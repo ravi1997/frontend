@@ -26,14 +26,15 @@
 ---
 
 ## 🛠️ Phase 2: Form Builder MVP
-**Status: 🔄 IN PROGRESS / PLANNED**
+**Status: 🔄 IN PROGRESS (Layout & Infrastructure ✅)**
 
 | Feature | Description | Status |
 | :--- | :--- | :--- |
-| **Builder Layout** | 3-panel workspace (Field library, Canvas, Properties) | 📅 Planned |
+| **Builder Layout** | 3-panel workspace (Field library, Canvas, Properties) | ✅ Done |
+| **Builder Store** | Zustand logic for sections, fields, reordering | ✅ Done |
+| **Field Library** | Library of 15+ interactive fields | ✅ Done |
+| **Properties Panel** | Settings for label, validation, and options | ✅ Done |
 | **Drag & Drop** | DnD Kit integration for form field ordering | 🔄 Development |
-| **Field Library** | Initial set of 15+ basic & advanced fields | 📅 Planned |
-| **Properties Panel** | Dynamic configuration for field settings/validation | 📅 Planned |
 | **Form Serialization** | Save/Load form JSON structure to backend | 📅 Planned |
 | **Preview Mode** | Real-time preview of the built form | 📅 Planned |
 
@@ -90,10 +91,10 @@
 
 - **Foundation:** 100%
 - **Authentication:** 100%
-- **Drafting/Builder:** 5%
+- **Drafting/Builder:** 50%
 - **Data Management:** 0%
 - **Analytics:** 0%
-- **Total Project:** ~20%
+- **Total Project:** ~35%
 
 ---
 

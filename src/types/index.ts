@@ -1,4 +1,5 @@
 import { UserRole, FormStatus, FieldType } from '@/lib/constants';
+export { UserRole, FormStatus, FieldType };
 
 // ==================== User Types ====================
 export enum UserType {
