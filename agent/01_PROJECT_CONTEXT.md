@@ -32,41 +32,41 @@ Copy/paste and edit. **Leave unknowns blank** - agent will infer.
 
 ```yaml
 # CORE (Required)
-app_name: ""              # REQUIRED
-project_type: ""          # python|nodejs|java|cpp|go|rust|flutter|static
-PRIMARY_STACK: ""         # OPTIONAL: Manual override for stack detection (e.g. "python", "java")
-env: "dev"                # REQUIRED - dev|staging|production
+app_name: "form-management-frontend"
+project_type: "nodejs"
+PRIMARY_STACK: "nextjs"
+env: "dev"                # dev|staging|production
 
 # STRUCTURE
 repo_root: "."
-source_dir: ""            # src/|app/|lib/
-build_dir: ""             # dist/|build/|target/
-test_dir: ""              # tests/|test/
+source_dir: "src"         # src/
+build_dir: ".next"        # .next/
+test_dir: "tests"         # tests/
 
 # BUILD
-build_system: ""          # cmake|makefile|maven|npm|pip|uv|cargo
-build_cmd: ""
-clean_cmd: ""
+build_system: "npm"       # npm
+build_cmd: "npm run build"
+clean_cmd: "rm -rf .next"
 
 # PACKAGE MANAGER
-package_manager: ""       # pip|uv|npm|maven|cargo|pub
-install_cmd: ""
+package_manager: "npm"    # npm
+install_cmd: "npm install"
 
 # RUNTIME
-runtime: ""               # python|node|java|gcc|go|dart
-entrypoint: ""
-run_cmd: ""
+runtime: "node"           # node
+entrypoint: "src/app"
+run_cmd: "npm run dev"
 
 # WEB (if applicable)
-framework: ""             # flask|express|spring|react
-server_type: ""           # gunicorn|node|tomcat
+framework: "next"         # Next.js framework
+server_type: "node"       # node
 listen_host: "0.0.0.0"
-app_port: 8000
-health_path: "/healthz"
+app_port: 3000
+health_path: "/api/health"
 
 # DATABASE (if applicable)
-db_kind: ""               # postgres|mysql|sqlite|mongo|none
-migration_tool: ""        # alembic|flyway|sequelize|none
+db_kind: "none"           # Frontend doesn't manage DB directly
+migration_tool: "none"    # none
 
 # DOCKER (if applicable)
 uses_docker: false
@@ -74,15 +74,15 @@ compose_file: ""
 compose_backend_service: ""
 
 # DEPLOYMENT (if applicable)
-deployment_type: ""       # docker|systemd|k8s|serverless
+deployment_type: "vercel" # vercel (default for Next.js)
 systemd_unit: ""
 
 # TESTING
-test_cmd: ""              # pytest|npm test|mvn test
-lint_cmd: ""              # ruff check .|npm run lint
+test_cmd: "npm run test:unit"
+lint_cmd: "npm run lint"
 
 # SECURITY
-has_phi_pii: true         # Default true for safety
+has_phi_pii: true         # Default true for safety (form data may contain sensitive info)
 ```
 
 See [`contracts/UNIVERSAL_PROJECT_SCHEMA.md`](contracts/UNIVERSAL_PROJECT_SCHEMA.md) for complete schema.
