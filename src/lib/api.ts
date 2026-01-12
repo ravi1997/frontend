@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/form/api/v1',
   timeout: 10000,
   withCredentials: true, // For HttpOnly cookies
   headers: {
@@ -32,8 +32,8 @@ api.interceptors.response.use(
       // Handle different error status codes
       switch (error.response.status) {
         case 401:
-          // Unauthorized - redirect to login
-          if (typeof window !== 'undefined') {
+          // Unauthorized - redirect to login, unless it's just checking status
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register') && !error.config?.url?.includes('/user/status')) {
             window.location.href = '/login';
           }
           break;
