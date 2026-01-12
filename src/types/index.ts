@@ -150,6 +150,8 @@ export interface RegisterRequest {
   mobile: string;
   password: string;
   confirm_password: string;
+  user_type: string;
+  roles: string[];
 }
 
 export interface AuthResponse {

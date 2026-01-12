@@ -22,7 +22,7 @@ type LoginMethod = 'email' | 'mobile';
 export default function LoginPage() {
   const { lastLoginMethod } = useAuthStore();
   const { login, isLoginLoading, loginError, generateOtp, isOtpLoading } = useAuth();
-  
+
   const [loginMethod, setLoginMethod] = useState<LoginMethod>(
     lastLoginMethod || 'email'
   );
@@ -44,7 +44,7 @@ export default function LoginPage() {
       await generateOtp(mobile);
       setOtpSent(true);
       setCountdown(60);
-      
+
       // Start countdown
       const interval = setInterval(() => {
         setCountdown((prev) => {

@@ -26,6 +26,8 @@ export default function RegisterPage() {
     mobile: '',
     password: '',
     confirm_password: '',
+    user_type: 'general',
+    roles: ['user'],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
