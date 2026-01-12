@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Users, BarChart3, Settings, PlusCircle } from 'lucide-react';
+import { FileText, Users, BarChart3, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {

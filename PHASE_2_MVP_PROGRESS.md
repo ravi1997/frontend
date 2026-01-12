@@ -6,6 +6,7 @@
 ## 🚀 Accomplishments
 
 ### **1. Builder State Management** ✅
+
 - Implemented `useBuilderStore` using Zustand with DevTools.
 - Support for Sections: Add, Update, Remove.
 - Support for Fields: Add, Update, Remove, Duplicate.
@@ -13,6 +14,7 @@
 - Integrated with `uuid` for unique ID generation.
 
 ### **2. 3-Panel Workspace Layout** ✅
+
 - **Sidebar (Field Library):**
   - Integrated 15+ field types with modern Lucide icons.
   - One-click adding of fields to the active section.
@@ -27,11 +29,13 @@
   - Quick actions for duplicating and deleting fields.
 
 ### **3. UI Components Expanded** ✅
+
 - Added `Switch` component (Radix UI).
 - Added `Select` component (Radix UI).
 - Enhanced `Card` and `Input` styles for builder workspace.
 
 ### **4. Verification** ✅
+
 - Successfully verified the layout and interaction in the browser.
 - Confirmed that clicking fields in the sidebar adds them to the canvas.
 - Confirmed that selecting a field opens its properties for editing.
@@ -48,7 +52,7 @@
 
 ## 📋 Remaining Phase 2 Tasks
 
-- [ ] **Drag & Drop Integration:** Implement `dnd-kit` for visual reordering of fields and sections.
+- [x] **Drag & Drop Integration:** Implement `dnd-kit` for visual reordering of fields and sections.
 - [ ] **Form Header Actions:** Implement Save Draft and Publish logic.
 - [ ] **Field Detailed Mockups:** Add better visual placeholders for complex fields (Date, File Upload, etc.).
 - [ ] **Preview Mode:** Create a separate view for previewing the form as it would appear to users.

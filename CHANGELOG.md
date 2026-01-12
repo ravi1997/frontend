@@ -5,6 +5,47 @@ All notable changes to the Form Management System Frontend will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-12
+
+### 🎉 Update - Phase 2: Form Builder MVP - Drag & Drop
+
+This update introduces the Drag & Drop functionality for the Form Builder, marking a significant milestone in Phase 2.
+
+### ✨ Added
+
+#### **Form Builder**
+
+- **Drag & Drop Integration**:
+  - Full `@dnd-kit/core` integration for intuitive drag-and-drop experience.
+  - Sorting strategy using `@dnd-kit/sortable` for vertical lists.
+  - `SortableField` component for draggable form fields.
+  - `SortableSection` component for draggable sections.
+  - **Reorder Fields**: Move fields within a section and between different sections.
+  - **Reorder Sections**: Drag handles to reorder entire sections within the form.
+  - **Drag Overlay**: Added smooth visual feedback (opacity, shadow) while dragging items.
+  
+#### **Store Updates**
+
+- **Enhanced Builder Store** (`src/store/builderStore.ts`):
+  - Added `moveSection` action to handle section reordering.
+  - Added `moveField` action to handle field reordering (inter- and intra-section).
+  - Explicit TypeScript types added to all store actions and state, removing implicit `any`.
+
+#### **Refactoring**
+
+- **Strict Data Models**: Refactored components to strictly adhere to the `IQuestion` and `ISection` interfaces:
+  - `label` → `question_text`
+  - `required` → `is_required`
+  - `description` → `help_text`
+  - `order` → `order_index`
+
+### 🔧 Fixed
+
+- **Type Safety**: Resolved multiple TypeScript lint errors in `builderStore.ts` and builder components.
+- **Component Alignment**: Aligned `SortableField` and `BuilderProperties` with the core type definitions.
+
+---
+
 ## [0.1.0] - 2026-01-11
 
 ### 🎉 Initial Release - Phase 1: Authentication & Foundation
@@ -14,6 +55,7 @@ This is the initial release of the Form Management System frontend with complete
 ### ✨ Added
 
 #### **Project Setup**
+
 - Next.js 16.1.1 with App Router and TypeScript
 - Tailwind CSS 4.0 with custom theme configuration
 - Complete project structure following best practices
@@ -21,6 +63,7 @@ This is the initial release of the Form Management System frontend with complete
 - Comprehensive documentation (README, setup guides, testing reports)
 
 #### **Authentication System**
+
 - **Login Page** (`/login`)
   - Email + Password authentication
   - Mobile + OTP authentication with 60-second countdown
@@ -51,6 +94,7 @@ This is the initial release of the Form Management System frontend with complete
   - Redirect parameter preservation
 
 #### **Dashboard**
+
 - **Dashboard Layout** (`/dashboard/layout.tsx`)
   - Sticky header with branding
   - User info display (username, email)
@@ -67,6 +111,7 @@ This is the initial release of the Form Management System frontend with complete
   - Responsive grid layout
 
 #### **Landing Page**
+
 - Modern gradient background (blue to purple)
 - Feature showcase with 3 cards:
   - Advanced Builder with drag-and-drop
@@ -76,6 +121,7 @@ This is the initial release of the Form Management System frontend with complete
 - Professional responsive design
 
 #### **State Management**
+
 - **Zustand Store** (`src/store/authStore.ts`)
   - User authentication state
   - Last login method persistence
@@ -97,6 +143,7 @@ This is the initial release of the Form Management System frontend with complete
     - Error handling for all operations
 
 #### **UI Component Library**
+
 - **Button Component** (`src/components/ui/button.tsx`)
   - 6 variants: default, destructive, outline, secondary, ghost, link
   - 4 sizes: default, sm, lg, icon
@@ -120,6 +167,7 @@ This is the initial release of the Form Management System frontend with complete
   - Consistent styling
 
 #### **Theme System**
+
 - Light and dark mode CSS variables
 - Semantic color tokens (primary, secondary, destructive, muted, accent)
 - HSL-based color system
@@ -127,6 +175,7 @@ This is the initial release of the Form Management System frontend with complete
 - Smooth theme transitions
 
 #### **API Integration**
+
 - **Axios Client** (`src/lib/api.ts`)
   - Base URL configuration from environment
   - Request interceptors for authentication
@@ -148,6 +197,7 @@ This is the initial release of the Form Management System frontend with complete
   - Application-wide constants
 
 #### **Type Definitions**
+
 - **Comprehensive TypeScript Types** (`src/types/index.ts`)
   - User types (IUser, UserType, UserRole)
   - Form types (IForm, ISection, IQuestion, IFormVersion, IOption)
@@ -158,11 +208,13 @@ This is the initial release of the Form Management System frontend with complete
   - Analytics types (FormAnalytics)
 
 #### **Utilities**
+
 - `cn()` function for merging Tailwind classes
 - Clsx and tailwind-merge integration
 - Type-safe utility functions
 
 #### **Documentation**
+
 - `PROJECT_README.md` - Comprehensive project documentation
 - `SETUP_COMPLETE.md` - Complete setup summary
 - `START_HERE.md` - Quick start guide
@@ -173,6 +225,7 @@ This is the initial release of the Form Management System frontend with complete
 - AI Agent configuration in `agent/01_PROJECT_CONTEXT.md`
 
 #### **Development Tools**
+
 - ESLint configuration
 - TypeScript strict mode
 - npm scripts for dev, build, test
@@ -195,21 +248,25 @@ This is the initial release of the Form Management System frontend with complete
 ### 📦 Dependencies
 
 #### Core
+
 - next@16.1.1
 - react@19.2.3
 - react-dom@19.2.3
 - typescript@^5
 
 #### State Management
+
 - @tanstack/react-query@^5.62.14
 - @tanstack/react-query-devtools@^5.62.14
 - zustand@^5.0.2
 
 #### Forms & Validation
+
 - react-hook-form@^7.55.2
 - zod@^3.24.1
 
 #### UI Components
+
 - @radix-ui/react-* (12 components)
 - lucide-react@^0.469.0
 - class-variance-authority@^0.7.1
@@ -217,20 +274,24 @@ This is the initial release of the Form Management System frontend with complete
 - tailwind-merge@^2.6.0
 
 #### Drag & Drop
+
 - @dnd-kit/core@^6.3.1
 - @dnd-kit/sortable@^9.0.0
 - @dnd-kit/utilities@^3.2.2
 
 #### HTTP & Utilities
+
 - axios@^1.7.9
 - date-fns@^4.1.0
 - dompurify@^3.2.4
 - loglevel@^1.9.2
 
 #### Charts
+
 - recharts@^2.15.0
 
 #### Testing (Dev Dependencies)
+
 - vitest@^2.1.8
 - @playwright/test@^1.49.1
 - @testing-library/react@^16.1.0
@@ -261,6 +322,7 @@ This is the initial release of the Form Management System frontend with complete
 ### 🚀 Next Phase
 
 Ready for **Phase 2: Form Builder MVP** implementation:
+
 - Form builder layout with 3-panel design
 - Drag-and-drop interface
 - Field library (15+ field types)
@@ -287,6 +349,7 @@ Ready for **Phase 2: Form Builder MVP** implementation:
 ## [Unreleased]
 
 ### Planned for Phase 2
+
 - Form builder with drag-and-drop
 - Field library panel
 - Properties editor
@@ -295,6 +358,7 @@ Ready for **Phase 2: Form Builder MVP** implementation:
 - Preview mode
 
 ### Planned for Phase 3
+
 - Public form submission engine
 - Dynamic form rendering
 - File upload component
@@ -302,12 +366,14 @@ Ready for **Phase 2: Form Builder MVP** implementation:
 - OTP verification component
 
 ### Planned for Phase 4
+
 - Response management grid
 - Advanced filtering
 - Export functionality (CSV, JSON, PDF, Excel)
 - Analytics dashboard
 
 ### Planned for Phase 5
+
 - Approval workflow UI
 - AI assistant integration
 - Workflow automation editor
@@ -315,4 +381,5 @@ Ready for **Phase 2: Form Builder MVP** implementation:
 
 ---
 
+[0.2.0]: https://github.com/yourusername/form-management-frontend/releases/tag/v0.2.0
 [0.1.0]: https://github.com/yourusername/form-management-frontend/releases/tag/v0.1.0

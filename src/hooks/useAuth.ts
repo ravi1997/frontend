@@ -13,7 +13,7 @@ import type {
 export function useAuth() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { user, isAuthenticated, setUser, setLoading, setLastLoginMethod, logout: logoutStore } =
+  const { user, isAuthenticated, setUser, setLastLoginMethod, logout: logoutStore } =
     useAuthStore();
 
   // Fetch user status on mount
@@ -24,7 +24,7 @@ export function useAuth() {
         const { data } = await api.get<IUser>(API_ENDPOINTS.AUTH.USER_STATUS);
         setUser(data);
         return data;
-      } catch (error) {
+      } catch {
         setUser(null);
         return null;
       }

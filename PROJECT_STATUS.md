@@ -7,6 +7,7 @@
 ---
 
 ## 🏗️ Phase 1: Foundation & Authentication
+
 **Status: ✅ COMPLETED**
 
 | Feature | Description | Status |
@@ -26,6 +27,7 @@
 ---
 
 ## 🛠️ Phase 2: Form Builder MVP
+
 **Status: 🔄 IN PROGRESS (Layout & Infrastructure ✅)**
 
 | Feature | Description | Status |
@@ -34,13 +36,14 @@
 | **Builder Store** | Zustand logic for sections, fields, reordering | ✅ Done |
 | **Field Library** | Library of 15+ interactive fields | ✅ Done |
 | **Properties Panel** | Settings for label, validation, and options | ✅ Done |
-| **Drag & Drop** | DnD Kit integration for form field ordering | 🔄 Development |
+| **Drag & Drop** | DnD Kit integration for form field ordering | ✅ Done |
 | **Form Serialization** | Save/Load form JSON structure to backend | 📅 Planned |
 | **Preview Mode** | Real-time preview of the built form | 📅 Planned |
 
 ---
 
 ## 📝 Phase 3: Public Submission Engine
+
 **Status: 📅 PLANNED**
 
 | Feature | Description | Status |
@@ -54,6 +57,7 @@
 ---
 
 ## 📈 Phase 4: Dashboard & Responses
+
 **Status: 📅 PLANNED**
 
 | Feature | Description | Status |
@@ -66,6 +70,7 @@
 ---
 
 ## 🤖 Phase 5: Advanced Workflows & AI
+
 **Status: 📅 PLANNED**
 
 | Feature | Description | Status |
@@ -91,10 +96,10 @@
 
 - **Foundation:** 100%
 - **Authentication:** 100%
-- **Drafting/Builder:** 50%
+- **Drafting/Builder:** 60%
 - **Data Management:** 0%
 - **Analytics:** 0%
-- **Total Project:** ~35%
+- **Total Project:** ~40%
 
 ---
 

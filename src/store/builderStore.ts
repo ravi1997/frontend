@@ -15,14 +15,15 @@ interface BuilderActions {
   addSection: () => void;
   updateSection: (sectionId: string, updates: Partial<ISection>) => void;
   removeSection: (sectionId: string) => void;
-  
+
   // Field Actions
   addField: (sectionId: string, type: FieldType, index?: number) => void;
   updateField: (fieldId: string, updates: Partial<IQuestion>) => void;
   removeField: (fieldId: string) => void;
   duplicateField: (fieldId: string) => void;
   moveField: (fieldId: string, targetSectionId: string, newIndex: number) => void;
-  
+  moveSection: (sectionId: string, newIndex: number) => void;
+
   // Interaction Actions
   setActiveField: (fieldId: string | null) => void;
   setActiveSection: (sectionId: string | null) => void;
@@ -30,15 +31,16 @@ interface BuilderActions {
 }
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
-  devtools((set, get) => ({
+  devtools((set) => ({
     // Initial State
     sections: [
       {
         id: uuidv4(),
         title: 'Untitled Section',
         description: '',
-        order: 0,
+        order_index: 0,
         questions: [],
+        is_repeatable: false,
       },
     ],
     activeFieldId: null,
@@ -46,38 +48,39 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     isDragging: false,
 
     // Section Actions
-    addSection: () => set((state) => ({
+    addSection: () => set((state: BuilderState) => ({
       sections: [
         ...state.sections,
         {
           id: uuidv4(),
           title: `Section ${state.sections.length + 1}`,
           description: '',
-          order: state.sections.length,
+          order_index: state.sections.length,
           questions: [],
+          is_repeatable: false,
         },
       ],
     })),
 
-    updateSection: (sectionId, updates) => set((state) => ({
+    updateSection: (sectionId: string, updates: Partial<ISection>) => set((state: BuilderState) => ({
       sections: state.sections.map((s) => s.id === sectionId ? { ...s, ...updates } : s),
     })),
 
-    removeSection: (sectionId) => set((state) => ({
+    removeSection: (sectionId: string) => set((state: BuilderState) => ({
       sections: state.sections.filter((s) => s.id !== sectionId),
       activeSectionId: state.activeSectionId === sectionId ? null : state.activeSectionId,
     })),
 
     // Field Actions
-    addField: (sectionId, type, index) => set((state) => {
+    addField: (sectionId: string, type: FieldType, index?: number) => set((state: BuilderState) => {
       const newField: IQuestion = {
         id: uuidv4(),
-        type,
-        label: `Untitled ${type}`,
-        required: false,
-        order: 0, // Will be calculated below
+        field_type: type,
+        question_text: `Untitled ${type}`,
+        is_required: false,
+        order_index: 0,
         options: type === FieldType.DROPDOWN || type === FieldType.RADIO || type === FieldType.CHECKBOX ? [
-          { label: 'Option 1', value: 'option-1' }
+          { option_label: 'Option 1', option_value: 'option-1', order_index: 0 }
         ] : undefined,
       };
 
@@ -94,21 +97,21 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         // Re-order questions within the section
         return {
           ...section,
-          questions: updatedQuestions.map((q, i) => ({ ...q, order: i })),
+          questions: updatedQuestions.map((q, i) => ({ ...q, order_index: i })),
         };
       });
 
       return { sections: newSections, activeFieldId: newField.id };
     }),
 
-    updateField: (fieldId, updates) => set((state) => ({
+    updateField: (fieldId: string, updates: Partial<IQuestion>) => set((state: BuilderState) => ({
       sections: state.sections.map((section) => ({
         ...section,
         questions: section.questions.map((q) => q.id === fieldId ? { ...q, ...updates } : q),
       })),
     })),
 
-    removeField: (fieldId) => set((state) => ({
+    removeField: (fieldId: string) => set((state: BuilderState) => ({
       sections: state.sections.map((section) => ({
         ...section,
         questions: section.questions.filter((q) => q.id !== fieldId),
@@ -116,26 +119,27 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       activeFieldId: state.activeFieldId === fieldId ? null : state.activeFieldId,
     })),
 
-    duplicateField: (fieldId) => set((state) => {
-      let fieldToDuplicate: IQuestion | null = null;
-      let targetSectionId: string | null = null;
+    duplicateField: (fieldId: string) => set((state: BuilderState) => {
+      let fieldToDuplicate: IQuestion | undefined;
+      let targetSectionId: string | undefined;
       let targetIndex: number = -1;
 
-      state.sections.forEach((s) => {
-        const idx = s.questions.findIndex((q) => q.id === fieldId);
+      for (const section of state.sections) {
+        const idx = section.questions.findIndex((q) => q.id === fieldId);
         if (idx !== -1) {
-          fieldToDuplicate = s.questions[idx];
-          targetSectionId = s.id;
+          fieldToDuplicate = section.questions[idx];
+          targetSectionId = section.id;
           targetIndex = idx;
+          break;
         }
-      });
+      }
 
-      if (!fieldToDuplicate || !targetSectionId) return state;
+      if (!fieldToDuplicate || !targetSectionId) return {};
 
-      const newField = {
+      const newField: IQuestion = {
         ...fieldToDuplicate,
         id: uuidv4(),
-        label: `${(fieldToDuplicate as IQuestion).label} (Copy)`,
+        question_text: `${fieldToDuplicate.question_text} (Copy)`,
       };
 
       const newSections = state.sections.map((section) => {
@@ -144,16 +148,16 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         updatedQuestions.splice(targetIndex + 1, 0, newField);
         return {
           ...section,
-          questions: updatedQuestions.map((q, i) => ({ ...q, order: i })),
+          questions: updatedQuestions.map((q, i) => ({ ...q, order_index: i })),
         };
       });
 
       return { sections: newSections, activeFieldId: newField.id };
     }),
 
-    moveField: (fieldId, targetSectionId, newIndex) => set((state) => {
+    moveField: (fieldId: string, targetSectionId: string, newIndex: number) => set((state: BuilderState) => {
       // Find the moving field and remove it from its current position
-      let movedField: IQuestion | null = null;
+      let movedField: IQuestion | undefined;
       const strippedSections = state.sections.map((section) => {
         const found = section.questions.find((q) => q.id === fieldId);
         if (found) movedField = found;
@@ -163,7 +167,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         };
       });
 
-      if (!movedField) return state;
+      if (!movedField) return {};
 
       // Insert it at the new position
       const finalSections = strippedSections.map((section) => {
@@ -172,11 +176,24 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         updatedQuestions.splice(newIndex, 0, movedField!);
         return {
           ...section,
-          questions: updatedQuestions.map((q, i) => ({ ...q, order: i })),
+          questions: updatedQuestions.map((q, i) => ({ ...q, order_index: i })),
         };
       });
 
       return { sections: finalSections };
+    }),
+
+    moveSection: (sectionId: string, newIndex: number) => set((state: BuilderState) => {
+      const activeIndex = state.sections.findIndex((s) => s.id === sectionId);
+      if (activeIndex === -1) return {};
+
+      const newSections = [...state.sections];
+      const [movedSection] = newSections.splice(activeIndex, 1);
+      newSections.splice(newIndex, 0, movedSection);
+
+      return {
+        sections: newSections.map((s, i) => ({ ...s, order_index: i })),
+      };
     }),
 
     // Interaction Actions

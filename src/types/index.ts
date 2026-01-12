@@ -103,7 +103,7 @@ export interface IFormResponse {
   form_id: string;
   form_version: number;
   submitted_by?: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   status: 'pending' | 'approved' | 'rejected';
   current_approval_step?: number;
   submitted_at: Date | string;
@@ -121,7 +121,7 @@ export interface IApprovalAction {
 }
 
 // ==================== API Response Types ====================
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   message?: string;
   error?: string;
