@@ -5,6 +5,37 @@ All notable changes to the Form Management System Frontend will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-01-12
+
+### 🐛 Fixed & Polished - Code Review & Optimization
+
+This release addresses critical bugs, type safety issues, and unused code identified during a comprehensive code review of the Phase 2 implementation.
+
+#### **Core Logic Fixes**
+
+- **Builder Logic**: Fixed `duplicateField` causing runtime errors due to incorrect loop logic and type inference.
+- **Section Ordering**: Corrected `moveSection` to properly update `order_index` instead of a non-existent `order` property.
+- **Field Duplication**: Improved robust ID generation for duplicated fields to prevent key conflicts.
+- **Data Preservation**: Fixed potential data loss scenarios when moving fields between sections.
+
+#### **Type Safety & Linting**
+
+- **Strict Typing**: Replaced `any` with specific types or `unknown` in `ApiResponse` and `IFormResponse` interfaces (`src/types/index.ts`).
+- **Interface Cleanup**: Fixed empty interface error in `Input` component (`src/components/ui/input.tsx`).
+- **Dead Code Removal**: Removed unused variables, imports, and definitions across:
+  - `BuilderCanvas.tsx` (unused DnD utilities)
+  - `BuilderProperties.tsx` (unused Radix imports)
+  - `SortableSection.tsx` (unused icons)
+  - `useAuth.ts` (unused state setters)
+  - `DashboardPage.tsx` (unused icons)
+
+#### **Quality Assurance**
+
+- **Linting**: Achieved 0 linting errors (ESLint).
+- **Compilation**: Achieved clean TypeScript compilation (`tsc --noEmit`).
+
+---
+
 ## [0.2.0] - 2026-01-12
 
 ### 🎉 Update - Phase 2: Form Builder MVP - Drag & Drop
