@@ -13,6 +13,11 @@ This release addresses critical bugs, type safety issues, and unused code identi
 
 #### **Core Logic Fixes**
 
+- **Login Page Fixes:**
+  - Resolved "Cannot read properties of undefined" crash in `useAuth` hook.
+  - Fixed 400 Bad Request error by mapping `email`/`mobile` to `identifier` in login payload.
+  - Fixed 401 Unauthorized error by implementing token storage in `localStorage` and request interception.
+  - Fixed Login Redirect issue by creating `access_token` cookie for Next.js middleware compatibility.
 - **Builder Logic**: Fixed `duplicateField` causing runtime errors due to incorrect loop logic and type inference.
 - **Section Ordering**: Corrected `moveSection` to properly update `order_index` instead of a non-existent `order` property.
 - **Field Duplication**: Improved robust ID generation for duplicated fields to prevent key conflicts.

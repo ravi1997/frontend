@@ -36,15 +36,35 @@ export function useAuth() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest) => {
+      // Backend expects 'identifier' for password login, or 'mobile'/'otp' for OTP login
+      const payload: any = { ...credentials };
+      if (credentials.email) {
+        payload.identifier = credentials.email;
+        delete payload.email;
+      } else if (credentials.mobile && credentials.password) {
+        // Mobile + Password login also uses identifier
+        payload.identifier = credentials.mobile;
+        delete payload.mobile;
+      }
+
       const { data } = await api.post<AuthResponse>(
         API_ENDPOINTS.AUTH.LOGIN,
-        credentials
+        payload
       );
       return data;
     },
-    onSuccess: (data) => {
-      setUser(data.user);
-      const method = data.user.email ? 'email' : 'mobile';
+    onSuccess: (data, variables) => {
+      if (data.access_token) {
+        // Store token for non-cookie auth (fallback)
+        localStorage.setItem('access_token', data.access_token);
+        // Set cookie for middleware
+        document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+      }
+
+      if (data.user) {
+        setUser(data.user);
+      }
+      const method = variables.email ? 'email' : 'mobile';
       setLastLoginMethod(method);
       queryClient.invalidateQueries({ queryKey: ['user-status'] });
       router.push('/dashboard');
@@ -80,6 +100,8 @@ export function useAuth() {
     onSuccess: () => {
       logoutStore();
       queryClient.clear();
+      localStorage.removeItem('access_token');
+      document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
       router.push('/login');
     },
   });

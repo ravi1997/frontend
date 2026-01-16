@@ -8,6 +8,8 @@ interface BuilderState {
   activeFieldId: string | null;
   activeSectionId: string | null;
   isDragging: boolean;
+  formTitle: string;
+  formDescription: string;
 }
 
 interface BuilderActions {
@@ -28,6 +30,7 @@ interface BuilderActions {
   setActiveField: (fieldId: string | null) => void;
   setActiveSection: (sectionId: string | null) => void;
   setIsDragging: (isDragging: boolean) => void;
+  setFormMetadata: (updates: { title?: string; description?: string }) => void;
 }
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -46,6 +49,13 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     activeFieldId: null,
     activeSectionId: null,
     isDragging: false,
+    formTitle: 'Untitled Form',
+    formDescription: '',
+
+    setFormMetadata: (updates) => set((state) => ({
+      formTitle: updates.title ?? state.formTitle,
+      formDescription: updates.description ?? state.formDescription,
+    })),
 
     // Section Actions
     addSection: () => set((state: BuilderState) => ({

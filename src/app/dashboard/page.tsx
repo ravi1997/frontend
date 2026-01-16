@@ -1,32 +1,36 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useForms } from '@/hooks/useForms'; // Import the new hook
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Users, BarChart3, PlusCircle } from 'lucide-react';
+import { FileText, Users, BarChart3, PlusCircle, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { formatDistanceToNow } from 'date-fns';
+import { IForm } from '@/types';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { forms, totalForms, isLoading: isFormsLoading } = useForms();
 
   const stats = [
     {
       title: 'Total Forms',
-      value: '0',
+      value: isFormsLoading ? '...' : totalForms.toString(),
       description: 'Forms created',
       icon: FileText,
       href: '/dashboard/forms',
     },
     {
       title: 'Responses',
-      value: '0',
+      value: '0', // Placeholder until responses API is ready
       description: 'Total submissions',
       icon: Users,
       href: '/dashboard/responses',
     },
     {
       title: 'Active Forms',
-      value: '0',
+      value: isFormsLoading ? '...' : (forms as IForm[]).filter((f: IForm) => f.is_public).length.toString(),
       description: 'Published forms',
       icon: BarChart3,
       href: '/dashboard/analytics',
@@ -46,7 +50,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         <Button asChild size="lg">
           <Link href="/builder/new">
             <PlusCircle className="mr-2 h-5 w-5" />
@@ -86,25 +90,62 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent Activity / Forms */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
+          <CardTitle>Recent Forms</CardTitle>
           <CardDescription>
-            Your latest form submissions and updates
+            Your recently created or modified forms
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No activity yet</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Create your first form to get started
-            </p>
-            <Button asChild>
-              <Link href="/builder/new">Create Form</Link>
-            </Button>
-          </div>
+          {isFormsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : forms.length > 0 ? (
+            <div className="space-y-4">
+              {(forms as IForm[]).slice(0, 5).map((form: IForm) => (
+                <div
+                  key={form.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="bg-primary/10 p-2 rounded-full shrink-0">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium truncate" title={form.title}>{form.title}</h4>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {form.is_public ? 'Public' : 'Draft'} • {formatDistanceToNow(new Date(form.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" asChild className="ml-4 shrink-0">
+                    <Link href={`/builder/${form.id}`}>
+                      Edit <ArrowRight className="ml-2 h-4 w-4 hidden sm:inline-block" />
+                    </Link>
+                  </Button>
+                </div>
+              ))}
+              <div className="pt-2 text-center">
+                <Button variant="link" asChild>
+                  <Link href="/dashboard/forms">View all activity</Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No forms yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create your first form to get started
+              </p>
+              <Button asChild>
+                <Link href="/builder/new">Create Form</Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

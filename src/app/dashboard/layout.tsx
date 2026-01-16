@@ -29,10 +29,10 @@ export default function DashboardLayout({
               <span className="font-bold">Form Management System</span>
             </a>
           </div>
-          
+
           <div className="flex flex-1 items-center justify-end space-x-4">
             <div className="flex items-center gap-4">
-              <div className="text-sm">
+              <div className="text-sm hidden md:block">
                 <p className="font-medium">{user?.username}</p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>

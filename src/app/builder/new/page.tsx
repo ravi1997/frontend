@@ -1,14 +1,41 @@
 'use client';
-
 import React from 'react';
 import { BuilderSidebar } from '@/components/form-builder/BuilderSidebar';
 import { BuilderCanvas } from '@/components/form-builder/BuilderCanvas';
 import { BuilderProperties } from '@/components/form-builder/BuilderProperties';
 import { Button } from '@/components/ui/button';
-import { Eye, Save, Send, ChevronLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Eye, Save, Send, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useBuilderStore } from '@/store/builderStore';
+import { useForm } from '@/hooks/useForm';
+import { slugify } from '@/lib/utils';
 
 export default function BuilderPage() {
+  const { sections, formTitle, formDescription, setFormMetadata } = useBuilderStore();
+  const { saveNewForm, isSaving } = useForm();
+
+  const handleSave = async () => {
+    if (!formTitle.trim()) {
+      alert('Please enter a form title');
+      return;
+    }
+
+    try {
+      await saveNewForm(
+        {
+          title: formTitle,
+          slug: `${slugify(formTitle)}-${Date.now().toString().slice(-6)}`,
+          description: formDescription,
+          is_public: false,
+        },
+        sections
+      );
+    } catch (error) {
+      // Error handled in hook
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Builder Header */}
@@ -20,21 +47,30 @@ export default function BuilderPage() {
             </Link>
           </Button>
           <div className="h-4 w-px bg-border" />
-          <h1 className="font-semibold text-sm truncate max-w-[200px]">
-            New Form
-          </h1>
-          <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground font-medium">
+          <div className="flex flex-col">
+            <Input
+              value={formTitle}
+              onChange={(e) => setFormMetadata({ title: e.target.value })}
+              className="h-7 text-sm font-semibold border-transparent hover:border-input focus:border-input px-2 -ml-2 w-[200px] sm:w-[300px]"
+              placeholder="Untitled Form"
+            />
+          </div>
+          <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground font-medium hidden sm:inline-block">
             Draft
           </span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
-          <Button variant="outline" size="sm">
-            <Save className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
             Save Draft
           </Button>
           <Button size="sm">
@@ -48,10 +84,10 @@ export default function BuilderPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Fields */}
         <BuilderSidebar />
-        
+
         {/* Canvas - Form Layout */}
         <BuilderCanvas />
-        
+
         {/* Properties - Field Settings */}
         <BuilderProperties />
       </div>

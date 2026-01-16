@@ -156,7 +156,8 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   access_token: string;
-  user: IUser;
+  user?: IUser;
+  success?: boolean;
 }
 
 // ==================== Form Builder Types ====================

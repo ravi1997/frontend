@@ -13,8 +13,13 @@ const api = axios.create({
 // Request interceptor - add auth token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Token is in HttpOnly cookie, no need to manually attach
-    // But we can add additional headers if needed
+    // Try to get token from localStorage if not using cookies
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error: AxiosError) => {
