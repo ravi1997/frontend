@@ -1,18 +1,17 @@
-# Dev Environment for AI Agent MD Pack
-# Includes tools for validation and maintenance (markdownlint, etc.)
-
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache bash git
+# Copy package files first to leverage Docker layer caching
+COPY package.json package-lock.json* ./
 
-# Install global tools
-RUN npm install -g markdownlint-cli
+# Install dependencies during build
+RUN npm install
 
-# Copy project
+# Copy the rest of the application code
 COPY . .
 
-# Default command: Lint all markdown files
-CMD ["markdownlint", "**/*.md"]
+EXPOSE 3000
+
+# Default command to run the development server
+CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "--port", "3000"]

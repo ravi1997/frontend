@@ -1,10 +1,22 @@
-version: '3.8'
-
 services:
-  # Linter Service
-  # Run with: docker compose run linter
-  linter:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
     volumes:
       - .:/app
-    command: markdownlint '**/*.md'
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      # optional but helps file watching on some systems:
+      # CHOKIDAR_USEPOLLING: "true"
+      # WATCHPACK_POLLING: "true"
+      # The CMD is now handled by the Dockerfile which is optimized with caching
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    external: true
