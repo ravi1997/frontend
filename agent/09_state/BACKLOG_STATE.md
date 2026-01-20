@@ -18,3 +18,10 @@
 | **T-007** | [M2-T3] Workflow Automation (MVP Notifications) | Pending | Medium | None |
 | **T-008** | [M3-T1] AI Form Generation Chat Interface | Pending | Low | None |
 | **T-009** | [M3-T2] PWA Support (Manifest + Service Worker) | Pending | Low | None |
+
+## Completed Tasks
+
+| Task ID | Description | Status | Priority | Resolved Date |
+| --- | --- | --- | --- | --- |
+| **RE-001** | Core Hook Refactor & PR Remediation | Done | High | 2026-01-20 |
+| **BOOT-01** | Initial Test Baseline Setup | Done | High | 2026-01-19 |
