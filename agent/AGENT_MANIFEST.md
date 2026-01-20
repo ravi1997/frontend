@@ -10,7 +10,7 @@
 ## System Components
 
 | ID | Component | Description |
-|---|---|---|
+| --- | --- | --- |
 | SYS-00 | Core System | Principles and response protocols. |
 | EP-01 | Entrypoints | Initial triggers for the Agent. |
 | DET-02 | Detection | Repo analysis and stack identification. |

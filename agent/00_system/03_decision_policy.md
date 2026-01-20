@@ -7,7 +7,7 @@ Provides a logic framework for the Agent to make autonomous decisions while ensu
 ## Decision Matrix
 
 | Risk Level | Definition | Authority | Action Required |
-|---|---|---|---|
+| --- | --- | --- |---|
 | **Low** | Typos, code style, doc updates. | Autonomous | Proceed and log. |
 | **Medium** | New functions, dependency updates, refactors. | Peer Review | Propose in PR/Task, wait for ACK. |
 | **High** | Schema changes, security policy, architecture. | Human-in-Loop | Stop, present options, wait for signature. |

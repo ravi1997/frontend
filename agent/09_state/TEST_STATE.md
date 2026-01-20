@@ -16,5 +16,5 @@
 ## Known Issues (Bugs)
 
 | ID | Description | Severity | Status |
-|---|---|---|---|
+| --- | --- | --- |---|
 | [None] | | | |

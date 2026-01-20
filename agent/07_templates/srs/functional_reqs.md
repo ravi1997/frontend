@@ -9,7 +9,7 @@ Brief description of the software.
 ## 2. User Stories
 
 | ID | Role | Feature | Reason | Acceptance Criteria |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | US-01 | User | I want to X | So that Y | Test Z passes. |
 
 ## 3. Core Features

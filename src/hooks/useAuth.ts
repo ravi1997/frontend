@@ -37,7 +37,7 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginRequest) => {
       // Backend expects 'identifier' for password login, or 'mobile'/'otp' for OTP login
-      const payload: any = { ...credentials };
+      const payload: Record<string, string | undefined> = { ...credentials };
       if (credentials.email) {
         payload.identifier = credentials.email;
         delete payload.email;

@@ -31,7 +31,7 @@ export default function BuilderPage() {
         },
         sections
       );
-    } catch (error) {
+    } catch {
       // Error handled in hook
     }
   };

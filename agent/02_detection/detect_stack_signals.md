@@ -7,7 +7,7 @@ Identifies specific languages, frameworks, and build tools using "fingerprints".
 ## Identification Logic
 
 | Stack component | Signals (Files/Strings) | Fingerprint File |
-|---|---|---|
+| --- | --- | --- |
 | **Python** | `requirements.txt`, `pyproject.toml`, `.py` | `stack_fingerprints/python_*.md` |
 | **Node.js** | `package.json`, `node_modules` | `stack_fingerprints/node_express.md` |
 | **React/Vite** | `vite.config.ts`, `React` imports | `stack_fingerprints/react_vite.md` |

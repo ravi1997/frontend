@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     ANALYTICS: (id: string) => `/form/${id}/analytics`,
     EXPORT_CSV: (id: string) => `/form/${id}/export/csv`,
     EXPORT_JSON: (id: string) => `/form/${id}/export/json`,
+    VERSIONS: (id: string) => `/form/${id}/versions`,
   },
   APPROVALS: {
     PENDING: '/approvals/pending',
