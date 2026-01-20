@@ -3,12 +3,11 @@ import api from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { ISection } from '@/types';
 import { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 
 interface CreateFormPayload {
     title: string;
-    slug: string;
-    description?: string;
-    is_public?: boolean;
+    description: string;
 }
 
 interface CreateVersionPayload {
@@ -18,6 +17,7 @@ interface CreateVersionPayload {
 }
 
 export function useForm() {
+    const router = useRouter();
     const queryClient = useQueryClient();
 
     // Create Form Mutation
