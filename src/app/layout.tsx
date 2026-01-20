@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Form Management System",
   description: "A comprehensive form management system with advanced features",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
