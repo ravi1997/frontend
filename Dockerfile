@@ -11,6 +11,13 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Change ownership to the non-root 'node' user defined in the base image
+# This ensures the user has permission to write to /app (needed for next.js)
+RUN chown -R node:node /app
+
+# Switch to non-root user
+USER node
+
 EXPOSE 3000
 
 # Default command to run the development server
