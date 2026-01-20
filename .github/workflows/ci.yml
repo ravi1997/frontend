@@ -1,4 +1,4 @@
-name: Frontend CI
+name: Continuous Integration
 
 on:
   push:
@@ -7,25 +7,35 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  quality:
+    name: Lint & Test
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Lint
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Lint
         run: npm run lint
-        
-      - name: Unit Tests
+
+      - name: Run Unit Tests
         run: npm run test:unit -- --run
-        
-      - name: Build
-        run: npm run build
+
+  docker:
+    name: Docker Build Sanity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t form-builder-frontend:test .
