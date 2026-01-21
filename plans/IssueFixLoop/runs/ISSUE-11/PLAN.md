@@ -1,26 +1,17 @@
-# PLAN: Resolve Documentation Linting Violations
+# PLAN: Fix Workflow Manager
 
 ## Objective
 
-Fix priority markdown linting violations across the repository to improve consistency and maintainability.
-
-## Strategy
-
-1. **Manual Remediation**: Fix specific files mentioned in the issue or high-level project docs.
-2. **Automated Cleanup**: Use shell scripts/regex to fix widespread boilerplate issues in the `agent/` directory.
-3. **Template Updates**: Ensure project templates are lint-clean to prevent future regressions.
+Fix UI bugs in `WorkflowManager` and verify workflow CRUD functionality.
 
 ## Tasks
 
-1. [x] Fix `MILESTONE_PLAN.md` duplicate headings and line wrapping.
-2. [x] Align table pipes in `TEST_STATE.md`.
-3. [x] Fix `PR_CORE_REFACTOR.md` emphasis-as-heading.
-4. [x] Fix boilerplate headers/lists in `agent/` subfolders via script.
-5. [x] Fix duplicate headings in `PULL_REQUEST_TEMPLATE.md` and `github_rules.md`.
-6. [x] Deduplicate headings in `GITHUB_ISSUES_EXPORT.md`.
-7. [x] Add missing code block languages in `github_rules.md`.
+1. [ ] **Fix JSX Errors**: Remove the comment text and duplicate button in `WorkflowManager.tsx`.
+2. [ ] **Verify Remove Workflow**: Ensure `removeWorkflow` stops propagation if needed (UI has `e.stopPropagation` but verifying functionality).
+3. [ ] **Unit Tests**: Create `src/components/form-builder/workflow/__tests__/WorkflowManager.test.tsx` (Component test) or `src/store/__tests__/builderStore.test.ts` (Store test already exists, check coverage).
+4. [ ] **Integration**: Verify workflows are saved in `useForm` (already verified by code inspection, but a test case in `useForm.test.ts` wouldn't hurt).
 
-## Verification
+## Strategy
 
-- Run `markdownlint-cli` on modified files.
-- Ensure priority rules (MD024, MD060, MD036) pass for targeted files.
+- Use `multi_replace_file_content` to clean up `WorkflowManager.tsx`.
+- Add test coverage for workflow actions in the store.

@@ -183,8 +183,6 @@ export const WorkflowManager = () => {
                                             className="h-6 w-6"
                                             onClick={() => removeAction(action.id)}
                                         >
-                                            <X className="h-3 w-3" /> // Note: Need to import X, I imported simple Trash2 before. Wait, I imported X for Dialog but not here.
-                                            {/* I also imported Trash2, I'll use Trash2 */}
                                             <Trash2 className="h-3 w-3" />
                                         </Button>
                                     </div>

@@ -1,26 +1,23 @@
-# REPRO: Documentation Linting Violations
+# REPRO: Issue #11 Workflow Automation UI Bugs
 
-## Gap Analysis
+## Issue
 
-The repository contains numerous markdown files with linting violations, as identified by `markdownlint-cli`.
+The `WorkflowManager.tsx` component contains malformed JSX and redundant buttons (Visual bug/Syntax error).
 
-### Priority Violations Identified
+## Location
 
-1. **Duplicate Headings (MD024)**:
-   - `plans/Milestones/MILESTONE_PLAN.md`: Multiple "Tasks" headings.
-   - `agent/07_templates/devops/PULL_REQUEST_TEMPLATE.md`: Multiple "Testing" headings.
-   - `agent/11_rules/github_rules.md`: Multiple "Security" headings.
-   - `plans/IssueTracker/GITHUB_ISSUES_EXPORT.md`: Multiple repetition of issue section headers.
+`src/components/form-builder/workflow/WorkflowManager.tsx` lines 186-189.
 
-2. **Table Pipe Alignment (MD060)**:
-   - `agent/09_state/TEST_STATE.md`: Misaligned pipes in status tables.
+## Evidence
 
-3. **Emphasis as Heading (MD036)**:
-   - `plans/Release/PULL_REQUESTS/PR_CORE_REFACTOR.md`: Used bold text instead of `###`.
+```tsx
+<X className="h-3 w-3" /> // Note: Need to import X, I imported simple Trash2 before. Wait, I imported X for Dialog but not here.
+{/* I also imported Trash2, I'll use Trash2 */}
+<Trash2 className="h-3 w-3" />
+```
 
-4. **Boilerplate Spacing (MD022/MD032/MD012)**:
-   - Hundreds of files in `agent/` had missing blank lines before lists and after headings in their boilerplate content.
+This renders distinct artifacts and duplicate actions.
 
-## Conclusion
+## Goal
 
-Hygiene gap confirmed. Automated cleanup and manual remediation required.
+Clean up the UI, ensure "Remove Action" works correctly, and add unit tests to prevent regression.
