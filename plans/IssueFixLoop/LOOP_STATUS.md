@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#12 ISSUE-0012: Docker Security hardening**
+  - Status: Closed
 - **#9 ISSUE-0002: Missing Vitest Coverage Dependency**
   - Status: Closed
 - **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
@@ -24,8 +26,8 @@
 ## Remaining Queue
 
 1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
-2. **#12 ISSUE-0012: Docker Security hardening**
-3. **#13 ISSUE-0013: Design CI/CD Pipeline**
+2. **#13 ISSUE-0013: Design CI/CD Pipeline**
+3. **#14 ISSUE-0014: Master Refactoring of Component Directory**
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
