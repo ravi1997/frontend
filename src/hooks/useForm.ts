@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 interface CreateFormPayload {
     title: string;
     description: string;
+    slug: string;
+    is_public: boolean;
 }
 
 interface CreateVersionPayload {
