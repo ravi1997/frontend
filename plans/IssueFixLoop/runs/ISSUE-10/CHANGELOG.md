@@ -1,18 +1,14 @@
-# CHANGELOG: Issue #10 - Zero Logic Coverage for Core Hooks
+# CHANGELOG: Issue #10 - Form Versioning Integration
 
 ## Added
 
-- **src/test/test-utils.tsx**: Utility `renderWithProviders` for testing hooks with TanStack Query.
-- **src/hooks/**tests**/useForm.test.ts**: New functional tests for `useForm` (89.4% coverage).
-- **src/hooks/**tests**/useForms.test.ts**: New functional tests for `useForms` (100% coverage).
+- **src/hooks/useVersions.ts**: New hook to fetch form versions from the backend (or fallback to empty array safely).
+- **src/components/form-builder/versions/VersionHistoryPanel.tsx**: Integrated `useVersions` hook to fetch data when the panel is opened.
 
-## Changed
+## Fixed
 
-- **src/hooks/**tests**/useAuth.test.ts**: Rewrote to include comprehensive functional tests (100% coverage).
-- **vitest.config.mts**: Enabled `v8` coverage provider and included hook directories.
+- **UI**: The Version History panel now calls the API instead of relying on empty store state.
 
-## Infrastructure
+## Verified
 
-- Installed `global-jsdom` to support hook rendering in Node.js environment.
-- Installed `@testing-library/dom` for React testing support.
-- Configured Vitest to exclude irrelevant directories from coverage reports.
+- **Unit Test**: `src/hooks/__tests__/useVersions.test.tsx` validates the hook correctly fetches and populates the store.

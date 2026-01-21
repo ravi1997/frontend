@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { useBuilderStore } from '@/store/builderStore';
 import { IFormVersion } from '@/types';
+import { useVersions } from '@/hooks/useVersions';
+import { useParams } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { History, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,19 @@ import {
 export const VersionHistoryPanel = () => {
     const { versions, loadVersion } = useBuilderStore();
     const [isOpen, setIsOpen] = useState(false);
+    const params = useParams();
+    const formId = params?.id as string | undefined;
+
+    // Fetch versions when panel is rendered (or grounded by id)
+    // We could make this lazy by only enabling if isOpen is true
+    const { refetch, isLoading } = useVersions(formId);
+
+    // Refetch when opening the dialog
+    React.useEffect(() => {
+        if (isOpen && formId) {
+            refetch();
+        }
+    }, [isOpen, formId, refetch]);
 
     const handleRestore = (version: IFormVersion) => {
         if (confirm('Are you sure? This will replace your current editor content with the selected version.')) {

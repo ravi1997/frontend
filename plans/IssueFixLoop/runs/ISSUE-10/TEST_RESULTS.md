@@ -1,17 +1,7 @@
 # TEST RESULTS: Issue #10
 
-## Coverage Report
+## Automated Tests
 
-| Hook | Line Coverage % | Result |
-| --- | --- | --- |
-| `useAuth.ts` | 100% | ✅ PASS |
-| `useForm.ts` | 89.4% | ✅ PASS |
-| `useForms.ts` | 100% | ✅ PASS |
+- `src/hooks/__tests__/useVersions.test.tsx`: **PASS** (2 tests).
 
-## Unit Tests
-
-- `src/hooks/__tests__/useAuth.test.ts`: **PASS** (7 tests)
-- `src/hooks/__tests__/useForm.test.ts`: **PASS** (3 tests)
-- `src/hooks/__tests__/useForms.test.ts`: **PASS** (3 tests)
-
-Total passing tests: 13 (new) + 11 (existing/other) = 24
+Total Tests: 45 passing.

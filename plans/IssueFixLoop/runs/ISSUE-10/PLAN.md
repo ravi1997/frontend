@@ -1,33 +1,25 @@
-# PLAN: Zero Logic Coverage for Core Hooks
+# PLAN: Versioning Integration
 
 ## Objective
 
-Implement comprehensive unit tests for `useAuth`, `useForm`, and `useForms` hooks, achieving at least 80% coverage on functional logic.
-
-## Strategy
-
-1. **Utility Setup**: Create a `renderWithProviders` helper to wrap hooks in `QueryClientProvider`.
-2. **Implement `useAuth` Tests**:
-   - Mock `api.post` and `api.get`.
-   - Test `login` success/failure.
-   - Test `register` and `logout`.
-   - Test `user-status` fetch on mount.
-3. **Implement `useForm` Tests**:
-   - Mock form creation and versioning endpoints.
-   - Test `saveForm` logic.
-4. **Implement `useForms` Tests**:
-   - Mock form listing and deletion.
-5. **Coverage Verification**: Run tests with coverage flag.
+Connect the Version History UI to the backend (or mock backend) to display real version history.
 
 ## Tasks
 
-1. [ ] Setup test utilities and mocks.
-2. [ ] Enhance `useAuth.test.ts`.
-3. [ ] Create `useForm.test.ts`.
-4. [ ] Create `useForms.test.ts`.
-5. [ ] Verify coverage.
+1. [ ] **Create Hook**: `src/hooks/useVersions.ts` to fetch versions using React Query.
+2. [ ] **Mock API**: Ensure `src/lib/api.ts` or a mock handler can return version data (if backend not ready).
+    - Actually, I'll rely on the existing `API_ENDPOINTS.FORMS.VERSIONS`.
+3. [ ] **Integration**:
+    - Update `VersionHistoryPanel` to call the hook.
+    - OR Update `BuilderPage.tsx` to call the hook and populate the store.
+    - *Decision*: Update `VersionHistoryPanel` only when opened? Or load all valid versions on form load?
+    - *Decision*: Load on form load makes sense for meta-data, but lazy loading on Panel open is better for performance.
+    - Let's make `VersionHistoryPanel` fetch data when the dialog opens.
+4. [ ] **Tests**: Unit test the hook and the integration.
 
-## Risks
+## Strategy
 
-- **Mocking TanStack Query**: Mutations require careful handling of `onSuccess` callbacks.
-- **Node/JSDOM Environment**: LocalStorage and Cookies must be mocked accurately.
+- Create `useVersions(formId)` hook.
+- It returns `{ data: versions, isLoading }`.
+- In `VersionHistoryPanel`, verify we have `formId` (might need to get it from params or store).
+- If `formId` is missing (new form), history is empty.

@@ -1,25 +1,19 @@
-# REPRO: Zero Logic Coverage for Core Hooks
+# REPRO: Issue #10 - Versioning Integration
 
-## Current State
+## Issue
 
-The repository contains three core hooks that handle logic for authentication and form management:
+The `VersionHistoryPanel` component exists but displays "No history available" because the frontend never fetches versions from the backend.
+The `useBuilderStore` has a `versions` array, but nothing populates it.
 
-- `src/hooks/useAuth.ts`
-- `src/hooks/useForm.ts`
-- `src/hooks/useForms.ts`
+## Location
 
-Existing tests (`src/hooks/__tests__/useAuth.test.ts`) only verify:
+- `src/components/form-builder/versions/VersionHistoryPanel.tsx`
+- Missing hook for fetching versions.
 
-1. The hook is a function.
-2. The hook returns expected property keys.
+## Evidence
 
-### Gaps Identified
+Code inspection of `src/hooks/useForm.ts` and `src/app/builder/new/page.tsx` shows no `GET /form/:id/versions` call.
 
-- **No Interaction Testing**: Mutations (login, logout, createForm) are not triggered in tests.
-- **No Mock API Validation**: Responses from the `api` (axios) are not verified or mocked to trigger success/error paths.
-- **No Store Integration Verification**: Success callbacks (onSuccess) that update `zustand` stores are not tested.
-- **No Coverage Reporting**: Total functional coverage is near 0%.
+## Goal
 
-## Conclusion
-
-The tests are shallow and do not protect against regressions in business logic.
+Implement generic data fetching for form versions and connect it to the store/UI.
