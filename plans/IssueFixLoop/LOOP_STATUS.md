@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#7 ISSUE-0007: Export Form Data to CSV/JSON**
+  - Status: Closed
 - **#14 ISSUE-0014: Master Refactoring of Component Directory**
   - Status: Closed
 - **#13 ISSUE-0013: Design CI/CD Pipeline**
@@ -30,8 +32,8 @@
 ## Remaining Queue
 
 1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
-2. **#7 ISSUE-0007: Export Form Data to CSV/JSON**
-3. **#8 ISSUE-0008: AI Form Generation Assistant (Draft)**
+2. **#8 ISSUE-0008: AI Form Generation Assistant (Draft)**
+3. **#11 ISSUE-0011: Workflow Automation implementation** (M3)
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers

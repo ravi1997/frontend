@@ -17,9 +17,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
+import { useResponses } from '@/hooks/useResponses';
+import { Download } from 'lucide-react';
 
 export default function FormsPage() {
     const { forms, isLoading } = useForms();
+    const { exportCsv, exportJson, isExportingCsv, isExportingJson } = useResponses();
     const [search, setSearch] = useState('');
 
     const filteredForms = (forms as IForm[]).filter((form) =>
@@ -119,6 +122,22 @@ export default function FormsPage() {
                                                     <Link href={`/builder/${form.id}`}>Edit Form</Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem>Preview</DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuLabel>Export Responses</DropdownMenuLabel>
+                                                <DropdownMenuItem
+                                                    onClick={() => exportCsv(form.id)}
+                                                    disabled={isExportingCsv}
+                                                >
+                                                    <Download className="mr-2 h-4 w-4" />
+                                                    Export CSV
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => exportJson(form.id)}
+                                                    disabled={isExportingJson}
+                                                >
+                                                    <Download className="mr-2 h-4 w-4" />
+                                                    Export JSON
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">
                                                     Delete
