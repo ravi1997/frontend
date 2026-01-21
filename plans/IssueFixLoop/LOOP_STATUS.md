@@ -11,13 +11,14 @@
 
 ## In Progress / Needs Review
 
-*None*
+- **#17 ISSUE-0006: Implementation of Conditional Logic Engine**
+  - Status: Needs Review
+  - Branch: `fix/issue-17-conditional-logic`
 
 ## Remaining Queue
 
-1. **#17 ISSUE-0006: Implementation of Conditional Logic Engine**
-2. **#11 ISSUE-0004: Resolve Documentation Linting Violations**
-3. **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
+1. **#11 ISSUE-0004: Resolve Documentation Linting Violations**
+2. **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
