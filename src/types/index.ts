@@ -80,6 +80,16 @@ export interface IOption {
   order_index: number;
 }
 
+// ==================== Logic Types ====================
+export type LogicOperator = 'equals' | 'not_equals' | 'contains' | 'gt' | 'lt';
+
+export interface ILogicRule {
+  id: string;
+  field_id: string;
+  operator: LogicOperator;
+  value: string | number | boolean;
+}
+
 export interface IQuestion {
   id: string;
   question_text: string;
@@ -91,7 +101,7 @@ export interface IQuestion {
   default_value?: string;
   options?: IOption[];
   validation_rules?: string; // JSON string
-  visibility_condition?: string; // JSON string
+  visibility_rules?: ILogicRule[];
   is_repeatable?: boolean;
   min_repeat?: number;
   max_repeat?: number;
