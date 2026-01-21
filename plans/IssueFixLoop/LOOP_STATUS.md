@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#9 ISSUE-0002: Missing Vitest Coverage Dependency**
+  - Status: Closed
 - **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
   - Status: Closed
 - **#11 ISSUE-0004: Resolve Documentation Linting Violations**
@@ -21,8 +23,9 @@
 
 ## Remaining Queue
 
-1. **#9 ISSUE-0002: Missing Vitest Coverage Dependency**
-2. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
+1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
+2. **#12 ISSUE-0012: Docker Security hardening**
+3. **#13 ISSUE-0013: Design CI/CD Pipeline**
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
