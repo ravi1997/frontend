@@ -5,6 +5,7 @@ import { useForm } from '../useForm';
 import api from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { act } from '@testing-library/react';
+import { ISection, FieldType } from '@/types';
 
 vi.mock('@/lib/api', () => ({
     default: {
@@ -26,6 +27,22 @@ describe('useForm', () => {
         vi.clearAllMocks();
     });
 
+    const validSection: ISection = {
+        id: 'sec1',
+        title: 'Section 1',
+        order_index: 0,
+        is_repeatable: false,
+        questions: [
+            {
+                id: 'q1',
+                question_text: 'Question 1',
+                field_type: FieldType.SHORT_TEXT,
+                is_required: true,
+                order_index: 0,
+            },
+        ],
+    };
+
     it('should create a form shell', async () => {
         const mockForm = { form_id: 'new-form-id' };
         vi.mocked(api.post).mockResolvedValueOnce({ data: mockForm });
@@ -42,7 +59,10 @@ describe('useForm', () => {
             expect(data).toEqual(mockForm);
         });
 
-        expect(api.post).toHaveBeenCalledWith(API_ENDPOINTS.FORMS.CREATE, expect.any(Object));
+        expect(api.post).toHaveBeenCalledWith(API_ENDPOINTS.FORMS.CREATE, expect.objectContaining({
+            title: 'Test Form',
+            slug: 'test-form',
+        }));
     });
 
     it('should handle composite save action', async () => {
@@ -56,15 +76,28 @@ describe('useForm', () => {
         const { result } = renderWithProviders(() => useForm());
 
         const formId = await result.current.saveNewForm(
-            { title: 'T', description: 'D', slug: 's', is_public: true },
-            []
+            { title: 'Test Form', description: 'Description', slug: 'test-form', is_public: true },
+            [validSection]
         );
 
         expect(formId).toBe('form-123');
         expect(api.post).toHaveBeenCalledTimes(2);
     });
 
-    it('should show alert on error', async () => {
+    it('should reject invalid form data', async () => {
+        const { result } = renderWithProviders(() => useForm());
+
+        await expect(async () => {
+            await result.current.saveNewForm(
+                { title: '', description: 'D', slug: 'test', is_public: true },
+                [validSection]
+            );
+        }).rejects.toThrow('Validation failed');
+
+        expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('Validation failed'));
+    });
+
+    it('should show alert on API error', async () => {
         const errorResponse = {
             response: {
                 data: { message: 'Database Error' }
@@ -75,7 +108,16 @@ describe('useForm', () => {
         const { result } = renderWithProviders(() => useForm());
 
         await act(async () => {
-            await result.current.createForm.mutate({ title: 'T', description: 'D', slug: 's', is_public: true });
+            try {
+                await result.current.createForm.mutateAsync({
+                    title: 'Test',
+                    description: 'Desc',
+                    slug: 'test',
+                    is_public: true
+                });
+            } catch (e) {
+                // Expected to throw
+            }
         });
 
         // Wait for error callback

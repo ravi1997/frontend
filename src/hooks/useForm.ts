@@ -4,6 +4,7 @@ import { API_ENDPOINTS } from '@/lib/constants';
 import { ISection, IWorkflow } from '@/types';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
+import { validateForm, sanitizeString } from '@/lib/validations';
 
 interface CreateFormPayload {
     title: string;
@@ -26,7 +27,13 @@ export function useForm() {
     // Create Form Mutation
     const createForm = useMutation({
         mutationFn: async (payload: CreateFormPayload) => {
-            const response = await api.post(API_ENDPOINTS.FORMS.CREATE, payload);
+            // Sanitize inputs
+            const sanitizedPayload = {
+                ...payload,
+                title: sanitizeString(payload.title),
+                description: sanitizeString(payload.description),
+            };
+            const response = await api.post(API_ENDPOINTS.FORMS.CREATE, sanitizedPayload);
             return response.data;
         },
         onSuccess: (data) => {
@@ -62,6 +69,13 @@ export function useForm() {
         formPayload: CreateFormPayload,
         sections: ISection[]
     ) => {
+        // Validation
+        const validation = validateForm(formPayload.title, formPayload.slug, sections);
+        if (!validation.isValid) {
+            alert(`Validation failed:\n${validation.errors.join('\n')}`);
+            throw new Error('Validation failed');
+        }
+
         try {
             // 1. Create Form
             const formResponse = await createForm.mutateAsync(formPayload);
