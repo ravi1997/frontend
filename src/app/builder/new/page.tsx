@@ -3,6 +3,7 @@ import React from 'react';
 import { BuilderSidebar } from '@/components/form-builder/BuilderSidebar';
 import { BuilderCanvas } from '@/components/form-builder/BuilderCanvas';
 import { BuilderProperties } from '@/components/form-builder/BuilderProperties';
+import { WorkflowManager } from '@/components/form-builder/workflow/WorkflowManager';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, Save, Send, ChevronLeft, Loader2 } from 'lucide-react';
@@ -12,7 +13,7 @@ import { useForm } from '@/hooks/useForm';
 import { slugify } from '@/lib/utils';
 
 export default function BuilderPage() {
-  const { sections, formTitle, formDescription, setFormMetadata } = useBuilderStore();
+  const { sections, formTitle, formDescription, setFormMetadata, workflows } = useBuilderStore();
   const { saveNewForm, isSaving } = useForm();
 
   const handleSave = async () => {
@@ -28,6 +29,7 @@ export default function BuilderPage() {
           slug: `${slugify(formTitle)}-${Date.now().toString().slice(-6)}`,
           description: formDescription,
           is_public: false,
+          workflows,
         },
         sections
       );
@@ -65,6 +67,7 @@ export default function BuilderPage() {
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
+          <WorkflowManager />
           <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -52,6 +52,7 @@ export interface IForm {
   is_public: boolean;
   approval_enabled: boolean;
   approval_steps?: IApprovalStep[];
+  workflows?: IWorkflow[];
   versions: IFormVersion[];
   tags?: string[];
   editors: string[];
@@ -95,6 +96,26 @@ export interface IQuestion {
   min_repeat?: number;
   max_repeat?: number;
   api_config?: string; // JSON string for API_SEARCH type
+}
+
+// ==================== Workflow Types ====================
+export type WorkflowTriggerType = 'on_submit' | 'on_approve' | 'on_reject';
+export type WorkflowActionType = 'email' | 'slack' | 'webhook';
+
+export interface IWorkflowAction {
+  id: string;
+  type: WorkflowActionType;
+  target?: string;
+  config?: Record<string, string>;
+}
+
+export interface IWorkflow {
+  id: string;
+  name: string;
+  description?: string;
+  trigger: WorkflowTriggerType;
+  actions: IWorkflowAction[];
+  is_active: boolean;
 }
 
 // ==================== Response Types ====================

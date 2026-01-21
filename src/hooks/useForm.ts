@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { ISection } from '@/types';
+import { ISection, IWorkflow } from '@/types';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -10,6 +10,7 @@ interface CreateFormPayload {
     description: string;
     slug: string;
     is_public: boolean;
+    workflows?: IWorkflow[];
 }
 
 interface CreateVersionPayload {

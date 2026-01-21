@@ -13,6 +13,8 @@
 - [SPEC-01] | Reconstructed SRS from Reality | Separated implemented vs missing features.
 - [ARCH-01] | Absolute Imports Policy | Restored alias usage (@/) across hooks.
 - [ARCH-02] | Centralized API Constants | Moved missing endpoints to shared constants.
+- [IMPL-01] | Fix Payload Types | Added slug/is_public to CreateFormPayload to match call sites.
+- [LEARN-01] | Known Issues | Created playbook for TS Object Literal errors (KI-20260121).
 
 ## Gaps & Blockers
 

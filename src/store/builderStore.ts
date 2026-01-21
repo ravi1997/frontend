@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { ISection, IQuestion, FieldType } from '@/types';
+import { ISection, IQuestion, FieldType, IWorkflow } from '@/types';
 
 interface BuilderState {
   sections: ISection[];
@@ -9,7 +9,9 @@ interface BuilderState {
   activeSectionId: string | null;
   isDragging: boolean;
   formTitle: string;
+
   formDescription: string;
+  workflows: IWorkflow[];
 }
 
 interface BuilderActions {
@@ -31,6 +33,11 @@ interface BuilderActions {
   setActiveSection: (sectionId: string | null) => void;
   setIsDragging: (isDragging: boolean) => void;
   setFormMetadata: (updates: { title?: string; description?: string }) => void;
+
+  // Workflow Actions
+  addWorkflow: (workflow: IWorkflow) => void;
+  updateWorkflow: (workflowId: string, updates: Partial<IWorkflow>) => void;
+  removeWorkflow: (workflowId: string) => void;
 }
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -50,7 +57,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     activeSectionId: null,
     isDragging: false,
     formTitle: 'Untitled Form',
+
     formDescription: '',
+    workflows: [],
 
     setFormMetadata: (updates) => set((state) => ({
       formTitle: updates.title ?? state.formTitle,
@@ -210,5 +219,16 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     setActiveField: (fieldId) => set({ activeFieldId: fieldId }),
     setActiveSection: (sectionId) => set({ activeSectionId: sectionId }),
     setIsDragging: (isDragging) => set({ isDragging }),
+
+    // Workflow Actions
+    addWorkflow: (workflow) => set((state) => ({
+      workflows: [...state.workflows, workflow],
+    })),
+    updateWorkflow: (workflowId, updates) => set((state) => ({
+      workflows: state.workflows.map((w) => w.id === workflowId ? { ...w, ...updates } : w),
+    })),
+    removeWorkflow: (workflowId) => set((state) => ({
+      workflows: state.workflows.filter((w) => w.id !== workflowId),
+    })),
   }))
 );

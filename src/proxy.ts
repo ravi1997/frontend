@@ -7,16 +7,14 @@ const protectedPaths = ['/dashboard', '/builder', '/responses', '/approvals', '/
 // Paths that should redirect to dashboard if already authenticated
 const authPaths = ['/login', '/register'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get authentication token from cookie
   const token = request.cookies.get('access_token')?.value;
 
   // Check if the path requires authentication
-  const isProtectedPath = protectedPaths.some((path) =>
-    pathname.startsWith(path)
-  );
+  const isProtectedPath = protectedPaths.some((path) => pathname.startsWith(path));
 
   // Check if the path is an auth page
   const isAuthPath = authPaths.some((path) => pathname.startsWith(path));
@@ -38,14 +36,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (public directory)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|submit).*)',
   ],
 };
