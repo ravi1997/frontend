@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#13 ISSUE-0013: Design CI/CD Pipeline**
+  - Status: Closed
 - **#12 ISSUE-0012: Docker Security hardening**
   - Status: Closed
 - **#9 ISSUE-0002: Missing Vitest Coverage Dependency**
@@ -26,8 +28,8 @@
 ## Remaining Queue
 
 1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
-2. **#13 ISSUE-0013: Design CI/CD Pipeline**
-3. **#14 ISSUE-0014: Master Refactoring of Component Directory**
+2. **#14 ISSUE-0014: Master Refactoring of Component Directory**
+3. **#7 ISSUE-0007: Export Form Data to CSV/JSON**
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers

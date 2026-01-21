@@ -22,7 +22,7 @@ The project is buildable via Docker but lacks essential engineering practices.
 ### Infrastructure & Security
 
 - **Docker**: Present, using `node:20-slim`. Running as non-root `node` user. ✅ PASSED
-- **CI/CD**: Missing. No `.github/workflows` found.
+- **CI/CD**: PASSED. GitHub Actions workflow configured in `.github/workflows/ci.yml`. ✅
 - **Security**: No secrets found in root. Docker image uses `node:20-slim`.
 
 ### Documentation Gaps
