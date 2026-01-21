@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#8 ISSUE-0008: AI Form Generation Assistant**
+  - Status: Closed
 - **#6 ISSUE-0006: Implementation of Conditional Logic Engine**
   - Status: Closed
 - **#5 ISSUE-0005: Implement Edge Case Validations**
@@ -36,8 +38,7 @@
 ## Remaining Queue
 
 1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
-2. **#8 ISSUE-0008: AI Form Generation Assistant (Draft)** (M3)
-3. **#11 ISSUE-0011: Workflow Automation implementation** (M3)
+2. **#11 ISSUE-0011: Workflow Automation implementation** (M3)
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers

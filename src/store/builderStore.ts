@@ -20,6 +20,7 @@ interface BuilderActions {
   addSection: () => void;
   updateSection: (sectionId: string, updates: Partial<ISection>) => void;
   removeSection: (sectionId: string) => void;
+  setSections: (sections: ISection[]) => void;
 
   // Field Actions
   addField: (sectionId: string, type: FieldType, index?: number) => void;
@@ -95,6 +96,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       sections: state.sections.filter((s) => s.id !== sectionId),
       activeSectionId: state.activeSectionId === sectionId ? null : state.activeSectionId,
     })),
+
+    setSections: (sections: ISection[]) => set(() => ({ sections })),
 
     // Field Actions
     addField: (sectionId: string, type: FieldType, index?: number) => set((state: BuilderState) => {

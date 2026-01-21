@@ -28,6 +28,9 @@ export const API_ENDPOINTS = {
     ACTION: (responseId: string) => `/approvals/${responseId}/action`,
     HISTORY: (responseId: string) => `/approvals/${responseId}/history`,
   },
+  AI: {
+    GENERATE: '/ai/generate-form',
+  },
 };
 
 // LocalStorage Keys

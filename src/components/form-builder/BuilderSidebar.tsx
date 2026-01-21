@@ -3,22 +3,23 @@
 import React from 'react';
 import { useBuilderStore } from '@/store/builderStore';
 import { FieldType } from '@/types';
-import { 
-  Type, 
-  AlignLeft, 
-  Hash, 
-  Calendar, 
-  Clock, 
-  ChevronDown, 
-  CheckSquare, 
-  CircleDot, 
-  FileUp, 
-  Mail, 
-  Phone, 
+import {
+  Type,
+  AlignLeft,
+  Hash,
+  Calendar,
+  Clock,
+  ChevronDown,
+  CheckSquare,
+  CircleDot,
+  FileUp,
+  Mail,
+  Phone,
   Link as LinkIcon,
   MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AIAssistant } from './ai/AIAssistant';
 
 const FIELD_LIBRARY = [
   { type: FieldType.SHORT_TEXT, label: 'Short Text', icon: Type },
@@ -55,8 +56,11 @@ export const BuilderSidebar = () => {
         <p className="text-xs text-muted-foreground mt-1">
           Click or drag to add fields
         </p>
+        <div className="mt-4">
+          <AIAssistant />
+        </div>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         <div className="grid grid-cols-2 gap-2">
           {FIELD_LIBRARY.map((field) => {
