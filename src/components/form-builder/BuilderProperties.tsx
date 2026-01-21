@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Settings2, Trash2, Copy } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
+import { LogicBuilder } from './properties/LogicBuilder';
 
 export const BuilderProperties = () => {
   const {
@@ -174,6 +175,9 @@ export const BuilderProperties = () => {
             </div>
           </div>
         )}
+
+        {/* Logic Rules */}
+        <LogicBuilder fieldId={activeFieldId} />
       </div>
     </aside>
   );

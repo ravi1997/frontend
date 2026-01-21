@@ -12,10 +12,12 @@ import Link from 'next/link';
 import { useBuilderStore } from '@/store/builderStore';
 import { useForm } from '@/hooks/useForm';
 import { slugify } from '@/lib/utils';
+import { FormPreview } from '@/components/form-builder/FormPreview';
 
 export default function BuilderPage() {
   const { sections, formTitle, formDescription, setFormMetadata, workflows } = useBuilderStore();
   const { saveNewForm, isSaving } = useForm();
+  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
   const handleSave = async () => {
     if (!formTitle.trim()) {
@@ -64,7 +66,7 @@ export default function BuilderPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => setIsPreviewOpen(true)}>
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
@@ -103,6 +105,8 @@ export default function BuilderPage() {
         {/* Properties - Field Settings */}
         <BuilderProperties />
       </div>
+
+      <FormPreview open={isPreviewOpen} onOpenChange={setIsPreviewOpen} />
     </div>
   );
 }
