@@ -68,7 +68,7 @@ Establish best practices for GitHub repository management, branching strategy, p
 
 **SHOULD** follow Conventional Commits:
 
-```
+```text
 <type>(<scope>): <description>
 
 [optional body]
@@ -88,7 +88,7 @@ Establish best practices for GitHub repository management, branching strategy, p
 
 ### Examples
 
-```
+```text
 feat(auth): add JWT authentication
 
 Implements JWT-based authentication for API endpoints.
@@ -97,7 +97,7 @@ Includes middleware for token validation and refresh.
 Closes #45
 ```
 
-```
+```text
 fix(api): handle null response in user endpoint
 
 Fixes crash when user data is not found.
@@ -150,7 +150,7 @@ Fixes crash when user data is not found.
 - **MUST** keep CODEOWNERS up to date with team changes
 - **SHOULD** use team mentions rather than individual users when possible
 
-### Security
+### Repo Security
 
 - **MUST** enable Dependabot security updates
 - **SHOULD** enable secret scanning

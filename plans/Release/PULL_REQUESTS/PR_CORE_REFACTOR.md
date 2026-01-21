@@ -30,7 +30,7 @@ This PR refactors the core authentication and form-building hooks to improve typ
 
 ## 📸 Screenshots / Demos
 
-*(N/A - Logic/Hook changes)*
+### Screenshots / Demos (N/A)
 
 ## 🔗 Related Tasks
 

@@ -13,7 +13,7 @@
 
 ## In Progress / Needs Review
 
-*None*
+`None`
 
 ## Remaining Queue
 

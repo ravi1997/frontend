@@ -32,4 +32,3 @@ The interface defining the expected payload (e.g., in a hook or API client) allo
 ## 5. Related Resources
 - **Rules**: `agent/11_rules/typescript_rules.md` (Ensure strict coding standards).
 - **Gates**: `agent/05_gates/global/gate_global_quality.md` (Must pass build).
-
