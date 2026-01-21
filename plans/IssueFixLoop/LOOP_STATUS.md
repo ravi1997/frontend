@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#14 ISSUE-0014: Master Refactoring of Component Directory**
+  - Status: Closed
 - **#13 ISSUE-0013: Design CI/CD Pipeline**
   - Status: Closed
 - **#12 ISSUE-0012: Docker Security hardening**
@@ -28,8 +30,8 @@
 ## Remaining Queue
 
 1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
-2. **#14 ISSUE-0014: Master Refactoring of Component Directory**
-3. **#7 ISSUE-0007: Export Form Data to CSV/JSON**
+2. **#7 ISSUE-0007: Export Form Data to CSV/JSON**
+3. **#8 ISSUE-0008: AI Form Generation Assistant (Draft)**
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
