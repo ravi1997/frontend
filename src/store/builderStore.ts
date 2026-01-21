@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { ISection, IQuestion, FieldType, IWorkflow } from '@/types';
+import { ISection, IQuestion, FieldType, IWorkflow, IFormVersion } from '@/types';
 
 interface BuilderState {
   sections: ISection[];
@@ -12,6 +12,7 @@ interface BuilderState {
 
   formDescription: string;
   workflows: IWorkflow[];
+  versions: IFormVersion[];
 }
 
 interface BuilderActions {
@@ -38,6 +39,10 @@ interface BuilderActions {
   addWorkflow: (workflow: IWorkflow) => void;
   updateWorkflow: (workflowId: string, updates: Partial<IWorkflow>) => void;
   removeWorkflow: (workflowId: string) => void;
+
+  // Version Actions
+  setVersions: (versions: IFormVersion[]) => void;
+  loadVersion: (version: IFormVersion) => void;
 }
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -60,6 +65,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
     formDescription: '',
     workflows: [],
+    versions: [],
 
     setFormMetadata: (updates) => set((state) => ({
       formTitle: updates.title ?? state.formTitle,
@@ -230,5 +236,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     removeWorkflow: (workflowId) => set((state) => ({
       workflows: state.workflows.filter((w) => w.id !== workflowId),
     })),
+
+    // Version Actions
+    setVersions: (versions) => set({ versions }),
+    loadVersion: (version) => set({ sections: version.sections }),
   }))
 );

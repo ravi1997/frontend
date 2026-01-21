@@ -57,3 +57,29 @@ describe('builderStore Workflows', () => {
         expect(useBuilderStore.getState().workflows).toHaveLength(0);
     });
 });
+
+describe('builderStore Versions', () => {
+    beforeEach(() => {
+        useBuilderStore.setState({ versions: [], sections: [] });
+    });
+
+    it('should set versions', () => {
+        const versions: any[] = [{ version_number: 1, sections: [], created_at: new Date() }];
+        useBuilderStore.getState().setVersions(versions);
+        expect(useBuilderStore.getState().versions).toHaveLength(1);
+    });
+
+    it('should load a version', () => {
+        const version: any = {
+            version_number: 1,
+            sections: [{ id: 's1', title: 'Old Section', order_index: 0, questions: [], is_repeatable: false }],
+            created_at: new Date()
+        };
+
+        useBuilderStore.getState().loadVersion(version);
+
+        const sections = useBuilderStore.getState().sections;
+        expect(sections).toHaveLength(1);
+        expect(sections[0].title).toBe('Old Section');
+    });
+});

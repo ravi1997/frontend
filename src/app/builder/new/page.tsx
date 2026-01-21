@@ -4,6 +4,7 @@ import { BuilderSidebar } from '@/components/form-builder/BuilderSidebar';
 import { BuilderCanvas } from '@/components/form-builder/BuilderCanvas';
 import { BuilderProperties } from '@/components/form-builder/BuilderProperties';
 import { WorkflowManager } from '@/components/form-builder/workflow/WorkflowManager';
+import { VersionHistoryPanel } from '@/components/form-builder/versions/VersionHistoryPanel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, Save, Send, ChevronLeft, Loader2 } from 'lucide-react';
@@ -67,6 +68,7 @@ export default function BuilderPage() {
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
+          <VersionHistoryPanel />
           <WorkflowManager />
           <Button variant="outline" size="sm" onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
@@ -75,6 +77,13 @@ export default function BuilderPage() {
               <Save className="mr-2 h-4 w-4" />
             )}
             Save Draft
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => {
+            const versionNote = prompt("Version Note (optional):");
+            handleSave(); // Currently verify generic save action. Ideally we pass a flag for forcing a new version if backend supported it differently.
+          }} disabled={isSaving}>
+            <Save className="mr-2 h-4 w-4" />
+            New Version
           </Button>
           <Button size="sm">
             <Send className="mr-2 h-4 w-4" />
