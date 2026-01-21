@@ -5,6 +5,8 @@
 
 ## Completed Issues
 
+- **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+**
+  - Status: Closed
 - **#11 ISSUE-0011: Workflow Automation implementation**
   - Status: Closed
 - **#8 ISSUE-0008: AI Form Generation Assistant**
@@ -28,14 +30,11 @@
 
 ## Remaining Queue
 
-1. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked by Environment)
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
 
-- **Node.js Version**: Project requires Node v20.9.0+, environment has v18.19.1.
-  - Impact: Builds fail, `npm install` requires `--legacy-peer-deps`.
-  - Action: Update environment or downgrade project requirement (not recommended).
+- None. Environment fixed.
 
 ## Next Up
 
