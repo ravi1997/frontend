@@ -4,6 +4,10 @@
 
 ## Completed Issues
 
+- **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
+  - Status: Closed
+- **#11 ISSUE-0004: Resolve Documentation Linting Violations**
+  - Status: Closed
 - **#17 ISSUE-0006: Implementation of Conditional Logic Engine**
   - Status: Closed
 - **#40 ISSUE-0010: Form Versioning UI Management**
@@ -17,8 +21,8 @@
 
 ## Remaining Queue
 
-1. **#11 ISSUE-0004: Resolve Documentation Linting Violations**
-2. **#10 ISSUE-0003: Zero Logic Coverage for Core Hooks**
+1. **#9 ISSUE-0002: Missing Vitest Coverage Dependency**
+2. **#1 ISSUE-0001: Upgrade Node.js Environment to 20.x+** (Blocked)
 ... (See `QUEUE.md` for full list)
 
 ## Current Blockers
