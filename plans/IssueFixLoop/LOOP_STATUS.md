@@ -4,6 +4,8 @@
 
 ## Completed Issues
 
+- **#17 ISSUE-0006: Implementation of Conditional Logic Engine**
+  - Status: Closed
 - **#40 ISSUE-0010: Form Versioning UI Management**
   - Status: Closed
 - **#41 ISSUE-0011: Workflow Automation (MVP)**
@@ -11,9 +13,7 @@
 
 ## In Progress / Needs Review
 
-- **#17 ISSUE-0006: Implementation of Conditional Logic Engine**
-  - Status: Needs Review
-  - Branch: `fix/issue-17-conditional-logic`
+*None*
 
 ## Remaining Queue
 
