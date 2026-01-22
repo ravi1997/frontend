@@ -1,8 +1,15 @@
-# Implementation Plan
+# PLAN: Fix Markdown Linting
 
-1. **Enhance Metadata**: Update `src/app/layout.tsx` to include:
-    * `appleWebApp` configuration.
-    * `formatDetection`.
-    * `viewport` export (separate from metadata in Next.js 14+).
-2. **Verify Build**: Run `npm run build` to confirm `sw.js` and `workbox-*.js` are generated in `public/`.
-3. **Test**: Run existing tests.
+## Objective
+
+Resolve static analysis warnings for markdown files.
+
+## Tasks
+
+1. [ ] **Fix Duplicate Headings**: Edit `plans/Milestones/MILESTONE_PLAN.md` to ensure all headings are unique or properly nested.
+2. [ ] **Fix Table Formatting**: Edit `agent/09_state/TEST_STATE.md` to align table columns.
+3. [ ] **Scan**: Briefly scan other core docs for obvious issues.
+
+## Strategy
+
+- Manual inspection and editing.
