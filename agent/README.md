@@ -10,11 +10,12 @@ This directory contains the complete "Operating System" for an AI Agent to manag
 - **Autonomous Lifecycle**: From SRS generation to Production Release with rigorous quality gates.
 - **Context Management**: Mandatory routines to prevent memory decay in long projects.
 - **Monorepo Discovery**: Advanced detection for complex project structures.
+- **Token Budgeting**: Active management of context windows, model switching, and continuity snapshots.
 - **Self-Evolution**: The Agent can suggest improvements to this `agent/` folder itself based on performance audits.
 
 ## Directory Structure
 
-- `00_system/`: Principles, Context Management, and Self-Evolution rules.
+- `00_system/`: Principles, Context Management, Token Budgeting, and Self-Evolution rules.
 - `01_entrypoints/`: Logic triggers including the `scenarios/` subfolder.
 - `02_detection/`: Heuristics for repo analysis and stack fingerprints.
 - `03_profiles/`: High-precision role definitions (Deep Architect, Deep Implementer).
@@ -28,6 +29,11 @@ This directory contains the complete "Operating System" for an AI Agent to manag
 - `11_rules/`: Rigid constraints for code, comms, and repo hygiene.
 - `12_checks/`: Audit rubrics and checklists.
 - `13_examples/`: Reference implementations and walkthroughs.
+- `14_known_issues/`: Database of fixed issues for self-learning.
+- `15_tech_hard_cases/`: Solutions for complex technical problems.
+- `16_recovery_playbooks/`: Strategies for recovering from critical failures.
+- `17_caveats/`: documented limitations and "gotchas".
+- `18_diagnostics/`: Tools and scripts for system health checks.
 
 ## Getting Started
 

@@ -553,7 +553,7 @@ If the AI loses context:
 ## Quick Reference
 
 | Situation | Prompt File |
-| --- | --- |
+|---|---|
 | Brand new project | `by_entrypoint/new_project.txt` |
 | Add feature to existing code | `by_entrypoint/existing_project.txt` |
 | Fix a bug | `by_scenario/bug_fix.txt` |

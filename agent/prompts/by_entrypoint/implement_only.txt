@@ -16,7 +16,7 @@ INPUTS REQUIRED
 
 MANDATORY EXECUTION ORDER
 1. Adopt `agent/03_profiles/profile_implementer.md`
-2. Select highest priority task from backlog (status: TODO)
+2. Select highest priority task from backlog (status: PENDING)
 3. Execute `agent/04_workflows/06_feature_implementation_loop.md`:
    - Phase 1: Scaffolding & Design
    - Phase 2: Implementation & Self-Correction

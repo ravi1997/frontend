@@ -60,6 +60,7 @@ prompts/
 │   ├── emergency_hotfix.txt
 │   ├── performance_investigation.txt
 │   └── ...
+├── hard_cases/                   # Tech-specific hard case prompts (Docker, GitHub, C++, etc.)
 └── cheatsheets/
     ├── prompt_selector.md        # Decision tree
     └── quick_copy_blocks.md      # Mobile-friendly versions
@@ -70,6 +71,7 @@ prompts/
 - **Full Guide**: See `PROMPTS_GUIDE.md` for detailed explanations
 - **Decision Tree**: See `cheatsheets/prompt_selector.md` to choose quickly
 - **Agent OS Docs**: See `../AGENT_MANIFEST.md` for system overview
+- **Hard Cases**: `hard_cases/` prompts map diagnostics to recovery playbooks per tech (Docker, GitHub, C++, CMake, Java, Python, Flask, Flutter, Static Web)
 
 ## Model Compatibility
 

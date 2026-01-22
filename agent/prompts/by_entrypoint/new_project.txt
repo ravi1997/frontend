@@ -11,7 +11,7 @@ ABSOLUTE RULES
 4) You MUST update the state files in `agent/09_state/` after every major phase.
 5) You MUST run applicable gates from `agent/05_gates/` before claiming completion.
 6) If you cannot proceed due to missing info, record assumptions in `plans/Questions/questions.md` and continue.
-7) Never leave TODO/TBD placeholders in produced artifacts.
+7) Never leave PENDING/TBD placeholders in produced artifacts.
 8) Maintain consistency between SRS, architecture, backlog, implementation, tests, and release docs.
 9) Use the existing folder contract in `agent/08_plan_output_contract/` for all outputs.
 10) Do not ask the user questions unless absolutely blocked; prefer assumptions documented in plans.

@@ -7,6 +7,7 @@
 3. **Orchestrated Mode**: For complex, multi-phase projects, copy `prompts/orchestrator/00_orchestrator_master_prompt.txt` and paste it into your AI.
 4. **Monitoring**: Check `agent/09_state/` frequently to see where the Agent thinks the project stands.
 5. **Approval**: The Agent will stop at "Gates" (defined in `05_gates/`) and wait for your feedback or automated test confirmation.
+6. **Reference Examples**: For Docker/GitHub setups, check `prompts/examples_devops/` for copy-paste ready implementations.
 
 ## Instructions for the AI Assistant
 

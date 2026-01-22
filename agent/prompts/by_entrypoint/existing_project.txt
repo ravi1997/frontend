@@ -14,7 +14,7 @@ ABSOLUTE RULES
 7) If blocked by missing context (business rules, expected behavior), record assumptions in `plans/Questions/questions.md` and continue.
 8) Never invent features not justified by code or SRS; record "future ideas" as optional backlog items.
 9) Maintain strict consistency between SRS, architecture, backlog, current code, and proposed changes.
-10) Never leave TODO/TBD placeholders in produced artifacts.
+10) Never leave PENDING/TBD placeholders in produced artifacts.
 
 YOUR EXECUTION ORDER (MANDATORY)
 Step 0 — Bootstrap
