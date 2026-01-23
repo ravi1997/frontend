@@ -81,7 +81,7 @@ export default function BuilderPage() {
             Save Draft
           </Button>
           <Button variant="outline" size="sm" onClick={() => {
-            const versionNote = prompt("Version Note (optional):");
+            prompt("Version Note (optional):");
             handleSave(); // Currently verify generic save action. Ideally we pass a flag for forcing a new version if backend supported it differently.
           }} disabled={isSaving}>
             <Save className="mr-2 h-4 w-4" />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -20,17 +20,16 @@ interface FormPreviewProps {
 
 export const FormPreview: React.FC<FormPreviewProps> = ({ open, onOpenChange }) => {
     const { sections, formTitle, formDescription } = useBuilderStore();
-    const [formData, setFormData] = useState<Record<string, any>>({});
+    const [formData, setFormData] = useState<Record<string, unknown>>({});
 
-    // Reset data when closed or opened? Maybe keep it persistence during session?
-    // Let's reset on open to verify "fresh" state behavior
-    useEffect(() => {
-        if (open) {
+    const handleOpenChange = (isOpen: boolean) => {
+        if (isOpen) {
             setFormData({});
         }
-    }, [open]);
+        onOpenChange(isOpen);
+    };
 
-    const handleFieldChange = (fieldId: string, value: any) => {
+    const handleFieldChange = (fieldId: string, value: unknown) => {
         setFormData(prev => ({
             ...prev,
             [fieldId]: value
@@ -38,7 +37,7 @@ export const FormPreview: React.FC<FormPreviewProps> = ({ open, onOpenChange }) 
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-3xl h-[80vh] flex flex-col p-0">
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle>Form Preview</DialogTitle>

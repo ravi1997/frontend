@@ -10,6 +10,7 @@
 ## 📋 Planning & Analysis
 
 - `agent/06_skills/planning/skill_milestone_planning.md`: Long-term roadmap creation.
+- `agent/06_skills/planning/skill_future_planning.md`: Detailed future roadmap generation.
 - `agent/06_skills/planning/skill_risk_register.md`: Identification of blockers.
 - `agent/06_skills/analysis/skill_repo_health_check.md`: Establishing project baseline.
 - `agent/06_skills/knowledge_extraction/skill_issue_extraction.md`: Parsing raw feedback into tasks.

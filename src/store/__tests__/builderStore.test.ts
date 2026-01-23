@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useBuilderStore } from '../builderStore';
-import { IWorkflow } from '@/types';
+import { IWorkflow, IFormVersion } from '@/types';
 
 describe('builderStore Workflows', () => {
     // Reset store before each test
@@ -64,16 +64,17 @@ describe('builderStore Versions', () => {
     });
 
     it('should set versions', () => {
-        const versions: any[] = [{ version_number: 1, sections: [], created_at: new Date() }];
+        const versions: IFormVersion[] = [{ version_number: 1, sections: [], created_at: new Date(), response_count: 0 }];
         useBuilderStore.getState().setVersions(versions);
         expect(useBuilderStore.getState().versions).toHaveLength(1);
     });
 
     it('should load a version', () => {
-        const version: any = {
+        const version: IFormVersion = {
             version_number: 1,
             sections: [{ id: 's1', title: 'Old Section', order_index: 0, questions: [], is_repeatable: false }],
-            created_at: new Date()
+            created_at: new Date(),
+            response_count: 0
         };
 
         useBuilderStore.getState().loadVersion(version);

@@ -41,12 +41,12 @@ describe('useResponses', () => {
 
         const originalCreateElement = document.createElement.bind(document);
         const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-            if (tagName === 'a') return link as any;
+            if (tagName === 'a') return link as unknown as HTMLAnchorElement;
             return originalCreateElement(tagName);
         });
 
         const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
-            if (node === (link as any)) return node as any;
+            if (node === (link as unknown as Node)) return node;
             return node;
         });
 
@@ -81,12 +81,12 @@ describe('useResponses', () => {
 
         const originalCreateElement = document.createElement.bind(document);
         const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
-            if (tagName === 'a') return link as any;
+            if (tagName === 'a') return link as unknown as HTMLAnchorElement;
             return originalCreateElement(tagName);
         });
 
         const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
-            if (node === (link as any)) return node as any;
+            if (node === (link as unknown as Node)) return node;
             return node;
         });
 

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { ISection, IQuestion, FieldType, IWorkflow, IFormVersion } from '@/types';
+import { ISection, IQuestion, FieldType, IWorkflow, IFormVersion, IForm } from '@/types';
 
 interface BuilderState {
   sections: ISection[];
@@ -44,6 +44,7 @@ interface BuilderActions {
   // Version Actions
   setVersions: (versions: IFormVersion[]) => void;
   loadVersion: (version: IFormVersion) => void;
+  loadForm: (form: IForm) => void;
 }
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -243,5 +244,15 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     // Version Actions
     setVersions: (versions) => set({ versions }),
     loadVersion: (version) => set({ sections: version.sections }),
+    loadForm: (form: IForm) => {
+      const latestVersion = form.versions?.sort((a, b) => b.version_number - a.version_number)[0];
+      set({
+        formTitle: form.title,
+        formDescription: form.description || '',
+        sections: latestVersion?.sections || [],
+        workflows: form.workflows || [],
+        versions: form.versions || [],
+      });
+    },
   }))
 );

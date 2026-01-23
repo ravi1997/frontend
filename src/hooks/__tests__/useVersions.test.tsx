@@ -31,7 +31,7 @@ describe('useVersions', () => {
         ];
 
         // Mock API response
-        (api.get as any).mockResolvedValue({ data: mockVersions });
+        vi.mocked(api.get).mockResolvedValue({ data: mockVersions });
 
         const { result } = renderHook(() => useVersions('form-123'), { wrapper });
 

@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IWorkflow, WorkflowTriggerType, WorkflowActionType } from '@/types';
+import { IWorkflow, WorkflowTriggerType, WorkflowActionType, IWorkflowAction } from '@/types';
 import { useBuilderStore } from '@/store/builderStore';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Workflow as WorkflowIcon, X } from 'lucide-react';
+import { Plus, Trash2, Workflow as WorkflowIcon } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 export const WorkflowManager = () => {
@@ -76,7 +76,7 @@ export const WorkflowManager = () => {
         }));
     };
 
-    const updateAction = (actionId: string, updates: any) => {
+    const updateAction = (actionId: string, updates: Partial<IWorkflowAction>) => {
         setFormData(prev => ({
             ...prev,
             actions: (prev.actions || []).map(a => a.id === actionId ? { ...a, ...updates } : a)
@@ -191,7 +191,7 @@ export const WorkflowManager = () => {
                                             <Label className="text-xs">Type</Label>
                                             <Select
                                                 value={action.type}
-                                                onValueChange={(v) => updateAction(action.id, { type: v })}
+                                                onValueChange={(v) => updateAction(action.id, { type: v as WorkflowActionType })}
                                             >
                                                 <SelectTrigger className="h-8">
                                                     <SelectValue />

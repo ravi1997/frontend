@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface FormInputProps {
     question: IQuestion;
-    value: any;
-    onChange: (value: any) => void;
+    value: unknown;
+    onChange: (value: unknown) => void;
     error?: string;
 }
 
 export const FormInput: React.FC<FormInputProps> = ({ question, value, onChange, error }) => {
-    const handleChange = (val: any) => {
+    const handleChange = (val: unknown) => {
         onChange(val);
     };
 
@@ -33,7 +33,7 @@ export const FormInput: React.FC<FormInputProps> = ({ question, value, onChange,
                                 question.field_type === FieldType.NUMBER ? 'number' : 'text'
                         }
                         placeholder={question.placeholder}
-                        value={value || ''}
+                        value={(value as string) || ''}
                         onChange={(e) => handleChange(e.target.value)}
                     />
                 );
@@ -43,14 +43,14 @@ export const FormInput: React.FC<FormInputProps> = ({ question, value, onChange,
                     <textarea
                         className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         placeholder={question.placeholder}
-                        value={value || ''}
+                        value={(value as string) || ''}
                         onChange={(e) => handleChange(e.target.value)}
                     />
                 );
 
             case FieldType.DROPDOWN:
                 return (
-                    <Select value={value} onValueChange={handleChange}>
+                    <Select value={value as string} onValueChange={handleChange}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select an option" />
                         </SelectTrigger>

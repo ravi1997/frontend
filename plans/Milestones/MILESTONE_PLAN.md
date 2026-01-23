@@ -1,61 +1,64 @@
-# Milestone Plan
+# Milestone Plan: Form Management Platform
 
-## Roadmap Overview
+## Executive Summary
 
-| Milestone | Title | Focus | Timeline |
-| --- | --- | --- | --- |
-| **M1** | Core Stabilization & Advanced Builder | Preview, Versioning, Conditional Logic | 2 Weeks |
-| **M2** | Data Management & Orchestration | Data Export, Server-side Filtering, Workflow | 2 Weeks |
-| **M3** | Intelligence & Reach | AI Integration, PWA, Advanced Analytics | 2 Weeks |
+This plan outlines the strategic roadmap for delivering the Enterprise Form Management Platform. The project is divided into 5 major milestones, prioritizing a solid foundation and core value steps before advanced features like AI and Logic pipelines.
 
----
+## Milestone 1: Foundation & Authentication (Week 1-2)
 
-## Milestone 1: Core Stabilization & Advanced Builder
+**Goal**: Establish a secure, deployable application skeleton with full user authentication and role management.
+**Focus**: Project Setup, Database Schema, Authentication, RBAC.
 
-**Objective**: Complete the missing features in the primary form builder and
-stabilize the preview/versioning systems.
+- **Deliverables**:
+  - Initial Next.js + Tailwind + Shadcn UI setup.
+  - Database schema migration (Users, Roles).
+  - Functional Login/Register pages (General & Employee).
+  - Role-Based Access Control logic.
+  - CI/CD Deployment pipeline active.
 
-### M1 Tasks
+## Milestone 2: Core Form Builder (Week 3-4)
 
-- **[M1-T1] Logic Verification for Form Preview**: Ensure the preview toggle
-  accurately reflects the final form state and validation logic.
-- **[M1-T2] Form Versioning UI**: Implement the UI for viewing and switching
-  between different form versions (`IFormVersion`).
-- **[M1-T3] Conditional Logic Engine**: Develop the UI and logic for adding
-  conditional fields (e.g., "Show Field B if Field A = 'Value'").
-- **[M1-T4] Enhanced Field Validation**: Add complex validation rules (Regex,
-  Min/Max) to the properties panel.
+**Goal**: Enable users to create, save, and manage basic forms using a visual interface.
+**Focus**: Drag-and-drop editor, Field components, Form persistence.
 
----
+- **Deliverables**:
+  - Visual Form Editor (Drag-and-drop).
+  - Core Field Types (Text, Number, Email, Mobile).
+  - Form saving and versioning (Draft/Published).
+  - Section management within forms.
+  - Public Form Slug generation.
 
-## Milestone 2: Data Management & Orchestration
+## Milestone 3: Respondent Experience & Validation (Week 5-6)
 
-**Objective**: Move beyond form creation to data utility and automated
-workflows.
+**Goal**: Allow end-users to fill out forms with robust validation and high performance.
+**Focus**: Public Form View, Input Validation, Conditional Logic, Performance.
 
-### M2 Tasks
+- **Deliverables**:
+  - Public-facing Form Renderer.
+  - Client-side Zod validation.
+  - Conditional Logic Engine (Show/Hide fields).
+  - Submissions capture and storage.
+  - Static Generation (SSG/ISR) for public forms (NFR-02).
 
-- **[M2-T1] Server-Side Search/Filter**: Implement robust server-side
-  pagination, search, and filtering for the Response Grid.
-- **[M2-T2] Data Export Integration**: Connect the "Export" button to backend
-  endpoints for CSV/XLSX generation.
-- **[M2-T3] Workflow Automation (MVP)**: Integrate a light workflow engine
-  (e.g., Slack/Email notification on submission).
-- **[M2-T4] Response Analytics Dashboard**: Basic charts/graphs for visualizing
-  form submission trends.
+## Milestone 4: Workflows & Advanced Features (Week 7-8)
 
----
+**Goal**: Implement business logic layers, approvals, and AI assistance.
+**Focus**: Approval flows, Notifications, AI generation.
 
-## Milestone 3: Intelligence & Reach
+- **Deliverables**:
+  - Multi-step approval system.
+  - Email/Slack/Webhook triggers on submission.
+  - Form expiration logic.
+  - AI Assistant for form generation (Mocked/Integration).
 
-**Objective**: Enhance user experience with AI and mobile accessibility.
+## Milestone 5: Analytics & Production Polish (Week 9-10)
 
-### M3 Tasks
+**Goal**: Provide insights, ensure reliability, and optimize for all devices (PWA).
+**Focus**: Dashboard, Analytics, PWA, Security Audit.
 
-- **[M3-T1] AI Form Generation**: Implement a chat-based interface to generate
-  forms using LLM.
-- **[M3-T2] PWA Support**: Add `manifest.json` with icons and splash screen for
-  offline capabilities and mobile install.
-- **[M3-T3] Advanced Multi-Step Forms**: Support for paginated/multi-step form
-  layouts in the builder.
-- **[M3-T4] Theming Engine**: Allow users to customize form colors/branding.
+- **Deliverables**:
+  - Admin/User Analytics Dashboard.
+  - Export functionality (CSV/Excel).
+  - PWA Offline capabilities (Service Worker).
+  - Security Audit & Input Sanitization checks.
+  - Final Production Release.

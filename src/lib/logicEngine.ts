@@ -3,7 +3,7 @@ import { ILogicRule, IQuestion } from '@/types';
 /**
  * Evaluates a single logic rule against form data.
  */
-export const evaluateRule = (rule: ILogicRule, formData: Record<string, any>): boolean => {
+export const evaluateRule = (rule: ILogicRule, formData: Record<string, unknown>): boolean => {
     const fieldValue = formData[rule.field_id];
 
     // Normalize values for comparison (basic string conversion)
@@ -36,7 +36,7 @@ export const evaluateRule = (rule: ILogicRule, formData: Record<string, any>): b
  * 1. No rules exist (default visible)
  * 2. ALL rules pass (AND logic - simplifying assumption for MVP)
  */
-export const shouldShowField = (field: IQuestion, formData: Record<string, any>): boolean => {
+export const shouldShowField = (field: IQuestion, formData: Record<string, unknown>): boolean => {
     if (!field.visibility_rules || field.visibility_rules.length === 0) {
         return true;
     }

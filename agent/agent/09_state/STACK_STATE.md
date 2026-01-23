@@ -2,20 +2,20 @@
 
 ## Detected Environment
 
-- **Primary Language**: [NONE]
-- **Framework**: [NONE]
-- **Build System**: [NONE]
-- **Package Manager**: [NONE]
-- **Runtime Version**: [NONE]
+- **Primary Language**: TypeScript
+- **Framework**: Next.js
+- **Build System**: Next.js (Webpack/Turbopack)
+- **Package Manager**: npm
+- **Runtime Version**: Node.js (v20+ Recommended)
 
 ## Infrastructure
 
-- **Database**: [NONE]
-- **Caching**: [NONE]
-- **Containerization**: [NONE]
+- **Database**: [Unknown - Investigation Needed]
+- **Caching**: [Unknown]
+- **Containerization**: Docker
 
 ## Tooling
 
-- **Linter**: [NONE]
-- **Formatter**: [NONE]
-- **Test Runner**: [NONE]
+- **Linter**: ESLint
+- **Formatter**: Prettier (likely)
+- **Test Runner**: Vitest

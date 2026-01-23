@@ -1,37 +1,41 @@
-# Baseline Report
+# Baseline Audit Report
 
-## Project Health: IMPROVING
+**Date**: 2026-01-22
+**Status**: YELLOW (Linting Broken, Tests Pass, Build Pass)
 
-The project is buildable via Docker but lacks essential engineering practices.
+## 1. Build Health
 
-### Build Status
+- Command: `npm run build`
+- Status: PASSED
+- Notes: Standard Next.js build succeeded.
 
-- **Local Build**: FAILED (Node version mismatch, requires >=20.9.0, current 18.19.1)
-- **Docker Build**: PASSED (Image `frontend-test` created successfully)
+## 2. Test Health
 
-### Test Status
+- Command: `npm run test:unit`
+- Status: PASSED (45/45)
+- Notes:
+  - Console warnings regarding `act(...)` in `useAuth`, `useForms`.
+  - `aiService` tests are mocked/stubbed (1.5s delay suggesting specific implementation).
 
-- **Unit Tests**: PASSED (Functional coverage for core hooks > 80%)
-- **E2E Tests**: NOT RUN (Likely no test files found)
+## 3. Code Quality (Lint)
 
-### Code Quality
+- Command: `npm run lint`
+- Status: FAILED
+- Error: "Invalid project directory provided"
+- Diagnosis: Likely configuration issue in `package.json` or `eslint.config.mjs` execution environment.
 
-- **Linter**: ESLint configured, but not run yet in audit.
-- **TypeScript**: Configured and used.
+## 4. DevOps Health
 
-### Infrastructure & Security
+- Docker: Dockerfile present.
+- CI/CD: `.github` folder present.
 
-- **Docker**: Present, using `node:20-slim`. Running as non-root `node` user. ✅ PASSED
-- **CI/CD**: PASSED. GitHub Actions workflow configured in `.github/workflows/ci.yml`. ✅
-- **Security**: No secrets found in root. Docker image uses `node:20-slim`.
+## 5. Security Summary
 
-### Documentation Gaps
+- No secrets scan performed yet.
+- Dependencies look standard.
 
-- No architecture diagrams.
-- README is basic.
-- Many project-related MD files exist in the root but might be outdated.
+## 6. Recommendations
 
-### Known Debt
-
-- 100% lack of test coverage.
-- Node version dependency not managed (e.g., no `.nvmrc`).
+1. Fix Lint command.
+2. Address `act(...)` warnings in tests.
+3. Review `aiService` test implementation for robustness.

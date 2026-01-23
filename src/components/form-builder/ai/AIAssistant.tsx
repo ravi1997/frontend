@@ -37,6 +37,11 @@ export const AIAssistant = () => {
         try {
             const response = await generateFormStructure(userMsg);
 
+            if (response.error) {
+                setMessages(prev => [...prev, { role: 'assistant', content: response.error! }]);
+                return;
+            }
+
             const assistantMsg: Message = {
                 role: 'assistant',
                 content: `I've generated a form with ${response.sections.length} sections based on your request.`,
@@ -45,17 +50,16 @@ export const AIAssistant = () => {
 
             setMessages(prev => [...prev, assistantMsg]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error generating the form.' }]);
+            const errorMsg = error instanceof Error ? error.message : 'Sorry, I encountered an error generating the form.';
+            setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
         } finally {
             setLoading(false);
         }
     };
 
     const handleApply = (sections: ISection[]) => {
-        if (confirm('This will replace your current form structure. Continue?')) {
-            setSections(sections);
-            setOpen(false);
-        }
+        setSections(sections);
+        setOpen(false);
     };
 
     return (

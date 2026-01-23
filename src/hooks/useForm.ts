@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
 import { ISection, IWorkflow } from '@/types';
 import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
+
 import { validateForm, sanitizeString } from '@/lib/validations';
 
 interface CreateFormPayload {
@@ -21,7 +21,6 @@ interface CreateVersionPayload {
 }
 
 export function useForm() {
-    const router = useRouter();
     const queryClient = useQueryClient();
 
     // Create Form Mutation
@@ -53,14 +52,28 @@ export function useForm() {
             const response = await api.post(API_ENDPOINTS.FORMS.VERSIONS(formId), payload);
             return response.data;
         },
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
             console.log('Form saved successfully');
+            queryClient.invalidateQueries({ queryKey: ['form', variables.formId] });
             alert('Form saved successfully!');
         },
         onError: (error: AxiosError<{ message?: string }>) => {
             console.error('Failed to save form version', error);
             const message = error.response?.data?.message || 'Failed to save form version';
             alert(message);
+        },
+    });
+
+    // Update Form Mutation (Metadata)
+    const updateForm = useMutation({
+        mutationFn: async ({ formId, payload }: { formId: string, payload: Partial<CreateFormPayload> }) => {
+            const response = await api.patch(API_ENDPOINTS.FORMS.UPDATE(formId), payload);
+            return response.data;
+        },
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['forms'] });
+            queryClient.invalidateQueries({ queryKey: ['form', variables.formId] });
+            alert('Form updated successfully!');
         },
     });
 
@@ -79,7 +92,7 @@ export function useForm() {
         try {
             // 1. Create Form
             const formResponse = await createForm.mutateAsync(formPayload);
-            const formId = formResponse.form_id;
+            const formId = formResponse.id || formResponse.form_id;
 
             if (!formId) throw new Error('No form ID returned');
 
@@ -103,7 +116,20 @@ export function useForm() {
     return {
         createForm,
         createVersion,
+        updateForm,
         saveNewForm,
-        isSaving: createForm.isPending || createVersion.isPending,
+        isSaving: createForm.isPending || createVersion.isPending || updateForm.isPending,
     };
+}
+
+export function useFormDetails(formId?: string) {
+    return useQuery({
+        queryKey: ['form', formId],
+        queryFn: async () => {
+            if (!formId) return null;
+            const { data } = await api.get(API_ENDPOINTS.FORMS.GET(formId));
+            return data;
+        },
+        enabled: !!formId,
+    });
 }

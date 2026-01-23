@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useBuilderStore } from '@/store/builderStore';
+import { useMounted } from '@/hooks/useMounted';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import {
@@ -37,6 +38,7 @@ export const BuilderCanvas = () => {
     setIsDragging
   } = useBuilderStore();
 
+  const mounted = useMounted();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeType, setActiveType] = useState<'section' | 'field' | null>(null);
 
@@ -144,76 +146,94 @@ export const BuilderCanvas = () => {
     ? sections.find(s => s.id === activeId)
     : null;
 
+  if (!mounted) {
+    return (
+      <div className="flex-1 bg-muted/30 p-8 flex justify-center">
+        <div className="w-full max-w-3xl space-y-8 min-h-full flex flex-col">
+          <div className="flex-1 space-y-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-40 bg-muted rounded-lg w-full"></div>
+              <div className="h-40 bg-muted rounded-lg w-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 bg-muted/30 overflow-y-auto p-8 flex justify-center">
-      <div className="w-full max-w-3xl space-y-6">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={sections.map(s => s.id)}
-            strategy={verticalListSortingStrategy}
+    <div className="flex-1 bg-muted/30 overflow-y-auto p-8 flex justify-center scroll-smooth">
+      <div className="w-full max-w-3xl space-y-8 min-h-full flex flex-col">
+        <div className="flex-1 space-y-6">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
           >
-            {sections.map((section) => (
-              <SortableSection
-                key={section.id}
-                section={section}
-                activeFieldId={activeFieldId}
-                onUpdateSection={updateSection}
-                onRemoveSection={removeSection}
-                onRemoveField={removeField}
-                onSetActiveField={setActiveField}
-                isRemoveDisabled={sections.length <= 1}
-              />
-            ))}
-          </SortableContext>
-
-          <DragOverlay dropAnimation={{
-            sideEffects: defaultDropAnimationSideEffects({
-              styles: {
-                active: {
-                  opacity: '0.5',
-                },
-              },
-            }),
-          }}>
-            {activeType === 'section' && activeSection ? (
-              <div className="w-[768px] opacity-80">
+            <SortableContext
+              items={sections.map(s => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {sections.map((section) => (
                 <SortableSection
-                  section={activeSection}
-                  activeFieldId={null}
-                  onUpdateSection={() => { }}
-                  onRemoveSection={() => { }}
-                  onRemoveField={() => { }}
-                  onSetActiveField={() => { }}
-                  isRemoveDisabled={false}
+                  key={section.id}
+                  section={section}
+                  activeFieldId={activeFieldId}
+                  onUpdateSection={updateSection}
+                  onRemoveSection={removeSection}
+                  onRemoveField={removeField}
+                  onSetActiveField={setActiveField}
+                  isRemoveDisabled={sections.length <= 1}
                 />
-              </div>
-            ) : activeType === 'field' && activeQuestion ? (
-              <div className="w-[700px] opacity-80">
-                <SortableField
-                  question={activeQuestion}
-                  isActive={false}
-                  onClick={() => { }}
-                  onRemove={() => { }}
-                />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+              ))}
+            </SortableContext>
 
-        <div className="flex justify-center pb-12">
+            <DragOverlay dropAnimation={{
+              sideEffects: defaultDropAnimationSideEffects({
+                styles: {
+                  active: {
+                    opacity: '0.5',
+                  },
+                },
+              }),
+            }}>
+              {activeType === 'section' && activeSection ? (
+                <div className="w-[768px] opacity-80">
+                  <SortableSection
+                    section={activeSection}
+                    activeFieldId={null}
+                    onUpdateSection={() => { }}
+                    onRemoveSection={() => { }}
+                    onRemoveField={() => { }}
+                    onSetActiveField={() => { }}
+                    isRemoveDisabled={false}
+                  />
+                </div>
+              ) : activeType === 'field' && activeQuestion ? (
+                <div className="w-[700px] opacity-80">
+                  <SortableField
+                    question={activeQuestion}
+                    isActive={false}
+                    onClick={() => { }}
+                    onRemove={() => { }}
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+
+        <div className="flex justify-center pt-8 pb-32">
           <Button
             variant="outline"
-            className="rounded-full shadow-sm hover:bg-primary/5 hover:text-primary transition-colors border-primary/20"
+            size="lg"
+            className="rounded-full shadow-md px-8 hover:bg-primary/5 hover:text-primary transition-all border-primary/30 flex items-center justify-center gap-3 h-12"
             onClick={addSection}
           >
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Section
+            <Plus className="h-5 w-5" />
+            <span className="font-semibold">Add New Section</span>
           </Button>
         </div>
       </div>

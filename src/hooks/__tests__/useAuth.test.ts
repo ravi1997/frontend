@@ -65,6 +65,9 @@ describe('useAuth', () => {
 
         const { result } = renderWithProviders(() => useAuth());
 
+        // Wait for initial user fetch
+        await vi.waitFor(() => expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.USER_STATUS));
+
         await act(async () => {
             await result.current.loginAsync({ email: 'test@example.com', password: 'password' });
         });
@@ -83,8 +86,19 @@ describe('useAuth', () => {
 
         const { result } = renderWithProviders(() => useAuth());
 
+        // Wait for initial user fetch
+        await vi.waitFor(() => expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.USER_STATUS));
+
         await act(async () => {
-            await result.current.registerAsync({ email: 't@e.com', password: 'p', firstName: 'F', lastName: 'L' });
+            await result.current.registerAsync({
+                username: 'tester',
+                email: 't@e.com',
+                mobile: '1234567890',
+                password: 'p',
+                confirm_password: 'p',
+                user_type: 'general',
+                roles: []
+            });
         });
 
         expect(api.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.REGISTER, expect.any(Object));
@@ -95,6 +109,9 @@ describe('useAuth', () => {
         vi.mocked(api.get).mockResolvedValue({ data: null });
 
         const { result } = renderWithProviders(() => useAuth());
+
+        // Wait for initial user fetch
+        await vi.waitFor(() => expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.USER_STATUS));
 
         await act(async () => {
             await result.current.loginAsync({ mobile: '12345', password: 'p' });
@@ -121,6 +138,9 @@ describe('useAuth', () => {
 
         const { result } = renderWithProviders(() => useAuth());
 
+        // Wait for initial user fetch
+        await vi.waitFor(() => expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.USER_STATUS));
+
         await act(async () => {
             await result.current.logout();
         });
@@ -132,8 +152,13 @@ describe('useAuth', () => {
 
     it('should handle generateOtp', async () => {
         vi.mocked(api.post).mockResolvedValueOnce({ data: { success: true } });
+        // Need to mock get for initial load too if we wait for it, or just ignore if it doesn't fail
+        vi.mocked(api.get).mockResolvedValue({ data: null });
 
         const { result } = renderWithProviders(() => useAuth());
+
+        // Wait for initial user fetch
+        await vi.waitFor(() => expect(api.get).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.USER_STATUS));
 
         await act(async () => {
             await result.current.generateOtpAsync('1234567890');

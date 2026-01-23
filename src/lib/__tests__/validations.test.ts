@@ -103,8 +103,8 @@ describe('validations', () => {
         });
 
         it('should handle null/undefined', () => {
-            expect(sanitizeString(null as any)).toBe(null);
-            expect(sanitizeString(undefined as any)).toBe(undefined);
+            expect(sanitizeString(null as unknown as string)).toBe(null);
+            expect(sanitizeString(undefined as unknown as string)).toBe(undefined);
         });
 
         it('should preserve safe HTML if using DOMPurify', () => {

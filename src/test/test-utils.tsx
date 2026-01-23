@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -10,7 +10,7 @@ const createTestQueryClient = () => new QueryClient({
     },
 });
 
-export function renderWithProviders(hook: () => any) {
+export function renderWithProviders<T>(hook: () => T) {
     const queryClient = createTestQueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
         <QueryClientProvider client={queryClient}>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateRule, shouldShowField } from '../logicEngine';
-import { ILogicRule, IQuestion, FieldType } from '@/types';
+import { ILogicRule, IQuestion } from '@/types';
 
 describe('Logic Engine', () => {
     describe('evaluateRule', () => {

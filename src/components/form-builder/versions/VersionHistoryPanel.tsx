@@ -25,7 +25,7 @@ export const VersionHistoryPanel = () => {
 
     // Fetch versions when panel is rendered (or grounded by id)
     // We could make this lazy by only enabling if isOpen is true
-    const { refetch, isLoading } = useVersions(formId);
+    const { refetch } = useVersions(formId);
 
     // Refetch when opening the dialog
     React.useEffect(() => {

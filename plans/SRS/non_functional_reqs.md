@@ -2,30 +2,22 @@
 
 ## 1. Performance
 
-- **Target**: LCP < 2.5s.
-- **Implementation**: Next.js App Router, SSR, Optimization via `next/image` (if used).
-- **Status**: Likely met, but no benchmarks performed.
+- **NFR-01**: Form rendering must occur under 200ms (Client-Side optimized).
+- **NFR-02**: Static generation (SSG/ISR) for high-traffic public forms.
+- **NFR-03**: Optimized images and assets for PWA Performance.
 
-## 2. Accessibility
+## 2. Security
 
-- **Target**: WCAG 2.1 AA Compliance.
-- **Implementation**: Radical UI primitives used which are accessible by defaults.
-- **Status**: Partially implemented via framework choices.
+- **NFR-04**: Input sanitization using `DOMPurify` to prevent XSS.
+- **NFR-05**: Auth tokens must be managed securely (HTTPOnly cookies preferred).
+- **NFR-06**: Zod schema validation for all inputs.
 
-## 3. Security
+## 3. Reliability & PWA
 
-- **Target**: Secure Authentication and Data Handling.
-- **Implementation**: JWT with HttpOnly cookies, CSRF protection via SameSite.
-- **Status**: Basic security implemented.
+- **NFR-07**: Application must function offline (PWA Service Worker).
+- **NFR-08**: Graceful degradation if API is unreachable.
 
 ## 4. Maintainability
 
-- **Target**: Clean Architecture and Type Safety.
-- **Implementation**: TypeScript, Husky (check if exists), ESLint.
-- **Status**: TypeScript is used extensively.
-
-## 5. Build & Deployment
-
-- **Target**: Containerized builds.
-- **Implementation**: Dockerfile, docker-compose.
-- **Status**: Implemented and verified via audit.
+- **NFR-09**: Strict TypeScript types (>95% coverage).
+- **NFR-10**: Component-driven architecture using Shadcn UI.

@@ -1,45 +1,33 @@
 # Functional Requirements
 
-## 1. Authentication
+## 1. Authentication & Authorization
 
-| ID | Requirement | Status | Note |
-| --- | --- | --- |---|
-| FR-01 | Login via Email/Password | Implemented | Uses `useAuth` hook and `api.post` |
-| FR-02 | Login via Mobile/OTP | Implemented | Uses `generateOtp` and `login` mutations |
-| FR-03 | Registration | Implemented | Supports employee self-service |
-| FR-04 | Session Management | Implemented | JWT in cookies and localStorage |
+- **FR-01**: Users must be able to register as 'General' or 'Employee'.
+- **FR-02**: System must support Role-Based Access Control (RBAC) with defined Roles.
+- **FR-03**: Support mobile layout and potentially OTP-based login (implied by `mobile` fields).
 
-## 2. Dashboard
+## 2. Form Builder
 
-| ID | Requirement | Status | Note |
-| --- | --- | --- |---|
-| FR-05 | Form Statistics Widget | Implemented | Shows Total/Active forms |
-| FR-06 | Recent Forms List | Implemented | Displays recent forms with edit links |
-| FR-07 | Create Form Shortcut | Implemented | Button to redirect to builder |
+- **FR-04**: Drag-and-drop interface for adding fields.
+- **FR-05**: Support for multiple field types: Short Text, Email, Mobile, Number, File Upload, Ratings.
+- **FR-06**: Ability to organize questions into Sections.
+- **FR-07**: Form Versioning (Draft, Published, Archived).
+- **FR-08**: Conditional Logic validation (Show/Hide fields based on rules).
 
-## 3. Form Builder
+## 3. Form Logic & AI
 
-| ID | Requirement | Status | Note |
-| --- | --- | --- |---|
-| FR-08 | Drag-and-Drop Editor | Implemented | Uses `@dnd-kit/core` |
-| FR-09 | Field Type Library | Implemented | Text, Choice, Date, etc. |
-| FR-10 | Properties Panel | Implemented | Context-sensitive settings |
-| FR-11 | Form Preview | Partially Implemented | Toggle exists in UI but needs verification of logic |
-| FR-12 | Versioning | Missing/Partial | `IFormVersion` exists in types but UI support is unclear |
-| FR-13 | Conditional Logic | Missing | No UI found for building expressions |
+- **FR-09**: AI Assistant to generate form structure from text prompts (Currently Mocked).
+- **FR-10**: Client-side validation for required fields and data types.
+- **FR-11**: Unique 'Slug' generation for public form access.
 
-## 4. Response Management
+## 4. Workflows & Approvals
 
-| ID | Requirement | Status | Note |
-| --- | --- | --- |---|
-| FR-14 | Response Grid | Implemented | TanStack Table used for display |
-| FR-15 | Data Export | Missing | Button exists but backend integration needed |
-| FR-16 | Search/Filter | Partially Implemented | Client-side filtering mostly |
+- **FR-12**: Multi-step approval workflows for form submissions.
+- **FR-13**: Automated actions on submit: Email, Slack, Webhook triggers.
+- **FR-14**: Expiration dates for forms.
 
-## 5. Advanced Features
+## 5. Analytics & Dashboard
 
-| ID | Requirement | Status | Note |
-| --- | --- | --- |---|
-| FR-17 | AI Form Generation | Missing | No code found for AI Chat |
-| FR-18 | Workflow Automation | Missing | No React Flow nodes found |
-| FR-19 | PWA Support | Missing | No manifest.json or Service Worker |
+- **FR-15**: Dashboard to view total responses and completion rates.
+- **FR-16**: Device breakdown analytics (Mobile vs Desktop).
+- **FR-17**: Exportable data (implied requirement for enterprise).

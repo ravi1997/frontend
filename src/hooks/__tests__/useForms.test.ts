@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '@/test/test-utils';
 import { useForms } from '../useForms';
 import api from '@/lib/api';
-import { API_ENDPOINTS } from '@/lib/constants';
+
 
 vi.mock('@/lib/api', () => ({
     default: {
@@ -23,6 +23,7 @@ describe('useForms', () => {
         const { result } = renderWithProviders(() => useForms());
 
         await vi.waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
             expect(result.current.forms).toEqual(mockForms);
             expect(result.current.totalForms).toBe(1);
         });
@@ -40,6 +41,7 @@ describe('useForms', () => {
         const { result } = renderWithProviders(() => useForms());
 
         await vi.waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
             expect(result.current.forms).toEqual(mockResponse.forms);
             expect(result.current.totalForms).toBe(10);
         });
@@ -51,6 +53,7 @@ describe('useForms', () => {
         const { result } = renderWithProviders(() => useForms());
 
         await vi.waitFor(() => {
+            expect(result.current.isLoading).toBe(false);
             expect(result.current.error).toBeDefined();
             expect(result.current.forms).toEqual([]);
         });

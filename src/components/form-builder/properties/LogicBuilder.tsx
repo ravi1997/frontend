@@ -82,7 +82,7 @@ export const LogicBuilder: React.FC<LogicBuilderProps> = ({ fieldId }) => {
                                 <span className="text-muted-foreground">Show if </span>
                                 <span className="font-medium truncate">{sourceField?.question_text || 'Unknown Field'}</span>
                                 <span className="px-1 text-muted-foreground">{rule.operator}</span>
-                                <span className="font-medium">"{rule.value}"</span>
+                                <span className="font-medium">&quot;{rule.value}&quot;</span>
                             </div>
                             <Button
                                 variant="ghost"
@@ -98,20 +98,20 @@ export const LogicBuilder: React.FC<LogicBuilderProps> = ({ fieldId }) => {
             </div>
 
             {/* Add Rule Form */}
-            <div className="border rounded-lg p-3 space-y-3 bg-muted/20">
+            <div className="border border-dashed rounded-lg p-3 space-y-3 bg-muted/30">
                 <div className="space-y-1">
-                    <Label className="text-xs">If Field</Label>
+                    <Label className="text-[10px] font-bold">IF THIS FIELD IS...</Label>
                     <Select
                         value={newRule.field_id}
                         onValueChange={(val) => setNewRule({ ...newRule, field_id: val })}
                     >
-                        <SelectTrigger className="h-8">
-                            <SelectValue placeholder="Select field..." />
+                        <SelectTrigger className="h-9 bg-background">
+                            <SelectValue placeholder="Select trigger field..." />
                         </SelectTrigger>
                         <SelectContent>
                             {sourceFields.map(field => (
                                 <SelectItem key={field.id} value={field.id}>
-                                    {field.question_text || 'Untitled'}
+                                    {field.question_text || 'Untitled Field'}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -120,12 +120,12 @@ export const LogicBuilder: React.FC<LogicBuilderProps> = ({ fieldId }) => {
 
                 <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                        <Label className="text-xs">Operator</Label>
+                        <Label className="text-[10px] font-bold">OPERATOR</Label>
                         <Select
                             value={newRule.operator}
                             onValueChange={(val) => setNewRule({ ...newRule, operator: val as LogicOperator })}
                         >
-                            <SelectTrigger className="h-8">
+                            <SelectTrigger className="h-9 bg-background">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -138,24 +138,25 @@ export const LogicBuilder: React.FC<LogicBuilderProps> = ({ fieldId }) => {
                         </Select>
                     </div>
                     <div className="space-y-1">
-                        <Label className="text-xs">Value</Label>
+                        <Label className="text-[10px] font-bold">VALUE</Label>
                         <Input
-                            className="h-8"
+                            className="h-9 bg-background"
                             value={String(newRule.value || '')}
                             onChange={(e) => setNewRule({ ...newRule, value: e.target.value })}
-                            placeholder="Value to match"
+                            placeholder="Value"
                         />
                     </div>
                 </div>
 
                 <Button
-                    variant="secondary"
+                    variant="default"
                     size="sm"
-                    className="w-full"
+                    className="w-full mt-2 h-9 shadow-sm"
                     onClick={handleAddRule}
                     disabled={!newRule.field_id}
+                    id="add-logic-rule-btn"
                 >
-                    <Plus className="h-3 w-3 mr-2" /> Add Rule
+                    <Plus className="h-4 w-4 mr-2" /> Add Rule
                 </Button>
             </div>
         </div>

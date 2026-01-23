@@ -115,7 +115,7 @@ describe('useForm', () => {
                     slug: 'test',
                     is_public: true
                 });
-            } catch (e) {
+            } catch {
                 // Expected to throw
             }
         });
