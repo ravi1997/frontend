@@ -6,7 +6,8 @@
     "dev": "next dev  --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test:unit": "vitest",
     "test:component": "vitest --ui",
     "test:e2e": "playwright test"
@@ -27,6 +28,7 @@
     "@radix-ui/react-select": "^2.1.4",
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slider": "^1.2.1",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.4",
