@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { ISection, IWorkflow } from '@/types';
-import { AxiosError } from 'axios';
+import { ISection, IWorkflow, IApprovalStep } from '@/types';
 
 import { validateForm, sanitizeString } from '@/lib/validations';
+import { transformFormPayload } from '@/lib/transformers';
 
 interface CreateFormPayload {
     title: string;
@@ -12,12 +12,30 @@ interface CreateFormPayload {
     slug: string;
     is_public: boolean;
     workflows?: IWorkflow[];
+    approval_enabled?: boolean;
+    approval_steps?: IApprovalStep[];
 }
 
 interface CreateVersionPayload {
     version: string;
     sections: ISection[];
     activate?: boolean;
+}
+
+interface CreateFormResponse {
+    id?: string;
+    form_id?: string;
+    [key: string]: unknown;
+}
+
+// Custom error interface matching our new api.ts
+interface ApiError extends Error {
+    response?: {
+        data?: {
+            message?: string;
+        };
+        status?: number;
+    };
 }
 
 export function useForm() {
@@ -32,14 +50,14 @@ export function useForm() {
                 title: sanitizeString(payload.title),
                 description: sanitizeString(payload.description),
             };
-            const response = await api.post(API_ENDPOINTS.FORMS.CREATE, sanitizedPayload);
+            const response = await api.post<CreateFormResponse>(API_ENDPOINTS.FORMS.CREATE, sanitizedPayload);
             return response.data;
         },
         onSuccess: (data) => {
             console.log('Form shell created successfully', data);
             queryClient.invalidateQueries({ queryKey: ['forms'] });
         },
-        onError: (error: AxiosError<{ message?: string }>) => {
+        onError: (error: ApiError) => {
             console.error('Failed to create form', error);
             const message = error.response?.data?.message || 'Failed to create form';
             alert(message);
@@ -49,7 +67,12 @@ export function useForm() {
     // Create Version Mutation
     const createVersion = useMutation({
         mutationFn: async ({ formId, payload }: { formId: string, payload: CreateVersionPayload }) => {
-            const response = await api.post(API_ENDPOINTS.FORMS.VERSIONS(formId), payload);
+            // Transform payload to match backend schema
+            const backendPayload = {
+                ...payload,
+                sections: transformFormPayload(payload.sections)
+            };
+            const response = await api.post(API_ENDPOINTS.FORMS.VERSIONS(formId), backendPayload);
             return response.data;
         },
         onSuccess: (_data, variables) => {
@@ -57,7 +80,7 @@ export function useForm() {
             queryClient.invalidateQueries({ queryKey: ['form', variables.formId] });
             alert('Form saved successfully!');
         },
-        onError: (error: AxiosError<{ message?: string }>) => {
+        onError: (error: ApiError) => {
             console.error('Failed to save form version', error);
             const message = error.response?.data?.message || 'Failed to save form version';
             alert(message);
@@ -67,7 +90,7 @@ export function useForm() {
     // Update Form Mutation (Metadata)
     const updateForm = useMutation({
         mutationFn: async ({ formId, payload }: { formId: string, payload: Partial<CreateFormPayload> }) => {
-            const response = await api.patch(API_ENDPOINTS.FORMS.UPDATE(formId), payload);
+            const response = await api.put(API_ENDPOINTS.FORMS.UPDATE(formId), payload);
             return response.data;
         },
         onSuccess: (_data, variables) => {

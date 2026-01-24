@@ -8,6 +8,7 @@ import { VersionHistoryPanel } from '@/components/form-builder/versions/VersionH
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, Save, Send, ChevronLeft, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useBuilderStore } from '@/store/builderStore';
 import { useForm } from '@/hooks/useForm';
@@ -15,6 +16,7 @@ import { slugify } from '@/lib/utils';
 import { FormPreview } from '@/components/form-builder/FormPreview';
 
 export default function BuilderPage() {
+  const router = useRouter();
   const { sections, formTitle, formDescription, setFormMetadata, workflows } = useBuilderStore();
   const { saveNewForm, isSaving } = useForm();
   const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
@@ -26,7 +28,7 @@ export default function BuilderPage() {
     }
 
     try {
-      await saveNewForm(
+      const formId = await saveNewForm(
         {
           title: formTitle,
           slug: `${slugify(formTitle)}-${Date.now().toString().slice(-6)}`,
@@ -36,6 +38,10 @@ export default function BuilderPage() {
         },
         sections
       );
+
+      if (formId) {
+        router.push(`/builder/${formId}`);
+      }
     } catch {
       // Error handled in hook
     }

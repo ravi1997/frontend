@@ -1,40 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { ISection, IQuestion, IOption } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // This is a server-side route to keep API keys secure
 // We use open-source models (Mistral / Llama 3) via an API provider
 
-const SYSTEM_PROMPT = `You are an expert Form Builder Assistant. 
-Your task is to generate a professional form structure based on the user's request.
-You must return only a valid JSON object matching the following structure:
-{
-  "sections": [
-    {
-      "id": "uuid",
-      "title": "Section Title",
-      "order_index": 0,
-      "is_repeatable": false,
-      "questions": [
-        {
-          "id": "uuid",
-          "question_text": "Label",
-          "field_type": "short_text" | "long_text" | "email" | "number" | "date" | "dropdown" | "checkbox" | "radio" | "file_upload" | "rating" | "mobile" | "url",
-          "is_required": true,
-          "order_index": 0,
-          "placeholder": "Optional placeholder",
-          "options": [ // Only if field_type is dropdown, checkbox, or radio
-            { "option_value": "val", "option_label": "Label", "order_index": 0 }
-          ]
-        }
-      ]
-    }
-  ]
-}
 
-Available FieldTypes: short_text, long_text, email, number, date, dropdown, checkbox, radio, file_upload, rating, mobile, url.
-Ensure UUIDs are unique and the structure is logical.
-Do not include any text outside the JSON block.`;
 
 export async function POST(request: NextRequest) {
     try {
@@ -44,15 +16,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
         }
 
-        const apiKey = process.env.LLM_API_KEY;
-        const providerUrl = process.env.LLM_API_URL || 'https://api.mistral.ai/v1/chat/completions'; // Default to Mistral AI
-        const model = process.env.LLM_MODEL || 'mistral-small-latest';
+        const cookieStore = await cookies();
+        const token = cookieStore.get('access_token')?.value;
+        const apiKey = token || process.env.LLM_API_KEY;
+        const backendUrl = 'http://127.0.0.1:5000/form/api/v1';
+        const providerUrl = `${backendUrl}/ai/generate`;
 
         if (!apiKey) {
             return NextResponse.json({
-                error: 'AI Service not configured. Please add LLM_API_KEY to your environment.',
+                error: 'Authentication required. Please log in to use AI generation.',
                 is_mock: true
-            }, { status: 503 });
+            }, { status: 401 });
         }
 
         const response = await fetch(providerUrl, {
@@ -62,13 +36,7 @@ export async function POST(request: NextRequest) {
                 'Authorization': `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: model,
-                messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
-                    { role: 'user', content: `Generate a form for: ${prompt}` }
-                ],
-                response_format: { type: 'json_object' }, // Supported by many modern LLM providers
-                temperature: 0.7
+                prompt: prompt
             })
         });
 
@@ -79,10 +47,18 @@ export async function POST(request: NextRequest) {
         }
 
         const result = await response.json();
-        const content = result.choices[0].message.content;
 
-        // Parse the generated JSON
-        const formStructure = JSON.parse(content);
+        let formStructure;
+        if (result.suggestion) {
+            // Internal backend format
+            formStructure = result.suggestion;
+        } else if (result.choices && result.choices[0]?.message?.content) {
+            // OpenAI / Mistral format
+            const content = result.choices[0].message.content;
+            formStructure = typeof content === 'string' ? JSON.parse(content) : content;
+        } else {
+            throw new Error('Failed to parse AI response: Unexpected format');
+        }
 
         // Post-process to ensure valid UUIDs and IDs if the LLM provided placeholders
         const validatedSections = formStructure.sections.map((section: ISection, sIdx: number) => ({

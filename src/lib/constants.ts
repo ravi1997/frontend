@@ -8,9 +8,9 @@ export const API_ENDPOINTS = {
     USER_STATUS: '/user/status',
   },
   FORMS: {
-    BASE: '/form',
-    LIST: '/form',
-    CREATE: '/form',
+    BASE: '/form/',
+    LIST: '/form/',
+    CREATE: '/form/',
     GET: (id: string) => `/form/${id}`,
     UPDATE: (id: string) => `/form/${id}`,
     DELETE: (id: string) => `/form/${id}`,

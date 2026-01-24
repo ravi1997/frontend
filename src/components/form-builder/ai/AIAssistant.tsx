@@ -24,6 +24,7 @@ export const AIAssistant = () => {
     const [loading, setLoading] = useState(false);
 
     // Store access
+    const sections = useBuilderStore((state) => state.sections);
     const setSections = useBuilderStore((state) => state.setSections);
 
     const handleSend = async () => {
@@ -35,7 +36,7 @@ export const AIAssistant = () => {
         setLoading(true);
 
         try {
-            const response = await generateFormStructure(userMsg);
+            const response = await generateFormStructure(userMsg, sections);
 
             if (response.error) {
                 setMessages(prev => [...prev, { role: 'assistant', content: response.error! }]);
@@ -44,7 +45,7 @@ export const AIAssistant = () => {
 
             const assistantMsg: Message = {
                 role: 'assistant',
-                content: `I've generated a form with ${response.sections.length} sections based on your request.`,
+                content: response.suggestion || `I've generated a form with ${response.sections.length} sections based on your request.`,
                 generatedSections: response.sections
             };
 
@@ -128,11 +129,16 @@ export const AIAssistant = () => {
                     <Input
                         value={input}
                         onChange={e => setInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSend()}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleSend();
+                            }
+                        }}
                         placeholder="Describe your form..."
                         disabled={loading}
                     />
-                    <Button size="icon" onClick={handleSend} disabled={loading || !input.trim()}>
+                    <Button size="icon" type="button" onClick={handleSend} disabled={loading || !input.trim()}>
                         <Send className="h-4 w-4" />
                     </Button>
                 </div>

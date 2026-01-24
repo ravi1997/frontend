@@ -12,21 +12,22 @@ import { Eye, Save, Send, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useBuilderStore } from '@/store/builderStore';
 import { useForm, useFormDetails } from '@/hooks/useForm';
+import { IForm } from '@/types';
 import { FormPreview } from '@/components/form-builder/FormPreview';
 
 export default function EditBuilderPage() {
     const params = useParams();
     const id = params.id as string;
 
-    const { sections, formTitle, formDescription, setFormMetadata, workflows, loadForm } = useBuilderStore();
+    const { sections, versions, formTitle, formDescription, setFormMetadata, workflows, loadForm, approvalEnabled, approvalSteps } = useBuilderStore();
     const { createVersion, updateForm, isSaving } = useForm();
     const { data: form, isLoading: isFetching } = useFormDetails(id);
     const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
     // Initialize store with form data
     React.useEffect(() => {
-        if (form) {
-            loadForm(form);
+        if (form && (form as any).id) {
+            loadForm(form as IForm);
         }
     }, [form, loadForm]);
 
@@ -40,14 +41,33 @@ export default function EditBuilderPage() {
             // 1. Update metadata
             await updateForm.mutateAsync({
                 formId: id,
-                payload: { title: formTitle, description: formDescription }
+                payload: {
+                    title: formTitle,
+                    description: formDescription,
+                    workflows,
+                    approval_enabled: approvalEnabled,
+                    approval_steps: approvalSteps
+                }
             });
 
             // 2. Create new version
+            // Calculate next safe version number (minor increment)
+            let nextVersion = '1.0';
+            if (versions && versions.length > 0) {
+                const validVersions = versions
+                    .map(v => typeof v.version_number === 'string' ? parseFloat(v.version_number as unknown as string) : v.version_number)
+                    .filter(v => typeof v === 'number' && !isNaN(v));
+
+                if (validVersions.length > 0) {
+                    const maxVersion = Math.max(...validVersions);
+                    nextVersion = (maxVersion + 0.1).toFixed(1);
+                }
+            }
+
             await createVersion.mutateAsync({
                 formId: id,
                 payload: {
-                    version: '1.0', // Simple mock versioning
+                    version: nextVersion,
                     sections,
                     activate: true
                 }

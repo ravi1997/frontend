@@ -1,73 +1,145 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+const BASE_URL = 'http://127.0.0.1:5000/form/api/v1';
 
-// Create axios instance
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/form/api/v1',
-  timeout: 10000,
-  withCredentials: true, // For HttpOnly cookies
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export interface RequestOptions extends RequestInit {
+  data?: unknown;
+  params?: Record<string, string>;
+  headers?: Record<string, string>;
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer';
+}
 
-// Request interceptor - add auth token
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Try to get token from localStorage if not using cookies
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
+export interface ApiResponse<T = unknown> {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Headers;
+}
+
+export interface ApiError extends Error {
+  status?: number;
+  statusText?: string;
+  response?: {
+    data: unknown;
+    status: number;
+    statusText: string;
+  };
+}
+
+async function request<T = unknown>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
+  const { data, params, headers, responseType, ...customConfig } = options;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+  const config: RequestInit = {
+    ...customConfig,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(headers || {}),
+    },
+  };
+
+  if (data) {
+    config.body = JSON.stringify(data);
   }
-);
 
-// Response interceptor - handle errors globally
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error: AxiosError) => {
-    if (error.response) {
-      // Handle different error status codes
-      switch (error.response.status) {
-        case 401:
-          // Unauthorized - redirect to login, unless it's just checking status
-          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/register') && !error.config?.url?.includes('/user/status')) {
-            window.location.href = '/login';
-          }
-          break;
-        case 403:
-          // Forbidden
-          console.error('Access denied');
-          break;
-        case 404:
-          console.error('Resource not found');
-          break;
-        case 429:
-          // Rate limited
-          console.error('Too many requests. Please try again later.');
-          break;
-        case 500:
-        case 502:
-        case 503:
-        case 504:
-          console.error('Server error. Please try again later.');
-          break;
+  // Handle absolute URLs vs relative paths
+  const urlStr = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+  const url = new URL(urlStr);
+
+  if (params) {
+    Object.keys(params).forEach(key => {
+      if (params[key] !== undefined) {
+        url.searchParams.append(key, params[key]);
       }
-    } else if (error.request) {
-      // Network error
-      console.error('Network error. Please check your connection.');
+    });
+  }
+
+  try {
+    const response = await fetch(url.toString(), config);
+    let responseData;
+
+    if (responseType === 'blob') {
+      responseData = await response.blob();
+    } else if (responseType === 'arraybuffer') {
+      responseData = await response.arrayBuffer();
+    } else if (responseType === 'text') {
+      responseData = await response.text();
     } else {
-      console.error('An unexpected error occurred.');
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        responseData = await response.json();
+      } else {
+        responseData = await response.text();
+      }
     }
-    return Promise.reject(error);
+
+    if (!response.ok) {
+      // Handle global errors
+      if (response.status === 401) {
+        if (typeof window !== 'undefined' &&
+          !window.location.pathname.includes('/login') &&
+          !window.location.pathname.includes('/register') &&
+          !endpoint.includes('/user/status') &&
+          !endpoint.includes('/ai/')) {
+          console.warn('[API] 401 Unauthorized detected. Redirecting to login...');
+          window.location.href = '/login';
+        }
+      }
+
+      // Create an error object that mimics AxiosError structure for compatibility
+      const responseDataObj = responseData as { message?: string, error?: string, [key: string]: any };
+      let errorMessage = responseDataObj?.message || responseDataObj?.error || response.statusText || 'Request failed';
+
+      // If we have a structured error (like validation errors) but no top-level message
+      if (typeof responseData === 'object' && responseData !== null && !responseDataObj.message && !responseDataObj.error) {
+        // Try to create a more helpful message from the first few validation errors if they exist
+        errorMessage = `Validation Error: ${JSON.stringify(responseData).substring(0, 100)}...`;
+      }
+
+      const error = new Error(errorMessage) as ApiError;
+      error.status = response.status;
+      error.response = {
+        data: responseData,
+        status: response.status,
+        statusText: response.statusText
+      };
+      throw error;
+    }
+
+    return {
+      data: responseData,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers
+    };
+
+  } catch (err: unknown) {
+    const error = err as ApiError;
+    // Normalize Network Errors (missing status/response)
+    if (!error.response) {
+      error.status = error.status || 0;
+      error.statusText = error.statusText || 'Network Error';
+      error.response = {
+        data: { message: error.message || 'Network Error' },
+        status: error.status,
+        statusText: error.statusText
+      };
+    }
+
+    // Suppress logging for 401 and 403 errors as they are expected/handled
+    if (error?.status !== 401 && error?.status !== 403) {
+      console.error('API Request Error:', error);
+    }
+    throw error;
   }
-);
+}
+
+const api = {
+  get: <T = unknown>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, { ...options, method: 'GET' }),
+  post: <T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions) => request<T>(endpoint, { ...options, data, method: 'POST' }),
+  put: <T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions) => request<T>(endpoint, { ...options, data, method: 'PUT' }),
+  patch: <T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions) => request<T>(endpoint, { ...options, data, method: 'PATCH' }),
+  delete: <T = unknown>(endpoint: string, options?: RequestOptions) => request<T>(endpoint, { ...options, method: 'DELETE' }),
+};
 
 export default api;
+

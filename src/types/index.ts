@@ -28,10 +28,9 @@ export interface IUser {
 
 // ==================== Form Types ====================
 export interface IApprovalStep {
-  step_number: number;
-  approver_role: UserRole;
-  approver_user_ids?: string[];
-  required_count?: number;
+  name: string;
+  required_role: UserRole;
+  order: number;
 }
 
 export interface IFormVersion {

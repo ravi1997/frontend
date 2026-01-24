@@ -48,18 +48,18 @@
 
 | ID | Priority | Task | Status | Owner | Linked Req |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T-020 | P1 | Design Approval Workflow Schema | New | Unassigned | FR-12 |
-| T-021 | P1 | Implement Approval Action UI | New | Unassigned | FR-12 |
-| T-022 | P2 | Integrate Email Notification Service | New | Unassigned | FR-13 |
-| T-023 | P2 | Implement Webhook Triggers | New | Unassigned | FR-13 |
-| T-024 | P2 | Implement AI Prompt-to-Form Service | New | Unassigned | FR-09 |
+| T-020 | P1 | Design Approval Workflow Schema | Review | User | FR-12 |
+| T-021 | P1 | Implement Approval Action UI | Review | User | FR-12 |
+| T-022 | P2 | Integrate Email Notification Service | Review | User | FR-13 |
+| T-023 | P2 | Implement Webhook Triggers | Review | User | FR-13 |
+| T-024 | P2 | Implement AI Prompt-to-Form Service | Review | User | FR-09 |
 
 ## Milestone 5: Analytics & Polish
 
 | ID | Priority | Task | Status | Owner | Linked Req |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T-025 | P1 | Build Dashboard Stats Components | New | Unassigned | FR-15 |
-| T-026 | P2 | Implement Device Analytics | New | Unassigned | FR-16 |
+| T-025 | P1 | Build Dashboard Stats Components | Review | User | FR-15 |
+| T-026 | P2 | Implement Device Analytics | Review | User | FR-16 |
 | T-027 | P2 | Implement CSV Export | New | Unassigned | FR-17 |
 | T-028 | P1 | Configure PWA Service Worker | New | Unassigned | NFR-07 |
 | T-029 | P0 | Final Security Audit & Sanitization Check | New | Unassigned | NFR-04 |

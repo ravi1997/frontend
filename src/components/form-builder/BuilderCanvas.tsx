@@ -162,7 +162,7 @@ export const BuilderCanvas = () => {
   }
 
   return (
-    <div className="flex-1 bg-muted/30 overflow-y-auto p-8 flex justify-center scroll-smooth">
+    <div role="main" className="flex-1 bg-muted/30 overflow-y-auto p-8 flex justify-center scroll-smooth">
       <div className="w-full max-w-3xl space-y-8 min-h-full flex flex-col">
         <div className="flex-1 space-y-6">
           <DndContext

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
-import { ISection, IQuestion, FieldType, IWorkflow, IFormVersion, IForm } from '@/types';
+import { ISection, IQuestion, FieldType, IWorkflow, IFormVersion, IForm, IApprovalStep } from '@/types';
+import { transformBackendToFrontend } from '@/lib/transformers';
 
 interface BuilderState {
   sections: ISection[];
@@ -13,6 +14,10 @@ interface BuilderState {
   formDescription: string;
   workflows: IWorkflow[];
   versions: IFormVersion[];
+
+  // Approval Config
+  approvalEnabled: boolean;
+  approvalSteps: IApprovalStep[];
 }
 
 interface BuilderActions {
@@ -41,6 +46,12 @@ interface BuilderActions {
   updateWorkflow: (workflowId: string, updates: Partial<IWorkflow>) => void;
   removeWorkflow: (workflowId: string) => void;
 
+  // Approval Actions
+  setApprovalEnabled: (enabled: boolean) => void;
+  addApprovalStep: (step: IApprovalStep) => void;
+  updateApprovalStep: (index: number, updates: Partial<IApprovalStep>) => void;
+  removeApprovalStep: (index: number) => void;
+
   // Version Actions
   setVersions: (versions: IFormVersion[]) => void;
   loadVersion: (version: IFormVersion) => void;
@@ -68,6 +79,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     formDescription: '',
     workflows: [],
     versions: [],
+    approvalEnabled: false,
+    approvalSteps: [],
 
     setFormMetadata: (updates) => set((state) => ({
       formTitle: updates.title ?? state.formTitle,
@@ -241,17 +254,35 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       workflows: state.workflows.filter((w) => w.id !== workflowId),
     })),
 
+    // Approval Actions
+    setApprovalEnabled: (enabled) => set({ approvalEnabled: enabled }),
+    addApprovalStep: (step) => set((state) => ({
+      approvalSteps: [...state.approvalSteps, step]
+    })),
+    updateApprovalStep: (index, updates) => set((state) => ({
+      approvalSteps: state.approvalSteps.map((s, i) => i === index ? { ...s, ...updates } : s)
+    })),
+    removeApprovalStep: (index) => set((state) => ({
+      approvalSteps: state.approvalSteps.filter((_, i) => i !== index)
+    })),
+
     // Version Actions
     setVersions: (versions) => set({ versions }),
-    loadVersion: (version) => set({ sections: version.sections }),
+    loadVersion: (version) => set({
+      sections: transformBackendToFrontend(version.sections)
+    }),
     loadForm: (form: IForm) => {
       const latestVersion = form.versions?.sort((a, b) => b.version_number - a.version_number)[0];
+      const sections = transformBackendToFrontend(latestVersion?.sections || []);
+
       set({
         formTitle: form.title,
         formDescription: form.description || '',
-        sections: latestVersion?.sections || [],
+        sections,
         workflows: form.workflows || [],
         versions: form.versions || [],
+        approvalEnabled: form.approval_enabled || false,
+        approvalSteps: form.approval_steps || []
       });
     },
   }))

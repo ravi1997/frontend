@@ -23,7 +23,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
+        <div className="container mx-auto px-4 flex h-14 items-center">
           <div className="mr-4 flex">
             <a href="/dashboard" className="mr-6 flex items-center space-x-2">
               <span className="font-bold">Form Management System</span>
@@ -57,7 +57,7 @@ export default function DashboardLayout({
       </header>
 
       {/* Main content */}
-      <main className="container py-6">{children}</main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
     </div>
   );
 }

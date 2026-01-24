@@ -21,9 +21,11 @@ export function useAuth() {
     queryKey: ['user-status'],
     queryFn: async () => {
       try {
-        const { data } = await api.get<IUser>(API_ENDPOINTS.AUTH.USER_STATUS);
-        setUser(data);
-        return data;
+        const { data } = await api.get<any>(API_ENDPOINTS.AUTH.USER_STATUS);
+        // The backend might return the user directly or nested under 'user' or 'data'
+        const userData = (data?.user || data?.data || data) as IUser;
+        setUser(userData);
+        return userData;
       } catch {
         setUser(null);
         return null;
@@ -97,7 +99,7 @@ export function useAuth() {
     mutationFn: async () => {
       await api.post(API_ENDPOINTS.AUTH.LOGOUT);
     },
-    onSuccess: () => {
+    onSettled: () => {
       logoutStore();
       queryClient.clear();
       localStorage.removeItem('access_token');
