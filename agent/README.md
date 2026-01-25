@@ -1,47 +1,43 @@
-# Agent OS: The Deep AI Software Engineer
+# Agent OS: Global README
 
-## Purpose
+## 🚀 Mission
 
-This directory contains the complete "Operating System" for an AI Agent to manage the full software development lifecycle (SDLC) of any project. It is optimized for **Recursive Self-Correction**, **Deep Scenario Execution**, and **Self-Evolution**.
+To provide a standardized, high-integrity environment for AI-driven software engineering that ensures 100% consistency, quality, and safety across any technology stack.
 
-## Key Capabilities
+## 📂 System Structure
 
-- **Deep Scenarios**: Pre-defined step-by-step logic for Bug Fixing, Refactoring, and Dependency Updates.
-- **Autonomous Lifecycle**: From SRS generation to Production Release with rigorous quality gates.
-- **Context Management**: Mandatory routines to prevent memory decay in long projects.
-- **Monorepo Discovery**: Advanced detection for complex project structures.
-- **Token Budgeting**: Active management of context windows, model switching, and continuity snapshots.
-- **Self-Evolution**: The Agent can suggest improvements to this `agent/` folder itself based on performance audits.
+| Component | ID | Description |
+| --- | --- | --- |
+| **System** | `00` | Principles, response protocols, and orchestration logic. |
+| **Entrypoints** | `01` | Scenario-based triggers (New project, Bug fix, etc.). |
+| **Detection** | `02` | Automated stack fingerprinting and repo health assessment. |
+| **Profiles** | `03` | Persona-based instructions (Architect, DevOps, UX, etc.). |
+| **Workflows** | `04` | Step-by-step SDLC execution playbooks. |
+| **Gates** | `05` | Mandatory quality and security checkpoints. |
+| **Skills** | `06` | Atomic execution logic (Git hygiene, secret scrubbing). |
+| **Templates** | `07` | Ready-to-use document and diagram scaffolds. |
 
-## Directory Structure
+## 🛠️ Quick Start
 
-- `00_system/`: Principles, Context Management, Token Budgeting, and Self-Evolution rules.
-- `01_entrypoints/`: Logic triggers including the `scenarios/` subfolder.
-- `02_detection/`: Heuristics for repo analysis and stack fingerprints.
-- `03_profiles/`: High-precision role definitions (Deep Architect, Deep Implementer).
-- `04_workflows/`: Deep playbooks for SDLC phases.
-- `05_gates/`: Mandatory quality and security checkpoints.
-- `06_skills/`: Specialized patterns including Metacognition (Self-Audit).
-- `07_templates/`: Standardized document and code layouts.
-- `08_plan_output_contract/`: Rules for where and how plans are stored.
-- `09_state/`: Data files tracking project progress and history.
-- `10_security/`: Policies, threat models, and classification.
-- `11_rules/`: Rigid constraints for code, comms, and repo hygiene.
-- `12_checks/`: Audit rubrics and checklists.
-- `13_examples/`: Reference implementations and walkthroughs.
-- `14_known_issues/`: Database of fixed issues for self-learning.
-- `15_tech_hard_cases/`: Solutions for complex technical problems.
-- `16_recovery_playbooks/`: Strategies for recovering from critical failures.
-- `17_caveats/`: documented limitations and "gotchas".
-- `18_diagnostics/`: Tools and scripts for system health checks.
+1. **Initialize**: Provide the Agent with access to your repository.
+2. **Boot**: Run `agent/01_entrypoints/run_existing_project.md` (for existing code) or `run_new_project.md`.
+3. **Follow the Workflow**: The Agent will guide you through SPEC -> PLAN -> DEV -> RELEASE.
+4. **Pass Gates**: No feature is merged without passing `agent/05_gates/global/gate_global_quality.md`.
 
-## Getting Started
+## ⚖️ Global Constraints (The "Golden Rules")
 
-1. **Initialize**: Point the AI to `01_entrypoints/run_new_project.md` or `run_existing_project.md`.
-2. **Assign Scenario**: Use `01_entrypoints/scenarios/` for specific tasks (e.g., "Run `scenario_bug_fix.md`").
-3. **Monitor State**: Check `agent/09_state/` frequently.
+- **Absolute Paths**: Always use absolute paths for file operations.
+- **Root-Relative Links**: Internal documentation links must use `agent/` prefix.
+- **Zero Placeholders**: Never produce "TODO" or "TBD" content.
+- **State Integrity**: Every cycle must update `agent/09_state/PROJECT_STATE.md`.
 
-## Version
+## 📚 Documentation Index
 
-- **OS Version**: 1.1.0 (Deep Edition)
-- **Status**: Self-Optimizing
+- [How to Use](./HOW_TO_USE.md)
+- [Quickstart Checklist](./QUICKSTART_CHECKLIST.md)
+- [System Principles](./00_system/00_principles.md)
+- [Workflow Overview](./04_workflows/00_overview.md)
+
+---
+**Version**: 1.1.0 (Audit Upgrade)  
+**Maintainer**: Agent OS Maintainer
