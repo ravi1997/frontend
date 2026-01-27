@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -8,6 +6,7 @@ import '../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../../features/auth/presentation/screens/login_screen.dart';
 import '../../../features/auth/presentation/screens/register_screen.dart';
 import '../../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../../features/form_builder/presentation/pages/form_builder_page.dart';
 
 part 'app_router.g.dart';
 
@@ -51,6 +50,13 @@ Raw<GoRouter> appRouter(Ref ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/builder/:formId',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId'] ?? 'new';
+          return FormBuilderPage(formId: formId);
+        },
       ),
     ],
   );

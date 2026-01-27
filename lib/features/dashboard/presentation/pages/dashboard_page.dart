@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../domain/entities/dashboard_data.dart';
@@ -223,7 +224,7 @@ class _ActionButtons extends StatelessWidget {
     return Row(
       children: [
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () => context.go('/builder/new'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF2563EB),
             foregroundColor: Colors.white,
@@ -426,6 +427,7 @@ class _RecentFormsSection extends StatelessWidget {
               (form) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _RecentFormItem(
+                  id: form.id,
                   title: form.title,
                   subtitle:
                       '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
@@ -453,10 +455,15 @@ class _RecentFormsSection extends StatelessWidget {
 }
 
 class _RecentFormItem extends StatelessWidget {
+  final String id;
   final String title;
   final String subtitle;
 
-  const _RecentFormItem({required this.title, required this.subtitle});
+  const _RecentFormItem({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +512,7 @@ class _RecentFormItem extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () => context.go('/builder/$id'),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFF374151),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
