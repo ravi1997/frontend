@@ -9,7 +9,15 @@ class AppColors {
 
   // Surfaces
   static const Color surfaceDark = Color(0xFF0F121E);
+  static const Color surface = surfaceDark;
   static const Color glassBorder = Color(0xFFFFFFFF); // usually with opacity
+
+  // Builder Specific Colors (Light Mode)
+  static const Color builderSidebar = Color(0xFFFFFFFF); // White
+  static const Color builderElement = Color(0xFFF1F5F9); // Slate 100
+  static const Color builderCanvas = Color(0xFFF8FAFC); // Slate 50
+
+  static const Color background = backgroundDark;
 
   // Accents
   static const Color primary = Color(0xFF00FFC2); // Vibrant Cyan
