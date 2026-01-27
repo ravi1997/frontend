@@ -63,7 +63,7 @@ class BuilderFieldWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (question.required)
+                if (question.isRequired)
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Text(
@@ -82,10 +82,10 @@ class BuilderFieldWidget extends StatelessWidget {
                 ),
               ],
             ),
-            if (question.description?.isNotEmpty ?? false) ...[
+            if (question.helperText?.isNotEmpty ?? false) ...[
               const SizedBox(height: 4),
               Text(
-                question.description!,
+                question.helperText!,
                 style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
               ),
             ],
@@ -271,16 +271,11 @@ class BuilderFieldWidget extends StatelessWidget {
 
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
-  final double strokeWidth;
-  final double dashWidth;
-  final double dashSpace;
+  final double strokeWidth = 1;
+  final double dashWidth = 5;
+  final double dashSpace = 3;
 
-  _DashedBorderPainter({
-    this.color = Colors.grey,
-    this.strokeWidth = 1,
-    this.dashWidth = 5,
-    this.dashSpace = 3,
-  });
+  _DashedBorderPainter({this.color = Colors.grey});
 
   @override
   void paint(Canvas canvas, Size size) {

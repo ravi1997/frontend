@@ -116,7 +116,7 @@
 1. **Form Builder Module**:
    - [x] Form creation UI structure
    - [x] Basic Field Library and Canvas
-   - [ ] Advanced Field type components (text, dropdown, radio, checkbox, etc.)
+   - [x] Advanced Field type components (text, dropdown, radio, checkbox, etc.)
    - [ ] Form preview functionality
    - [ ] Save/Publish functionality
 

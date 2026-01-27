@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/form_question.dart';
+import '../../domain/entities/question_type.dart';
 import '../controllers/form_builder_controller.dart';
 
 class FieldPropertiesWidget extends ConsumerStatefulWidget {
@@ -63,9 +64,12 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
         if (question == null) return const SizedBox();
 
-        // Sync controllers if ID changed or text inconsistent (handled carefully to avoid cursor jumps)
+        // Sync main controllers
         if (_labelController.text != question.label) {
-          _labelController.text = question.label;
+          _labelController.value = _labelController.value.copyWith(
+            text: question.label,
+            selection: TextSelection.collapsed(offset: question.label.length),
+          );
         }
         if (_helperTextController.text != (question.helperText ?? '')) {
           _helperTextController.text = question.helperText ?? '';
@@ -76,7 +80,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.builderSidebar,
+            color: Colors.white,
             border: Border(
               left: BorderSide(color: AppColors.borderLight, width: 1),
             ),
@@ -134,6 +138,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                         label: 'Field Label',
                         controller: _labelController,
                         onChanged: (val) {
+                          // Debounce could be added here
                           ref
                               .read(
                                 formBuilderControllerProvider(
@@ -182,11 +187,19 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                         },
                       ),
 
+                      // Options Editor (for Dropdown, Checkbox, Radio)
+                      if (question.type == QuestionType.dropdown ||
+                          question.type == QuestionType.checkboxes ||
+                          question.type == QuestionType.multipleChoice) ...[
+                        const SizedBox(height: 24),
+                        _buildOptionsEditor(question),
+                      ],
+
                       const SizedBox(height: 24),
                       const Text(
                         'VALIDATION',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: AppColors.textGrey,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
@@ -216,7 +229,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       const Text(
                         'CONDITIONAL LOGIC',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: AppColors.textGrey,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
@@ -236,7 +249,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                         child: Column(
                           children: [
                             Text(
-                              'Add logic to show/hide this field based on other answers.',
+                              'Add logic to show/hide this field.',
                               style: TextStyle(
                                 color: AppColors.textGrey,
                                 fontSize: 13,
@@ -290,14 +303,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
         ),
         const SizedBox(height: 8),
         TextField(
-          controller:
-              controller, // Using controller with sync logic in build is tricky.
-          // Better approach for production: State in local widget initialized from props.
-          // But for this demo, onChanged callback handles the state update effectively.
-          // The issue is cursor jumping if we rebuild while typing.
-          // We can just use the controller and update on submit or debounce.
-          // For now, simpler: Use standard TextField with onChanged.
-          // To fix cursor issues, usually we don't bind 'value' prop, but here we sync logic above.
+          controller: controller,
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: const TextStyle(color: Colors.black26),
@@ -342,7 +348,148 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
         Switch(
           value: value,
           onChanged: onChanged,
-          activeThumbColor: AppColors.primary,
+          activeColor: AppColors.primary,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOptionsEditor(FormQuestion question) {
+    final options = question.options ?? ['Option 1', 'Option 2', 'Option 3'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'OPTIONS',
+          style: TextStyle(
+            color: AppColors.textGrey,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: options.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            return _OptionRow(
+              key: ValueKey('${question.id}_opt_$index'),
+              initialValue: options[index],
+              onChanged: (newValue) {
+                final newOptions = List<String>.from(options);
+                newOptions[index] = newValue;
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestion(question.copyWith(options: newOptions));
+              },
+              onDelete: () {
+                final newOptions = List<String>.from(options);
+                newOptions.removeAt(index);
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestion(question.copyWith(options: newOptions));
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {
+            final newOptions = List<String>.from(options);
+            newOptions.add('Option ${newOptions.length + 1}');
+            ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .updateQuestion(question.copyWith(options: newOptions));
+          },
+          icon: const Icon(Icons.add, size: 16),
+          label: const Text('Add Option'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 44),
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OptionRow extends StatefulWidget {
+  final String initialValue;
+  final Function(String) onChanged;
+  final VoidCallback onDelete;
+
+  const _OptionRow({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+    required this.onDelete,
+  });
+
+  @override
+  State<_OptionRow> createState() => _OptionRowState();
+}
+
+class _OptionRowState extends State<_OptionRow> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(_OptionRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue &&
+        _controller.text != widget.initialValue) {
+      _controller.text = widget.initialValue;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.drag_indicator, color: AppColors.textGrey, size: 20),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              fillColor: AppColors.builderElement,
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            style: const TextStyle(fontSize: 14),
+            onChanged: widget.onChanged,
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.close, size: 18, color: AppColors.textGrey),
+          onPressed: widget.onDelete,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
         ),
       ],
     );
