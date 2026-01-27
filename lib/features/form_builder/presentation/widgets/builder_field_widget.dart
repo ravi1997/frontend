@@ -25,21 +25,19 @@ class BuilderFieldWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface.withValues(alpha: 0.4),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.white12,
+            color: isSelected ? AppColors.brandBlue : AppColors.borderLight,
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -50,7 +48,7 @@ class BuilderFieldWidget extends StatelessWidget {
                 Icon(
                   FontAwesomeIcons.gripVertical,
                   size: 14,
-                  color: Colors.white24,
+                  color: AppColors.textGrey.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -58,26 +56,40 @@ class BuilderFieldWidget extends StatelessWidget {
                     question.label.isEmpty
                         ? 'Untitled ${question.type.label}'
                         : question.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                    style: TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                if (isSelected)
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      size: 18,
-                      color: Colors.redAccent,
+                if (question.required)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      '*',
+                      style: TextStyle(color: Colors.red[400], fontSize: 16),
                     ),
-                    onPressed: onDelete,
-                    tooltip: 'Delete Field',
                   ),
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: isSelected ? Colors.redAccent : AppColors.textGrey,
+                  ),
+                  onPressed: onDelete,
+                  tooltip: 'Delete Field',
+                ),
               ],
             ),
-            const SizedBox(height: 12),
+            if (question.description?.isNotEmpty ?? false) ...[
+              const SizedBox(height: 4),
+              Text(
+                question.description!,
+                style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
+              ),
+            ],
+            const SizedBox(height: 16),
             _buildFieldPreview(question),
           ],
         ),
@@ -86,8 +98,8 @@ class BuilderFieldWidget extends StatelessWidget {
   }
 
   Widget _buildFieldPreview(FormQuestion q) {
-    // This is a READ-ONLY preview.
-    // We use standard Flutter widgets to simulate the look.
+    // This is a READ-ONLY preview for the builder.
+    // It mocks the appearance of the field.
 
     switch (q.type) {
       case QuestionType.shortText:
@@ -98,68 +110,77 @@ class BuilderFieldWidget extends StatelessWidget {
       case QuestionType.mobile:
       case QuestionType.url:
         return Container(
-          height: 40,
+          height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.white24),
+            color: AppColors.fieldBackground,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: AppColors.borderLight),
           ),
           alignment: Alignment.centerLeft,
           child: Text(
-            q.placeholder ?? '${q.type.label} input placeholder...',
-            style: const TextStyle(color: Colors.white38, fontSize: 13),
+            q.placeholder ?? _getPlaceholderForType(q.type),
+            style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
           ),
         );
       case QuestionType.paragraph:
         return Container(
-          height: 80,
+          height: 90,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.white24),
+            color: AppColors.fieldBackground,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: AppColors.borderLight),
           ),
           alignment: Alignment.topLeft,
           child: Text(
             q.placeholder ?? 'Long answer text...',
-            style: const TextStyle(color: Colors.white38, fontSize: 13),
+            style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
           ),
         );
       case QuestionType.dropdown:
         return Container(
-          height: 40,
+          height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.white24),
+            color: AppColors.fieldBackground,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: AppColors.borderLight),
           ),
           child: Row(
             children: [
               Text(
                 'Select an option',
-                style: const TextStyle(color: Colors.white38, fontSize: 13),
+                style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
               ),
               const Spacer(),
-              const Icon(Icons.arrow_drop_down, color: Colors.white38),
+              const Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
             ],
           ),
         );
       case QuestionType.checkboxes:
         return Column(
-          children: (q.options ?? ['Option 1']).map((opt) {
+          children: (q.options ?? ['Option 1', 'Option 2']).map((opt) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.check_box_outline_blank,
-                    size: 18,
-                    color: Colors.white38,
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppColors.textGrey),
+                    ),
                   ),
                   const SizedBox(width: 8),
-                  Text(opt, style: const TextStyle(color: Colors.white70)),
+                  Text(
+                    opt,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -167,18 +188,24 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.multipleChoice:
         return Column(
-          children: (q.options ?? ['Option 1']).map((opt) {
+          children: (q.options ?? ['Option 1', 'Option 2']).map((opt) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 children: [
                   const Icon(
                     Icons.radio_button_unchecked,
-                    size: 18,
-                    color: Colors.white38,
+                    size: 20,
+                    color: AppColors.textGrey,
                   ),
                   const SizedBox(width: 8),
-                  Text(opt, style: const TextStyle(color: Colors.white70)),
+                  Text(
+                    opt,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -186,33 +213,106 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.fileUpload:
         return Container(
-          height: 60,
+          height: 80,
           decoration: BoxDecoration(
             border: Border.all(
-              color: Colors.white24,
-              style: BorderStyle.solid,
-            ), // Should be dashed ideally
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.white10,
+              color: AppColors.borderLight,
+              style: BorderStyle.none, // Can't do dashed easily with Border
+              width: 1,
+            ),
+            color: AppColors.fieldBackground,
+            borderRadius: BorderRadius.circular(6),
           ),
-          child: const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.cloud_upload_outlined,
-                  color: Colors.white38,
-                  size: 20,
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Click to upload file',
-                  style: TextStyle(color: Colors.white38, fontSize: 12),
-                ),
-              ],
+          child: CustomPaint(
+            painter: _DashedBorderPainter(color: AppColors.textGrey),
+            child: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    color: AppColors.textGrey,
+                    size: 24,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Click to upload file',
+                    style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                  ),
+                ],
+              ),
             ),
           ),
         );
     }
   }
+
+  String _getPlaceholderForType(QuestionType type) {
+    switch (type) {
+      case QuestionType.shortText:
+        return 'Short answer text';
+      case QuestionType.number:
+        return 'Number';
+      case QuestionType.date:
+        return 'YYYY-MM-DD';
+      case QuestionType.time:
+        return 'HH:MM';
+      case QuestionType.email:
+        return 'name@example.com';
+      case QuestionType.mobile:
+        return '+1 234 567 890';
+      case QuestionType.url:
+        return 'https://example.com';
+      default:
+        return '';
+    }
+  }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double dashWidth;
+  final double dashSpace;
+
+  _DashedBorderPainter({
+    this.color = Colors.grey,
+    this.strokeWidth = 1,
+    this.dashWidth = 5,
+    this.dashSpace = 3,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.5)
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height),
+          const Radius.circular(6),
+        ),
+      );
+
+    final dashPath = Path();
+    double distance = 0.0;
+
+    for (final pathMetric in path.computeMetrics()) {
+      while (distance < pathMetric.length) {
+        dashPath.addPath(
+          pathMetric.extractPath(distance, distance + dashWidth),
+          Offset.zero,
+        );
+        distance += dashWidth + dashSpace;
+      }
+    }
+
+    canvas.drawPath(dashPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
