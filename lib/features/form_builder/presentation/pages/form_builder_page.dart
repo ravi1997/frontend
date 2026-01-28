@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,7 +8,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../controllers/form_builder_controller.dart';
 import '../widgets/field_library_widget.dart';
 import '../widgets/field_properties_widget.dart';
+import '../widgets/form_properties_widget.dart';
+import '../widgets/section_properties_widget.dart';
 import '../widgets/form_canvas_widget.dart';
+import '../widgets/feature_verification_dialog.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
   final String formId;
@@ -19,6 +23,9 @@ class FormBuilderPage extends ConsumerStatefulWidget {
 }
 
 class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
+  double _leftPanelWidth = 300;
+  double _rightPanelWidth = 320;
+
   @override
   Widget build(BuildContext context) {
     // Watch the form state
@@ -30,6 +37,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       backgroundColor: AppColors.background,
       body: builderStateAsync.when(
         data: (builderState) {
+          final isRightPanelVisible =
+              builderState.selectedQuestionId != null ||
+              builderState.isFormSelected ||
+              builderState.selectedSectionId != null;
+
           return Column(
             children: [
               // Top Bar
@@ -41,21 +53,94 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Left Sidebar: Field Library
-                    const SizedBox(width: 300, child: FieldLibraryWidget()),
+                    SizedBox(
+                      width: _leftPanelWidth,
+                      child: const FieldLibraryWidget(),
+                    ),
+
+                    // Left Resize Handle
+                    MouseRegion(
+                      cursor: SystemMouseCursors.resizeColumn,
+                      child: GestureDetector(
+                        onHorizontalDragUpdate: (details) {
+                          setState(() {
+                            _leftPanelWidth += details.delta.dx;
+                            if (_leftPanelWidth < 200) _leftPanelWidth = 200;
+                            if (_leftPanelWidth > 500) _leftPanelWidth = 500;
+                          });
+                        },
+                        child: Container(
+                          width: 5,
+                          color: AppColors.borderLight,
+                          child: Center(
+                            child: Container(
+                              width: 1,
+                              color: AppColors.textGrey.withValues(alpha: 0.2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
                     // Center: Form Canvas
                     Expanded(child: FormCanvasWidget(formId: widget.formId)),
 
-                    // Right Sidebar: Properties
-                    // Only show if a question is selected
-                    if (builderState.selectedQuestionId != null)
-                      SizedBox(
-                        width: 320,
-                        child: FieldPropertiesWidget(
-                          formId: widget.formId,
-                          selectedQuestionId: builderState.selectedQuestionId!,
+                    // Right Resize Handle & Sidebar
+                    if (isRightPanelVisible) ...[
+                      MouseRegion(
+                        cursor: SystemMouseCursors.resizeColumn,
+                        child: GestureDetector(
+                          onHorizontalDragUpdate: (details) {
+                            setState(() {
+                              _rightPanelWidth -= details.delta.dx;
+                              if (_rightPanelWidth < 250) {
+                                _rightPanelWidth = 250;
+                              }
+                              if (_rightPanelWidth > 600) {
+                                _rightPanelWidth = 600;
+                              }
+                            });
+                          },
+                          child: Container(
+                            width: 5,
+                            color: AppColors.borderLight,
+                            child: Center(
+                              child: Container(
+                                width: 1,
+                                color: AppColors.textGrey.withValues(
+                                  alpha: 0.2,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
+                      SizedBox(
+                        width: _rightPanelWidth,
+                        child: Builder(
+                          builder: (context) {
+                            if (builderState.selectedQuestionId != null) {
+                              return FieldPropertiesWidget(
+                                formId: widget.formId,
+                                selectedQuestionId:
+                                    builderState.selectedQuestionId!,
+                              );
+                            } else if (builderState.isFormSelected) {
+                              return FormPropertiesWidget(
+                                formId: widget.formId,
+                              );
+                            } else if (builderState.selectedSectionId != null) {
+                              return SectionPropertiesWidget(
+                                formId: widget.formId,
+                                selectedSectionId:
+                                    builderState.selectedSectionId!,
+                              );
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -84,109 +169,139 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   }
 
   Widget _buildTopBar(BuildContext context, String title, WidgetRef ref) {
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        color: AppColors.builderSidebar,
-        border: Border(
-          bottom: BorderSide(color: AppColors.borderLight, width: 1),
-        ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textGrey),
-            onPressed: () => context.go('/dashboard'),
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: AppColors.builderSidebar.withValues(alpha: 0.8),
+            border: Border(
+              bottom: BorderSide(color: AppColors.borderLight, width: 1),
+            ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Row(
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: const Text(
-                    'Editing',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textGrey),
+                onPressed: () => context.go('/dashboard'),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => ref
+                          .read(
+                            formBuilderControllerProvider(
+                              widget.formId,
+                            ).notifier,
+                          )
+                          .selectForm(),
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Editing',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _buildActionButton(
+                icon: FontAwesomeIcons.listCheck,
+                label: 'Features',
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const FeatureVerificationDialog(),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                icon: FontAwesomeIcons.eye,
+                label: 'Preview',
+                onTap: () {},
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                icon: FontAwesomeIcons.clockRotateLeft,
+                label: 'History',
+                onTap: () {},
+              ),
+              const SizedBox(width: 8),
+              _buildActionButton(
+                icon: FontAwesomeIcons.shareNodes,
+                label: 'Workflows',
+                onTap: () {},
+              ),
+              const SizedBox(width: 16),
+              // Save Button
+              Container(
+                height: 36,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primary),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextButton.icon(
+                  onPressed: () => ref
+                      .read(
+                        formBuilderControllerProvider(widget.formId).notifier,
+                      )
+                      .saveForm(),
+                  icon: const Icon(
+                    Icons.save_outlined,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  label: const Text(
+                    'Save Changes',
+                    style: TextStyle(color: AppColors.primary),
                   ),
                 ),
-              ],
-            ),
-          ),
-          _buildActionButton(
-            icon: FontAwesomeIcons.eye,
-            label: 'Preview',
-            onTap: () {},
-          ),
-          const SizedBox(width: 8),
-          _buildActionButton(
-            icon: FontAwesomeIcons.clockRotateLeft,
-            label: 'History',
-            onTap: () {},
-          ),
-          const SizedBox(width: 8),
-          _buildActionButton(
-            icon: FontAwesomeIcons.shareNodes,
-            label: 'Workflows',
-            onTap: () {},
-          ),
-          const SizedBox(width: 16),
-          // Save Button
-          Container(
-            height: 36,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.primary),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: TextButton.icon(
-              onPressed: () => ref
-                  .read(formBuilderControllerProvider(widget.formId).notifier)
-                  .saveForm(),
-              icon: const Icon(
-                Icons.save_outlined,
-                size: 16,
-                color: AppColors.primary,
               ),
-              label: const Text(
-                'Save Changes',
-                style: TextStyle(color: AppColors.primary),
+              const SizedBox(width: 12),
+              // Publish Button
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                ),
+                child: const Text('Publish'),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 12),
-          // Publish Button
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            ),
-            child: const Text('Publish'),
-          ),
-        ],
+        ),
       ),
     );
   }

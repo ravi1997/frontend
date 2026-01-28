@@ -9,6 +9,7 @@ class BuilderFieldWidget extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final VoidCallback onDuplicate;
 
   const BuilderFieldWidget({
     super.key,
@@ -16,20 +17,39 @@ class BuilderFieldWidget extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.onDelete,
+    required this.onDuplicate,
   });
 
   @override
   Widget build(BuildContext context) {
+    final style = question.style;
+    Color bgColor;
+    Color borderColor;
+    Color labelColor;
+    Color helperColor;
+
+    try {
+      bgColor = Color(int.parse(style.backgroundColor.replaceAll('#', '0xFF')));
+      borderColor = Color(int.parse(style.borderColor.replaceAll('#', '0xFF')));
+      labelColor = Color(int.parse(style.labelColor.replaceAll('#', '0xFF')));
+      helperColor = Color(int.parse(style.helperColor.replaceAll('#', '0xFF')));
+    } catch (_) {
+      bgColor = Colors.white;
+      borderColor = AppColors.borderLight;
+      labelColor = AppColors.textDark;
+      helperColor = AppColors.textGrey;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(bottom: style.verticalMargin),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(style.borderRadius),
           border: Border.all(
-            color: isSelected ? AppColors.brandBlue : AppColors.borderLight,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? AppColors.brandBlue : borderColor,
+            width: isSelected ? 2 : style.borderWidth,
           ),
           boxShadow: [
             BoxShadow(
@@ -57,9 +77,9 @@ class BuilderFieldWidget extends StatelessWidget {
                         ? 'Untitled ${question.type.label}'
                         : question.label,
                     style: TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      color: labelColor,
+                      fontSize: style.labelFontSize,
+                      fontWeight: _parseFontWeight(style.labelFontWeight),
                     ),
                   ),
                 ),
@@ -71,6 +91,15 @@ class BuilderFieldWidget extends StatelessWidget {
                       style: TextStyle(color: Colors.red[400], fontSize: 16),
                     ),
                   ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.copy,
+                    size: 18,
+                    color: AppColors.textGrey,
+                  ),
+                  onPressed: onDuplicate,
+                  tooltip: 'Duplicate Field',
+                ),
                 IconButton(
                   icon: Icon(
                     Icons.delete_outline,
@@ -86,7 +115,11 @@ class BuilderFieldWidget extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 question.helperText!,
-                style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
+                style: TextStyle(
+                  color: helperColor,
+                  fontSize: style.helperFontSize,
+                  fontWeight: _parseFontWeight(style.helperFontWeight),
+                ),
               ),
             ],
             const SizedBox(height: 16),
@@ -97,9 +130,91 @@ class BuilderFieldWidget extends StatelessWidget {
     );
   }
 
+  FontWeight _parseFontWeight(String weight) {
+    switch (weight) {
+      case 'bold':
+        return FontWeight.bold;
+      case 'medium':
+        return FontWeight.w500;
+      case 'normal':
+      default:
+        return FontWeight.normal;
+    }
+  }
+
   Widget _buildFieldPreview(FormQuestion q) {
     // This is a READ-ONLY preview for the builder.
     // It mocks the appearance of the field.
+
+    final inputStyle = q.style.inputStyle;
+    Color fillColor = AppColors.fieldBackground;
+    BoxBorder? border = Border.all(color: AppColors.borderLight);
+    List<BoxShadow>? shadows;
+    double radius = 6.0;
+
+    switch (inputStyle) {
+      case 'filled':
+        fillColor = Colors.grey.shade200;
+        border = const Border(
+          bottom: BorderSide(color: AppColors.textGrey, width: 1.5),
+        );
+        break;
+      case 'glass':
+        fillColor = Colors.white.withValues(alpha: 0.3);
+        border = Border.all(color: Colors.white.withValues(alpha: 0.5));
+        break;
+      case 'minimalist':
+        fillColor = Colors.transparent;
+        border = const Border(bottom: BorderSide(color: AppColors.borderLight));
+        shadows = [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ];
+        break;
+      case 'rounded':
+        radius = 20.0;
+        break;
+      case 'underlined':
+        fillColor = Colors.transparent;
+        border = const Border(bottom: BorderSide(color: AppColors.borderLight));
+        radius = 0;
+        break;
+      case 'outlined':
+      default:
+        // Default styles
+        break;
+    }
+
+    final containerDecor = BoxDecoration(
+      color: fillColor,
+      borderRadius:
+          inputStyle == 'filled' ||
+              inputStyle == 'minimalist' ||
+              inputStyle == 'underlined'
+          ? BorderRadius.vertical(top: Radius.circular(radius))
+          : BorderRadius.circular(radius),
+      border: border,
+      boxShadow: shadows,
+    );
+
+    // Parse input style
+    Color inputColor;
+    try {
+      inputColor = Color(
+        int.parse(q.style.inputFontColor.replaceAll('#', '0xFF')),
+      );
+    } catch (_) {
+      inputColor = AppColors.textDark;
+    }
+
+    final textStyle = TextStyle(
+      color: inputColor,
+      fontSize: q.style.inputFontSize,
+      fontWeight: _parseFontWeight(q.style.inputFontWeight),
+    );
 
     switch (q.type) {
       case QuestionType.shortText:
@@ -112,49 +227,65 @@ class BuilderFieldWidget extends StatelessWidget {
         return Container(
           height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.fieldBackground,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.borderLight),
-          ),
+          decoration: containerDecor,
           alignment: Alignment.centerLeft,
-          child: Text(
-            q.placeholder ?? _getPlaceholderForType(q.type),
-            style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
+          child: Row(
+            children: [
+              if (q.style.prefixIcon?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Text(q.style.prefixIcon!, style: textStyle),
+                ),
+              Expanded(
+                child: Text(
+                  q.placeholder ?? _getPlaceholderForType(q.type),
+                  style: textStyle.copyWith(
+                    color: textStyle.color?.withValues(alpha: 0.5),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (q.style.suffixIcon?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(q.style.suffixIcon!, style: textStyle),
+                ),
+            ],
           ),
         );
       case QuestionType.paragraph:
         return Container(
           height: 90,
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.fieldBackground,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.borderLight),
-          ),
+          decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
             q.placeholder ?? 'Long answer text...',
-            style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
+            style: textStyle.copyWith(
+              color: textStyle.color?.withValues(alpha: 0.5),
+            ),
           ),
         );
       case QuestionType.dropdown:
         return Container(
           height: 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.fieldBackground,
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.borderLight),
-          ),
+          decoration: containerDecor,
           child: Row(
             children: [
               Text(
                 'Select an option',
-                style: const TextStyle(color: AppColors.textGrey, fontSize: 14),
+                style: textStyle.copyWith(
+                  color: textStyle.color?.withValues(alpha: 0.5),
+                ),
               ),
               const Spacer(),
-              const Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
+              Icon(
+                Icons.arrow_drop_down,
+                color:
+                    textStyle.color?.withValues(alpha: 0.5) ??
+                    AppColors.textGrey,
+              ),
             ],
           ),
         );
@@ -170,17 +301,13 @@ class BuilderFieldWidget extends StatelessWidget {
                     height: 18,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: AppColors.textGrey),
+                      border: Border.all(
+                        color: textStyle.color ?? AppColors.textGrey,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    opt,
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 14,
-                    ),
-                  ),
+                  Text(opt, style: textStyle),
                 ],
               ),
             );
@@ -193,19 +320,13 @@ class BuilderFieldWidget extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.radio_button_unchecked,
                     size: 20,
-                    color: AppColors.textGrey,
+                    color: textStyle.color ?? AppColors.textGrey,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    opt,
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontSize: 14,
-                    ),
-                  ),
+                  Text(opt, style: textStyle),
                 ],
               ),
             );
@@ -225,19 +346,22 @@ class BuilderFieldWidget extends StatelessWidget {
           ),
           child: CustomPaint(
             painter: _DashedBorderPainter(color: AppColors.textGrey),
-            child: const Center(
+            child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.cloud_upload_outlined,
                     color: AppColors.textGrey,
                     size: 24,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Click to upload file',
-                    style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                    style: textStyle.copyWith(
+                      fontSize: 13,
+                      color: AppColors.textGrey,
+                    ), // Keep generic for file upload
                   ),
                 ],
               ),

@@ -5,11 +5,29 @@ import '../../../../core/theme/app_colors.dart';
 
 import '../../domain/entities/question_type.dart';
 
-class FieldLibraryWidget extends ConsumerWidget {
+class FieldLibraryWidget extends ConsumerStatefulWidget {
   const FieldLibraryWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FieldLibraryWidget> createState() => _FieldLibraryWidgetState();
+}
+
+class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredTypes = QuestionType.values.where((type) {
+      return type.label.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.builderSidebar,
@@ -39,7 +57,28 @@ class FieldLibraryWidget extends ConsumerWidget {
                   style: TextStyle(color: AppColors.textGrey, fontSize: 12),
                 ),
                 const SizedBox(height: 20),
-                // AI Assistant Button - Updated styling
+
+                // Search Bar
+                TextField(
+                  controller: _searchController,
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                  decoration: InputDecoration(
+                    hintText: 'Search fields...',
+                    prefixIcon: const Icon(Icons.search, size: 18),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    filled: true,
+                    fillColor: AppColors.builderElement,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                ),
+
+                const SizedBox(height: 16),
+                // AI Assistant Button
                 Container(
                   width: double.infinity,
                   height: 44,
@@ -85,13 +124,31 @@ class FieldLibraryWidget extends ConsumerWidget {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: QuestionType.values.map((type) {
-                  return _buildFieldButton(context, type);
-                }).toList(),
-              ),
+              child: filteredTypes.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 48,
+                            color: AppColors.textGrey.withValues(alpha: 0.3),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'No fields match your search',
+                            style: TextStyle(color: AppColors.textGrey),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: filteredTypes.map((type) {
+                        return _buildFieldButton(context, type);
+                      }).toList(),
+                    ),
             ),
           ),
         ],
@@ -125,38 +182,68 @@ class _FieldButtonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = _getColorForType(type);
+
     return Container(
       width: width,
-      height: 90, // Taller for better proportion
+      height: 90,
       decoration: BoxDecoration(
-        color: AppColors.builderElement, // Slate 800
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: color.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(_getIconForType(type), color: AppColors.textGrey, size: 22),
-          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(_getIconForType(type), color: color, size: 20),
+          ),
+          const SizedBox(height: 8),
           Text(
             type.label,
             style: const TextStyle(
               color: AppColors.textDark,
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
+  }
+
+  Color _getColorForType(QuestionType type) {
+    switch (type) {
+      case QuestionType.shortText:
+      case QuestionType.paragraph:
+      case QuestionType.number:
+      case QuestionType.email:
+      case QuestionType.mobile:
+      case QuestionType.url:
+        return AppColors.fieldText;
+      case QuestionType.dropdown:
+      case QuestionType.checkboxes:
+      case QuestionType.multipleChoice:
+        return AppColors.fieldChoice;
+      case QuestionType.date:
+      case QuestionType.time:
+        return AppColors.fieldDate;
+      case QuestionType.fileUpload:
+        return AppColors.fieldMedia;
+    }
   }
 
   IconData _getIconForType(QuestionType type) {

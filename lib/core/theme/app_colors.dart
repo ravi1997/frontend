@@ -38,6 +38,13 @@ class AppColors {
   static const Color borderLight = Color(0xFFE5E7EB);
   static const Color fieldBackground = Color(0xFFF9FAFB);
 
+  // Semantic Field Colors
+  static const Color fieldText = Color(0xFF3B82F6); // Blue 500
+  static const Color fieldChoice = Color(0xFF8B5CF6); // Violet 500
+  static const Color fieldDate = Color(0xFFF59E0B); // Amber 500
+  static const Color fieldMedia = Color(0xFFEC4899); // Pink 500
+  static const Color fieldAdvanced = Color(0xFF10B981); // Emerald 500
+
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primary, secondary],

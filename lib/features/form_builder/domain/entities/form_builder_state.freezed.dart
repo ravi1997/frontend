@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormBuilderState {
 
- BuilderForm get form; String? get selectedSectionId; String? get selectedQuestionId; bool get isSaving; bool get isLoading; String? get error;
+ BuilderForm get form; String? get selectedSectionId; String? get selectedQuestionId; bool get isFormSelected; bool get isSaving; bool get isLoading; String? get error;
 /// Create a copy of FormBuilderState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $FormBuilderStateCopyWith<FormBuilderState> get copyWith => _$FormBuilderStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormBuilderState&&(identical(other.form, form) || other.form == form)&&(identical(other.selectedSectionId, selectedSectionId) || other.selectedSectionId == selectedSectionId)&&(identical(other.selectedQuestionId, selectedQuestionId) || other.selectedQuestionId == selectedQuestionId)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormBuilderState&&(identical(other.form, form) || other.form == form)&&(identical(other.selectedSectionId, selectedSectionId) || other.selectedSectionId == selectedSectionId)&&(identical(other.selectedQuestionId, selectedQuestionId) || other.selectedQuestionId == selectedQuestionId)&&(identical(other.isFormSelected, isFormSelected) || other.isFormSelected == isFormSelected)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,form,selectedSectionId,selectedQuestionId,isSaving,isLoading,error);
+int get hashCode => Object.hash(runtimeType,form,selectedSectionId,selectedQuestionId,isFormSelected,isSaving,isLoading,error);
 
 @override
 String toString() {
-  return 'FormBuilderState(form: $form, selectedSectionId: $selectedSectionId, selectedQuestionId: $selectedQuestionId, isSaving: $isSaving, isLoading: $isLoading, error: $error)';
+  return 'FormBuilderState(form: $form, selectedSectionId: $selectedSectionId, selectedQuestionId: $selectedQuestionId, isFormSelected: $isFormSelected, isSaving: $isSaving, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $FormBuilderStateCopyWith<$Res>  {
   factory $FormBuilderStateCopyWith(FormBuilderState value, $Res Function(FormBuilderState) _then) = _$FormBuilderStateCopyWithImpl;
 @useResult
 $Res call({
- BuilderForm form, String? selectedSectionId, String? selectedQuestionId, bool isSaving, bool isLoading, String? error
+ BuilderForm form, String? selectedSectionId, String? selectedQuestionId, bool isFormSelected, bool isSaving, bool isLoading, String? error
 });
 
 
@@ -62,12 +62,13 @@ class _$FormBuilderStateCopyWithImpl<$Res>
 
 /// Create a copy of FormBuilderState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? isSaving = null,Object? isLoading = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? isFormSelected = null,Object? isSaving = null,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
 as BuilderForm,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionId: freezed == selectedQuestionId ? _self.selectedQuestionId : selectedQuestionId // ignore: cast_nullable_to_non_nullable
-as String?,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
+as String?,isFormSelected: null == isFormSelected ? _self.isFormSelected : isFormSelected // ignore: cast_nullable_to_non_nullable
+as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -164,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isSaving,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isFormSelected,  bool isSaving,  bool isLoading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormBuilderState() when $default != null:
-return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isSaving,_that.isLoading,_that.error);case _:
+return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isFormSelected,_that.isSaving,_that.isLoading,_that.error);case _:
   return orElse();
 
 }
@@ -185,10 +186,10 @@ return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isSaving,  bool isLoading,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isFormSelected,  bool isSaving,  bool isLoading,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _FormBuilderState():
-return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isSaving,_that.isLoading,_that.error);case _:
+return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isFormSelected,_that.isSaving,_that.isLoading,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +206,10 @@ return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isSaving,  bool isLoading,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  bool isFormSelected,  bool isSaving,  bool isLoading,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _FormBuilderState() when $default != null:
-return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isSaving,_that.isLoading,_that.error);case _:
+return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.isFormSelected,_that.isSaving,_that.isLoading,_that.error);case _:
   return null;
 
 }
@@ -220,12 +221,13 @@ return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_tha
 
 
 class _FormBuilderState implements FormBuilderState {
-  const _FormBuilderState({required this.form, this.selectedSectionId, this.selectedQuestionId, this.isSaving = false, this.isLoading = false, this.error});
+  const _FormBuilderState({required this.form, this.selectedSectionId, this.selectedQuestionId, this.isFormSelected = false, this.isSaving = false, this.isLoading = false, this.error});
   
 
 @override final  BuilderForm form;
 @override final  String? selectedSectionId;
 @override final  String? selectedQuestionId;
+@override@JsonKey() final  bool isFormSelected;
 @override@JsonKey() final  bool isSaving;
 @override@JsonKey() final  bool isLoading;
 @override final  String? error;
@@ -240,16 +242,16 @@ _$FormBuilderStateCopyWith<_FormBuilderState> get copyWith => __$FormBuilderStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormBuilderState&&(identical(other.form, form) || other.form == form)&&(identical(other.selectedSectionId, selectedSectionId) || other.selectedSectionId == selectedSectionId)&&(identical(other.selectedQuestionId, selectedQuestionId) || other.selectedQuestionId == selectedQuestionId)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormBuilderState&&(identical(other.form, form) || other.form == form)&&(identical(other.selectedSectionId, selectedSectionId) || other.selectedSectionId == selectedSectionId)&&(identical(other.selectedQuestionId, selectedQuestionId) || other.selectedQuestionId == selectedQuestionId)&&(identical(other.isFormSelected, isFormSelected) || other.isFormSelected == isFormSelected)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,form,selectedSectionId,selectedQuestionId,isSaving,isLoading,error);
+int get hashCode => Object.hash(runtimeType,form,selectedSectionId,selectedQuestionId,isFormSelected,isSaving,isLoading,error);
 
 @override
 String toString() {
-  return 'FormBuilderState(form: $form, selectedSectionId: $selectedSectionId, selectedQuestionId: $selectedQuestionId, isSaving: $isSaving, isLoading: $isLoading, error: $error)';
+  return 'FormBuilderState(form: $form, selectedSectionId: $selectedSectionId, selectedQuestionId: $selectedQuestionId, isFormSelected: $isFormSelected, isSaving: $isSaving, isLoading: $isLoading, error: $error)';
 }
 
 
@@ -260,7 +262,7 @@ abstract mixin class _$FormBuilderStateCopyWith<$Res> implements $FormBuilderSta
   factory _$FormBuilderStateCopyWith(_FormBuilderState value, $Res Function(_FormBuilderState) _then) = __$FormBuilderStateCopyWithImpl;
 @override @useResult
 $Res call({
- BuilderForm form, String? selectedSectionId, String? selectedQuestionId, bool isSaving, bool isLoading, String? error
+ BuilderForm form, String? selectedSectionId, String? selectedQuestionId, bool isFormSelected, bool isSaving, bool isLoading, String? error
 });
 
 
@@ -277,12 +279,13 @@ class __$FormBuilderStateCopyWithImpl<$Res>
 
 /// Create a copy of FormBuilderState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? isSaving = null,Object? isLoading = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? isFormSelected = null,Object? isSaving = null,Object? isLoading = null,Object? error = freezed,}) {
   return _then(_FormBuilderState(
 form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
 as BuilderForm,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionId: freezed == selectedQuestionId ? _self.selectedQuestionId : selectedQuestionId // ignore: cast_nullable_to_non_nullable
-as String?,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
+as String?,isFormSelected: null == isFormSelected ? _self.isFormSelected : isFormSelected // ignore: cast_nullable_to_non_nullable
+as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
 as bool,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,

@@ -51,7 +51,7 @@ final class FormBuilderControllerProvider
 }
 
 String _$formBuilderControllerHash() =>
-    r'801308e7d0aa780659daf8dc1f5783dc35869e2f';
+    r'644c0fc7f183635e340d914e59bf9b2b35b2d759';
 
 final class FormBuilderControllerFamily extends $Family
     with

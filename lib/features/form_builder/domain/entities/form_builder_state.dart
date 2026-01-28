@@ -9,6 +9,7 @@ abstract class FormBuilderState with _$FormBuilderState {
     required BuilderForm form,
     String? selectedSectionId,
     String? selectedQuestionId,
+    @Default(false) bool isFormSelected,
     @Default(false) bool isSaving,
     @Default(false) bool isLoading,
     String? error,

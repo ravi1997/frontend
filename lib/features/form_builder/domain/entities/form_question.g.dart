@@ -17,7 +17,19 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      isReadOnly: json['isReadOnly'] as bool? ?? false,
+      isHidden: json['isHidden'] as bool? ?? false,
+      validationRegex: json['validationRegex'] as String?,
+      minLength: (json['minLength'] as num?)?.toInt(),
+      maxLength: (json['maxLength'] as num?)?.toInt(),
+      minValue: json['minValue'] as num?,
+      maxValue: json['maxValue'] as num?,
+      inputMask: json['inputMask'] as String?,
+      customErrorMessage: json['customErrorMessage'] as String?,
       conditionalLogic: json['conditionalLogic'] as Map<String, dynamic>?,
+      style: json['style'] == null
+          ? const QuestionStyle()
+          : QuestionStyle.fromJson(json['style'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
@@ -29,7 +41,17 @@ Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
       'placeholder': instance.placeholder,
       'isRequired': instance.isRequired,
       'options': instance.options,
+      'isReadOnly': instance.isReadOnly,
+      'isHidden': instance.isHidden,
+      'validationRegex': instance.validationRegex,
+      'minLength': instance.minLength,
+      'maxLength': instance.maxLength,
+      'minValue': instance.minValue,
+      'maxValue': instance.maxValue,
+      'inputMask': instance.inputMask,
+      'customErrorMessage': instance.customErrorMessage,
       'conditionalLogic': instance.conditionalLogic,
+      'style': instance.style,
     };
 
 const _$QuestionTypeEnumMap = {

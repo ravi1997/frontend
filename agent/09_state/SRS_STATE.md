@@ -2,16 +2,16 @@
 
 ## Status
 
-- **Functional Requirements**: [NOT_STARTED]
-- **Non-Functional Requirements**: [NOT_STARTED]
-- **User Stories**: [NOT_STARTED]
-- **Acceptance Criteria**: [NOT_STARTED]
+- **Functional Requirements**: [DRAFTED]
+- **Non-Functional Requirements**: [DRAFTED]
+- **User Stories**: [IN_PROGRESS]
+- **Acceptance Criteria**: [PARTIAL]
 
 ## Links
 
-- **Full SRS Path**: [NONE]
-- **Last Approved Version**: [NONE]
+- **Full SRS Path**: `plans/SRS/SRS_INDEX.md`
+- **Last Approved Version**: v1.0 (Phase 1 & 2 scope)
 
 ## Approval
 
-- **User Sign-off**: [PENDING]
+- **User Sign-off**: [DONE - via interactive progress]

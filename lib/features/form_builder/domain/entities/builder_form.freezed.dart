@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BuilderForm {
 
- String get id; String get title; String get status; List<FormSection> get sections; DateTime? get updatedAt;
+ String get id; String get title; String get status; List<FormSection> get sections; FormLayoutType get layout; DateTime? get updatedAt; FormStyle get style;
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $BuilderFormCopyWith<BuilderForm> get copyWith => _$BuilderFormCopyWithImpl<Buil
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuilderForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.sections, sections)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuilderForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.sections, sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,const DeepCollectionEquality().hash(sections),updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,const DeepCollectionEquality().hash(sections),layout,updatedAt,style);
 
 @override
 String toString() {
-  return 'BuilderForm(id: $id, title: $title, status: $status, sections: $sections, updatedAt: $updatedAt)';
+  return 'BuilderForm(id: $id, title: $title, status: $status, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $BuilderFormCopyWith<$Res>  {
   factory $BuilderFormCopyWith(BuilderForm value, $Res Function(BuilderForm) _then) = _$BuilderFormCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String status, List<FormSection> sections, DateTime? updatedAt
+ String id, String title, String status, List<FormSection> sections, FormLayoutType layout, DateTime? updatedAt, FormStyle style
 });
 
 
-
+$FormStyleCopyWith<$Res> get style;
 
 }
 /// @nodoc
@@ -65,17 +65,28 @@ class _$BuilderFormCopyWithImpl<$Res>
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? sections = null,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,sections: null == sections ? _self.sections : sections // ignore: cast_nullable_to_non_nullable
-as List<FormSection>,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as List<FormSection>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
+as FormLayoutType,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as FormStyle,
   ));
 }
-
+/// Create a copy of BuilderForm
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FormStyleCopyWith<$Res> get style {
+  
+  return $FormStyleCopyWith<$Res>(_self.style, (value) {
+    return _then(_self.copyWith(style: value));
+  });
+}
 }
 
 
@@ -157,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String status,  List<FormSection> sections,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String status,  List<FormSection> sections,  FormLayoutType layout,  DateTime? updatedAt,  FormStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.sections,_that.layout,_that.updatedAt,_that.style);case _:
   return orElse();
 
 }
@@ -178,10 +189,10 @@ return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String status,  List<FormSection> sections,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String status,  List<FormSection> sections,  FormLayoutType layout,  DateTime? updatedAt,  FormStyle style)  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm():
-return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.sections,_that.layout,_that.updatedAt,_that.style);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +209,10 @@ return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String status,  List<FormSection> sections,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String status,  List<FormSection> sections,  FormLayoutType layout,  DateTime? updatedAt,  FormStyle style)?  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.sections,_that.layout,_that.updatedAt,_that.style);case _:
   return null;
 
 }
@@ -213,7 +224,7 @@ return $default(_that.id,_that.title,_that.status,_that.sections,_that.updatedAt
 @JsonSerializable()
 
 class _BuilderForm extends BuilderForm {
-  const _BuilderForm({required this.id, required this.title, this.status = 'draft', required final  List<FormSection> sections, this.updatedAt}): _sections = sections,super._();
+  const _BuilderForm({required this.id, required this.title, this.status = 'draft', required final  List<FormSection> sections, this.layout = FormLayoutType.singleColumn, this.updatedAt, this.style = const FormStyle()}): _sections = sections,super._();
   factory _BuilderForm.fromJson(Map<String, dynamic> json) => _$BuilderFormFromJson(json);
 
 @override final  String id;
@@ -226,7 +237,9 @@ class _BuilderForm extends BuilderForm {
   return EqualUnmodifiableListView(_sections);
 }
 
+@override@JsonKey() final  FormLayoutType layout;
 @override final  DateTime? updatedAt;
+@override@JsonKey() final  FormStyle style;
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +254,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuilderForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._sections, _sections)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuilderForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._sections, _sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,const DeepCollectionEquality().hash(_sections),updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,const DeepCollectionEquality().hash(_sections),layout,updatedAt,style);
 
 @override
 String toString() {
-  return 'BuilderForm(id: $id, title: $title, status: $status, sections: $sections, updatedAt: $updatedAt)';
+  return 'BuilderForm(id: $id, title: $title, status: $status, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style)';
 }
 
 
@@ -261,11 +274,11 @@ abstract mixin class _$BuilderFormCopyWith<$Res> implements $BuilderFormCopyWith
   factory _$BuilderFormCopyWith(_BuilderForm value, $Res Function(_BuilderForm) _then) = __$BuilderFormCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String status, List<FormSection> sections, DateTime? updatedAt
+ String id, String title, String status, List<FormSection> sections, FormLayoutType layout, DateTime? updatedAt, FormStyle style
 });
 
 
-
+@override $FormStyleCopyWith<$Res> get style;
 
 }
 /// @nodoc
@@ -278,18 +291,29 @@ class __$BuilderFormCopyWithImpl<$Res>
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? sections = null,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,}) {
   return _then(_BuilderForm(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,sections: null == sections ? _self._sections : sections // ignore: cast_nullable_to_non_nullable
-as List<FormSection>,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as List<FormSection>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
+as FormLayoutType,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as FormStyle,
   ));
 }
 
-
+/// Create a copy of BuilderForm
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FormStyleCopyWith<$Res> get style {
+  
+  return $FormStyleCopyWith<$Res>(_self.style, (value) {
+    return _then(_self.copyWith(style: value));
+  });
+}
 }
 
 // dart format on
