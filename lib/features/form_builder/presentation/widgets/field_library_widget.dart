@@ -4,6 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 
 import '../../domain/entities/question_type.dart';
+import '../../domain/entities/custom_field_template.dart';
+import '../controllers/custom_fields_controller.dart';
+import '../../domain/services/field_registry.dart';
 
 class FieldLibraryWidget extends ConsumerStatefulWidget {
   const FieldLibraryWidget({super.key});
@@ -22,11 +25,138 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
     super.dispose();
   }
 
+  Map<QuestionType, List<String>> get _searchKeywords => {
+    QuestionType.shortText: [
+      'text',
+      'string',
+      'name',
+      'title',
+      'single line',
+      'input',
+    ],
+    QuestionType.paragraph: [
+      'long text',
+      'description',
+      'textarea',
+      'comment',
+      'essay',
+      'multiline',
+    ],
+    QuestionType.number: [
+      'integer',
+      'decimal',
+      'count',
+      'quantity',
+      'amount',
+      'numeric',
+    ],
+    QuestionType.email: ['mail', 'address'],
+    QuestionType.mobile: [
+      'phone',
+      'cell',
+      'telephone',
+      'number',
+      'contact',
+      'call',
+    ],
+    QuestionType.url: ['link', 'website', 'address', 'http', 'https'],
+    QuestionType.dropdown: [
+      'select',
+      'choice',
+      'menu',
+      'option',
+      'list',
+      'picker',
+    ],
+    QuestionType.checkboxes: [
+      'multiple',
+      'check',
+      'tick',
+      'box',
+      'multi-select',
+    ],
+    QuestionType.multipleChoice: ['radio', 'option', 'single selection'],
+    QuestionType.date: [
+      'calendar',
+      'day',
+      'month',
+      'year',
+      'birth',
+      'datepicker',
+    ],
+    QuestionType.time: ['clock', 'hour', 'minute', 'schedule', 'timepicker'],
+    QuestionType.fileUpload: [
+      'image',
+      'photo',
+      'document',
+      'attachment',
+      'media',
+      'upload',
+      'file',
+    ],
+    QuestionType.rating: ['star', 'rate', 'score', 'feedback'],
+    QuestionType.signature: ['sign', 'draw', 'handwriting', 'approve'],
+    QuestionType.slider: ['range', 'volume', 'level', 'adjust'],
+    QuestionType.image: ['photo', 'picture', 'gallery', 'camera'],
+    QuestionType.divider: ['line', 'separator', 'break', 'horizontal'],
+    QuestionType.spacer: ['empty', 'gap', 'margin', 'padding'],
+    QuestionType.matrixChoice: ['grid', 'table', 'multiple', 'rows', 'columns'],
+  };
+
+  bool _matchesSearch(QuestionType type, String query) {
+    if (query.isEmpty) return true;
+    final q = query.toLowerCase();
+
+    // Check label
+    if (type.label.toLowerCase().contains(q)) return true;
+
+    // Check Enum name (technically 'type')
+    if (type.name.toLowerCase().contains(q)) return true;
+
+    // Check keywords
+    final keywords = _searchKeywords[type] ?? [];
+    return keywords.any((k) => k.contains(q));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredTypes = QuestionType.values.where((type) {
-      return type.label.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    final customFields = ref.watch(customFieldsProvider);
+
+    // Reorganized categories based on user requirements
+    final categories = {
+      'Basic Fields': [
+        QuestionType.shortText,
+        QuestionType.paragraph,
+        QuestionType.number,
+        QuestionType.email,
+        QuestionType.mobile,
+        QuestionType.url,
+      ],
+      'Advanced Fields': [
+        QuestionType.dropdown,
+        QuestionType.checkboxes,
+        QuestionType.multipleChoice,
+        QuestionType.date,
+        QuestionType.time,
+        QuestionType.rating,
+        QuestionType.matrixChoice,
+        QuestionType.slider,
+      ],
+      'Media & Input': [
+        QuestionType.fileUpload,
+        QuestionType.image,
+        QuestionType.signature,
+      ],
+      'Layout Elements': [QuestionType.divider, QuestionType.spacer],
+    };
+
+    final hasResults =
+        categories.values.any(
+          (types) => types.any((t) => _matchesSearch(t, _searchQuery)),
+        ) ||
+        customFields.any(
+          (f) => f.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        );
 
     return Container(
       decoration: BoxDecoration(
@@ -38,8 +168,24 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
+          // Sticky Header Section
+          Container(
             padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: AppColors.builderSidebar.withOpacity(0.9),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.borderLight.withOpacity(0.5),
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -56,100 +202,216 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                   'Click or drag to add fields',
                   style: TextStyle(color: AppColors.textGrey, fontSize: 12),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Search Bar
+                // Search Bar with glass/subtle effect
                 TextField(
                   controller: _searchController,
                   onChanged: (val) => setState(() => _searchQuery = val),
                   decoration: InputDecoration(
-                    hintText: 'Search fields...',
-                    prefixIcon: const Icon(Icons.search, size: 18),
+                    hintText: 'Search fields (e.g., "Phone")',
+                    hintStyle: TextStyle(
+                      color: AppColors.textGrey.withOpacity(0.7),
+                      fontSize: 13,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 18,
+                      color: AppColors.textGrey,
+                    ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
+                    ),
                     filled: true,
-                    fillColor: AppColors.builderElement,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
+                    fillColor: AppColors.builderBackground,
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.transparent),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: AppColors.primary.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                   ),
                   style: const TextStyle(fontSize: 14),
                 ),
-
-                const SizedBox(height: 16),
-                // AI Assistant Button
-                Container(
-                  width: double.infinity,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primary.withValues(alpha: 0.1),
-                        AppColors.primary.withValues(alpha: 0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          FontAwesomeIcons.wandMagicSparkles,
-                          color: AppColors.primary,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'AI Assistant',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
+
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: filteredTypes.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 48,
-                            color: AppColors.textGrey.withValues(alpha: 0.3),
+            child: !hasResults && _searchQuery.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 40,
+                          color: AppColors.textGrey.withOpacity(0.3),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No fields found',
+                          style: TextStyle(
+                            color: AppColors.textGrey,
+                            fontSize: 13,
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No fields match your search',
-                            style: TextStyle(color: AppColors.textGrey),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: filteredTypes.map((type) {
-                        return _buildFieldButton(context, type);
-                      }).toList(),
+                        ),
+                      ],
                     ),
-            ),
+                  )
+                : Theme(
+                    data: Theme.of(
+                      context,
+                    ).copyWith(dividerColor: Colors.transparent),
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          width: double.infinity,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primary.withOpacity(0.08),
+                                AppColors.primary.withOpacity(0.02),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.2),
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () {},
+                            borderRadius: BorderRadius.circular(8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  FontAwesomeIcons.wandMagicSparkles,
+                                  color: AppColors.primary,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'AI Assistant',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        ...categories.entries.map((entry) {
+                          final categoryName = entry.key;
+                          final categoryTypes = entry.value;
+
+                          final filteredCategoryTypes = categoryTypes.where((
+                            type,
+                          ) {
+                            return _matchesSearch(type, _searchQuery);
+                          }).toList();
+
+                          if (filteredCategoryTypes.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: ExpansionTile(
+                              title: Text(
+                                categoryName,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textGrey,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              initiallyExpanded: true,
+                              shape: const Border(), // Remove default borders
+                              dense: true,
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: const EdgeInsets.only(
+                                bottom: 8,
+                                left: 4,
+                                right: 4,
+                              ),
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: filteredCategoryTypes.map((type) {
+                                    return _buildFieldButton(context, type);
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+
+                        if (customFields.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: ExpansionTile(
+                              title: const Text(
+                                'Custom Fields',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textGrey,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              initiallyExpanded: true,
+                              shape: const Border(),
+                              dense: true,
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: const EdgeInsets.only(
+                                bottom: 8,
+                                left: 4,
+                                right: 4,
+                              ),
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: customFields
+                                      .where((f) {
+                                        if (_searchQuery.isEmpty) return true;
+                                        return f.name.toLowerCase().contains(
+                                          _searchQuery.toLowerCase(),
+                                        );
+                                      })
+                                      .map((template) {
+                                        return _buildCustomFieldButton(
+                                          context,
+                                          template,
+                                        );
+                                      })
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
           ),
         ],
       ),
@@ -157,18 +419,42 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
   }
 
   Widget _buildFieldButton(BuildContext context, QuestionType type) {
-    return Draggable<QuestionType>(
+    return Draggable<Object>(
       data: type,
       feedback: Material(
         color: Colors.transparent,
         child: Opacity(
           opacity: 0.8,
-          child: _FieldButtonCard(type: type, width: 120),
+          child: _FieldButtonCard(type: type, width: 110),
+        ),
+      ),
+      child: _FieldButtonCard(type: type, width: 105),
+    );
+  }
+
+  Widget _buildCustomFieldButton(
+    BuildContext context,
+    CustomFieldTemplate template,
+  ) {
+    return Draggable<Object>(
+      data: template,
+      feedback: Material(
+        color: Colors.transparent,
+        child: Opacity(
+          opacity: 0.8,
+          child: _FieldButtonCard(
+            type: template.question.type,
+            label: template.name,
+            width: 110,
+            isCustom: true,
+          ),
         ),
       ),
       child: _FieldButtonCard(
-        type: type,
-        width: 120, // Strict sizing
+        type: template.question.type,
+        label: template.name,
+        width: 105,
+        isCustom: true,
       ),
     );
   }
@@ -176,26 +462,40 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
 
 class _FieldButtonCard extends StatelessWidget {
   final QuestionType type;
+  final String? label;
   final double width;
+  final bool isCustom;
 
-  const _FieldButtonCard({required this.type, required this.width});
+  const _FieldButtonCard({
+    required this.type,
+    this.label,
+    required this.width,
+    this.isCustom = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColorForType(type);
+    final color = isCustom
+        ? AppColors.primary
+        : FieldRegistry.getColorForType(type);
 
     return Container(
       width: width,
-      height: 90,
+      height: 85,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(
+          color: isCustom
+              ? AppColors.primary.withOpacity(0.3)
+              : AppColors.borderLight,
+          width: isCustom ? 1.5 : 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: color.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -205,73 +505,29 @@ class _FieldButtonCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(_getIconForType(type), color: color, size: 20),
+            child: Icon(
+              FieldRegistry.getIconForType(type),
+              color: color,
+              size: 18,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            type.label,
-            style: const TextStyle(
+            label ?? type.label,
+            style: TextStyle(
               color: AppColors.textDark,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              fontWeight: isCustom ? FontWeight.bold : FontWeight.w600,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
-  }
-
-  Color _getColorForType(QuestionType type) {
-    switch (type) {
-      case QuestionType.shortText:
-      case QuestionType.paragraph:
-      case QuestionType.number:
-      case QuestionType.email:
-      case QuestionType.mobile:
-      case QuestionType.url:
-        return AppColors.fieldText;
-      case QuestionType.dropdown:
-      case QuestionType.checkboxes:
-      case QuestionType.multipleChoice:
-        return AppColors.fieldChoice;
-      case QuestionType.date:
-      case QuestionType.time:
-        return AppColors.fieldDate;
-      case QuestionType.fileUpload:
-        return AppColors.fieldMedia;
-    }
-  }
-
-  IconData _getIconForType(QuestionType type) {
-    switch (type) {
-      case QuestionType.shortText:
-        return FontAwesomeIcons.textWidth;
-      case QuestionType.paragraph:
-        return FontAwesomeIcons.alignLeft;
-      case QuestionType.number:
-        return FontAwesomeIcons.hashtag;
-      case QuestionType.date:
-        return FontAwesomeIcons.calendar;
-      case QuestionType.time:
-        return FontAwesomeIcons.clock;
-      case QuestionType.dropdown:
-        return FontAwesomeIcons.caretDown;
-      case QuestionType.checkboxes:
-        return FontAwesomeIcons.squareCheck;
-      case QuestionType.multipleChoice:
-        return FontAwesomeIcons.circleDot;
-      case QuestionType.fileUpload:
-        return FontAwesomeIcons.fileArrowUp;
-      case QuestionType.email:
-        return FontAwesomeIcons.envelope;
-      case QuestionType.mobile:
-        return FontAwesomeIcons.phone;
-      case QuestionType.url:
-        return FontAwesomeIcons.link;
-    }
   }
 }

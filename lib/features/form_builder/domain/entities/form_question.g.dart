@@ -27,6 +27,7 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       inputMask: json['inputMask'] as String?,
       customErrorMessage: json['customErrorMessage'] as String?,
       conditionalLogic: json['conditionalLogic'] as Map<String, dynamic>?,
+      metadata: json['metadata'] as Map<String, dynamic>?,
       style: json['style'] == null
           ? const QuestionStyle()
           : QuestionStyle.fromJson(json['style'] as Map<String, dynamic>),
@@ -51,6 +52,7 @@ Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
       'inputMask': instance.inputMask,
       'customErrorMessage': instance.customErrorMessage,
       'conditionalLogic': instance.conditionalLogic,
+      'metadata': instance.metadata,
       'style': instance.style,
     };
 
@@ -67,4 +69,11 @@ const _$QuestionTypeEnumMap = {
   QuestionType.email: 'email',
   QuestionType.mobile: 'mobile',
   QuestionType.url: 'url',
+  QuestionType.rating: 'rating',
+  QuestionType.signature: 'signature',
+  QuestionType.slider: 'slider',
+  QuestionType.image: 'image',
+  QuestionType.divider: 'divider',
+  QuestionType.spacer: 'spacer',
+  QuestionType.matrixChoice: 'matrix_choice',
 };

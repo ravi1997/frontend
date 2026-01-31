@@ -25,6 +25,20 @@ enum QuestionType {
   mobile,
   @JsonValue('url')
   url,
+  @JsonValue('rating')
+  rating,
+  @JsonValue('signature')
+  signature,
+  @JsonValue('slider')
+  slider,
+  @JsonValue('image')
+  image,
+  @JsonValue('divider')
+  divider,
+  @JsonValue('spacer')
+  spacer,
+  @JsonValue('matrix_choice')
+  matrixChoice,
 }
 
 extension QuestionTypeExtension on QuestionType {
@@ -33,7 +47,7 @@ extension QuestionTypeExtension on QuestionType {
       case QuestionType.shortText:
         return 'Short Text';
       case QuestionType.paragraph:
-        return 'Paragraph';
+        return 'Long Text';
       case QuestionType.number:
         return 'Number';
       case QuestionType.date:
@@ -54,6 +68,20 @@ extension QuestionTypeExtension on QuestionType {
         return 'Mobile';
       case QuestionType.url:
         return 'URL';
+      case QuestionType.rating:
+        return 'Rating';
+      case QuestionType.signature:
+        return 'Signature';
+      case QuestionType.slider:
+        return 'Slider';
+      case QuestionType.image:
+        return 'Image';
+      case QuestionType.divider:
+        return 'Divider';
+      case QuestionType.spacer:
+        return 'Spacer';
+      case QuestionType.matrixChoice:
+        return 'Matrix Choice';
     }
   }
 }

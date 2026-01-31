@@ -26,6 +26,7 @@ abstract class FormQuestion with _$FormQuestion {
     String? inputMask,
     String? customErrorMessage,
     Map<String, dynamic>? conditionalLogic,
+    Map<String, dynamic>? metadata,
     @Default(QuestionStyle()) QuestionStyle style,
   }) = _FormQuestion;
 

@@ -1,11 +1,15 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../core/utils/error_handler.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_builder_state.dart';
 import '../../domain/entities/form_question.dart';
 import '../../domain/entities/form_section.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/repositories/form_builder_repository.dart';
+import '../../domain/entities/form_version_history.dart';
+import '../../domain/services/field_registry.dart';
+import '../../domain/entities/custom_field_template.dart';
 
 part 'form_builder_controller.g.dart';
 
@@ -82,12 +86,7 @@ class FormBuilderController extends _$FormBuilderController {
 
   void addQuestion(String sectionId, QuestionType type) {
     if (state.value == null) return;
-    final newQuestion = FormQuestion(
-      id: _uuid.v4(),
-      label: 'Untitled ${type.name.toLowerCase().replaceAll('_', ' ')}',
-      type: type,
-      placeholder: '${type.label} input placeholder...',
-    );
+    final newQuestion = FieldRegistry.getDefaultQuestion(type);
 
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
@@ -102,6 +101,52 @@ class FormBuilderController extends _$FormBuilderController {
         selectedQuestionId: newQuestion.id,
         selectedSectionId: sectionId,
         isFormSelected: false,
+      ),
+    );
+  }
+
+  void addQuestionFromTemplate(String sectionId, CustomFieldTemplate template) {
+    if (state.value == null) return;
+    final newQuestion = template.question.copyWith(id: _uuid.v4());
+
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(questions: [...s.questions, newQuestion]);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+        selectedQuestionId: newQuestion.id,
+        selectedSectionId: sectionId,
+        isFormSelected: false,
+      ),
+    );
+  }
+
+  void updateQuestionMetadata(
+    String questionId,
+    Map<String, dynamic> metadata,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final updatedQuestion = s.questions[qIndex].copyWith(
+          metadata: {...s.questions[qIndex].metadata ?? {}, ...metadata},
+        );
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = updatedQuestion;
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
       ),
     );
   }
@@ -202,6 +247,15 @@ class FormBuilderController extends _$FormBuilderController {
     state = AsyncValue.data(
       state.value!.copyWith(
         form: updatedForm.copyWith(sections: state.value!.form.sections),
+      ),
+    );
+  }
+
+  void updateWorkflows(Map<String, dynamic> workflows) {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(workflows: workflows),
       ),
     );
   }
@@ -321,17 +375,67 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  Future<void> saveForm() async {
-    if (state.value == null) return;
+  Future<bool> saveForm() async {
+    if (state.value == null) return false;
     state = AsyncValue.data(state.value!.copyWith(isSaving: true));
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
       await repository.saveForm(state.value!.form);
       state = AsyncValue.data(state.value!.copyWith(isSaving: false));
+      return true;
     } catch (e) {
+      final error = ErrorHandler.handle(e);
       state = AsyncValue.data(
-        state.value!.copyWith(isSaving: false, error: e.toString()),
+        state.value!.copyWith(isSaving: false, error: error.toString()),
       );
+      return false;
+    }
+  }
+
+  Future<bool> publishForm() async {
+    if (state.value == null) return false;
+
+    // Logic to increment version: 1.0.0 -> 1.0.1
+    final currentVersion = state.value!.form.version;
+    final parts = currentVersion.split('.');
+    String nextVersion = currentVersion;
+    if (parts.length == 3) {
+      final patch = int.tryParse(parts[2]) ?? 0;
+      nextVersion = '${parts[0]}.${parts[1]}.${patch + 1}';
+    }
+
+    final newHistoryEntry = FormVersionHistory(
+      version: nextVersion,
+      createdAt: DateTime.now(),
+      changeLog: 'Form published',
+    );
+
+    final publishedForm = state.value!.form.copyWith(
+      isPublished: true,
+      status: 'published',
+      version: nextVersion,
+      versionHistory: [...state.value!.form.versionHistory, newHistoryEntry],
+    );
+
+    state = AsyncValue.data(
+      state.value!.copyWith(form: publishedForm, isSaving: true),
+    );
+
+    try {
+      final repository = ref.read(formBuilderRepositoryProvider);
+      await repository.saveForm(publishedForm);
+      state = AsyncValue.data(state.value!.copyWith(isSaving: false));
+      return true;
+    } catch (e) {
+      final error = ErrorHandler.handle(e);
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(isPublished: false, status: 'draft'),
+          isSaving: false,
+          error: error.toString(),
+        ),
+      );
+      return false;
     }
   }
 }

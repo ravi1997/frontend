@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/form_section.dart';
 import '../../domain/entities/question_type.dart';
+import '../../domain/entities/custom_field_template.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../controllers/form_builder_controller.dart';
@@ -330,7 +331,9 @@ class FormCanvasWidget extends ConsumerWidget {
 
     return DragTarget<Object>(
       onWillAcceptWithDetails: (details) {
-        return details.data is QuestionType || details.data is QuestionDragData;
+        return details.data is QuestionType ||
+            details.data is QuestionDragData ||
+            details.data is CustomFieldTemplate;
       },
       onAcceptWithDetails: (details) {
         final notifier = ref.read(
@@ -338,6 +341,11 @@ class FormCanvasWidget extends ConsumerWidget {
         );
         if (details.data is QuestionType) {
           notifier.addQuestion(section.id, details.data as QuestionType);
+        } else if (details.data is CustomFieldTemplate) {
+          notifier.addQuestionFromTemplate(
+            section.id,
+            details.data as CustomFieldTemplate,
+          );
         } else if (details.data is QuestionDragData) {
           final data = details.data as QuestionDragData;
           if (data.sectionId == section.id) {

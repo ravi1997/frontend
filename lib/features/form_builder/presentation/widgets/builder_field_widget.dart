@@ -338,7 +338,7 @@ class BuilderFieldWidget extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: AppColors.borderLight,
-              style: BorderStyle.none, // Can't do dashed easily with Border
+              style: BorderStyle.none,
               width: 1,
             ),
             color: AppColors.fieldBackground,
@@ -361,11 +361,148 @@ class BuilderFieldWidget extends StatelessWidget {
                     style: textStyle.copyWith(
                       fontSize: 13,
                       color: AppColors.textGrey,
-                    ), // Keep generic for file upload
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
+        );
+      case QuestionType.rating:
+        return Row(
+          children: List.generate(
+            5,
+            (i) => Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(
+                Icons.star_border,
+                color: textStyle.color ?? Colors.orange,
+                size: 28,
+              ),
+            ),
+          ),
+        );
+      case QuestionType.signature:
+        return Container(
+          height: 100,
+          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          child: Center(
+            child: Icon(
+              Icons.draw,
+              color: textStyle.color?.withValues(alpha: 0.3) ??
+                  AppColors.textGrey,
+              size: 32,
+            ),
+          ),
+        );
+      case QuestionType.slider:
+        return Column(
+          children: [
+            Slider(
+              value: 0.5,
+              onChanged: (_) {},
+              activeColor: textStyle.color ?? AppColors.brandBlue,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('0', style: textStyle.copyWith(fontSize: 12)),
+                  Text('100', style: textStyle.copyWith(fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        );
+      case QuestionType.image:
+        return Container(
+          height: 120,
+          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.image_outlined,
+                  color:
+                      textStyle.color?.withValues(alpha: 0.3) ??
+                      AppColors.textGrey,
+                  size: 32,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Upload Image',
+                  style: textStyle.copyWith(
+                    fontSize: 12,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      case QuestionType.divider:
+        return Divider(
+          height: 32,
+          thickness: 1,
+          color: textStyle.color ?? AppColors.borderLight,
+        );
+      case QuestionType.spacer:
+        return const SizedBox(height: 32);
+      case QuestionType.matrixChoice:
+        return Container(
+          padding: const EdgeInsets.all(8),
+          decoration: containerDecor,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const SizedBox(width: 80),
+                  ...List.generate(
+                    3,
+                    (i) => Expanded(
+                      child: Center(
+                        child: Text(
+                          'Col ${i + 1}',
+                          style: textStyle.copyWith(fontSize: 10),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(),
+              ...List.generate(
+                2,
+                (i) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          'Row ${i + 1}',
+                          style: textStyle.copyWith(fontSize: 10),
+                        ),
+                      ),
+                      ...List.generate(
+                        3,
+                        (j) => const Expanded(
+                          child: Center(
+                            child: Icon(
+                              Icons.radio_button_unchecked,
+                              size: 14,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         );
     }
