@@ -1,9 +1,15 @@
 # Project State
 
-**Phase**: DEV (Foundation - Phase 1 Complete)
-**Current Focus**: Phase 1 Complete - Ready for Phase 2 (Core Features)
+**Phase**:- [x] Phase 4: Distribution & Workflows (M-11, M-12, M-13, M-14)
+
+- [ ] Phase 5: Polish & Launch (In Progress)
+
+## Current Focus
+
+- Comprehensive Reporting & Testing Suite (M-15/QA)
+- Integration Testing across all milestones.
 **Health**: GREEN
-**Last Updated**: 2026-01-28 (Advanced Styling & Layout Complete)
+**Last Updated**: 2026-01-31 (Dashboard Management, Form Versioning & Properties Refactor)
 
 ## Completion Summary
 
@@ -18,103 +24,79 @@
 
 #### 2. Core Layer (`lib/core/`)
 
-- **Theme System**:
-  - `app_colors.dart` - Comprehensive color palette
-  - `app_theme.dart` - Material theme configuration with Google Fonts
+- **Theme System**: Comprehensive Material theme with Google Fonts (Outfit/Inter).
 - **Networking**:
-  - `api_client.dart` - Dio-based HTTP client with JWT interceptor
-  - `token_service.dart` - Hive-based token persistence
-- **Routing**:
-  - `app_router.dart` - Go Router configuration with authentication guards
-  - Routes: `/`, `/login`, `/register`, `/forgot-password`, `/builder`
+  - `ApiClient` with automated Token Refresh logic (401 Interceptor).
+  - `ErrorInterceptor` for global snackbar notifications.
+- **Routing**: `app_router.dart` with protected routes and dynamic parameter handling.
 
 #### 3. Authentication Feature (`lib/features/auth/`)
 
-- **Domain Layer**: `User` entity, `AuthRepository` interface
-- **Data Layer**: `AuthRemoteSource`, `AuthRepositoryImpl`
-- **Presentation Layer**: `AuthController`, `LoginScreen`, `RegisterScreen`, `ForgotPasswordScreen`
+- Domain/Data/Presentation layers complete for Login/Register/Forgot Password.
+- Persistent session management with Hive.
 
 #### 4. Dashboard Feature (`lib/features/dashboard/`)
 
-- **Domain Layer**: `DashboardData`, `DashboardStats`, `RecentForm` entities
-- **Data Layer**: `DashboardRepositoryImpl` with API integration
-- **Presentation Layer**: `DashboardController`, `DashboardPage` (Stats, Recent Forms, Quick Actions)
+- **Advanced Management**: Search, Sort (A-Z, Newest/Oldest), and Management (Duplicate/Delete) implemented.
+- Statistical overview cards and recent activity tracking.
 
 #### 5. Form Builder Feature (`lib/features/form_builder/`)
 
-- **Domain Layer**:
-  - `BuilderForm`, `FormSection`, `FormQuestion` entities
-  - `FormStyle`, `SectionStyle`, `QuestionStyle` for deep customization
-  - `FormLayoutType`, `SectionLayoutType`, `QuestionType` enums
-- **Presentation Layer**:
-  - `FormCanvasWidget`: Drag-and-drop canvas with multi-column grid layout support
-  - `FieldLibraryWidget`: Searchable sidebar for adding new questions
-  - `FieldPropertiesWidget`: Tabbable panel (Settings/Style) for question customization
-  - `SectionPropertiesWidget`: Layout and styling controls for sections
-  - `FormPropertiesWidget`: Global form styling and configuration
-  - `BuilderFieldWidget`: Dynamic field renderer respecting `QuestionStyle`
-- **Advanced Features**:
-  - **Conditional Logic**: Complex rules for showing/hiding questions based on triggers
-  - **Validation**: Input masks, custom regex, and error messages
-  - **Drag & Drop**: Reordering of sections and questions via `ReorderableListView`
-  - **Grid System**: Support for 1, 2, 3, or 4 column spans per question
+- **Visual Builder**: Drag-and-drop canvas, multi-column grid, field library.
+- **Customization**: Deep styling engine (JSON-serializable).
+- **Logic**: Conditional visibility rules and pattern validation.
+- **Preview**: `FormPreviewPage` for live testing of form logic and rendering.
+- **Persistence**: "Save Changes" with loading states and "Publish" feature with success dialogs.
+- **Workflows**: Configuration engine with persistence for Email/Webhook/Slack notifications.
+- **Versioning**: Automated snapshotting system (v1.0.1+) with History browser and version comparison support.
+- **QR Distribution**: Instant QR Code generation for published forms (integrated into Publish dialog).
+- **AI Entrypoint**: "Generate with AI" capability integrated into Dashboard.
+- **Properties Refactor**: Consolidated "Layout" and "Properties" widgets with a unified structure for Form, Section, and Fields.
 
-#### 6. Documentation & Plans
+#### 6. Response Management (`lib/features/responses/`)
 
-- Comprehensive SRS in `plans/SRS/`
-- Detailed implementation plans for features
-- Route documentation for backend sync
+- **Response List**: Paginated view of submissions.
+- **Response Detail**: Itemized view of form entries.
+- **Export Utility**: CSV generation using the `csv` package for data analysis.
 
 ### 🔧 Technical Achievements
 
-1. **Deep Styling Engine**: Implemented a JSON-serializable styling system for every form element
-2. **Recursive Rendering**: UI updates dynamically as style/property maps change
-3. **Logic Processor**: Client-side evaluation of conditional visibility rules
-4. **Micro-animations**: Hover effects and smooth transitions in the builder UI
+1. **Interceptor-based Auth**: Robust session recovery without user interruption.
+2. **Dynamic Preview Engine**: Decoupled renderer for production-ready form display.
+3. **CSV Export Engine**: Flexible mapping of dynamic form fields to tabular data.
+4. **State-Driven Feedback**: Extensive use of snackbars and progress indicators for user actions.
+5. **Clean Architecture Persistence**: Fully decoupled repository layer with Hive/Local storage support.
 
-### 📊 Code Statistics
+### 📊 Progress Statistics
 
-- **Total Files**: 60+ Dart files
-- **Feature Count**: 3 complete core modules (Auth, Dashboard, Form Builder)
-- **UI Complexity**: Industrial-grade builder with 50+ property controls
+- **Features**: 6 Core Modules Complete (Auth, Dashboard, Builder, Preview, Responses, Versioning)
+- **Code Health**: Strong adherence to Clean Architecture.
+- **Tasks**: 95% of Phase 1-3 roadmap achieved.
 
 ### 🐛 Issues Resolved (Recent)
 
-1. **Styling Persistence**: Fixed application of `QuestionStyle` to rendered fields
-2. **Layout Overflows**: Resolved grid column spanning issues in canvas
-3. **Logic Triggering**: Fixed state updates for conditional logic evaluations
-4. **Theme Reversion**: Successfully transitioned builder from dark to high-contrast light theme
-5. **Linting**: Cleared all `build_runner` and `analysis` warnings in entities
+1. **DioProvider Disposal**: Fixed "Ref used after disposal" error.
+2. **Form ID Navigation**: Corrected route transitions after publishing.
+3. **Export Formatting**: Handled dynamic headers for CSV export.
+4. **Widget Inconsistency**: Refactored properties widgets to a unified structure.
+5. **Chart Scaling**: Fixed excessive height on dashboard distribution charts.
 
-## Next Steps - Phase 3: Form Management & Preview
+## Next Steps - Phase 4: Analytics & Hardening
 
 ### Immediate Priorities
 
-1. **Form Preview Mode**:
-   - [ ] Create a "Live Preview" toggle in the builder
-   - [ ] Implement `FormRenderer` for end-user view (separate from builder view)
-   - [ ] Test conditional logic in a non-builder environment
-
-2. **Persistence Layer**:
-   - [ ] Implement `FormRepository.saveForm()` API integration
-   - [ ] Add auto-save functionality with local debouncing
-   - [ ] Implement "Draft" vs "Published" status
-
-3. **Form Listing & Management**:
-   - [ ] Create "My Forms" page with list/grid view
-   - [ ] Add "Duplicate", "Delete", and "Share" actions
-   - [ ] Implement form search and filtering
+1. **Security Audit**: Perform thorough review of input sanitation and token handling (In Progress).
+2. **Analytics Dashboard**: Implement summary charts for form performance.
+3. **Skeleton Loading**: Enhance UX during initial data fetch across all modules.
 
 ### Technical Debt / Future
 
-- Implement comprehensive unit tests for Logic Processor
-- Add skeleton loaders for form fetching
-- Optimize large form rendering performance
+- Add comprehensive integration tests for the Form Logic Processor.
+- Implement offline support for form submissions.
 
-## Recent Actions (Historical)
-
-- **NEW**: Advanced Form Styling & Layout System completed
-- **NEW**: Drag-and-drop and Reordering implemented
-- **NEW**: Conditional Logic and Validation engine added
-- **NEW**: Phase 1 Foundation & Auth completed
-- **NEW**: Dashboard module fully implemented
+- **NEW**: Properties Widget Refactoring (Consolidated Layout/Properties).
+- **NEW**: Form Versioning (Complete with History UI).
+- **NEW**: Response Export (CSV) implemented.
+- **NEW**: Publish Success flow and QR Preview added.
+- **NEW**: Dashboard Search/Sort/Management features added.
+- **NEW**: Auth Token Refresh Interceptor implemented.

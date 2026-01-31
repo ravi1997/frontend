@@ -2,15 +2,15 @@
 
 ## Status
 
-- **Functional Requirements**: [DRAFTED]
-- **Non-Functional Requirements**: [DRAFTED]
-- **User Stories**: [IN_PROGRESS]
-- **Acceptance Criteria**: [PARTIAL]
+- **Functional Requirements**: [DONE]
+- **Non-Functional Requirements**: [DONE]
+- **User Stories**: [COMPLETE]
+- **Acceptance Criteria**: [COMPLETE]
 
 ## Links
 
 - **Full SRS Path**: `plans/SRS/SRS_INDEX.md`
-- **Last Approved Version**: v1.0 (Phase 1 & 2 scope)
+- **Last Approved Version**: v1.2 (Including Responses & Export)
 
 ## Approval
 

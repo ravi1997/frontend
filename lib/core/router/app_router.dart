@@ -6,6 +6,11 @@ import '../../../features/auth/presentation/screens/login_screen.dart';
 import '../../../features/auth/presentation/screens/register_screen.dart';
 import '../../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../../features/form_builder/presentation/pages/form_builder_page.dart';
+import '../../../features/responses/presentation/pages/response_list_page.dart';
+import '../../../features/responses/presentation/pages/response_detail_page.dart';
+import '../../../features/form_builder/domain/entities/builder_form.dart';
+import '../../../features/form_builder/presentation/pages/form_preview_page.dart';
+import '../../../features/analytics/presentation/pages/analytics_page.dart';
 
 part 'app_router.g.dart';
 
@@ -57,11 +62,39 @@ Raw<GoRouter> appRouter(Ref ref) {
           return FormBuilderPage(formId: formId);
         },
       ),
+      GoRoute(
+        path: '/forms/:formId/responses',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          return ResponseListPage(formId: formId);
+        },
+      ),
+      GoRoute(
+        path: '/responses/:responseId',
+        builder: (context, state) {
+          final responseId = state.pathParameters['responseId']!;
+          return ResponseDetailPage(responseId: responseId);
+        },
+      ),
+      GoRoute(
+        path: '/form-preview',
+        builder: (context, state) {
+          final form = state.extra as BuilderForm;
+          return FormPreviewPage(form: form);
+        },
+      ),
+      GoRoute(
+        path: '/forms/:formId/analytics',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          return AnalyticsPage(formId: formId);
+        },
+      ),
     ],
   );
 
   // Listen to auth changes and refresh router
-  ref.listen<AsyncValue>(authControllerProvider, (_, __) {
+  ref.listen<AsyncValue>(authControllerProvider, (previous, next) {
     router.refresh();
   });
 

@@ -2,20 +2,20 @@
 
 ## Detected Environment
 
-- **Primary Language**: [NONE]
-- **Framework**: [NONE]
-- **Build System**: [NONE]
-- **Package Manager**: [NONE]
-- **Runtime Version**: [NONE]
+- **Primary Language**: Dart
+- **Framework**: Flutter
+- **Build System**: build_runner
+- **Package Manager**: pub
+- **Runtime Version**: Flutter 3.x (Dart 3.x)
 
 ## Infrastructure
 
-- **Database**: [NONE]
-- **Caching**: [NONE]
-- **Containerization**: [NONE]
+- **Database**: Hive (LocalStorage)
+- **Caching**: Hive / Dio Interceptors
+- **Containerization**: N/A (Web/Mobile Deployment)
 
 ## Tooling
 
-- **Linter**: [NONE]
-- **Formatter**: [NONE]
-- **Test Runner**: [NONE]
+- **Linter**: flutter_lints / custom analysis_options.yaml
+- **Formatter**: dart format
+- **Test Runner**: flutter test
