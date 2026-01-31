@@ -31,6 +31,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
         updatedAt: DateTime.parse(
           json['updated_at'] ?? DateTime.now().toIso8601String(),
         ),
+        createdAt: json['created_at'] != null
+            ? DateTime.parse(json['created_at'])
+            : null,
       );
     }).toList();
 
@@ -55,8 +58,27 @@ class DashboardRepositoryImpl implements DashboardRepository {
         activeForms: activeForms,
         totalResponses: totalResponses,
       ),
-      recentForms: recentForms.take(5).toList(), // Show only top 5 recent
+      recentForms: recentForms.take(20).toList(), // Show up to 20 forms
     );
+  }
+
+  @override
+  Future<void> deleteForm(String id) async {
+    await _dio.delete('/form/$id');
+  }
+
+  @override
+  Future<void> duplicateForm(String originalFormId, String newTitle) async {
+    final response = await _dio.get('/form/$originalFormId');
+    final formData = Map<String, dynamic>.from(response.data);
+
+    // Remove ID and update title
+    formData.remove('id');
+    formData.remove('_id');
+    formData['title'] = newTitle;
+
+    // Save as new form
+    await _dio.post('/form/', data: formData);
   }
 }
 

@@ -11,6 +11,9 @@ _RecentForm _$RecentFormFromJson(Map<String, dynamic> json) => _RecentForm(
   title: json['title'] as String,
   status: json['status'] as String,
   updatedAt: DateTime.parse(json['updatedAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
 );
 
 Map<String, dynamic> _$RecentFormToJson(_RecentForm instance) =>
@@ -19,4 +22,5 @@ Map<String, dynamic> _$RecentFormToJson(_RecentForm instance) =>
       'title': instance.title,
       'status': instance.status,
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt?.toIso8601String(),
     };

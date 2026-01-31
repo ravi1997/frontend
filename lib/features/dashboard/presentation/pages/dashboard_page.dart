@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../domain/entities/dashboard_data.dart';
-import '../../domain/entities/recent_form.dart';
+import '../widgets/dashboard_stats_card.dart';
+import '../widgets/recent_forms_list.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -210,10 +211,140 @@ class _DashboardContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _StatsRow(data: data),
-        const SizedBox(height: 32),
-        _RecentFormsSection(forms: data.recentForms),
+        _StatsGrid(data: data),
+        const SizedBox(height: 48),
+        const _DashboardFilterBar(),
+        const SizedBox(height: 24),
+        const RecentFormsList(),
       ],
+    );
+  }
+}
+
+class _DashboardFilterBar extends ConsumerWidget {
+  const _DashboardFilterBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sortBy = ref.watch(dashboardSortByProvider);
+
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            key: const Key('dashboard_search_field'),
+            onChanged: (value) =>
+                ref.read(dashboardSearchQueryProvider.notifier).setQuery(value),
+            decoration: InputDecoration(
+              hintText: 'Search forms by name...',
+              prefixIcon: const Icon(
+                Icons.search,
+                size: 20,
+                color: Color(0xFF6B7280),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: Color(0xFF2563EB),
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              key: const Key('dashboard_sort_dropdown'),
+              value: sortBy,
+              icon: const Icon(Icons.sort, size: 20, color: Color(0xFF6B7280)),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  ref.read(dashboardSortByProvider.notifier).setSort(newValue);
+                }
+              },
+              items: <String>['Newest First', 'Oldest First', 'A-Z']
+                  .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: const Color(0xFF374151),
+                        ),
+                      ),
+                    );
+                  })
+                  .toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatsGrid extends StatelessWidget {
+  final DashboardData data;
+  const _StatsGrid({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double spacing = 24;
+        final double cardWidth = (constraints.maxWidth - (spacing * 2)) / 3;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            DashboardStatsCard(
+              title: 'Total Forms',
+              value: data.stats.totalForms.toString(),
+              subtitle: 'Forms created',
+              icon: Icons.description_outlined,
+              width: cardWidth,
+            ),
+            DashboardStatsCard(
+              title: 'Responses',
+              value: data.stats.totalResponses.toString(),
+              subtitle: 'Total submissions',
+              icon: Icons.people_outline,
+              width: cardWidth,
+            ),
+            DashboardStatsCard(
+              title: 'Active Forms',
+              value: data.stats.activeForms.toString(),
+              subtitle: 'Published forms',
+              icon: Icons.check_circle_outline,
+              width: cardWidth,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -241,6 +372,24 @@ class _ActionButtons extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
+        ElevatedButton.icon(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF8B5CF6), // Purple for AI
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          icon: const Icon(FontAwesomeIcons.wandMagicSparkles, size: 16),
+          label: Text(
+            'Generate with AI',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 12),
         OutlinedButton.icon(
           onPressed: () {},
           style: OutlinedButton.styleFrom(
@@ -263,281 +412,6 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-class _StatsRow extends StatelessWidget {
-  final DashboardData data;
-  const _StatsRow({required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double spacing = 24;
-        final double cardWidth = (constraints.maxWidth - (spacing * 2)) / 3;
-
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            _StatCard(
-              title: 'Total Forms',
-              value: data.stats.totalForms.toString(),
-              subtitle: 'Forms created',
-              icon: Icons.description_outlined,
-              width: cardWidth,
-            ),
-            _StatCard(
-              title: 'Responses',
-              value: data.stats.totalResponses.toString(),
-              subtitle: 'Total submissions',
-              icon: Icons.people_outline,
-              width: cardWidth,
-            ),
-            _StatCard(
-              title: 'Active Forms',
-              value: data.stats.activeForms.toString(),
-              subtitle: 'Published forms',
-              icon: Icons.check_circle_outline,
-              width: cardWidth,
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final String subtitle;
-  final IconData icon;
-  final double width;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.icon,
-    required this.width,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF374151),
-                ),
-              ),
-              Icon(icon, color: const Color(0xFF9CA3AF), size: 20),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF111827),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: const Color(0xFF6B7280),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecentFormsSection extends StatelessWidget {
-  final List<RecentForm> forms;
-  const _RecentFormsSection({required this.forms});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Recent Forms',
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF111827),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Your recently created or modified forms',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: const Color(0xFF6B7280),
-            ),
-          ),
-          const SizedBox(height: 24),
-          if (forms.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                child: Text(
-                  'No forms yet. Create your first form!',
-                  style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
-                ),
-              ),
-            )
-          else
-            ...forms.map(
-              (form) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _RecentFormItem(
-                  id: form.id,
-                  title: form.title,
-                  subtitle:
-                      '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
-                ),
-              ),
-            ),
-          const SizedBox(height: 24),
-          Center(
-            child: TextButton(
-              onPressed: () {},
-              child: Text(
-                'View all activity',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF2563EB),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecentFormItem extends StatelessWidget {
-  final String id;
-  final String title;
-  final String subtitle;
-
-  const _RecentFormItem({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Icon(
-              Icons.description_outlined,
-              color: Color(0xFF2563EB),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF6B7280),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () => context.go('/builder/$id'),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF374151),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Edit',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.arrow_forward, size: 14),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _GettingStartedSection extends StatelessWidget {
   const _GettingStartedSection();
 
@@ -547,8 +421,8 @@ class _GettingStartedSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [const Color(0xFFEFF6FF), const Color(0xFFF5F3FF)],
+        gradient: const LinearGradient(
+          colors: [Color(0xFFEFF6FF), Color(0xFFF5F3FF)],
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFDBEAFE)),

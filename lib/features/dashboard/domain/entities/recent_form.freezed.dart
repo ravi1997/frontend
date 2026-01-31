@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecentForm {
 
- String get id; String get title; String get status; DateTime get updatedAt;
+ String get id; String get title; String get status; DateTime get updatedAt; DateTime? get createdAt;
 /// Create a copy of RecentForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $RecentFormCopyWith<RecentForm> get copyWith => _$RecentFormCopyWithImpl<RecentF
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecentForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecentForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,updatedAt,createdAt);
 
 @override
 String toString() {
-  return 'RecentForm(id: $id, title: $title, status: $status, updatedAt: $updatedAt)';
+  return 'RecentForm(id: $id, title: $title, status: $status, updatedAt: $updatedAt, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $RecentFormCopyWith<$Res>  {
   factory $RecentFormCopyWith(RecentForm value, $Res Function(RecentForm) _then) = _$RecentFormCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String status, DateTime updatedAt
+ String id, String title, String status, DateTime updatedAt, DateTime? createdAt
 });
 
 
@@ -65,13 +65,14 @@ class _$RecentFormCopyWithImpl<$Res>
 
 /// Create a copy of RecentForm
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? updatedAt = null,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String status,  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String status,  DateTime updatedAt,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecentForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.updatedAt,_that.createdAt);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String status,  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String status,  DateTime updatedAt,  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _RecentForm():
-return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.updatedAt,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String status,  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String status,  DateTime updatedAt,  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _RecentForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
+return $default(_that.id,_that.title,_that.status,_that.updatedAt,_that.createdAt);case _:
   return null;
 
 }
@@ -212,13 +213,14 @@ return $default(_that.id,_that.title,_that.status,_that.updatedAt);case _:
 @JsonSerializable()
 
 class _RecentForm extends RecentForm {
-  const _RecentForm({required this.id, required this.title, required this.status, required this.updatedAt}): super._();
+  const _RecentForm({required this.id, required this.title, required this.status, required this.updatedAt, this.createdAt}): super._();
   factory _RecentForm.fromJson(Map<String, dynamic> json) => _$RecentFormFromJson(json);
 
 @override final  String id;
 @override final  String title;
 @override final  String status;
 @override final  DateTime updatedAt;
+@override final  DateTime? createdAt;
 
 /// Create a copy of RecentForm
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +235,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecentForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecentForm&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,title,status,updatedAt,createdAt);
 
 @override
 String toString() {
-  return 'RecentForm(id: $id, title: $title, status: $status, updatedAt: $updatedAt)';
+  return 'RecentForm(id: $id, title: $title, status: $status, updatedAt: $updatedAt, createdAt: $createdAt)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$RecentFormCopyWith<$Res> implements $RecentFormCopyWith<$
   factory _$RecentFormCopyWith(_RecentForm value, $Res Function(_RecentForm) _then) = __$RecentFormCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String status, DateTime updatedAt
+ String id, String title, String status, DateTime updatedAt, DateTime? createdAt
 });
 
 
@@ -270,13 +272,14 @@ class __$RecentFormCopyWithImpl<$Res>
 
 /// Create a copy of RecentForm
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? updatedAt = null,Object? createdAt = freezed,}) {
   return _then(_RecentForm(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

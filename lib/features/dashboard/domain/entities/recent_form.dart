@@ -11,6 +11,7 @@ abstract class RecentForm with _$RecentForm {
     required String title,
     required String status,
     required DateTime updatedAt,
+    DateTime? createdAt,
   }) = _RecentForm;
 
   factory RecentForm.fromJson(Map<String, dynamic> json) =>
