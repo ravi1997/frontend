@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/auth_controller.dart';
+import '../../../../core/widgets/snackbar_service.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -37,16 +38,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncData && next.value == null && previous is AsyncLoading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account created successfully! Please sign in.'),
-          ),
-        );
+        ref
+            .read(snackbarServiceProvider.notifier)
+            .showSuccess('Account created successfully! Please sign in.');
         context.go('/login');
       } else if (next is AsyncError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.error.toString())));
+        ref
+            .read(snackbarServiceProvider.notifier)
+            .showError(next.error.toString());
       }
     });
 
@@ -142,11 +141,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           : () {
                               if (_passwordController.text !=
                                   _confirmPasswordController.text) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Passwords do not match'),
-                                  ),
-                                );
+                                ref
+                                    .read(snackbarServiceProvider.notifier)
+                                    .showError('Passwords do not match');
                                 return;
                               }
 

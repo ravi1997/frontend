@@ -3,26 +3,48 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'token_service.g.dart';
 
-@riverpod
+class AuthTokens {
+  final String? accessToken;
+  final String? refreshToken;
+
+  AuthTokens({this.accessToken, this.refreshToken});
+}
+
+@Riverpod(keepAlive: true)
 class TokenService extends _$TokenService {
   static const String _boxName = 'auth_box';
-  static const String _tokenKey = 'access_token';
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
 
   @override
-  FutureOr<String?> build() async {
+  FutureOr<AuthTokens> build() async {
     final box = await Hive.openBox(_boxName);
-    return box.get(_tokenKey);
+    final accessToken = box.get(_accessTokenKey) as String?;
+    final refreshToken = box.get(_refreshTokenKey) as String?;
+    return AuthTokens(accessToken: accessToken, refreshToken: refreshToken);
   }
 
-  Future<void> setToken(String token) async {
+  Future<void> setTokens({
+    required String accessToken,
+    String? refreshToken,
+  }) async {
     final box = await Hive.openBox(_boxName);
-    await box.put(_tokenKey, token);
-    state = AsyncData(token);
+    await box.put(_accessTokenKey, accessToken);
+    if (refreshToken != null) {
+      await box.put(_refreshTokenKey, refreshToken);
+    }
+    state = AsyncData(
+      AuthTokens(
+        accessToken: accessToken,
+        refreshToken: refreshToken ?? state.value?.refreshToken,
+      ),
+    );
   }
 
-  Future<void> clearToken() async {
+  Future<void> clearTokens() async {
     final box = await Hive.openBox(_boxName);
-    await box.delete(_tokenKey);
-    state = const AsyncData(null);
+    await box.delete(_accessTokenKey);
+    await box.delete(_refreshTokenKey);
+    state = AsyncData(AuthTokens());
   }
 }

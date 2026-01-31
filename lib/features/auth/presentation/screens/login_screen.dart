@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/auth_controller.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/widgets/snackbar_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -35,19 +36,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncError) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Login Failed'),
-            content: Text(next.error.toString().replaceAll('Exception: ', '')),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        ref
+            .read(snackbarServiceProvider.notifier)
+            .showError(next.error.toString());
       }
     });
 

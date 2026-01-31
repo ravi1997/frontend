@@ -13,14 +13,14 @@ part of 'token_service.dart';
 final tokenServiceProvider = TokenServiceProvider._();
 
 final class TokenServiceProvider
-    extends $AsyncNotifierProvider<TokenService, String?> {
+    extends $AsyncNotifierProvider<TokenService, AuthTokens> {
   TokenServiceProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'tokenServiceProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,19 +33,19 @@ final class TokenServiceProvider
   TokenService create() => TokenService();
 }
 
-String _$tokenServiceHash() => r'ecf5fe07d16de04969d0953409c052b6408fbf8d';
+String _$tokenServiceHash() => r'0cc9230b2ccbb864a0da1669ec12add0190a53be';
 
-abstract class _$TokenService extends $AsyncNotifier<String?> {
-  FutureOr<String?> build();
+abstract class _$TokenService extends $AsyncNotifier<AuthTokens> {
+  FutureOr<AuthTokens> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<String?>, String?>;
+    final ref = this.ref as $Ref<AsyncValue<AuthTokens>, AuthTokens>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<String?>, String?>,
-              AsyncValue<String?>,
+              AnyNotifier<AsyncValue<AuthTokens>, AuthTokens>,
+              AsyncValue<AuthTokens>,
               Object?,
               Object?
             >;

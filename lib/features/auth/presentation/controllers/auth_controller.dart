@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
 import '../../data/repositories/auth_repository_impl.dart';
+import '../../../../core/utils/error_handler.dart';
 
 part 'auth_controller.g.dart';
 
@@ -9,12 +10,11 @@ part 'auth_controller.g.dart';
 class AuthController extends _$AuthController {
   @override
   FutureOr<User?> build() async {
-    // Watch token service to rebuild when token changes (e.g., on login/logout)
-    final tokenAsync = ref.watch(tokenServiceProvider);
+    final tokenState = ref.watch(tokenServiceProvider);
 
-    return tokenAsync.when(
-      data: (token) async {
-        if (token == null) return null;
+    return tokenState.when(
+      data: (tokens) async {
+        if (tokens.accessToken == null) return null;
         try {
           final repo = ref.read(authRepositoryImplProvider);
           return await repo.getCurrentUser();
@@ -34,7 +34,7 @@ class AuthController extends _$AuthController {
       final user = await repo.login(identifier, password);
       state = AsyncValue.data(user);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(ErrorHandler.handle(e), st);
     }
   }
 
@@ -45,7 +45,7 @@ class AuthController extends _$AuthController {
       final user = await repo.loginWithOtp(mobile, otp);
       state = AsyncValue.data(user);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(ErrorHandler.handle(e), st);
     }
   }
 
@@ -54,15 +54,18 @@ class AuthController extends _$AuthController {
       final repo = ref.read(authRepositoryImplProvider);
       await repo.generateOtp(mobile);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(ErrorHandler.handle(e), st);
     }
   }
 
   Future<void> logout() async {
     state = const AsyncValue.loading();
-    final repo = ref.read(authRepositoryImplProvider);
-    await repo.logout();
-    state = const AsyncValue.data(null);
+    try {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.logout();
+    } finally {
+      state = const AsyncValue.data(null);
+    }
   }
 
   Future<void> register({
@@ -84,12 +87,9 @@ class AuthController extends _$AuthController {
         employeeId: employeeId,
         mobile: mobile,
       );
-      // After registration, we might want to log in automatically or steer user to login
-      // For now, let's just clear the loading state.
-      // The register screen listener will handle navigation based on success.
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(ErrorHandler.handle(e), st);
     }
   }
 
@@ -100,7 +100,7 @@ class AuthController extends _$AuthController {
       await repo.requestPasswordReset(email);
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      state = AsyncValue.error(ErrorHandler.handle(e), st);
     }
   }
 }

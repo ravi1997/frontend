@@ -11,6 +11,7 @@ abstract class AuthRemoteSource {
   Future<void> generateOtp(String mobile);
   Future<void> logout();
   Future<User?> getCurrentUser();
+  Future<Map<String, dynamic>> refreshToken(String refreshToken);
   Future<Map<String, dynamic>> register({
     required String username,
     required String email,
@@ -65,6 +66,15 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       return null;
     }
     return null;
+  }
+
+  @override
+  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+    final response = await _dio.post(
+      '/auth/refresh',
+      data: {'refresh_token': refreshToken},
+    );
+    return response.data;
   }
 
   @override

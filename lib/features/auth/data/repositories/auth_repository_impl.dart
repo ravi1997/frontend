@@ -15,12 +15,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> login(String identifier, String password) async {
     final response = await _remoteSource.login(identifier, password);
-    final token = response['access_token'] as String;
-    await _tokenService.setToken(token);
+    final accessToken = response['access_token'] as String;
+    final refreshToken = response['refresh_token'] as String?;
+    await _tokenService.setTokens(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    );
 
-    // After login, we might want to fetch user data if the login response doesn't have it
-    // The current documentation says /login returns access_token.
-    // Let's assume we need to fetch user status.
     final user = await getCurrentUser();
     if (user == null) {
       throw Exception('Failed to retrieve user info after login');
@@ -31,8 +32,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> loginWithOtp(String mobile, String otp) async {
     final response = await _remoteSource.loginWithOtp(mobile, otp);
-    final token = response['access_token'] as String;
-    await _tokenService.setToken(token);
+    final accessToken = response['access_token'] as String;
+    final refreshToken = response['refresh_token'] as String?;
+    await _tokenService.setTokens(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    );
 
     final user = await getCurrentUser();
     if (user == null) {
@@ -51,7 +56,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _remoteSource.logout();
     } finally {
-      await _tokenService.clearToken();
+      await _tokenService.clearTokens();
     }
   }
 
@@ -82,6 +87,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> requestPasswordReset(String email) async {
     await _remoteSource.requestPasswordReset(email);
+  }
+
+  Future<String> refreshToken(String refreshToken) async {
+    final response = await _remoteSource.refreshToken(refreshToken);
+    final newAccessToken = response['access_token'] as String;
+    final newRefreshToken = response['refresh_token'] as String?;
+    await _tokenService.setTokens(
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    );
+    return newAccessToken;
   }
 }
 

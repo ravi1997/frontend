@@ -1,17 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'token_service.dart';
+import 'auth_interceptor.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../widgets/snackbar_service.dart';
+import '../router/app_router.dart';
+import 'error_interceptor.dart';
 
 part 'api_client.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
-  final tokenState = ref.watch(tokenServiceProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:5000/form/api/v1', // Based on documentation
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      baseUrl: 'http://localhost:5000/form/api/v1',
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -19,19 +23,38 @@ Dio dio(Ref ref) {
     ),
   );
 
+  final tokenService = ref.read(tokenServiceProvider.notifier);
+  final snackbarService = ref.read(snackbarServiceProvider.notifier);
+
   dio.interceptors.add(
-    InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final token = tokenState.value;
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
+    AuthInterceptor(
+      getTokens: () {
+        if (!ref.mounted) return null;
+        return ref.read(tokenServiceProvider).value;
       },
+      clearTokens: () async {
+        if (!ref.mounted) return;
+        await tokenService.clearTokens();
+      },
+      getAuthRepository: () {
+        if (!ref.mounted) throw Exception('Provider disposed');
+        return ref.read(authRepositoryImplProvider) as AuthRepositoryImpl;
+      },
+      onNavigateToLogin: () {
+        if (!ref.mounted) return;
+        ref.read(appRouterProvider).go('/login');
+      },
+      dio: dio,
     ),
   );
 
+  dio.interceptors.add(ErrorInterceptor(snackbarService));
+
   dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+
+  ref.onDispose(() {
+    dio.close(force: true);
+  });
 
   return dio;
 }

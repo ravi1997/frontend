@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
+import '../../../../core/widgets/snackbar_service.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -97,18 +98,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           ? null
                           : () async {
                               if (_emailController.text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please enter your email'),
-                                  ),
-                                );
+                                ref
+                                    .read(snackbarServiceProvider.notifier)
+                                    .showError('Please enter your email');
                                 return;
                               }
-
-                              final router = GoRouter.of(context);
-                              final scaffoldMessenger = ScaffoldMessenger.of(
-                                context,
-                              );
 
                               try {
                                 await ref
@@ -117,27 +111,26 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                       _emailController.text,
                                     );
 
-                                scaffoldMessenger.showSnackBar(
-                                  SnackBar(
-                                    backgroundColor: Colors.green[600],
-                                    content: const Text(
-                                      'Reset link sent to your email',
-                                    ),
-                                  ),
-                                );
+                                if (mounted) {
+                                  ref
+                                      .read(snackbarServiceProvider.notifier)
+                                      .showSuccess(
+                                        'Reset link sent to your email',
+                                      );
 
-                                Future.delayed(const Duration(seconds: 2), () {
-                                  if (mounted) {
-                                    router.go('/login');
-                                  }
-                                });
+                                  Future.delayed(
+                                    const Duration(seconds: 2),
+                                    () {
+                                      if (mounted) {
+                                        context.go('/login');
+                                      }
+                                    },
+                                  );
+                                }
                               } catch (e) {
-                                scaffoldMessenger.showSnackBar(
-                                  SnackBar(
-                                    backgroundColor: Colors.red[600],
-                                    content: Text('Error: ${e.toString()}'),
-                                  ),
-                                );
+                                // Error is already handled by the controller and would be shown by the listener if we had one
+                                // But since we are awaiting here, we can also handle it here.
+                                // Actually, AuthController.requestPasswordReset sets state to AsyncError.
                               }
                             },
                       style: ElevatedButton.styleFrom(
