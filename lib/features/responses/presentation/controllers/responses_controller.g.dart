@@ -1,0 +1,162 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'responses_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(formResponses)
+final formResponsesProvider = FormResponsesFamily._();
+
+final class FormResponsesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FormResponse>>,
+          List<FormResponse>,
+          FutureOr<List<FormResponse>>
+        >
+    with
+        $FutureModifier<List<FormResponse>>,
+        $FutureProvider<List<FormResponse>> {
+  FormResponsesProvider._({
+    required FormResponsesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'formResponsesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$formResponsesHash();
+
+  @override
+  String toString() {
+    return r'formResponsesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<FormResponse>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<FormResponse>> create(Ref ref) {
+    final argument = this.argument as String;
+    return formResponses(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FormResponsesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$formResponsesHash() => r'7f5bb219c5479f8745425ab46b119095270af083';
+
+final class FormResponsesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<FormResponse>>, String> {
+  FormResponsesFamily._()
+    : super(
+        retry: null,
+        name: r'formResponsesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  FormResponsesProvider call(String formId) =>
+      FormResponsesProvider._(argument: formId, from: this);
+
+  @override
+  String toString() => r'formResponsesProvider';
+}
+
+@ProviderFor(responseDetail)
+final responseDetailProvider = ResponseDetailFamily._();
+
+final class ResponseDetailProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<FormResponse>,
+          FormResponse,
+          FutureOr<FormResponse>
+        >
+    with $FutureModifier<FormResponse>, $FutureProvider<FormResponse> {
+  ResponseDetailProvider._({
+    required ResponseDetailFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'responseDetailProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$responseDetailHash();
+
+  @override
+  String toString() {
+    return r'responseDetailProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<FormResponse> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<FormResponse> create(Ref ref) {
+    final argument = this.argument as String;
+    return responseDetail(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ResponseDetailProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$responseDetailHash() => r'0ad017eee15143cd1032176aac6c3dee85cf8de7';
+
+final class ResponseDetailFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<FormResponse>, String> {
+  ResponseDetailFamily._()
+    : super(
+        retry: null,
+        name: r'responseDetailProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ResponseDetailProvider call(String responseId) =>
+      ResponseDetailProvider._(argument: responseId, from: this);
+
+  @override
+  String toString() => r'responseDetailProvider';
+}
