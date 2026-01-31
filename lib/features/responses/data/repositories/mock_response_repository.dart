@@ -43,6 +43,13 @@ class MockResponseRepository implements ResponseRepository {
       answers: {'q1': 'Mock Answer 1', 'q2': 'Mock Answer 2'},
     );
   }
+
+  @override
+  Future<void> submitResponse(FormResponse response) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 1000));
+    print('Response submitted successfully: ${response.id}');
+  }
 }
 
 @riverpod

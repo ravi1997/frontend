@@ -28,6 +28,9 @@ class _WorkflowConfigurationDialogState
   late TextEditingController _emailController;
   late TextEditingController _webhookController;
 
+  // Condition States
+  late Map<String, Map<String, dynamic>> _conditions;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +46,12 @@ class _WorkflowConfigurationDialogState
     _webhookController = TextEditingController(
       text: workflows['webhook']?['url'] ?? '',
     );
+
+    _conditions = {
+      'email_notification': workflows['email_notification']?['condition'] ?? {},
+      'webhook': workflows['webhook']?['condition'] ?? {},
+      'slack_notification': workflows['slack_notification']?['condition'] ?? {},
+    };
   }
 
   @override
@@ -56,13 +65,18 @@ class _WorkflowConfigurationDialogState
     final config = {
       'email_notification': {
         'enabled': _emailEnabled,
-        if (_emailEnabled) 'recipient': _emailController.text,
+        'recipient': _emailController.text,
+        'condition': _conditions['email_notification'],
       },
       'webhook': {
         'enabled': _webhookEnabled,
-        if (_webhookEnabled) 'url': _webhookController.text,
+        'url': _webhookController.text,
+        'condition': _conditions['webhook'],
       },
-      'slack_notification': {'enabled': _slackEnabled},
+      'slack_notification': {
+        'enabled': _slackEnabled,
+        'condition': _conditions['slack_notification'],
+      },
     };
 
     widget.onSave(config);
@@ -113,6 +127,7 @@ class _WorkflowConfigurationDialogState
                       title: 'Email Notification',
                       description: 'Send an email when a response is received',
                       isEnabled: _emailEnabled,
+                      id: 'email_notification',
                       onToggle: (val) => setState(() => _emailEnabled = val),
                       child: TextField(
                         controller: _emailController,
@@ -130,6 +145,7 @@ class _WorkflowConfigurationDialogState
                       title: 'Webhook',
                       description: 'POST submission data to an external URL',
                       isEnabled: _webhookEnabled,
+                      id: 'webhook',
                       onToggle: (val) => setState(() => _webhookEnabled = val),
                       child: TextField(
                         controller: _webhookController,
@@ -147,6 +163,7 @@ class _WorkflowConfigurationDialogState
                       title: 'Slack Notification',
                       description: 'Send a message to a Slack channel',
                       isEnabled: _slackEnabled,
+                      id: 'slack_notification',
                       onToggle: (val) => setState(() => _slackEnabled = val),
                     ),
                   ],
@@ -186,6 +203,7 @@ class _WorkflowConfigurationDialogState
     required String title,
     required String description,
     required bool isEnabled,
+    required String id,
     required ValueChanged<bool> onToggle,
     Widget? child,
   }) {
@@ -244,7 +262,140 @@ class _WorkflowConfigurationDialogState
             child: child,
           ),
         ],
+        if (isEnabled) ...[
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(left: 44),
+            child: _buildConditionBuilder(id),
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildConditionBuilder(String integrationId) {
+    final condition = _conditions[integrationId]!;
+    final isConditional = condition['enabled'] ?? false;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.filter_list, size: 14, color: AppColors.textGrey),
+            const SizedBox(width: 8),
+            Text(
+              'Workflow Logic',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: isConditional ? AppColors.primary : AppColors.textGrey,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              isConditional ? 'Conditional' : 'Run Always',
+              style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
+            ),
+            Switch(
+              value: isConditional,
+              onChanged: (val) {
+                setState(() {
+                  _conditions[integrationId]!['enabled'] = val;
+                });
+              },
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ],
+        ),
+        if (isConditional) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Text('IF field', style: TextStyle(fontSize: 12)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: condition['field'] ?? '',
+                        onChanged: (val) =>
+                            _conditions[integrationId]!['field'] = val,
+                        decoration: _conditionInputDecoration('score'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        value: condition['operator'] ?? 'equals',
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'equals',
+                            child: Text('Equals'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'not_equals',
+                            child: Text('Not Equals'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'contains',
+                            child: Text('Contains'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'is_empty',
+                            child: Text('Is Empty'),
+                          ),
+                        ],
+                        onChanged: (val) => setState(
+                          () => _conditions[integrationId]!['operator'] = val,
+                        ),
+                        decoration: _conditionInputDecoration('operator'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 3,
+                      child: TextFormField(
+                        initialValue: condition['value'] ?? '',
+                        onChanged: (val) =>
+                            _conditions[integrationId]!['value'] = val,
+                        decoration: _conditionInputDecoration('value'),
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  InputDecoration _conditionInputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
     );
   }
 }

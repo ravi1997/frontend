@@ -20,10 +20,14 @@
 | M-11 | Form Analytics & Reporting | Low | DONE | Implementer |
 | M-13 | QR Code Distribution | Medium | DONE | Auditor |
 | M-14 | Advanced Workflows Engine | Medium | DONE | Auditor |
+| M-15 | Offline Submission Sync Engine | High | DONE | Implementer |
+| M-16 | Login OTP Verification Flow | High | DONE | Implementer |
+| M-17 | Workflow Logic Engine (Trigger/Action Integration) | Medium | DONE | Implementer |
+| M-18 | Skeleton Loading & Shimmer UX | Low | DONE | Implementer |
 
 ## Progress
 
-- **Total Tasks**: 14
-- **Done**: 14
+- **Total Tasks**: 18
+- **Done**: 18
 - **Pending**: 0
 - **Blocked**: 0

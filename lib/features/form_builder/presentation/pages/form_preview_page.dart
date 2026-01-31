@@ -10,6 +10,7 @@ import '../../domain/entities/question_type.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/services/workflow_executor_provider.dart';
+import '../../../responses/presentation/controllers/form_submission_controller.dart';
 
 class FormPreviewPage extends ConsumerStatefulWidget {
   final BuilderForm form;
@@ -303,23 +304,37 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
       widget.form.style.primaryColor,
       AppColors.primary,
     );
+    final submissionState = ref.watch(formSubmissionControllerProvider);
+
     return Center(
       child: ElevatedButton(
-        onPressed: () async {
-          final dummyData = {'preview': 'true'};
-          await ref
-              .read(workflowExecutorProvider)
-              .execute(widget.form, dummyData);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Submission Recorded (Simulation)'),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
+        onPressed: submissionState.isLoading
+            ? null
+            : () async {
+                final dummyData = {
+                  'preview': 'true',
+                  'timestamp': DateTime.now().toIso8601String(),
+                };
+                final success = await ref
+                    .read(formSubmissionControllerProvider.notifier)
+                    .submit(widget.form.id, dummyData);
+
+                if (success && context.mounted) {
+                  await ref
+                      .read(workflowExecutorProvider)
+                      .execute(widget.form, dummyData);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Submission Recorded (Offline Sync Enabled)',
+                      ),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
@@ -334,7 +349,16 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        child: const Text('Submit'),
+        child: submissionState.isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Text('Submit'),
       ),
     );
   }

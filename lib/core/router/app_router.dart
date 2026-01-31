@@ -11,6 +11,7 @@ import '../../../features/responses/presentation/pages/response_detail_page.dart
 import '../../../features/form_builder/domain/entities/builder_form.dart';
 import '../../../features/form_builder/presentation/pages/form_preview_page.dart';
 import '../../../features/analytics/presentation/pages/analytics_page.dart';
+import '../../../features/auth/presentation/screens/otp_verification_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -30,7 +31,9 @@ Raw<GoRouter> appRouter(Ref ref) {
       final isLoggingIn = state.matchedLocation == '/login';
       final isRegistering = state.matchedLocation == '/register';
       final isForgotPassword = state.matchedLocation == '/forgot-password';
-      final isAuthPath = isLoggingIn || isRegistering || isForgotPassword;
+      final isVerifyingOtp = state.matchedLocation == '/verify-otp';
+      final isAuthPath =
+          isLoggingIn || isRegistering || isForgotPassword || isVerifyingOtp;
 
       // If not authenticated and trying to access protected route, redirect to login
       if (!isAuth && !isAuthPath) {
@@ -54,6 +57,13 @@ Raw<GoRouter> appRouter(Ref ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/verify-otp',
+        builder: (context, state) {
+          final mobile = state.uri.queryParameters['mobile'] ?? '';
+          return OtpVerificationScreen(mobile: mobile);
+        },
       ),
       GoRoute(
         path: '/builder/:formId',

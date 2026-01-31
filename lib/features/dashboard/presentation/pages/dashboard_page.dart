@@ -8,6 +8,11 @@ import '../controllers/dashboard_controller.dart';
 import '../../domain/entities/dashboard_data.dart';
 import '../widgets/dashboard_stats_card.dart';
 import '../widgets/recent_forms_list.dart';
+import '../../../responses/data/services/sync_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../widgets/stats_card_skeleton.dart';
+import '../widgets/form_card_skeleton.dart';
+import '../../../../core/widgets/app_shimmer.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -49,12 +54,7 @@ class DashboardPage extends ConsumerWidget {
                             const SizedBox(height: 32),
                             dashboardState.when(
                               data: (data) => _DashboardContent(data: data),
-                              loading: () => const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(48.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
+                              loading: () => const _DashboardSkeleton(),
                               error: (e, st) => Center(
                                 child: Padding(
                                   padding: EdgeInsets.all(48.0),
@@ -140,6 +140,8 @@ class _TopBar extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(width: 24),
+          const _SyncIndicator(),
           const SizedBox(width: 16),
           _LogoutButton(
             onPressed: () => ref.read(authControllerProvider.notifier).logout(),
@@ -169,6 +171,66 @@ class _LogoutButton extends StatelessWidget {
         'Logout',
         style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
       ),
+    );
+  }
+}
+
+class _SyncIndicator extends ConsumerWidget {
+  const _SyncIndicator();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final syncState = ref.watch(syncServiceProvider);
+    final connectivity = ref.watch(connectivityServiceProvider);
+
+    return syncState.when(
+      data: (_) {
+        final count = ref.read(syncServiceProvider.notifier).pendingCount;
+        if (count == 0) return const SizedBox.shrink();
+
+        final isOffline = connectivity == ConnectivityStatus.offline;
+
+        return Tooltip(
+          message: isOffline
+              ? 'You are offline. $count submissions will sync when connected.'
+              : 'Synchronizing $count submissions...',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isOffline
+                  ? Colors.orange.withValues(alpha: 0.1)
+                  : Colors.blue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isOffline
+                    ? Colors.orange.withValues(alpha: 0.5)
+                    : Colors.blue.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isOffline ? Icons.cloud_off : Icons.sync,
+                  size: 16,
+                  color: isOffline ? Colors.orange : Colors.blue,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$count Pending',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: isOffline ? Colors.orange[800] : Colors.blue[800],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
@@ -454,6 +516,64 @@ class _GettingStartedSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DashboardSkeleton extends StatelessWidget {
+  const _DashboardSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double spacing = 24;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: List.generate(
+                3,
+                (_) => SizedBox(
+                  width: (constraints.maxWidth - (spacing * 2)) / 3,
+                  child: const StatsCardSkeleton(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Fake Filter Bar
+            Container(
+              height: 48,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Fake List
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SkeletonBox(width: 150, height: 20),
+                  const SizedBox(height: 24),
+                  ...List.generate(5, (_) => const FormCardSkeleton()),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

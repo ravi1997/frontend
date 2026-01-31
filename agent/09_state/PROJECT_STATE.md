@@ -47,8 +47,11 @@
 - **Logic**: Conditional visibility rules and pattern validation.
 - **Preview**: `FormPreviewPage` for live testing of form logic and rendering.
 - **Persistence**: "Save Changes" with loading states and "Publish" feature with success dialogs.
-- **Workflows**: Configuration engine with persistence for Email/Webhook/Slack notifications.
-- **Versioning**: Automated snapshotting system (v1.0.1+) with History browser and version comparison support.
+- **Skeleton Loading**: High-fidelity shimmer effects for Dashboard and List views to improve perceived performance.
+- **Workflows**: Advanced logic engine supporting conditional execution (IF-THEN) for Email, Webhooks, and Slack.
+- **VERSIONING**: Automated snapshotting system (v1.0.1+) with History browser and version comparison support.
+- **Offline Sync**: Robust background synchronization engine with Hive-based queuing and connectivity monitoring.
+- **OTP Login**: Advanced mobile-based authentication flow with `pinput` verification and resend logic.
 - **QR Distribution**: Instant QR Code generation for published forms (integrated into Publish dialog).
 - **AI Entrypoint**: "Generate with AI" capability integrated into Dashboard.
 - **Properties Refactor**: Consolidated "Layout" and "Properties" widgets with a unified structure for Form, Section, and Fields.

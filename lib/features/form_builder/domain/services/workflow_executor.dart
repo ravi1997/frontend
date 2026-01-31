@@ -22,21 +22,65 @@ class WorkflowExecutorImpl implements WorkflowExecutor {
 
     debugPrint('Executing workflows for form: ${form.title}');
 
-    // 1. Email Workflow
-    if (workflows['email_notification']?['enabled'] == true) {
-      final recipient = workflows['email_notification']?['recipient'];
-      await _executeEmail(recipient, form.title, responseData);
-    }
+    for (final entry in workflows.entries) {
+      final config = entry.value as Map<String, dynamic>;
+      if (config['enabled'] != true) continue;
 
-    // 2. Webhook Workflow
-    if (workflows['webhook']?['enabled'] == true) {
-      final url = workflows['webhook']?['url'];
-      await _executeWebhook(url, responseData);
-    }
+      // Evaluate condition if present
+      if (config.containsKey('condition')) {
+        final condition = config['condition'] as Map<String, dynamic>;
+        if (!_evaluateCondition(condition, responseData)) {
+          debugPrint('Workflow ${entry.key} skipped: Condition not met.');
+          continue;
+        }
+      }
 
-    // 3. Slack Workflow
-    if (workflows['slack_notification']?['enabled'] == true) {
-      await _executeSlack(form.title, responseData);
+      switch (entry.key) {
+        case 'email_notification':
+          await _executeEmail(config['recipient'], form.title, responseData);
+          break;
+        case 'webhook':
+          await _executeWebhook(config['url'], responseData);
+          break;
+        case 'slack_notification':
+          await _executeSlack(form.title, responseData);
+          break;
+      }
+    }
+  }
+
+  bool _evaluateCondition(
+    Map<String, dynamic> condition,
+    Map<String, dynamic> data,
+  ) {
+    final field = condition['field'] as String?;
+    final operator = condition['operator'] as String?;
+    final expectedValue = condition['value'];
+
+    if (field == null || operator == null) return true;
+
+    // Support both direct value and nested answer map
+    final dynamic actualValue = data[field];
+
+    debugPrint(
+      'Evaluating condition: $field $operator $expectedValue (Actual: $actualValue)',
+    );
+
+    switch (operator) {
+      case 'equals':
+        final result = actualValue.toString() == expectedValue.toString();
+        debugPrint('Result: $result');
+        return result;
+      case 'not_equals':
+        return actualValue.toString() != expectedValue.toString();
+      case 'contains':
+        return actualValue.toString().contains(expectedValue.toString());
+      case 'is_empty':
+        return actualValue == null || actualValue.toString().isEmpty;
+      case 'is_not_empty':
+        return actualValue != null && actualValue.toString().isNotEmpty;
+      default:
+        return true;
     }
   }
 

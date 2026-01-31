@@ -17,16 +17,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _otpController = TextEditingController();
   bool _isEmailTab = true;
-  bool _otpSent = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
-    _otpController.dispose();
     super.dispose();
   }
 
@@ -101,7 +98,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             isSelected: _isEmailTab,
                             onTap: () => setState(() {
                               _isEmailTab = true;
-                              _otpSent = false;
                             }),
                           ),
                         ),
@@ -161,44 +157,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       placeholder: '9876543210',
                     ),
                     const SizedBox(height: 8),
-                    if (!_otpSent)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Enter your 10-digit mobile number',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: AppColors.textGrey,
-                          ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Enter your 10-digit mobile number to receive OTP',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textGrey,
                         ),
                       ),
-                    if (_otpSent) ...[
-                      const SizedBox(height: 20),
-                      _LoginTextField(
-                        controller: _otpController,
-                        label: 'Enter OTP',
-                        placeholder: '000000',
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GestureDetector(
-                          onTap: () {
-                            ref
-                                .read(authControllerProvider.notifier)
-                                .generateOtp(_phoneController.text);
-                          },
-                          child: Text(
-                            'Resend OTP',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: AppColors.brandBlue,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
                   const SizedBox(height: 32),
                   SizedBox(
@@ -217,14 +185,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   _passwordController.text,
                                 );
                               } else {
-                                if (!_otpSent) {
-                                  notifier.generateOtp(_phoneController.text);
-                                  setState(() => _otpSent = true);
+                                final mobile = _phoneController.text;
+                                if (mobile.length == 10) {
+                                  notifier.generateOtp(mobile).then((_) {
+                                    if (context.mounted) {
+                                      context.push(
+                                        '/verify-otp?mobile=$mobile',
+                                      );
+                                    }
+                                  });
                                 } else {
-                                  notifier.loginWithOtp(
-                                    _phoneController.text,
-                                    _otpController.text,
-                                  );
+                                  ref
+                                      .read(snackbarServiceProvider.notifier)
+                                      .showError('Invalid mobile number');
                                 }
                               }
                             },
@@ -246,9 +219,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                             )
                           : Text(
-                              _isEmailTab
-                                  ? 'Sign In'
-                                  : (_otpSent ? 'Login' : 'Send OTP'),
+                              _isEmailTab ? 'Sign In' : 'Send OTP',
                               style: GoogleFonts.inter(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
