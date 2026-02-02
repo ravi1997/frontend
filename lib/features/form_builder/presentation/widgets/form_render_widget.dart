@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_question.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
 
-class FormRenderWidget extends StatelessWidget {
+class FormRenderWidget extends ConsumerWidget {
   final BuilderForm form;
 
   const FormRenderWidget({super.key, required this.form});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeControllerProvider).languageCode;
     final formStyle = form.style;
     Color canvasColor;
     try {
@@ -33,7 +36,7 @@ class FormRenderWidget extends StatelessWidget {
             child: Column(
               children: [
                 // Form Header
-                _buildFormHeader(form.title),
+                _buildFormHeader(form.title, locale),
                 const SizedBox(height: 24),
 
                 // Sections
@@ -65,7 +68,7 @@ class FormRenderWidget extends StatelessWidget {
                       children: form.sections.map((section) {
                         return SizedBox(
                           width: itemWidth,
-                          child: _buildSection(context, section),
+                          child: _buildSection(context, section, locale),
                         );
                       }).toList(),
                     );
@@ -97,7 +100,7 @@ class FormRenderWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildFormHeader(String title) {
+  Widget _buildFormHeader(Object? title, String locale) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -116,7 +119,7 @@ class FormRenderWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            title.translate(locale),
             style: const TextStyle(
               color: AppColors.textDark,
               fontSize: 24,
@@ -128,7 +131,7 @@ class FormRenderWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, dynamic section) {
+  Widget _buildSection(BuildContext context, dynamic section, String locale) {
     // section is FormSection
     final sectionStyle = section.style;
 
@@ -171,18 +174,17 @@ class FormRenderWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    section.title,
+                    section.title.translate(locale),
                     style: const TextStyle(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
-                  if (section.description != null &&
-                      section.description!.isNotEmpty) ...[
+                  if (section.description.translate(locale).isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
-                      section.description!,
+                      section.description.translate(locale),
                       style: const TextStyle(color: AppColors.textGrey),
                     ),
                   ],
@@ -247,7 +249,7 @@ class FormRenderWidget extends StatelessWidget {
 
                     return SizedBox(
                       width: width,
-                      child: _RenderFieldWidget(question: q),
+                      child: _RenderFieldWidget(question: q, locale: locale),
                     );
                   }).toList(),
                 );
@@ -262,8 +264,9 @@ class FormRenderWidget extends StatelessWidget {
 
 class _RenderFieldWidget extends StatelessWidget {
   final FormQuestion question;
+  final String locale;
 
-  const _RenderFieldWidget({required this.question});
+  const _RenderFieldWidget({required this.question, required this.locale});
 
   FontWeight _parseFontWeight(String weight) {
     switch (weight) {
@@ -300,9 +303,9 @@ class _RenderFieldWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  question.label.isEmpty
+                  question.label.translate(locale).isEmpty
                       ? 'Untitled ${question.type.label}'
-                      : question.label,
+                      : question.label.translate(locale),
                   style: TextStyle(
                     color: labelColor,
                     fontSize: style.labelFontSize,
@@ -320,10 +323,10 @@ class _RenderFieldWidget extends StatelessWidget {
                 ),
             ],
           ),
-          if (question.helperText?.isNotEmpty ?? false) ...[
+          if (question.helperText.translate(locale).isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              question.helperText!,
+              question.helperText.translate(locale),
               style: TextStyle(
                 color: helperColor,
                 fontSize: style.helperFontSize,
@@ -332,13 +335,13 @@ class _RenderFieldWidget extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 8),
-          _buildFieldInput(question),
+          _buildFieldInput(question, locale),
         ],
       ),
     );
   }
 
-  Widget _buildFieldInput(FormQuestion q) {
+  Widget _buildFieldInput(FormQuestion q, String locale) {
     final inputStyle = q.style.inputStyle;
     Color fillColor = AppColors.fieldBackground;
     BoxBorder? border = Border.all(color: AppColors.borderLight);
@@ -429,7 +432,9 @@ class _RenderFieldWidget extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  q.placeholder ?? _getPlaceholderForType(q.type),
+                  q.placeholder.translate(locale).isEmpty
+                      ? _getPlaceholderForType(q.type)
+                      : q.placeholder.translate(locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
@@ -451,7 +456,9 @@ class _RenderFieldWidget extends StatelessWidget {
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            q.placeholder ?? 'Long answer text...',
+            q.placeholder.translate(locale).isEmpty
+                ? 'Long answer text...'
+                : q.placeholder.translate(locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -465,7 +472,9 @@ class _RenderFieldWidget extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                'Select an option',
+                q.placeholder.translate(locale).isEmpty
+                    ? 'Select an option'
+                    : q.placeholder.translate(locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),

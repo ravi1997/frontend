@@ -34,7 +34,7 @@ class FieldGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(label: val));
+                .updateQuestionLabel(question.id, val);
           },
         ),
         const SizedBox(height: 20),
@@ -47,7 +47,7 @@ class FieldGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(helperText: val));
+                .updateQuestionHelperText(question.id, val);
           },
         ),
         const SizedBox(height: 20),
@@ -60,7 +60,7 @@ class FieldGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(placeholder: val));
+                .updateQuestionPlaceholder(question.id, val);
           },
         ),
 

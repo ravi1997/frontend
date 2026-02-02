@@ -62,4 +62,10 @@ class MockFormBuilderRepository implements FormBuilderRepository {
   Future<void> saveForm(BuilderForm form) async {
     await Future.delayed(const Duration(milliseconds: 500));
   }
+
+  @override
+  Future<Map<String, dynamic>> publishForm(String formId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return {'published_version': '1.0.0', 'next_draft_version': '1.0.1'};
+  }
 }

@@ -42,10 +42,170 @@ class FormBuilderController extends _$FormBuilderController {
     return FormBuilderState(form: form);
   }
 
+  dynamic _updateLocalizedField(
+    dynamic current,
+    String newValue,
+    String locale,
+  ) {
+    if (current is Map) {
+      return {...Map<String, dynamic>.from(current), locale: newValue};
+    }
+    return {'en': current?.toString() ?? '', locale: newValue};
+  }
+
+  void setEditingLocale(String locale) {
+    if (state.value == null) return;
+    state = AsyncValue.data(state.value!.copyWith(editingLocale: locale));
+  }
+
   void updateFormTitle(String title) {
     if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    updateLocalizedFormTitle(title, locale);
+  }
+
+  void updateLocalizedFormTitle(String title, String locale) {
+    if (state.value == null) return;
+    final currentTitle = state.value!.form.title;
+
+    dynamic newTitle;
+    if (currentTitle is Map) {
+      newTitle = Map<String, dynamic>.from(currentTitle);
+      newTitle[locale] = title;
+    } else {
+      newTitle = {'en': currentTitle, locale: title};
+    }
+
     state = AsyncValue.data(
-      state.value!.copyWith(form: state.value!.form.copyWith(title: title)),
+      state.value!.copyWith(form: state.value!.form.copyWith(title: newTitle)),
+    );
+  }
+
+  void updateLocalizedSectionTitle(
+    String sectionId,
+    String title,
+    String locale,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(title: _updateLocalizedField(s.title, title, locale));
+      }
+      return s;
+    }).toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateLocalizedSectionDescription(
+    String sectionId,
+    String description,
+    String locale,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(
+          description: _updateLocalizedField(
+            s.description,
+            description,
+            locale,
+          ),
+        );
+      }
+      return s;
+    }).toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateLocalizedQuestionLabel(
+    String questionId,
+    String label,
+    String locale,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          label: _updateLocalizedField(
+            newQuestions[qIndex].label,
+            label,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateLocalizedQuestionHelperText(
+    String questionId,
+    String text,
+    String locale,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          helperText: _updateLocalizedField(
+            newQuestions[qIndex].helperText,
+            text,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateLocalizedQuestionPlaceholder(
+    String questionId,
+    String text,
+    String locale,
+  ) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          placeholder: _updateLocalizedField(
+            newQuestions[qIndex].placeholder,
+            text,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
     );
   }
 
@@ -204,6 +364,84 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
+  void updateQuestionLabel(String questionId, String label) {
+    if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          label: _updateLocalizedField(
+            newQuestions[qIndex].label,
+            label,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateQuestionHelperText(String questionId, String helperText) {
+    if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          helperText: _updateLocalizedField(
+            newQuestions[qIndex].helperText,
+            helperText,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateQuestionPlaceholder(String questionId, String placeholder) {
+    if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          placeholder: _updateLocalizedField(
+            newQuestions[qIndex].placeholder,
+            placeholder,
+            locale,
+          ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
   void selectForm() {
     if (state.value == null) return;
     state = AsyncValue.data(
@@ -231,6 +469,46 @@ class FormBuilderController extends _$FormBuilderController {
     final sections = state.value!.form.sections.map((s) {
       if (s.id == updatedSection.id) {
         return updatedSection;
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateSectionTitle(String sectionId, String title) {
+    if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(title: _updateLocalizedField(s.title, title, locale));
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateSectionDescription(String sectionId, String description) {
+    if (state.value == null) return;
+    final locale = state.value!.editingLocale;
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(
+          description: _updateLocalizedField(
+            s.description,
+            description,
+            locale,
+          ),
+        );
       }
       return s;
     }).toList();
@@ -395,45 +673,42 @@ class FormBuilderController extends _$FormBuilderController {
   Future<bool> publishForm() async {
     if (state.value == null) return false;
 
-    // Logic to increment version: 1.0.0 -> 1.0.1
-    final currentVersion = state.value!.form.version;
-    final parts = currentVersion.split('.');
-    String nextVersion = currentVersion;
-    if (parts.length == 3) {
-      final patch = int.tryParse(parts[2]) ?? 0;
-      nextVersion = '${parts[0]}.${parts[1]}.${patch + 1}';
-    }
-
-    final newHistoryEntry = FormVersionHistory(
-      version: nextVersion,
-      createdAt: DateTime.now(),
-      changeLog: 'Form published',
-    );
-
-    final publishedForm = state.value!.form.copyWith(
-      isPublished: true,
-      status: 'published',
-      version: nextVersion,
-      versionHistory: [...state.value!.form.versionHistory, newHistoryEntry],
-    );
-
-    state = AsyncValue.data(
-      state.value!.copyWith(form: publishedForm, isSaving: true),
-    );
+    state = AsyncValue.data(state.value!.copyWith(isSaving: true));
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      await repository.saveForm(publishedForm);
-      state = AsyncValue.data(state.value!.copyWith(isSaving: false));
+      final result = await repository.publishForm(state.value!.form.id);
+
+      final publishedVersion =
+          result['published_version'] as String? ?? state.value!.form.version;
+
+      // We'll update the local state to reflect it's published.
+      // Ideally we re-fetch the form, but let's update immediately for UX.
+
+      final newHistoryEntry = FormVersionHistory(
+        version: publishedVersion,
+        createdAt: DateTime.now(),
+        changeLog: 'Form published',
+      );
+
+      final updatedForm = state.value!.form.copyWith(
+        isPublished: true,
+        status: 'published',
+        version:
+            publishedVersion, // Display published version or shift to next draft?
+        // Usually after publish, we stay on the page. The page might switch to 'Draft Mode' for V2.
+        // Let's assume we show the published state primarily.
+        versionHistory: [...state.value!.form.versionHistory, newHistoryEntry],
+      );
+
+      state = AsyncValue.data(
+        state.value!.copyWith(form: updatedForm, isSaving: false),
+      );
       return true;
     } catch (e) {
       final error = ErrorHandler.handle(e);
       state = AsyncValue.data(
-        state.value!.copyWith(
-          form: state.value!.form.copyWith(isPublished: false, status: 'draft'),
-          isSaving: false,
-          error: error.toString(),
-        ),
+        state.value!.copyWith(isSaving: false, error: error.toString()),
       );
       return false;
     }

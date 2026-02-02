@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/form_question.dart';
 import '../../domain/entities/question_type.dart';
 
@@ -10,6 +11,7 @@ class BuilderFieldWidget extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onDuplicate;
+  final String locale;
 
   const BuilderFieldWidget({
     super.key,
@@ -18,6 +20,7 @@ class BuilderFieldWidget extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     required this.onDuplicate,
+    required this.locale,
   });
 
   @override
@@ -73,9 +76,9 @@ class BuilderFieldWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    question.label.isEmpty
+                    question.label.translate(locale).isEmpty
                         ? 'Untitled ${question.type.label}'
-                        : question.label,
+                        : question.label.translate(locale),
                     style: TextStyle(
                       color: labelColor,
                       fontSize: style.labelFontSize,
@@ -111,10 +114,10 @@ class BuilderFieldWidget extends StatelessWidget {
                 ),
               ],
             ),
-            if (question.helperText?.isNotEmpty ?? false) ...[
+            if (question.helperText.translate(locale).isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
-                question.helperText!,
+                question.helperText.translate(locale),
                 style: TextStyle(
                   color: helperColor,
                   fontSize: style.helperFontSize,
@@ -123,7 +126,7 @@ class BuilderFieldWidget extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 16),
-            _buildFieldPreview(question),
+            _buildFieldPreview(question, locale),
           ],
         ),
       ),
@@ -142,7 +145,7 @@ class BuilderFieldWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildFieldPreview(FormQuestion q) {
+  Widget _buildFieldPreview(FormQuestion q, String locale) {
     // This is a READ-ONLY preview for the builder.
     // It mocks the appearance of the field.
 
@@ -238,7 +241,9 @@ class BuilderFieldWidget extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  q.placeholder ?? _getPlaceholderForType(q.type),
+                  q.placeholder.translate(locale).isEmpty
+                      ? _getPlaceholderForType(q.type)
+                      : q.placeholder.translate(locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
@@ -260,7 +265,9 @@ class BuilderFieldWidget extends StatelessWidget {
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            q.placeholder ?? 'Long answer text...',
+            q.placeholder.translate(locale).isEmpty
+                ? 'Long answer text...'
+                : q.placeholder.translate(locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -274,7 +281,9 @@ class BuilderFieldWidget extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                'Select an option',
+                q.placeholder.translate(locale).isEmpty
+                    ? 'Select an option'
+                    : q.placeholder.translate(locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),
@@ -389,8 +398,8 @@ class BuilderFieldWidget extends StatelessWidget {
           child: Center(
             child: Icon(
               Icons.draw,
-              color: textStyle.color?.withValues(alpha: 0.3) ??
-                  AppColors.textGrey,
+              color:
+                  textStyle.color?.withValues(alpha: 0.3) ?? AppColors.textGrey,
               size: 32,
             ),
           ),

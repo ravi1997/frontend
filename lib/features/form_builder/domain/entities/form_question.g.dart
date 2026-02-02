@@ -9,10 +9,10 @@ part of 'form_question.dart';
 _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
     _FormQuestion(
       id: json['id'] as String,
-      label: json['label'] as String,
+      label: json['label'],
       type: $enumDecode(_$QuestionTypeEnumMap, json['type']),
-      helperText: json['helperText'] as String?,
-      placeholder: json['placeholder'] as String?,
+      helperText: json['helperText'],
+      placeholder: json['placeholder'],
       isRequired: json['isRequired'] as bool? ?? false,
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => e as String)

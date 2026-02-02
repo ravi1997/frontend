@@ -11,6 +11,7 @@ import 'package:frontend/features/form_builder/presentation/widgets/properties/f
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_layout_settings.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_specific_settings.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/custom_fields_controller.dart';
+import '../../../../core/localization/locale_controller.dart';
 
 class FieldPropertiesWidget extends ConsumerStatefulWidget {
   final String formId;
@@ -75,18 +76,21 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
     super.dispose();
   }
 
-  void _syncControllers(FormQuestion question) {
-    if (_labelController.text != question.label) {
+  void _syncControllers(FormQuestion question, String locale) {
+    final translatedLabel = question.label.translate(locale);
+    if (_labelController.text != translatedLabel) {
       _labelController.value = _labelController.value.copyWith(
-        text: question.label,
-        selection: TextSelection.collapsed(offset: question.label.length),
+        text: translatedLabel,
+        selection: TextSelection.collapsed(offset: translatedLabel.length),
       );
     }
-    if (_helperTextController.text != (question.helperText ?? '')) {
-      _helperTextController.text = question.helperText ?? '';
+    final translatedHelperText = question.helperText.translate(locale);
+    if (_helperTextController.text != translatedHelperText) {
+      _helperTextController.text = translatedHelperText;
     }
-    if (_placeholderController.text != (question.placeholder ?? '')) {
-      _placeholderController.text = question.placeholder ?? '';
+    final translatedPlaceholder = question.placeholder.translate(locale);
+    if (_placeholderController.text != translatedPlaceholder) {
+      _placeholderController.text = translatedPlaceholder;
     }
     if (_regexController.text != (question.validationRegex ?? '')) {
       _regexController.text = question.validationRegex ?? '';
@@ -138,7 +142,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
         if (question == null) return const SizedBox();
 
-        _syncControllers(question);
+        _syncControllers(question, state.editingLocale);
 
         return DefaultTabController(
           length: 6,
@@ -176,7 +180,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                           ref
                               .read(customFieldsProvider.notifier)
                               .saveAsTemplate(
-                                question!.label,
+                                question!.label.translate(state.editingLocale),
                                 'My Fields',
                                 question,
                               );

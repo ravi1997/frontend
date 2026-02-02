@@ -29,7 +29,7 @@ class SectionGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateSection(section.copyWith(title: val));
+                .updateSectionTitle(section.id, val);
           },
         ),
         const SizedBox(height: 20),
@@ -40,7 +40,7 @@ class SectionGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateSection(section.copyWith(description: val));
+                .updateSectionDescription(section.id, val);
           },
         ),
         const SizedBox(height: 24),

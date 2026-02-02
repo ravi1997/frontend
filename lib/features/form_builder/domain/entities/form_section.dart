@@ -11,8 +11,8 @@ abstract class FormSection with _$FormSection {
   const FormSection._();
   const factory FormSection({
     required String id,
-    required String title,
-    String? description,
+    required Object? title,
+    Object? description,
     required List<FormQuestion> questions,
     @Default(SectionLayoutType.standard) SectionLayoutType layout,
     @Default(2) int gridColumns,

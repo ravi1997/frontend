@@ -7,6 +7,7 @@ import 'properties/section_general_settings.dart';
 import 'properties/section_layout_settings.dart';
 import 'properties/section_style_settings.dart';
 import 'properties/section_logic_settings.dart';
+import '../../../../core/localization/locale_controller.dart';
 
 class SectionPropertiesWidget extends ConsumerStatefulWidget {
   final String formId;
@@ -56,11 +57,14 @@ class _SectionPropertiesWidgetState
 
         if (section == null) return const SizedBox();
 
-        if (_titleController.text != section.title) {
-          _titleController.text = section.title;
+        final locale = state.editingLocale;
+        final translatedTitle = section.title.translate(locale);
+        if (_titleController.text != translatedTitle) {
+          _titleController.text = translatedTitle;
         }
-        if (_descriptionController.text != (section.description ?? '')) {
-          _descriptionController.text = section.description ?? '';
+        final translatedDescription = section.description.translate(locale);
+        if (_descriptionController.text != translatedDescription) {
+          _descriptionController.text = translatedDescription;
         }
 
         return DefaultTabController(

@@ -8,7 +8,7 @@ part of 'builder_form.dart';
 
 _BuilderForm _$BuilderFormFromJson(Map<String, dynamic> json) => _BuilderForm(
   id: json['id'] as String,
-  title: json['title'] as String,
+  title: json['title'],
   status: json['status'] as String? ?? 'draft',
   isPublished: json['isPublished'] as bool? ?? false,
   version: json['version'] as String? ?? '1.0.0',

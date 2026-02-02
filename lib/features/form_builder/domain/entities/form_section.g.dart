@@ -8,8 +8,8 @@ part of 'form_section.dart';
 
 _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
   id: json['id'] as String,
-  title: json['title'] as String,
-  description: json['description'] as String?,
+  title: json['title'],
+  description: json['description'],
   questions: (json['questions'] as List<dynamic>)
       .map((e) => FormQuestion.fromJson(e as Map<String, dynamic>))
       .toList(),

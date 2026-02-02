@@ -12,7 +12,7 @@ abstract class BuilderForm with _$BuilderForm {
   const BuilderForm._();
   const factory BuilderForm({
     required String id,
-    required String title,
+    required Object? title,
     @Default('draft') String status,
     @Default(false) bool isPublished,
     @Default('1.0.0') String version,

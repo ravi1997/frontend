@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/builder_form.dart';
+import '../../../../core/localization/locale_controller.dart';
 
 import '../controllers/form_builder_controller.dart';
 import '../widgets/field_library_widget.dart';
@@ -193,7 +194,15 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       )
                       .selectForm(),
                   child: Text(
-                    form.title,
+                    form.title.translate(
+                      ref
+                              .watch(
+                                formBuilderControllerProvider(widget.formId),
+                              )
+                              .value
+                              ?.editingLocale ??
+                          'en',
+                    ),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: AppColors.textDark,
                       fontWeight: FontWeight.bold,
@@ -238,6 +247,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                _buildEditingLocaleSwitcher(context, ref),
               ],
             ),
           ),
@@ -275,7 +286,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         ? const Center(child: Text('No version history yet.'))
                         : ListView.separated(
                             itemCount: form.versionHistory.length,
-                            separatorBuilder: (_, __) => const Divider(),
+                            separatorBuilder: (_, _) => const Divider(),
                             itemBuilder: (context, index) {
                               final history = form.versionHistory.reversed
                                   .toList()[index];
@@ -311,6 +322,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                   ],
                 ),
               );
+            },
+          ),
+          const SizedBox(width: 8),
+          _buildActionButton(
+            icon: Icons.translate,
+            label: 'Translate',
+            onTap: () {
+              context.push('/forms/${widget.formId}/translate');
             },
           ),
           const SizedBox(width: 8),
@@ -458,6 +477,49 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       ),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildEditingLocaleSwitcher(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(formBuilderControllerProvider(widget.formId)).value;
+    if (state == null) return const SizedBox();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: state.editingLocale,
+          isDense: true,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            size: 16,
+            color: AppColors.primary,
+          ),
+          items: const [
+            DropdownMenuItem(value: 'en', child: Text('EN')),
+            DropdownMenuItem(value: 'es', child: Text('ES')),
+            DropdownMenuItem(value: 'fr', child: Text('FR')),
+            DropdownMenuItem(value: 'hi', child: Text('HI')),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .setEditingLocale(val);
+            }
+          },
+        ),
       ),
     );
   }

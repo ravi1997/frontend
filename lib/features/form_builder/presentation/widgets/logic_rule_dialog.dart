@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/form_question.dart';
 import '../../domain/entities/form_section.dart';
 import '../../domain/entities/question_type.dart';
@@ -8,11 +9,13 @@ class LogicRuleDialog extends StatefulWidget {
   final FormQuestion currentQuestion;
   final List<FormSection> sections;
   final Map<String, dynamic>? initialRule;
+  final String locale;
 
   const LogicRuleDialog({
     super.key,
     required this.currentQuestion,
     required this.sections,
+    required this.locale,
     this.initialRule,
   });
 
@@ -349,7 +352,10 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                   items: triggers.map((q) {
                     return DropdownMenuItem(
                       value: q.id,
-                      child: Text(q.label, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                        q.label.translate(widget.locale),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   }).toList(),
                   onChanged: (val) {

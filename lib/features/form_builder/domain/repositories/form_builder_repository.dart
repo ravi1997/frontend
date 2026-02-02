@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_version_history.dart';
-import '../../data/repositories/mock_form_builder_repository.dart';
+import '../../../../core/network/api_client_wrapper.dart';
+import '../../data/repositories/form_builder_repository_impl.dart';
 
 part 'form_builder_repository.g.dart';
 
@@ -10,9 +11,12 @@ abstract class FormBuilderRepository {
   Future<List<FormVersionHistory>> getVersionHistory(String formId);
   Future<BuilderForm> getFormVersion(String formId, String version);
   Future<void> saveForm(BuilderForm form);
+  Future<Map<String, dynamic>> publishForm(String formId);
 }
 
 @riverpod
 FormBuilderRepository formBuilderRepository(Ref ref) {
-  return MockFormBuilderRepository();
+  // Use real implementation
+  final apiClient = ref.watch(apiClientProvider);
+  return FormBuilderRepositoryImpl(apiClient);
 }

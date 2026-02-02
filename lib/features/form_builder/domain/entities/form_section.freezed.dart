@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormSection {
 
- String get id; String get title; String? get description; List<FormQuestion> get questions; SectionLayoutType get layout; int get gridColumns; bool get isHidden; Map<String, dynamic>? get conditionalLogic; SectionStyle get style;
+ String get id; Object? get title; Object? get description; List<FormQuestion> get questions; SectionLayoutType get layout; int get gridColumns; bool get isHidden; Map<String, dynamic>? get conditionalLogic; SectionStyle get style;
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,12 +28,12 @@ $FormSectionCopyWith<FormSection> get copyWith => _$FormSectionCopyWithImpl<Form
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormSection&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&(identical(other.style, style) || other.style == style));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,const DeepCollectionEquality().hash(questions),layout,gridColumns,isHidden,const DeepCollectionEquality().hash(conditionalLogic),style);
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(questions),layout,gridColumns,isHidden,const DeepCollectionEquality().hash(conditionalLogic),style);
 
 @override
 String toString() {
@@ -48,7 +48,7 @@ abstract mixin class $FormSectionCopyWith<$Res>  {
   factory $FormSectionCopyWith(FormSection value, $Res Function(FormSection) _then) = _$FormSectionCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, Map<String, dynamic>? conditionalLogic, SectionStyle style
+ String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, Map<String, dynamic>? conditionalLogic, SectionStyle style
 });
 
 
@@ -65,12 +65,10 @@ class _$FormSectionCopyWithImpl<$Res>
 
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? conditionalLogic = freezed,Object? style = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? conditionalLogic = freezed,Object? style = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
 as List<FormQuestion>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as SectionLayoutType,gridColumns: null == gridColumns ? _self.gridColumns : gridColumns // ignore: cast_nullable_to_non_nullable
 as int,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable
@@ -170,7 +168,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.conditionalLogic,_that.style);case _:
@@ -191,7 +189,7 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)  $default,) {final _that = this;
 switch (_that) {
 case _FormSection():
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.conditionalLogic,_that.style);case _:
@@ -211,7 +209,7 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  Map<String, dynamic>? conditionalLogic,  SectionStyle style)?  $default,) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.conditionalLogic,_that.style);case _:
@@ -230,8 +228,8 @@ class _FormSection extends FormSection {
   factory _FormSection.fromJson(Map<String, dynamic> json) => _$FormSectionFromJson(json);
 
 @override final  String id;
-@override final  String title;
-@override final  String? description;
+@override final  Object? title;
+@override final  Object? description;
  final  List<FormQuestion> _questions;
 @override List<FormQuestion> get questions {
   if (_questions is EqualUnmodifiableListView) return _questions;
@@ -266,12 +264,12 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormSection&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&(identical(other.style, style) || other.style == style));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,const DeepCollectionEquality().hash(_questions),layout,gridColumns,isHidden,const DeepCollectionEquality().hash(_conditionalLogic),style);
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(_questions),layout,gridColumns,isHidden,const DeepCollectionEquality().hash(_conditionalLogic),style);
 
 @override
 String toString() {
@@ -286,7 +284,7 @@ abstract mixin class _$FormSectionCopyWith<$Res> implements $FormSectionCopyWith
   factory _$FormSectionCopyWith(_FormSection value, $Res Function(_FormSection) _then) = __$FormSectionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, Map<String, dynamic>? conditionalLogic, SectionStyle style
+ String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, Map<String, dynamic>? conditionalLogic, SectionStyle style
 });
 
 
@@ -303,12 +301,10 @@ class __$FormSectionCopyWithImpl<$Res>
 
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? conditionalLogic = freezed,Object? style = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? conditionalLogic = freezed,Object? style = null,}) {
   return _then(_FormSection(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
 as List<FormQuestion>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as SectionLayoutType,gridColumns: null == gridColumns ? _self.gridColumns : gridColumns // ignore: cast_nullable_to_non_nullable
 as int,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable

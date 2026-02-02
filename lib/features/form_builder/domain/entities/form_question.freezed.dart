@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormQuestion {
 
- String get id; String get label; QuestionType get type; String? get helperText; String? get placeholder; bool get isRequired; List<String>? get options; bool get isReadOnly; bool get isHidden; String? get validationRegex; int? get minLength; int? get maxLength; num? get minValue; num? get maxValue; String? get inputMask; String? get customErrorMessage; Map<String, dynamic>? get conditionalLogic; Map<String, dynamic>? get metadata; QuestionStyle get style;
+ String get id; Object? get label; QuestionType get type; Object? get helperText; Object? get placeholder; bool get isRequired; List<String>? get options; bool get isReadOnly; bool get isHidden; String? get validationRegex; int? get minLength; int? get maxLength; num? get minValue; num? get maxValue; String? get inputMask; String? get customErrorMessage; Map<String, dynamic>? get conditionalLogic; Map<String, dynamic>? get metadata; QuestionStyle get style;
 /// Create a copy of FormQuestion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,12 +28,12 @@ $FormQuestionCopyWith<FormQuestion> get copyWith => _$FormQuestionCopyWithImpl<F
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormQuestion&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.type, type) || other.type == type)&&(identical(other.helperText, helperText) || other.helperText == helperText)&&(identical(other.placeholder, placeholder) || other.placeholder == placeholder)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other.options, options)&&(identical(other.isReadOnly, isReadOnly) || other.isReadOnly == isReadOnly)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.validationRegex, validationRegex) || other.validationRegex == validationRegex)&&(identical(other.minLength, minLength) || other.minLength == minLength)&&(identical(other.maxLength, maxLength) || other.maxLength == maxLength)&&(identical(other.minValue, minValue) || other.minValue == minValue)&&(identical(other.maxValue, maxValue) || other.maxValue == maxValue)&&(identical(other.inputMask, inputMask) || other.inputMask == inputMask)&&(identical(other.customErrorMessage, customErrorMessage) || other.customErrorMessage == customErrorMessage)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.style, style) || other.style == style));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormQuestion&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.label, label)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.helperText, helperText)&&const DeepCollectionEquality().equals(other.placeholder, placeholder)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other.options, options)&&(identical(other.isReadOnly, isReadOnly) || other.isReadOnly == isReadOnly)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.validationRegex, validationRegex) || other.validationRegex == validationRegex)&&(identical(other.minLength, minLength) || other.minLength == minLength)&&(identical(other.maxLength, maxLength) || other.maxLength == maxLength)&&(identical(other.minValue, minValue) || other.minValue == minValue)&&(identical(other.maxValue, maxValue) || other.maxValue == maxValue)&&(identical(other.inputMask, inputMask) || other.inputMask == inputMask)&&(identical(other.customErrorMessage, customErrorMessage) || other.customErrorMessage == customErrorMessage)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,label,type,helperText,placeholder,isRequired,const DeepCollectionEquality().hash(options),isReadOnly,isHidden,validationRegex,minLength,maxLength,minValue,maxValue,inputMask,customErrorMessage,const DeepCollectionEquality().hash(conditionalLogic),const DeepCollectionEquality().hash(metadata),style]);
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(label),type,const DeepCollectionEquality().hash(helperText),const DeepCollectionEquality().hash(placeholder),isRequired,const DeepCollectionEquality().hash(options),isReadOnly,isHidden,validationRegex,minLength,maxLength,minValue,maxValue,inputMask,customErrorMessage,const DeepCollectionEquality().hash(conditionalLogic),const DeepCollectionEquality().hash(metadata),style]);
 
 @override
 String toString() {
@@ -48,7 +48,7 @@ abstract mixin class $FormQuestionCopyWith<$Res>  {
   factory $FormQuestionCopyWith(FormQuestion value, $Res Function(FormQuestion) _then) = _$FormQuestionCopyWithImpl;
 @useResult
 $Res call({
- String id, String label, QuestionType type, String? helperText, String? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
+ String id, Object? label, QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
 });
 
 
@@ -65,14 +65,11 @@ class _$FormQuestionCopyWithImpl<$Res>
 
 /// Create a copy of FormQuestion
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? label = null,Object? type = null,Object? helperText = freezed,Object? placeholder = freezed,Object? isRequired = null,Object? options = freezed,Object? isReadOnly = null,Object? isHidden = null,Object? validationRegex = freezed,Object? minLength = freezed,Object? maxLength = freezed,Object? minValue = freezed,Object? maxValue = freezed,Object? inputMask = freezed,Object? customErrorMessage = freezed,Object? conditionalLogic = freezed,Object? metadata = freezed,Object? style = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? label = freezed,Object? type = null,Object? helperText = freezed,Object? placeholder = freezed,Object? isRequired = null,Object? options = freezed,Object? isReadOnly = null,Object? isHidden = null,Object? validationRegex = freezed,Object? minLength = freezed,Object? maxLength = freezed,Object? minValue = freezed,Object? maxValue = freezed,Object? inputMask = freezed,Object? customErrorMessage = freezed,Object? conditionalLogic = freezed,Object? metadata = freezed,Object? style = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as QuestionType,helperText: freezed == helperText ? _self.helperText : helperText // ignore: cast_nullable_to_non_nullable
-as String?,placeholder: freezed == placeholder ? _self.placeholder : placeholder // ignore: cast_nullable_to_non_nullable
-as String?,isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
+as String,label: freezed == label ? _self.label : label ,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as QuestionType,helperText: freezed == helperText ? _self.helperText : helperText ,placeholder: freezed == placeholder ? _self.placeholder : placeholder ,isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
 as bool,options: freezed == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
 as List<String>?,isReadOnly: null == isReadOnly ? _self.isReadOnly : isReadOnly // ignore: cast_nullable_to_non_nullable
 as bool,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable
@@ -180,7 +177,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String label,  QuestionType type,  String? helperText,  String? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormQuestion() when $default != null:
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -201,7 +198,7 @@ return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placehold
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String label,  QuestionType type,  String? helperText,  String? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestion():
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -221,7 +218,7 @@ return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placehold
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String label,  QuestionType type,  String? helperText,  String? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestion() when $default != null:
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -240,10 +237,10 @@ class _FormQuestion extends FormQuestion {
   factory _FormQuestion.fromJson(Map<String, dynamic> json) => _$FormQuestionFromJson(json);
 
 @override final  String id;
-@override final  String label;
+@override final  Object? label;
 @override final  QuestionType type;
-@override final  String? helperText;
-@override final  String? placeholder;
+@override final  Object? helperText;
+@override final  Object? placeholder;
 @override@JsonKey() final  bool isRequired;
  final  List<String>? _options;
 @override List<String>? get options {
@@ -296,12 +293,12 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormQuestion&&(identical(other.id, id) || other.id == id)&&(identical(other.label, label) || other.label == label)&&(identical(other.type, type) || other.type == type)&&(identical(other.helperText, helperText) || other.helperText == helperText)&&(identical(other.placeholder, placeholder) || other.placeholder == placeholder)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other._options, _options)&&(identical(other.isReadOnly, isReadOnly) || other.isReadOnly == isReadOnly)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.validationRegex, validationRegex) || other.validationRegex == validationRegex)&&(identical(other.minLength, minLength) || other.minLength == minLength)&&(identical(other.maxLength, maxLength) || other.maxLength == maxLength)&&(identical(other.minValue, minValue) || other.minValue == minValue)&&(identical(other.maxValue, maxValue) || other.maxValue == maxValue)&&(identical(other.inputMask, inputMask) || other.inputMask == inputMask)&&(identical(other.customErrorMessage, customErrorMessage) || other.customErrorMessage == customErrorMessage)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.style, style) || other.style == style));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormQuestion&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.label, label)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.helperText, helperText)&&const DeepCollectionEquality().equals(other.placeholder, placeholder)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&const DeepCollectionEquality().equals(other._options, _options)&&(identical(other.isReadOnly, isReadOnly) || other.isReadOnly == isReadOnly)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.validationRegex, validationRegex) || other.validationRegex == validationRegex)&&(identical(other.minLength, minLength) || other.minLength == minLength)&&(identical(other.maxLength, maxLength) || other.maxLength == maxLength)&&(identical(other.minValue, minValue) || other.minValue == minValue)&&(identical(other.maxValue, maxValue) || other.maxValue == maxValue)&&(identical(other.inputMask, inputMask) || other.inputMask == inputMask)&&(identical(other.customErrorMessage, customErrorMessage) || other.customErrorMessage == customErrorMessage)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,label,type,helperText,placeholder,isRequired,const DeepCollectionEquality().hash(_options),isReadOnly,isHidden,validationRegex,minLength,maxLength,minValue,maxValue,inputMask,customErrorMessage,const DeepCollectionEquality().hash(_conditionalLogic),const DeepCollectionEquality().hash(_metadata),style]);
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(label),type,const DeepCollectionEquality().hash(helperText),const DeepCollectionEquality().hash(placeholder),isRequired,const DeepCollectionEquality().hash(_options),isReadOnly,isHidden,validationRegex,minLength,maxLength,minValue,maxValue,inputMask,customErrorMessage,const DeepCollectionEquality().hash(_conditionalLogic),const DeepCollectionEquality().hash(_metadata),style]);
 
 @override
 String toString() {
@@ -316,7 +313,7 @@ abstract mixin class _$FormQuestionCopyWith<$Res> implements $FormQuestionCopyWi
   factory _$FormQuestionCopyWith(_FormQuestion value, $Res Function(_FormQuestion) _then) = __$FormQuestionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String label, QuestionType type, String? helperText, String? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
+ String id, Object? label, QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
 });
 
 
@@ -333,14 +330,11 @@ class __$FormQuestionCopyWithImpl<$Res>
 
 /// Create a copy of FormQuestion
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? label = null,Object? type = null,Object? helperText = freezed,Object? placeholder = freezed,Object? isRequired = null,Object? options = freezed,Object? isReadOnly = null,Object? isHidden = null,Object? validationRegex = freezed,Object? minLength = freezed,Object? maxLength = freezed,Object? minValue = freezed,Object? maxValue = freezed,Object? inputMask = freezed,Object? customErrorMessage = freezed,Object? conditionalLogic = freezed,Object? metadata = freezed,Object? style = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? label = freezed,Object? type = null,Object? helperText = freezed,Object? placeholder = freezed,Object? isRequired = null,Object? options = freezed,Object? isReadOnly = null,Object? isHidden = null,Object? validationRegex = freezed,Object? minLength = freezed,Object? maxLength = freezed,Object? minValue = freezed,Object? maxValue = freezed,Object? inputMask = freezed,Object? customErrorMessage = freezed,Object? conditionalLogic = freezed,Object? metadata = freezed,Object? style = null,}) {
   return _then(_FormQuestion(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as QuestionType,helperText: freezed == helperText ? _self.helperText : helperText // ignore: cast_nullable_to_non_nullable
-as String?,placeholder: freezed == placeholder ? _self.placeholder : placeholder // ignore: cast_nullable_to_non_nullable
-as String?,isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
+as String,label: freezed == label ? _self.label : label ,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as QuestionType,helperText: freezed == helperText ? _self.helperText : helperText ,placeholder: freezed == placeholder ? _self.placeholder : placeholder ,isRequired: null == isRequired ? _self.isRequired : isRequired // ignore: cast_nullable_to_non_nullable
 as bool,options: freezed == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
 as List<String>?,isReadOnly: null == isReadOnly ? _self.isReadOnly : isReadOnly // ignore: cast_nullable_to_non_nullable
 as bool,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable

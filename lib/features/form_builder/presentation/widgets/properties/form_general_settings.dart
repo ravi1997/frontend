@@ -27,7 +27,7 @@ class FormGeneralSettings extends ConsumerWidget {
           onChanged: (val) {
             ref
                 .read(formBuilderControllerProvider(formId).notifier)
-                .updateForm(form.copyWith(title: val));
+                .updateFormTitle(val);
           },
         ),
       ],

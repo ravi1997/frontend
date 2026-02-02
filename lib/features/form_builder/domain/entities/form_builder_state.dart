@@ -12,6 +12,7 @@ abstract class FormBuilderState with _$FormBuilderState {
     @Default(false) bool isFormSelected,
     @Default(false) bool isSaving,
     @Default(false) bool isLoading,
+    @Default('en') String editingLocale,
     String? error,
   }) = _FormBuilderState;
 }

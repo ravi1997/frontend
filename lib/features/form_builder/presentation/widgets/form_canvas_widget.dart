@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/form_section.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/entities/custom_field_template.dart';
@@ -65,7 +66,11 @@ class FormCanvasWidget extends ConsumerWidget {
                   child: Column(
                     children: [
                       // Form Title Input
-                      _buildFormHeader(state.form.title, ref),
+                      _buildFormHeader(
+                        state.form.title,
+                        ref,
+                        state.editingLocale,
+                      ),
                       const SizedBox(height: 24),
 
                       // Empty State
@@ -161,6 +166,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                     state.selectedQuestionId,
                                     state.selectedSectionId,
                                     ref,
+                                    state.editingLocale,
                                   ),
                                 );
 
@@ -268,7 +274,7 @@ class FormCanvasWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildFormHeader(String title, WidgetRef ref) {
+  Widget _buildFormHeader(Object? title, WidgetRef ref, String locale) {
     return InkWell(
       onTap: () =>
           ref.read(formBuilderControllerProvider(formId).notifier).selectForm(),
@@ -283,7 +289,7 @@ class FormCanvasWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              title.translate(locale),
               style: const TextStyle(
                 color: AppColors.textDark,
                 fontSize: 24,
@@ -310,6 +316,7 @@ class FormCanvasWidget extends ConsumerWidget {
     String? selectedQuestionId,
     String? selectedSectionId,
     WidgetRef ref,
+    String locale,
   ) {
     final isSectionSelected =
         selectedSectionId == section.id && selectedQuestionId == null;
@@ -417,7 +424,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                 SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    section.title,
+                                    section.title.translate(locale),
                                     style: TextStyle(
                                       color: AppColors.textDark,
                                       fontWeight: FontWeight.bold,
@@ -504,10 +511,11 @@ class FormCanvasWidget extends ConsumerWidget {
                                 ),
                               ],
                             ),
-                            if (section.description != null &&
-                                section.description!.isNotEmpty)
+                            if (section.description
+                                .translate(locale)
+                                .isNotEmpty)
                               Text(
-                                section.description!,
+                                section.description.translate(locale),
                                 style: TextStyle(color: AppColors.textGrey),
                               ),
                           ],
@@ -605,6 +613,7 @@ class FormCanvasWidget extends ConsumerWidget {
                               final questionWidget = BuilderFieldWidget(
                                 question: q,
                                 isSelected: isSelected,
+                                locale: locale,
                                 onTap: () {
                                   ref
                                       .read(

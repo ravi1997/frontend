@@ -7,6 +7,7 @@ import 'properties/form_general_settings.dart';
 import 'properties/form_layout_settings.dart';
 import 'properties/form_style_settings.dart';
 import 'properties/form_logic_settings.dart';
+import 'package:frontend/core/localization/locale_controller.dart';
 
 class FormPropertiesWidget extends ConsumerStatefulWidget {
   final String formId;
@@ -42,9 +43,11 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
     return builderState.when(
       data: (state) {
         final form = state.form;
+        final currentLocale = state.editingLocale;
 
-        if (_titleController.text != form.title) {
-          _titleController.text = form.title;
+        final translatedTitle = form.title.translate(currentLocale);
+        if (_titleController.text != translatedTitle) {
+          _titleController.text = translatedTitle;
         }
 
         return DefaultTabController(
@@ -90,6 +93,74 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                               ).notifier,
                             )
                             .selectQuestion(null, null),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(color: AppColors.borderLight, height: 1),
+                // Language Selector
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  color: AppColors.builderBackground.withValues(alpha: 0.5),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.translate,
+                        size: 14,
+                        color: AppColors.textGrey,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Editing Language:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Spacer(),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: currentLocale,
+                          isDense: true,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'en',
+                              child: Text('English (EN)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'es',
+                              child: Text('Spanish (ES)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'fr',
+                              child: Text('French (FR)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'hi',
+                              child: Text('Hindi (HI)'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              ref
+                                  .read(
+                                    formBuilderControllerProvider(
+                                      widget.formId,
+                                    ).notifier,
+                                  )
+                                  .setEditingLocale(val);
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),

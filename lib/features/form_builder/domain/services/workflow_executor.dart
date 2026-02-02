@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../../../core/utils/error_handler.dart';
 import '../entities/builder_form.dart';
+import '../../../../core/localization/locale_controller.dart';
 
 abstract class WorkflowExecutor {
   Future<void> execute(BuilderForm form, Map<String, dynamic> responseData);
@@ -37,13 +38,17 @@ class WorkflowExecutorImpl implements WorkflowExecutor {
 
       switch (entry.key) {
         case 'email_notification':
-          await _executeEmail(config['recipient'], form.title, responseData);
+          await _executeEmail(
+            config['recipient'],
+            form.title.translate('en'),
+            responseData,
+          );
           break;
         case 'webhook':
           await _executeWebhook(config['url'], responseData);
           break;
         case 'slack_notification':
-          await _executeSlack(form.title, responseData);
+          await _executeSlack(form.title.translate('en'), responseData);
           break;
       }
     }

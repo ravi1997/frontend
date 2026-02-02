@@ -11,6 +11,7 @@ import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/services/workflow_executor_provider.dart';
 import '../../../responses/presentation/controllers/form_submission_controller.dart';
+import '../../../../core/localization/locale_controller.dart';
 
 class FormPreviewPage extends ConsumerStatefulWidget {
   final BuilderForm form;
@@ -34,6 +35,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeControllerProvider).languageCode;
     final formStyle = widget.form.style;
     final canvasColor = _parseColor(
       formStyle.backgroundColor,
@@ -74,6 +76,8 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             ],
           ),
           actions: [
+            _buildLanguageSwitcher(),
+            const SizedBox(width: 8),
             TextButton.icon(
               onPressed: () => context.pop(),
               icon: const Icon(
@@ -93,12 +97,12 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             child: Container(color: AppColors.borderLight, height: 1),
           ),
         ),
-        body: _buildBody(),
+        body: _buildBody(locale),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(String locale) {
     final formStyle = widget.form.style;
 
     if (widget.form.sections.isEmpty) {
@@ -106,7 +110,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     }
 
     if (formStyle.layoutType == 'step') {
-      return _buildStepLayout();
+      return _buildStepLayout(locale);
     }
 
     return SingleChildScrollView(
@@ -117,9 +121,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildFormHeader(),
+              _buildFormHeader(locale),
               SizedBox(height: formStyle.sectionSpacing),
-              _buildSectionsList(),
+              _buildSectionsList(locale),
               const SizedBox(height: 32),
               _buildSubmitButton(),
               const SizedBox(height: 16),
@@ -152,7 +156,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
   }
 
-  Widget _buildFormHeader() {
+  Widget _buildFormHeader(String locale) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -168,7 +172,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         ],
       ),
       child: Text(
-        widget.form.title,
+        widget.form.title.translate(locale),
         style: const TextStyle(
           color: AppColors.textDark,
           fontSize: 28,
@@ -178,7 +182,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
   }
 
-  Widget _buildSectionsList() {
+  Widget _buildSectionsList(String locale) {
     final spacing = widget.form.style.sectionSpacing;
 
     return LayoutBuilder(
@@ -214,7 +218,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
   }
 
-  Widget _buildStepLayout() {
+  Widget _buildStepLayout(String locale) {
     final sections = widget.form.sections;
     final currentSection = sections[_currentStep];
     final primaryColor = _parseColor(
@@ -375,9 +379,40 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
       ),
     );
   }
+
+  Widget _buildLanguageSwitcher() {
+    final currentLocale = ref.watch(localeControllerProvider);
+
+    return PopupMenuButton<String>(
+      tooltip: 'Change Language',
+      icon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.language, size: 20, color: AppColors.textGrey),
+          const SizedBox(width: 4),
+          Text(
+            currentLocale.languageCode.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textGrey,
+            ),
+          ),
+        ],
+      ),
+      onSelected: (code) =>
+          ref.read(localeControllerProvider.notifier).setLocale(code),
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'en', child: Text('English (EN)')),
+        const PopupMenuItem(value: 'es', child: Text('Spanish (ES)')),
+        const PopupMenuItem(value: 'fr', child: Text('French (FR)')),
+        const PopupMenuItem(value: 'hi', child: Text('Hindi (HI)')),
+      ],
+    );
+  }
 }
 
-class _PreviewSectionWidget extends StatelessWidget {
+class _PreviewSectionWidget extends ConsumerWidget {
   final FormSection section;
   final double questionSpacing;
 
@@ -395,7 +430,8 @@ class _PreviewSectionWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeControllerProvider).languageCode;
     final style = section.style;
     final sectionBg = _parseColor(style.backgroundColor, Colors.white);
     final headerBg = _parseColor(
@@ -432,19 +468,18 @@ class _PreviewSectionWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      section.title,
+                      section.title.translate(locale),
                       style: const TextStyle(
                         color: AppColors.textDark,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
-                    if (section.description != null &&
-                        section.description!.isNotEmpty)
+                    if (section.description.translate(locale).isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 6.0),
                         child: Text(
-                          section.description!,
+                          section.description.translate(locale),
                           style: const TextStyle(
                             color: AppColors.textGrey,
                             fontSize: 13,
@@ -521,7 +556,7 @@ class _PreviewSectionWidget extends StatelessWidget {
   }
 }
 
-class _PreviewFieldWidget extends StatelessWidget {
+class _PreviewFieldWidget extends ConsumerWidget {
   final FormQuestion question;
 
   const _PreviewFieldWidget({required this.question});
@@ -546,7 +581,8 @@ class _PreviewFieldWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeControllerProvider).languageCode;
     final style = question.style;
     final labelColor = _parseColor(style.labelColor, AppColors.textDark);
     final helperColor = _parseColor(style.helperColor, AppColors.textGrey);
@@ -555,11 +591,11 @@ class _PreviewFieldWidget extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInput(question),
-          if (question.helperText?.isNotEmpty ?? false) ...[
+          _buildInput(question, locale),
+          if (question.helperText.translate(locale).isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              question.helperText!,
+              question.helperText.translate(locale),
               style: TextStyle(
                 color: helperColor,
                 fontSize: style.helperFontSize,
@@ -580,7 +616,7 @@ class _PreviewFieldWidget extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: Text(
-                question.label,
+                question.label.translate(locale),
                 style: TextStyle(
                   color: labelColor,
                   fontSize: style.labelFontSize,
@@ -595,11 +631,11 @@ class _PreviewFieldWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInput(question),
-                if (question.helperText?.isNotEmpty ?? false) ...[
+                _buildInput(question, locale),
+                if (question.helperText.translate(locale).isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    question.helperText!,
+                    question.helperText.translate(locale),
                     style: TextStyle(
                       color: helperColor,
                       fontSize: style.helperFontSize,
@@ -622,7 +658,7 @@ class _PreviewFieldWidget extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                question.label,
+                question.label.translate(locale),
                 style: TextStyle(
                   color: labelColor,
                   fontSize: style.labelFontSize,
@@ -640,10 +676,10 @@ class _PreviewFieldWidget extends StatelessWidget {
               ),
           ],
         ),
-        if (question.helperText?.isNotEmpty ?? false) ...[
+        if (question.helperText.translate(locale).isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            question.helperText!,
+            question.helperText.translate(locale),
             style: TextStyle(
               color: helperColor,
               fontSize: style.helperFontSize,
@@ -652,12 +688,12 @@ class _PreviewFieldWidget extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 8),
-        _buildInput(question),
+        _buildInput(question, locale),
       ],
     );
   }
 
-  Widget _buildInput(FormQuestion q) {
+  Widget _buildInput(FormQuestion q, String locale) {
     final style = q.style;
     final inputStyle = style.inputStyle;
     Color fillColor = _parseColor(
@@ -725,7 +761,7 @@ class _PreviewFieldWidget extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  q.placeholder ?? '',
+                  q.placeholder.translate(locale),
                   style: textStyle.copyWith(
                     color: inputColor.withValues(alpha: 0.4),
                   ),
@@ -747,7 +783,9 @@ class _PreviewFieldWidget extends StatelessWidget {
           decoration: decoration,
           alignment: Alignment.topLeft,
           child: Text(
-            q.placeholder ?? 'Your answer...',
+            q.placeholder.translate(locale).isEmpty
+                ? 'Your answer...'
+                : q.placeholder.translate(locale),
             style: textStyle.copyWith(color: inputColor.withValues(alpha: 0.4)),
           ),
         );
@@ -760,7 +798,9 @@ class _PreviewFieldWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  q.placeholder ?? 'Select...',
+                  q.placeholder.translate(locale).isEmpty
+                      ? 'Select...'
+                      : q.placeholder.translate(locale),
                   style: textStyle.copyWith(
                     color: inputColor.withValues(alpha: 0.4),
                   ),

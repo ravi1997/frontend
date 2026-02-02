@@ -4,6 +4,7 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
+import 'package:frontend/core/localization/locale_controller.dart';
 import '../logic_rule_dialog.dart';
 
 class FieldLogicSettings extends ConsumerWidget {
@@ -103,9 +104,21 @@ class FieldLogicSettings extends ConsumerWidget {
                   children: rules.asMap().entries.map((entry) {
                     final index = entry.key;
                     final rule = entry.value;
+                    final locale =
+                        ref
+                            .watch(formBuilderControllerProvider(formId))
+                            .value
+                            ?.editingLocale ??
+                        'en';
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
-                      child: _buildLogicRuleCard(context, ref, rule, index),
+                      child: _buildLogicRuleCard(
+                        context,
+                        ref,
+                        rule,
+                        index,
+                        locale,
+                      ),
                     );
                   }).toList(),
                 ),
@@ -131,6 +144,7 @@ class FieldLogicSettings extends ConsumerWidget {
     WidgetRef ref,
     Map<String, dynamic> rule,
     int index,
+    String locale,
   ) {
     final action = rule['action'] ?? 'show';
     final actionLabel = action.toString().toUpperCase().replaceAll('_', ' ');
@@ -238,7 +252,7 @@ class FieldLogicSettings extends ConsumerWidget {
                 for (final s in sections) {
                   for (final q in s.questions) {
                     if (q.id == triggerId) {
-                      triggerLabel = q.label;
+                      triggerLabel = q.label.translate(locale);
                       break;
                     }
                   }
@@ -272,6 +286,8 @@ class FieldLogicSettings extends ConsumerWidget {
   }
 
   void _editRule(BuildContext context, WidgetRef ref, int index) async {
+    final state = ref.read(formBuilderControllerProvider(formId)).value;
+    final locale = state?.editingLocale ?? 'en';
     final logicState = _getLogicState(question);
     final rules = (logicState['rules'] as List).cast<Map<String, dynamic>>();
     final ruleToEdit = rules[index];
@@ -282,6 +298,7 @@ class FieldLogicSettings extends ConsumerWidget {
         currentQuestion: question,
         sections: sections,
         initialRule: ruleToEdit,
+        locale: locale,
       ),
     );
 
@@ -301,10 +318,15 @@ class FieldLogicSettings extends ConsumerWidget {
   }
 
   void _showRuleDialog(BuildContext context, WidgetRef ref) async {
+    final state = ref.read(formBuilderControllerProvider(formId)).value;
+    final locale = state?.editingLocale ?? 'en';
     final resultRule = await showDialog(
       context: context,
-      builder: (context) =>
-          LogicRuleDialog(currentQuestion: question, sections: sections),
+      builder: (context) => LogicRuleDialog(
+        currentQuestion: question,
+        sections: sections,
+        locale: locale,
+      ),
     );
 
     if (resultRule != null) {

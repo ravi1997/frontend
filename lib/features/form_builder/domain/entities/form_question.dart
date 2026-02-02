@@ -10,10 +10,10 @@ abstract class FormQuestion with _$FormQuestion {
   const FormQuestion._();
   const factory FormQuestion({
     required String id,
-    required String label,
+    required Object? label,
     required QuestionType type,
-    String? helperText,
-    String? placeholder,
+    Object? helperText,
+    Object? placeholder,
     @Default(false) bool isRequired,
     List<String>? options,
     @Default(false) bool isReadOnly,
