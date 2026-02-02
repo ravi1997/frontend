@@ -3,6 +3,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'form_analytics.freezed.dart';
 part 'form_analytics.g.dart';
 
+/// Represents analytics data for a form including submission metrics and trends.
+///
+/// Contains total submissions, completion rate, time series trends for
+/// submissions, and field-level distribution data.
 @freezed
 abstract class FormAnalytics with _$FormAnalytics {
   const factory FormAnalytics({
@@ -19,7 +23,7 @@ abstract class FormAnalytics with _$FormAnalytics {
 
 @freezed
 abstract class TimeSeriesData with _$TimeSeriesData {
-  const factory TimeSeriesData({required DateTime date, required int count}) =
+  const factory TimeSeriesData({required DateTime date, required int value}) =
       _TimeSeriesData;
 
   factory TimeSeriesData.fromJson(Map<String, dynamic> json) =>
