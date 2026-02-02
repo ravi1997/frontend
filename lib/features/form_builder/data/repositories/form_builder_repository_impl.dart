@@ -2,6 +2,7 @@ import 'package:logger/logger.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/repositories/form_builder_repository.dart';
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 
 /// Implementation of [FormBuilderRepository] for managing form CRUD operations.
@@ -62,7 +63,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       return BuilderForm.fromJson(transformedData);
     } catch (e) {
       _logger.e('Failed to load form: $e');
-      throw Exception('Failed to load form: $e');
+      throw FormLoadException(id, originalError: e);
     }
   }
 
@@ -93,7 +94,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       }
     } catch (e) {
       _logger.e('Failed to save form: $e');
-      throw Exception('Failed to save form: $e');
+      throw FormSaveException(form.id, originalError: e);
     }
   }
 
@@ -107,7 +108,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       return response.data;
     } catch (e) {
       _logger.e('Failed to publish form: $e');
-      throw Exception('Failed to publish form: $e');
+      throw FormLoadException(formId, originalError: e);
     }
   }
 
@@ -130,7 +131,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final response = await _apiClient.get('/forms/$formId/versions/$version');
       return BuilderForm.fromJson(response.data);
     } catch (e) {
-      throw Exception('Failed to load version: $e');
+      _logger.e('Failed to load form version: $e');
+      throw FormVersionException(formId, version, originalError: e);
     }
   }
 }

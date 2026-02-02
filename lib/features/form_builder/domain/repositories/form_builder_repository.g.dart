@@ -55,4 +55,4 @@ final class FormBuilderRepositoryProvider
 }
 
 String _$formBuilderRepositoryHash() =>
-    r'f970ed8fa5a5a78883e4a346eaacf55d7ae39404';
+    r'8b7793ff1e0e9053cc2a9ca8d4a5a72a2d87dc72';

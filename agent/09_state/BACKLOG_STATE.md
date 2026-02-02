@@ -1,6 +1,6 @@
 # Backlog State
 
-## Current Milestone: [Phase 4: Analytics & Hardening]
+## Current Milestone: [Phase 5: Enterprise Features & Optimization]
 
 ## Task List
 
@@ -24,10 +24,15 @@
 | M-16 | Login OTP Verification Flow | High | DONE | Implementer |
 | M-17 | Workflow Logic Engine (Trigger/Action Integration) | Medium | DONE | Implementer |
 | M-18 | Skeleton Loading & Shimmer UX | Low | DONE | Implementer |
+| M-19 | Multi-language Form Support (i18n) | Medium | TODO | Architect |
+| M-20 | Advanced Analytics Dashboard (Charts/Trends) | High | TODO | Implementer |
+| M-21 | User Roles & Permissions (RBAC) | High | TODO | Implementer |
+| M-22 | Form Templates Marketplace | Medium | TODO | Implementer |
+| M-23 | Audit Logs & Activity Tracking | Low | TODO | Auditor |
 
 ## Progress
 
-- **Total Tasks**: 18
+- **Total Tasks**: 23
 - **Done**: 18
-- **Pending**: 0
+- **Pending**: 5
 - **Blocked**: 0

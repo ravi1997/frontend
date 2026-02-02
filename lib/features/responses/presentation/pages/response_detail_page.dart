@@ -183,7 +183,7 @@ class ResponseDetailPage extends ConsumerWidget {
         final question = questions[index];
         final answer = answers[question.id] ?? 'Not answered';
 
-        return _buildAnswerItem(question.label, answer.toString());
+        return _buildAnswerItem(question.label.toString(), answer.toString());
       },
     );
   }

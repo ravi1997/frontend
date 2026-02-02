@@ -69,16 +69,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
   @override
   Future<void> duplicateForm(String originalFormId, String newTitle) async {
-    final response = await _dio.get('/form/$originalFormId');
-    final formData = Map<String, dynamic>.from(response.data);
-
-    // Remove ID and update title
-    formData.remove('id');
-    formData.remove('_id');
-    formData['title'] = newTitle;
-
-    // Save as new form
-    await _dio.post('/form/', data: formData);
+    // Use the backend's clone endpoint
+    await _dio.post('/form/$originalFormId/clone', data: {'title': newTitle});
   }
 }
 
