@@ -42,13 +42,13 @@ Map<String, dynamic> _$FormAnalyticsToJson(_FormAnalytics instance) =>
 _TimeSeriesData _$TimeSeriesDataFromJson(Map<String, dynamic> json) =>
     _TimeSeriesData(
       date: DateTime.parse(json['date'] as String),
-      count: (json['count'] as num).toInt(),
+      value: (json['value'] as num).toInt(),
     );
 
 Map<String, dynamic> _$TimeSeriesDataToJson(_TimeSeriesData instance) =>
     <String, dynamic>{
       'date': instance.date.toIso8601String(),
-      'count': instance.count,
+      'value': instance.value,
     };
 
 _DistributionData _$DistributionDataFromJson(Map<String, dynamic> json) =>

@@ -12,6 +12,7 @@ import '../../../features/form_builder/domain/entities/builder_form.dart';
 import '../../../features/form_builder/presentation/pages/form_preview_page.dart';
 import '../../../features/analytics/presentation/pages/analytics_page.dart';
 import '../../../features/auth/presentation/screens/otp_verification_screen.dart';
+import '../../../features/form_builder/presentation/pages/translator_page.dart';
 
 part 'app_router.g.dart';
 
@@ -98,6 +99,13 @@ Raw<GoRouter> appRouter(Ref ref) {
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
           return AnalyticsPage(formId: formId);
+        },
+      ),
+      GoRoute(
+        path: '/forms/:formId/translate',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          return TranslatorPage(formId: formId);
         },
       ),
     ],

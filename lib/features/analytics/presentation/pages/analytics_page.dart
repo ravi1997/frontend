@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/repositories/analytics_repository.dart';
-import 'package:frontend/features/analytics/domain/entities/form_analytics.dart';
+import '../controllers/analytics_controller.dart';
 import '../widgets/submission_trend_chart.dart';
 import '../widgets/response_distribution_chart.dart';
-
-final analyticsProvider = FutureProvider.family<FormAnalytics, String>((
-  ref,
-  formId,
-) async {
-  return ref.read(analyticsRepositoryProvider).getAnalytics(formId);
-});
+import '../../domain/entities/form_analytics.dart';
 
 class AnalyticsPage extends ConsumerWidget {
   final String formId;
@@ -21,10 +14,10 @@ class AnalyticsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final analyticsAsync = ref.watch(analyticsProvider(formId));
+    final analyticsState = ref.watch(analyticsControllerProvider(formId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColors.builderBackground,
       appBar: AppBar(
         title: const Text('Form Analytics'),
         backgroundColor: Colors.white,
@@ -34,152 +27,168 @@ class AnalyticsPage extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref
+                .read(analyticsControllerProvider(formId).notifier)
+                .refresh(),
+          ),
+        ],
       ),
-      body: analyticsAsync.when(
-        data: (data) => _buildContent(context, data),
+      body: analyticsState.when(
+        data: (analytics) => SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSummaryGrid(context, analytics),
+              const SizedBox(height: 32),
+              _buildSectionTitle('Submission Trends'),
+              const SizedBox(height: 16),
+              _buildChartCard(
+                child: SubmissionTrendChart(trends: analytics.trends),
+                height: 300,
+              ),
+              const SizedBox(height: 32),
+              _buildSectionTitle('Field Distributions'),
+              const SizedBox(height: 16),
+              ...analytics.fieldDistributions.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildChartCard(
+                        child: ResponseDistributionChart(
+                          distribution: entry.value,
+                        ),
+                        height: 250,
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, FormAnalytics data) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildStatsGrid(data),
-          const SizedBox(height: 32),
-          _buildChartSection(
-            title: 'Submission Trends (Last 7 Days)',
-            child: SubmissionTrendChart(trends: data.trends),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Field-specific Insights',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...data.fieldDistributions.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: _buildChartSection(
-                title: entry.key,
-                child: ResponseDistributionChart(distribution: entry.value),
-              ),
-            );
-          }),
-        ],
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textDark,
       ),
     );
   }
 
-  Widget _buildStatsGrid(FormAnalytics data) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 800 ? 4 : 2;
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 2.2,
-          children: [
-            _buildStatCard(
-              'Total Submissions',
-              data.totalSubmissions.toString(),
-              Icons.people_outline,
-            ),
-            _buildStatCard(
-              'Completion Rate',
-              '${data.completionRate}%',
-              Icons.check_circle_outline,
-            ),
-            _buildStatCard('Avg. Time', '2m 30s', Icons.timer_outlined),
-            _buildStatCard('Drafts', '12', Icons.edit_note_outlined),
-          ],
-        );
-      },
+  Widget _buildSummaryGrid(BuildContext context, FormAnalytics analytics) {
+    return GridView.count(
+      crossAxisCount: MediaQuery.of(context).size.width > 900 ? 4 : 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.5,
+      children: [
+        _buildSummaryCard(
+          'Total Submissions',
+          analytics.totalSubmissions.toString(),
+          Icons.description_outlined,
+          AppColors.primary,
+        ),
+        _buildSummaryCard(
+          'Completion Rate',
+          '${(analytics.completionRate * 100).toInt()}%',
+          Icons.assignment_turned_in_outlined,
+          Colors.teal,
+        ),
+        _buildSummaryCard(
+          'Avg. Time',
+          '2m 14s',
+          Icons.timer_outlined,
+          Colors.amber,
+        ),
+        _buildSummaryCard(
+          'Active Since',
+          'Jan 15',
+          Icons.calendar_today_outlined,
+          Colors.indigo,
+        ),
+      ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
+  Widget _buildSummaryCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderLight),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          Row(
             children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
+                style: const TextStyle(
+                  color: AppColors.textGrey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildChartSection({required String title, required Widget child}) {
+  Widget _buildChartCard({required Widget child, required double height}) {
     return Container(
+      height: height,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.borderLight),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(height: 250, child: child),
-        ],
-      ),
+      child: child,
     );
   }
 }

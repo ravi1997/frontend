@@ -12,7 +12,7 @@ class CsvExporter {
     final Map<String, String> questionHeaders = {};
     for (var section in form.sections) {
       for (var question in section.questions) {
-        questionHeaders[question.id] = question.label;
+        questionHeaders[question.id] = question.label?.toString() ?? '';
       }
     }
 

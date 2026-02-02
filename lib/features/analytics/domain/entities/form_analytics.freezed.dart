@@ -302,7 +302,7 @@ as Map<String, List<DistributionData>>,
 /// @nodoc
 mixin _$TimeSeriesData {
 
- DateTime get date; int get count;
+ DateTime get date; int get value;
 /// Create a copy of TimeSeriesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,16 +315,16 @@ $TimeSeriesDataCopyWith<TimeSeriesData> get copyWith => _$TimeSeriesDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TimeSeriesData&&(identical(other.date, date) || other.date == date)&&(identical(other.count, count) || other.count == count));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TimeSeriesData&&(identical(other.date, date) || other.date == date)&&(identical(other.value, value) || other.value == value));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,date,count);
+int get hashCode => Object.hash(runtimeType,date,value);
 
 @override
 String toString() {
-  return 'TimeSeriesData(date: $date, count: $count)';
+  return 'TimeSeriesData(date: $date, value: $value)';
 }
 
 
@@ -335,7 +335,7 @@ abstract mixin class $TimeSeriesDataCopyWith<$Res>  {
   factory $TimeSeriesDataCopyWith(TimeSeriesData value, $Res Function(TimeSeriesData) _then) = _$TimeSeriesDataCopyWithImpl;
 @useResult
 $Res call({
- DateTime date, int count
+ DateTime date, int value
 });
 
 
@@ -352,10 +352,10 @@ class _$TimeSeriesDataCopyWithImpl<$Res>
 
 /// Create a copy of TimeSeriesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? count = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? value = null,}) {
   return _then(_self.copyWith(
 date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as DateTime,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as DateTime,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -441,10 +441,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime date,  int count)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime date,  int value)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TimeSeriesData() when $default != null:
-return $default(_that.date,_that.count);case _:
+return $default(_that.date,_that.value);case _:
   return orElse();
 
 }
@@ -462,10 +462,10 @@ return $default(_that.date,_that.count);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime date,  int count)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime date,  int value)  $default,) {final _that = this;
 switch (_that) {
 case _TimeSeriesData():
-return $default(_that.date,_that.count);case _:
+return $default(_that.date,_that.value);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -482,10 +482,10 @@ return $default(_that.date,_that.count);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime date,  int count)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime date,  int value)?  $default,) {final _that = this;
 switch (_that) {
 case _TimeSeriesData() when $default != null:
-return $default(_that.date,_that.count);case _:
+return $default(_that.date,_that.value);case _:
   return null;
 
 }
@@ -497,11 +497,11 @@ return $default(_that.date,_that.count);case _:
 @JsonSerializable()
 
 class _TimeSeriesData implements TimeSeriesData {
-  const _TimeSeriesData({required this.date, required this.count});
+  const _TimeSeriesData({required this.date, required this.value});
   factory _TimeSeriesData.fromJson(Map<String, dynamic> json) => _$TimeSeriesDataFromJson(json);
 
 @override final  DateTime date;
-@override final  int count;
+@override final  int value;
 
 /// Create a copy of TimeSeriesData
 /// with the given fields replaced by the non-null parameter values.
@@ -516,16 +516,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TimeSeriesData&&(identical(other.date, date) || other.date == date)&&(identical(other.count, count) || other.count == count));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TimeSeriesData&&(identical(other.date, date) || other.date == date)&&(identical(other.value, value) || other.value == value));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,date,count);
+int get hashCode => Object.hash(runtimeType,date,value);
 
 @override
 String toString() {
-  return 'TimeSeriesData(date: $date, count: $count)';
+  return 'TimeSeriesData(date: $date, value: $value)';
 }
 
 
@@ -536,7 +536,7 @@ abstract mixin class _$TimeSeriesDataCopyWith<$Res> implements $TimeSeriesDataCo
   factory _$TimeSeriesDataCopyWith(_TimeSeriesData value, $Res Function(_TimeSeriesData) _then) = __$TimeSeriesDataCopyWithImpl;
 @override @useResult
 $Res call({
- DateTime date, int count
+ DateTime date, int value
 });
 
 
@@ -553,10 +553,10 @@ class __$TimeSeriesDataCopyWithImpl<$Res>
 
 /// Create a copy of TimeSeriesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? count = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? value = null,}) {
   return _then(_TimeSeriesData(
 date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
-as DateTime,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as DateTime,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

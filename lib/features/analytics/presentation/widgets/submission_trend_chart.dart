@@ -2,7 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'package:frontend/features/analytics/domain/entities/form_analytics.dart';
+import '../../domain/entities/form_analytics.dart';
 
 class SubmissionTrendChart extends StatelessWidget {
   final List<TimeSeriesData> trends;
@@ -11,16 +11,15 @@ class SubmissionTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (trends.isEmpty) return const Center(child: Text('No data available'));
+
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
           getDrawingHorizontalLine: (value) {
-            return FlLine(
-              color: Colors.grey.withValues(alpha: 0.1),
-              strokeWidth: 1,
-            );
+            return FlLine(color: AppColors.borderLight, strokeWidth: 1);
           },
         ),
         titlesData: FlTitlesData(
@@ -38,8 +37,9 @@ class SubmissionTrendChart extends StatelessWidget {
               interval: 1,
               getTitlesWidget: (value, meta) {
                 final index = value.toInt();
-                if (index < 0 || index >= trends.length)
+                if (index < 0 || index >= trends.length) {
                   return const SizedBox();
+                }
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
@@ -56,7 +56,6 @@ class SubmissionTrendChart extends StatelessWidget {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              interval: 20,
               reservedSize: 42,
               getTitlesWidget: (value, meta) {
                 return Text(
@@ -74,21 +73,26 @@ class SubmissionTrendChart extends StatelessWidget {
         minX: 0,
         maxX: (trends.length - 1).toDouble(),
         minY: 0,
-        maxY: (trends.map((e) => e.count).reduce((a, b) => a > b ? a : b) * 1.5)
-            .toDouble(),
         lineBarsData: [
           LineChartBarData(
             spots: List.generate(trends.length, (index) {
-              return FlSpot(index.toDouble(), trends[index].count.toDouble());
+              return FlSpot(index.toDouble(), trends[index].value.toDouble());
             }),
             isCurved: true,
             color: AppColors.primary,
             barWidth: 3,
             isStrokeCapRound: true,
-            dotData: const FlDotData(show: false),
+            dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: AppColors.primary.withValues(alpha: 0.1),
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.2),
+                  AppColors.primary.withValues(alpha: 0.0),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
           ),
         ],
