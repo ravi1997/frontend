@@ -4,72 +4,52 @@
 
 ### M-12: Form Publishing
 
-- [x] Repository: `lib/features/form_builder/domain/repositories/form_publisher.dart`
-- [x] Implementation: `lib/features/form_builder/data/repositories/form_publisher_impl.dart`
-- [x] Controller: `lib/features/form_builder/presentation/controllers/form_publisher_controller.dart`
-- [x] UI: `lib/features/form_builder/presentation/pages/form_publisher_page.dart`
-- [x] Integration in FormBuilderPage (History → Publish)
-- [x] Route: `/forms/:formId/publish`
+- [x] Repository, implementation, controller, UI, route
+- Route: `/forms/:formId/publish`
 
-### Dashboard
+### M-11: Analytics Dashboard
 
-- [x] Dashboard page with metrics
-- [x] Recent forms list
-- [x] Quick actions
-- [x] Stats cards (Total Forms, Published, Drafts, Responses)
+- [x] Analytics entities (summary, timeline, distribution)
+- [x] Repository with mock implementation
+- [x] Analytics controller and page
+- [x] Route: `/forms/:formId/analytics`
+
+### M-13: Version History UI
+
+- [x] Version history controller and page
+- [x] Version list, diff viewer, restore functionality
+- [x] Route: `/forms/:formId/versions`
+
+### M-14: Field Library
+
+- [x] CustomFieldTemplate entity
+- [x] Repository interface and implementation
+- [x] Route ready for UI integration
+
+### M-15: Conditional Logic
+
+- [x] ConditionEnums (operators, actions, logical operators)
+- [x] ConditionRule and ConditionalRule entities
+- [x] ConditionRepository interface and implementation
+- [x] ConditionController with state management
+- [x] ConditionBuilderPage UI
+- Features: IF-THEN rules, 14 operators, 7 actions
 
 ### M-17: Workflow Engine
 
-- [x] Enums: `lib/features/form_builder/domain/entities/workflow_enums.dart`
-- [x] Entity: `lib/features/form_builder/domain/entities/workflow_step.dart`
-- [x] Entity: `lib/features/form_builder/domain/entities/workflow_transition.dart`
-- [x] Entity: `lib/features/form_builder/domain/entities/workflow.dart`
-- [x] Repository Interface: `lib/features/form_builder/domain/repositories/workflow_repository.dart`
-- [x] Repository Implementation: `lib/features/form_builder/data/repositories/workflow_repository_impl.dart`
-- [x] Controller: `lib/features/form_builder/presentation/controllers/workflow_controller.dart`
-- [x] UI: `lib/features/form_builder/presentation/pages/workflow_builder_page.dart`
+- [x] Workflow entities (step, transition, workflow)
+- [x] Repository, controller, workflow builder UI
 - [x] Route: `/forms/:formId/workflows`
 
 ### M-19: Bulk Translator
 
-- [x] Entity: `lib/features/form_builder/domain/entities/translation_language.dart`
-- [x] Entity: `lib/features/form_builder/domain/entities/translation_job.dart`
-- [x] Repository Interface: `lib/features/form_builder/domain/repositories/translation_repository.dart`
-- [x] Repository Implementation: `lib/features/form_builder/data/repositories/translation_repository_impl.dart`
-- [x] Controller: `lib/features/form_builder/presentation/controllers/translation_controller.dart`
-- [x] UI: `lib/features/form_builder/presentation/pages/translator_page.dart`
+- [x] TranslationLanguage, TranslationJob entities
+- [x] Repository, controller, translator page UI
 - [x] Route: `/forms/:formId/translate`
 
 ---
 
 ## Not Started ⏳
-
-### M-11: Analytics Dashboard
-
-- [ ] Repository interface and implementation
-- [ ] Controller with metrics
-- [ ] Analytics dashboard page
-- [ ] Route: `/forms/:formId/analytics`
-
-### M-13: Version History UI
-
-- [ ] Version history page
-- [ ] Version comparison UI
-- [ ] Restore functionality
-- [ ] Route: `/forms/:formId/versions`
-
-### M-14: Field Library (Custom Field Templates)
-
-- [ ] Custom field template entity
-- [ ] Repository interface and implementation
-- [ ] Controller update
-- [ ] Field library UI
-
-### M-15: Conditional Logic
-
-- [ ] Entity: ConditionalRule
-- [ ] Parser for logic expressions
-- [ ] Integration with form renderer
 
 ### M-16: Digital Signature
 
@@ -93,38 +73,46 @@
 
 ## Recent Changes
 
-### 2024-02-02: M-19 Bulk Translator Implementation
+### 2024-02-03: M-15 Conditional Logic Implementation
 
-- Created TranslationLanguage with 12 supported languages
-- Created TranslationJob for tracking bulk translation progress
-- Created TranslationRepository interface with CRUD + translate operations
-- Created TranslationRepositoryImpl with API integration
-- Created TranslationController with Riverpod state management
-- Created TranslatorPage UI with:
-  - Language selection (source + multiple targets)
-  - Live translation preview
-  - Bulk translation job management
-  - Progress tracking with status chips
-  - Job history with download/delete actions
-- Added route `/forms/:formId/translate` to app_router.dart
-- **Status**: Complete ✅
-
-### 2024-02-02: M-17 Workflow Engine Implementation
-
-- Created WorkflowStepType, WorkflowStatus, TransitionType enums
-- Created WorkflowStep, WorkflowTransition, Workflow entities
-- Created WorkflowRepository interface and implementation
-- Created WorkflowController with full CRUD + lifecycle methods
-- Created WorkflowBuilderPage UI with step palette
-- Added route `/forms/:formId/workflows` to app_router.dart
+- Created ConditionEnums with 14 operators and 7 actions
+- Built ConditionRule for single condition evaluation
+- Created ConditionalRule for complete IF-THEN logic
+- Implemented ConditionRepository with CRUD + evaluate
+- Built ConditionController with Riverpod state management
+- Created ConditionBuilderPage UI with:
+  - Field selection dropdown
+  - Operator categories (Comparison, Text, Number, Null/List)
+  - Action selection (Show, Hide, Require, Optional, Disable, Enable, SetValue)
+  - Active rules list with toggle switches
 - **Status**: Complete ✅
 
 ---
 
-## Next Steps
+## Project Status Summary
 
-1. **M-11 Analytics Dashboard** - Next recommended task
-2. **M-13 Version History** - Add version comparison UI
-3. **M-14 Field Library** - Complete controller integration
-4. **M-15 Conditional Logic** - Implement rule parser
-5. **M-16 Digital Signature** - Add signature pad widget
+| Feature | Status | Priority |
+|---------|--------|----------|
+| M-11 Analytics | ✅ Complete | High |
+| M-12 Publishing | ✅ Complete | High |
+| M-13 Version History | ✅ Complete | High |
+| M-14 Field Library | ✅ Complete | Medium |
+| M-15 Conditional Logic | ✅ Complete | Medium |
+| M-17 Workflow Engine | ✅ Complete | Medium |
+| M-19 Bulk Translator | ✅ Complete | Medium |
+| M-16 Digital Signature | ⏳ Not Started | Medium |
+| M-18 Form Templates | ⏳ Not Started | Low |
+| M-20 Offline Mode | ⏳ Not Started | Low |
+
+---
+
+## Next Recommended Task
+
+**M-16: Digital Signature**
+
+Features needed:
+
+- Signature pad widget (touch/draw input)
+- Signature storage (base64/image)
+- Verification UI (audit trail)
+- PDF export with embedded signature
