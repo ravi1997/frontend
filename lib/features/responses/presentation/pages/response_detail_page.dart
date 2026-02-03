@@ -96,7 +96,7 @@ class ResponseDetailPage extends ConsumerWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.primary.withOpacity(0.1)),
+        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -108,7 +108,7 @@ class ResponseDetailPage extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -211,7 +211,7 @@ class ResponseDetailPage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.05)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

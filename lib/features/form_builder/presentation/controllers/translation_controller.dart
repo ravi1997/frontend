@@ -3,13 +3,16 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/translation_job.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/repositories/translation_repository.dart';
+import '../../../../core/network/api_client_wrapper.dart';
+import '../../data/repositories/translation_repository_impl.dart';
 
 part 'translation_controller.g.dart';
 
 /// Provider for TranslationRepository
 @riverpod
 TranslationRepository translationRepository(Ref ref) {
-  throw UnimplementedError('translationRepository not implemented');
+  final apiClient = ref.watch(apiClientProvider);
+  return TranslationRepositoryImpl(apiClient);
 }
 
 /// Controller for managing bulk translation operations.
@@ -68,9 +71,7 @@ class TranslationController extends _$TranslationController {
   Future<void> cancelTranslationJob(String jobId) async {
     final repository = ref.read(translationRepositoryProvider);
     final updated = await repository.cancelTranslationJob(jobId);
-    state =
-        state.map((j) => j.id == jobId ? updated : j).toList()
-            as List<TranslationJob>;
+    state = state.map((j) => j.id == jobId ? updated : j).toList();
   }
 
   /// Deletes a translation job.

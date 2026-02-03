@@ -148,7 +148,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           ),
           const SizedBox(height: 16),
           const Text(
-            "This form is empty.",
+            'This form is empty.',
             style: TextStyle(color: AppColors.textGrey),
           ),
         ],
@@ -190,13 +190,15 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         final availableWidth = constraints.maxWidth;
         int crossAxisCount = 1;
         if (widget.form.layout == FormLayoutType.twoColumns) crossAxisCount = 2;
-        if (widget.form.layout == FormLayoutType.threeColumns)
+        if (widget.form.layout == FormLayoutType.threeColumns) {
           crossAxisCount = 3;
+        }
 
-        if (availableWidth < 600)
+        if (availableWidth < 600) {
           crossAxisCount = 1;
-        else if (availableWidth < 900 && crossAxisCount > 2)
+        } else if (availableWidth < 900 && crossAxisCount > 2) {
           crossAxisCount = 2;
+        }
 
         final itemWidth =
             (availableWidth - (24 * (crossAxisCount - 1))) / crossAxisCount;
@@ -246,7 +248,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   children: [
                     const SizedBox(height: 20),
                     Text(
-                      "Step ${_currentStep + 1} of ${sections.length}",
+                      'Step ${_currentStep + 1} of ${sections.length}',
                       style: const TextStyle(
                         color: AppColors.textGrey,
                         fontWeight: FontWeight.bold,
@@ -272,7 +274,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                                 vertical: 12,
                               ),
                             ),
-                            child: const Text("Previous"),
+                            child: const Text('Previous'),
                           )
                         else
                           const SizedBox(),
@@ -287,7 +289,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                                 vertical: 12,
                               ),
                             ),
-                            child: const Text("Next"),
+                            child: const Text('Next'),
                           )
                         else
                           _buildSubmitButton(small: true),
@@ -328,6 +330,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       .read(workflowExecutorProvider)
                       .execute(widget.form, dummyData);
 
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -509,10 +512,11 @@ class _PreviewSectionWidget extends ConsumerWidget {
           crossAxisCount = section.gridColumns;
         }
 
-        if (availableWidth < 400)
+        if (availableWidth < 400) {
           crossAxisCount = 1;
-        else if (availableWidth < 700 && crossAxisCount > 2)
+        } else if (availableWidth < 700 && crossAxisCount > 2) {
           crossAxisCount = 2;
+        }
 
         final itemWidth =
             (availableWidth - (questionSpacing * (crossAxisCount - 1))) /
@@ -840,7 +844,7 @@ class _PreviewFieldWidget extends ConsumerWidget {
           decoration: decoration,
           child: Center(
             child: Text(
-              "Preview of ${q.type.label}",
+              'Preview of ${q.type.label}',
               style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
             ),
           ),

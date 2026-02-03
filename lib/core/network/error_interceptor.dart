@@ -34,7 +34,7 @@ class ErrorInterceptor extends Interceptor {
           message = 'You do not have permission to perform this action.';
         } else {
           // Optionally parse backend error message here
-          message = 'An error occurred (${statusCode}).';
+          message = 'An error occurred ($statusCode).';
         }
         break;
       case DioExceptionType.cancel:

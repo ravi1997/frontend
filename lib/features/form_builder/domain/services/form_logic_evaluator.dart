@@ -134,9 +134,9 @@ class FormLogicEvaluator {
     _ConditionGroup group,
     Map<String, dynamic> formData,
   ) {
-    if (group.conditions.isEmpty)
+    if (group.conditions.isEmpty) {
       return true; // Empty group matches? Or not? Usually true if no constraints.
-
+    }
     if (group.matchType == 'and') {
       return group.conditions.every((c) => _evaluateCondition(c, formData));
     } else {

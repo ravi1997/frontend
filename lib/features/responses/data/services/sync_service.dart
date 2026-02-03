@@ -46,8 +46,10 @@ class SyncService extends _$SyncService {
         final response = FormResponse.fromJson(data);
         await repository.submitResponse(response);
         await _box.delete(key);
+        // ignore: avoid_print
         print('Synced submission: $key');
       } catch (e) {
+        // ignore: avoid_print
         print('Failed to sync submission $key: $e');
       }
     }

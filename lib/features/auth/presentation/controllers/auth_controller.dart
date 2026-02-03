@@ -23,7 +23,7 @@ class AuthController extends _$AuthController {
         }
       },
       loading: () => null,
-      error: (_, __) => null,
+      error: (_, _) => null,
     );
   }
 

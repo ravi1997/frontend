@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -60,7 +59,7 @@ class _SignaturePadWidgetState extends State<SignaturePadWidget> {
   Future<void> _loadInitialSignature(String data) async {
     try {
       final bytes = base64Decode(data);
-      final image = await _loadImage(bytes);
+      await _loadImage(bytes);
       setState(() {});
     } catch (e) {
       debugPrint('Failed to load initial signature: $e');

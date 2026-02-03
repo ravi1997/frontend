@@ -6,13 +6,16 @@ import '../../domain/entities/workflow_enums.dart';
 import '../../domain/entities/workflow_step.dart';
 import '../../domain/entities/workflow_transition.dart';
 import '../../domain/repositories/workflow_repository.dart';
+import '../../../../core/network/api_client_wrapper.dart';
+import '../../data/repositories/workflow_repository_impl.dart';
 
 part 'workflow_controller.g.dart';
 
 /// Provider for WorkflowRepository
 @riverpod
 WorkflowRepository workflowRepository(Ref ref) {
-  throw UnimplementedError('workflowRepository not implemented');
+  final apiClient = ref.watch(apiClientProvider);
+  return WorkflowRepositoryImpl(apiClient);
 }
 
 /// Controller for managing workflow builder state.
@@ -63,9 +66,7 @@ class WorkflowController extends _$WorkflowController {
   Future<void> updateWorkflow(Workflow workflow) async {
     final repository = ref.read(workflowRepositoryProvider);
     final updated = await repository.updateWorkflow(workflow);
-    state =
-        state.map((w) => w.id == updated.id ? updated : w).toList()
-            as List<Workflow>;
+    state = state.map((w) => w.id == updated.id ? updated : w).toList();
   }
 
   /// Deletes a workflow.
@@ -79,18 +80,14 @@ class WorkflowController extends _$WorkflowController {
   Future<void> activateWorkflow(String workflowId) async {
     final repository = ref.read(workflowRepositoryProvider);
     final updated = await repository.activateWorkflow(workflowId);
-    state =
-        state.map((w) => w.id == updated.id ? updated : w).toList()
-            as List<Workflow>;
+    state = state.map((w) => w.id == updated.id ? updated : w).toList();
   }
 
   /// Pauses a workflow.
   Future<void> pauseWorkflow(String workflowId) async {
     final repository = ref.read(workflowRepositoryProvider);
     final updated = await repository.pauseWorkflow(workflowId);
-    state =
-        state.map((w) => w.id == updated.id ? updated : w).toList()
-            as List<Workflow>;
+    state = state.map((w) => w.id == updated.id ? updated : w).toList();
   }
 
   /// Adds a step to a workflow.

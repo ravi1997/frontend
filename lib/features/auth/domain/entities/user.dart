@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:frontend/features/analytics/domain/entities/form_analytics.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
@@ -11,8 +10,8 @@ abstract class User with _$User {
     required String username,
     required String email,
     @Default([]) List<String> roles,
-    @JsonKey(name: 'user_type') required String userType,
-    @JsonKey(name: 'employee_id') String? employeeId,
+    required String userType,
+    String? employeeId,
     String? mobile,
   }) = _User;
 

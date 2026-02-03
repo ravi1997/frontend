@@ -5,7 +5,6 @@ import '../controllers/workflow_controller.dart';
 import '../../domain/entities/workflow.dart';
 import '../../domain/entities/workflow_enums.dart';
 import '../../domain/entities/workflow_step.dart';
-import '../../../../core/router/app_router.dart';
 
 /// Workflow Builder Page.
 ///
@@ -143,7 +142,7 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final workflows = ref.watch(workflowControllerProvider);
+    ref.watch(workflowControllerProvider);
 
     return Scaffold(
       appBar: AppBar(

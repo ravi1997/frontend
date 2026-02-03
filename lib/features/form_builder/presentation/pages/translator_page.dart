@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/translation_controller.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/entities/translation_job.dart';
-import '../../../../core/router/app_router.dart';
 
 /// Bulk Translator Page.
 ///
@@ -19,7 +18,7 @@ class TranslatorPage extends ConsumerStatefulWidget {
 
 class _TranslatorPageState extends ConsumerState<TranslatorPage> {
   List<TranslationLanguage> _languages = [];
-  List<String> _selectedTargetLanguages = [];
+  final List<String> _selectedTargetLanguages = [];
   String _sourceLanguage = 'en';
   bool _isLoading = false;
   final _previewTextController = TextEditingController();
@@ -196,7 +195,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _sourceLanguage,
+                    initialValue: _sourceLanguage,
                     decoration: const InputDecoration(
                       labelText: 'Source Language',
                       border: OutlineInputBorder(),

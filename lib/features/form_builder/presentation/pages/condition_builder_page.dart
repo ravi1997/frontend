@@ -177,7 +177,7 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _selectedFieldId,
+              initialValue: _selectedFieldId,
               decoration: const InputDecoration(
                 labelText: 'Field to Watch',
                 border: OutlineInputBorder(),
@@ -207,7 +207,7 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<ConditionAction>(
-                    value: _selectedAction,
+                    initialValue: _selectedAction,
                     decoration: const InputDecoration(
                       labelText: 'Action',
                       border: OutlineInputBorder(),
@@ -226,7 +226,7 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<LogicalOperator>(
-                    value: _selectedLogicalOperator,
+                    initialValue: _selectedLogicalOperator,
                     decoration: const InputDecoration(
                       labelText: 'Logic',
                       border: OutlineInputBorder(),
@@ -264,7 +264,7 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
     final allOperators = operators.values.expand((e) => e).toList();
 
     return DropdownButtonFormField<ConditionOperator>(
-      value: _selectedOperator,
+      initialValue: _selectedOperator,
       decoration: const InputDecoration(
         labelText: 'Operator',
         border: OutlineInputBorder(),

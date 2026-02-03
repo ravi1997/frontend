@@ -127,7 +127,10 @@ class PublishSuccessDialog extends StatelessWidget {
                     version: QrVersions.auto,
                     size: 160.0,
                     gapless: false,
-                    foregroundColor: AppColors.textDark,
+                    eyeStyle: QrEyeStyle(color: AppColors.textDark),
+                    dataModuleStyle: QrDataModuleStyle(
+                      color: AppColors.textDark,
+                    ),
                   ),
                 ],
               ),

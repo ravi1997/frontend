@@ -39,7 +39,7 @@ class SectionLayoutSettings extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.builderElement.withOpacity(0.5),
+            color: AppColors.builderElement.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.borderLight),
           ),
@@ -47,7 +47,7 @@ class SectionLayoutSettings extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "Description",
+                'Description',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,

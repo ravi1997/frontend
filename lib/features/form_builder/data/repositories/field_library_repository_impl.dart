@@ -1,7 +1,6 @@
 import 'package:logger/logger.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../../domain/repositories/field_library_repository.dart';
-import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 
 /// Implementation of [FieldLibraryRepository] for custom field templates.

@@ -166,7 +166,7 @@ class FieldLogicSettings extends ConsumerWidget {
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -181,7 +181,7 @@ class FieldLogicSettings extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -242,7 +242,7 @@ class FieldLogicSettings extends ConsumerWidget {
               ),
             ),
           Text(
-            "${conditions.length} Condition(s)",
+            '${conditions.length} Condition(s)',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           ),
           ...conditions
@@ -277,7 +277,7 @@ class FieldLogicSettings extends ConsumerWidget {
               .take(3),
           if (conditions.length > 3)
             const Text(
-              "...",
+              '...',
               style: TextStyle(fontSize: 10, color: AppColors.textGrey),
             ),
         ],

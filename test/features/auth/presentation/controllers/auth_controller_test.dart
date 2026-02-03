@@ -67,6 +67,7 @@ void main() {
       final controller = container.read(authControllerProvider.notifier);
       await controller.login('test@example.com', 'password');
 
+      // ignore: avoid_print
       print('States during login: $states');
       expect(states.any((s) => s.hasError), true);
     });

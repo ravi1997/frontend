@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_builder_state.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/features/form_builder/domain/repositories/form_builder_repository.dart';

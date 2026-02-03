@@ -234,7 +234,7 @@ class _SignatureRequestPageState extends ConsumerState<SignatureRequestPage> {
   Widget _buildStatCard(String label, int count, Color color) {
     return Expanded(
       child: Card(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

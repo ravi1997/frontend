@@ -595,9 +595,12 @@ class FormCanvasWidget extends ConsumerWidget {
                               } else {
                                 // Auto mode (Grid Column Span)
                                 int span = q.style.columnSpan;
-                                if (span > crossAxisCount)
+                                if (span > crossAxisCount) {
                                   span = crossAxisCount;
-                                if (span < 1) span = 1;
+                                }
+                                if (span < 1) {
+                                  span = 1;
+                                }
 
                                 // Calculate spanned width:
                                 // (single_col_width * span) + (spacing * (span - 1))
@@ -607,8 +610,9 @@ class FormCanvasWidget extends ConsumerWidget {
                               }
 
                               // Ensure we don't exceed available width (with some buffer)
-                              if (width > availableWidth)
+                              if (width > availableWidth) {
                                 width = availableWidth;
+                              }
 
                               final questionWidget = BuilderFieldWidget(
                                 question: q,

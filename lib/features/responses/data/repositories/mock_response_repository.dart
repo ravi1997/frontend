@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/responses/domain/repositories/response_repository.dart';
@@ -48,6 +47,7 @@ class MockResponseRepository implements ResponseRepository {
   Future<void> submitResponse(FormResponse response) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 1000));
+    // ignore: avoid_print
     print('Response submitted successfully: ${response.id}');
   }
 }

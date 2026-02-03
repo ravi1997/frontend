@@ -18,12 +18,12 @@ class VersionHistoryState {
 
   const VersionHistoryState({
     this.versions = const [],
-    this.selectedVersion = null,
-    this.selectedForm = null,
-    this.currentVersion = null,
+    this.selectedVersion,
+    this.selectedForm,
+    this.currentVersion,
     this.isLoading = false,
     this.isRefreshing = false,
-    this.error = null,
+    this.error,
     this.isRestoring = false,
   });
 

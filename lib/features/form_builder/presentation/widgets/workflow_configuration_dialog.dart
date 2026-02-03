@@ -216,7 +216,7 @@ class _WorkflowConfigurationDialogState
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isEnabled
-                    ? AppColors.primary.withOpacity(0.1)
+                    ? AppColors.primary.withValues(alpha: 0.1)
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -251,7 +251,7 @@ class _WorkflowConfigurationDialogState
             Switch(
               value: isEnabled,
               onChanged: onToggle,
-              activeColor: AppColors.primary,
+              activeTrackColor: AppColors.primary,
             ),
           ],
         ),
@@ -340,7 +340,7 @@ class _WorkflowConfigurationDialogState
                     Expanded(
                       flex: 2,
                       child: DropdownButtonFormField<String>(
-                        value: condition['operator'] ?? 'equals',
+                        initialValue: condition['operator'] ?? 'equals',
                         items: const [
                           DropdownMenuItem(
                             value: 'equals',

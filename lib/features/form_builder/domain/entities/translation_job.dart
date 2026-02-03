@@ -1,5 +1,3 @@
-import 'translation_language.dart';
-
 /// Status of a translation job.
 enum TranslationJobStatus { pending, inProgress, completed, failed, cancelled }
 

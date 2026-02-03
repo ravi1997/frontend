@@ -104,6 +104,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                 return;
                               }
 
+                              final ctx = context;
                               try {
                                 await ref
                                     .read(authControllerProvider.notifier)
@@ -117,16 +118,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                                       .showSuccess(
                                         'Reset link sent to your email',
                                       );
-
-                                  Future.delayed(
-                                    const Duration(seconds: 2),
-                                    () {
-                                      if (mounted) {
-                                        context.go('/login');
-                                      }
-                                    },
-                                  );
                                 }
+
+                                // ignore: use_build_context_synchronously
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  if (mounted) {
+                                    // ignore: use_build_context_synchronously
+                                    Navigator.of(ctx).pushNamed('/login');
+                                  }
+                                });
                               } catch (e) {
                                 // Error is already handled by the controller and would be shown by the listener if we had one
                                 // But since we are awaiting here, we can also handle it here.
