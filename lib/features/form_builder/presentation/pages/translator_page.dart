@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/localization/locale_controller.dart';
-import '../controllers/form_builder_controller.dart';
+import '../controllers/translation_controller.dart';
+import '../../domain/entities/translation_language.dart';
+import '../../domain/entities/translation_job.dart';
+import '../../../../core/router/app_router.dart';
 
+/// Bulk Translator Page.
+///
+/// Provides interface for translating forms to multiple languages.
 class TranslatorPage extends ConsumerStatefulWidget {
   final String formId;
 
@@ -15,305 +18,461 @@ class TranslatorPage extends ConsumerStatefulWidget {
 }
 
 class _TranslatorPageState extends ConsumerState<TranslatorPage> {
-  String _targetLocale = 'es';
+  List<TranslationLanguage> _languages = [];
+  List<String> _selectedTargetLanguages = [];
+  String _sourceLanguage = 'en';
+  bool _isLoading = false;
+  final _previewTextController = TextEditingController();
+  String _previewResult = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguages();
+    _loadTranslationJobs();
+  }
+
+  Future<void> _loadLanguages() async {
+    try {
+      final languages = await ref
+          .read(translationControllerProvider.notifier)
+          .loadLanguages();
+      setState(() => _languages = languages);
+    } catch (e) {
+      _showError('Failed to load languages: $e');
+    }
+  }
+
+  Future<void> _loadTranslationJobs() async {
+    await ref
+        .read(translationControllerProvider.notifier)
+        .loadTranslationJobs(widget.formId);
+  }
+
+  Future<void> _startTranslation() async {
+    if (_selectedTargetLanguages.isEmpty) {
+      _showError('Please select at least one target language');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await ref
+          .read(translationControllerProvider.notifier)
+          .startTranslation(
+            formId: widget.formId,
+            sourceLanguage: _sourceLanguage,
+            targetLanguages: _selectedTargetLanguages,
+            totalFields: 10, // TODO: Get actual field count
+          );
+      _showSuccess('Translation started!');
+      await _loadTranslationJobs();
+    } catch (e) {
+      _showError('Failed to start translation: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _previewTranslation(String targetLanguage) async {
+    if (_previewTextController.text.isEmpty) {
+      _showError('Please enter text to translate');
+      return;
+    }
+
+    try {
+      final result = await ref
+          .read(translationControllerProvider.notifier)
+          .previewTranslation(
+            text: _previewTextController.text,
+            sourceLanguage: _sourceLanguage,
+            targetLanguage: targetLanguage,
+          );
+      setState(() => _previewResult = result);
+    } catch (e) {
+      _showError('Preview failed: $e');
+    }
+  }
+
+  Future<void> _cancelJob(String jobId) async {
+    try {
+      await ref
+          .read(translationControllerProvider.notifier)
+          .cancelTranslationJob(jobId);
+      await _loadTranslationJobs();
+      _showSuccess('Translation cancelled');
+    } catch (e) {
+      _showError('Failed to cancel: $e');
+    }
+  }
+
+  Future<void> _deleteJob(String jobId) async {
+    try {
+      await ref
+          .read(translationControllerProvider.notifier)
+          .deleteTranslationJob(jobId);
+      await _loadTranslationJobs();
+    } catch (e) {
+      _showError('Failed to delete: $e');
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final builderStateAsync = ref.watch(
-      formBuilderControllerProvider(widget.formId),
-    );
+    final jobs = ref.watch(translationControllerProvider);
+    final activeJobs = jobs
+        .where(
+          (j) =>
+              j.status == TranslationJobStatus.pending ||
+              j.status == TranslationJobStatus.inProgress,
+        )
+        .toList();
+    final completedJobs = jobs
+        .where(
+          (j) =>
+              j.status == TranslationJobStatus.completed ||
+              j.status == TranslationJobStatus.failed,
+        )
+        .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.builderBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Bulk Translator',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textGrey),
-          onPressed: () => context.pop(),
-        ),
+        title: const Text('Bulk Translator'),
         actions: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: AppColors.builderBackground,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.borderLight),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _targetLocale,
-                items: const [
-                  DropdownMenuItem(value: 'es', child: Text('Spanish (ES)')),
-                  DropdownMenuItem(value: 'fr', child: Text('French (FR)')),
-                  DropdownMenuItem(value: 'hi', child: Text('Hindi (HI)')),
-                ],
-                onChanged: (val) {
-                  if (val != null) setState(() => _targetLocale = val);
-                },
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              _loadLanguages();
+              _loadTranslationJobs();
+            },
           ),
         ],
       ),
-      body: builderStateAsync.when(
-        data: (state) {
-          final form = state.form;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildLanguageSelector(),
+            const SizedBox(height: 24),
+            _buildPreviewCard(),
+            const SizedBox(height: 24),
+            _buildTranslationActions(),
+            const SizedBox(height: 24),
+            _buildActiveJobs(activeJobs),
+            const SizedBox(height: 24),
+            _buildJobHistory(completedJobs),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageSelector() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Languages',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                _buildSectionHeader('Form Details'),
-                _buildTranslationRow(
-                  label: 'Form Title',
-                  original: form.title.translate('en'),
-                  currentValue: form.title.translate(_targetLocale),
-                  onChanged: (val) => ref
-                      .read(
-                        formBuilderControllerProvider(widget.formId).notifier,
-                      )
-                      .updateLocalizedFormTitle(val, _targetLocale),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _sourceLanguage,
+                    decoration: const InputDecoration(
+                      labelText: 'Source Language',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _languages.map((lang) {
+                      return DropdownMenuItem(
+                        value: lang.code,
+                        child: Text(
+                          '${lang.name} (${lang.nativeName ?? lang.name})',
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() => _sourceLanguage = value!);
+                    },
+                  ),
                 ),
-                const SizedBox(height: 32),
-                ...form.sections.asMap().entries.map((entry) {
-                  final sectionIndex = entry.key;
-                  final section = entry.value;
-                  return Column(
+                const SizedBox(width: 16),
+                const Icon(Icons.arrow_forward),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildSectionHeader(
-                        'Section ${sectionIndex + 1}: ${section.title.translate('en')}',
+                      const Text('Target Languages'),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: _languages.map((lang) {
+                          final isSelected = _selectedTargetLanguages.contains(
+                            lang.code,
+                          );
+                          return FilterChip(
+                            selected: isSelected,
+                            label: Text(lang.code.toUpperCase()),
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedTargetLanguages.add(lang.code);
+                                } else {
+                                  _selectedTargetLanguages.remove(lang.code);
+                                }
+                              });
+                            },
+                          );
+                        }).toList(),
                       ),
-                      _buildTranslationRow(
-                        label: 'Section Title',
-                        original: section.title.translate('en'),
-                        currentValue: section.title.translate(_targetLocale),
-                        onChanged: (val) => ref
-                            .read(
-                              formBuilderControllerProvider(
-                                widget.formId,
-                              ).notifier,
-                            )
-                            .updateLocalizedSectionTitle(
-                              section.id,
-                              val,
-                              _targetLocale,
-                            ),
-                      ),
-                      if (section.description.translate('en').isNotEmpty)
-                        _buildTranslationRow(
-                          label: 'Description',
-                          original: section.description.translate('en'),
-                          currentValue: section.description.translate(
-                            _targetLocale,
-                          ),
-                          onChanged: (val) => ref
-                              .read(
-                                formBuilderControllerProvider(
-                                  widget.formId,
-                                ).notifier,
-                              )
-                              .updateLocalizedSectionDescription(
-                                section.id,
-                                val,
-                                _targetLocale,
-                              ),
-                        ),
-                      const SizedBox(height: 16),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: Column(
-                          children: section.questions.map((question) {
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(color: AppColors.borderLight),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Question: ${question.label.translate('en')}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: AppColors.textDark,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _buildTranslationRow(
-                                      label: 'Label',
-                                      original: question.label.translate('en'),
-                                      currentValue: question.label.translate(
-                                        _targetLocale,
-                                      ),
-                                      onChanged: (val) => ref
-                                          .read(
-                                            formBuilderControllerProvider(
-                                              widget.formId,
-                                            ).notifier,
-                                          )
-                                          .updateLocalizedQuestionLabel(
-                                            question.id,
-                                            val,
-                                            _targetLocale,
-                                          ),
-                                    ),
-                                    if (question.helperText
-                                        .translate('en')
-                                        .isNotEmpty)
-                                      _buildTranslationRow(
-                                        label: 'Helper Text',
-                                        original: question.helperText.translate(
-                                          'en',
-                                        ),
-                                        currentValue: question.helperText
-                                            .translate(_targetLocale),
-                                        onChanged: (val) => ref
-                                            .read(
-                                              formBuilderControllerProvider(
-                                                widget.formId,
-                                              ).notifier,
-                                            )
-                                            .updateLocalizedQuestionHelperText(
-                                              question.id,
-                                              val,
-                                              _targetLocale,
-                                            ),
-                                      ),
-                                    if (question.placeholder
-                                        .translate('en')
-                                        .isNotEmpty)
-                                      _buildTranslationRow(
-                                        label: 'Placeholder',
-                                        original: question.placeholder
-                                            .translate('en'),
-                                        currentValue: question.placeholder
-                                            .translate(_targetLocale),
-                                        onChanged: (val) => ref
-                                            .read(
-                                              formBuilderControllerProvider(
-                                                widget.formId,
-                                              ).notifier,
-                                            )
-                                            .updateLocalizedQuestionPlaceholder(
-                                              question.id,
-                                              val,
-                                              _targetLocale,
-                                            ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
                     ],
-                  );
-                }),
+                  ),
+                ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildTranslationRow({
-    required String label,
-    required String original,
-    required String currentValue,
-    required Function(String) onChanged,
-  }) {
-    final controller = TextEditingController(text: currentValue);
-    // Move cursor to end
-    controller.selection = TextSelection.fromPosition(
-      TextPosition(offset: controller.text.length),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textGrey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  original,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textDark,
-                  ),
-                ),
-              ],
+  Widget _buildPreviewCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Preview Translation',
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-          ),
-          const SizedBox(width: 16),
-          const Icon(Icons.arrow_forward, color: AppColors.textGrey, size: 16),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 3,
-            child: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(
+            const SizedBox(height: 16),
+            TextField(
+              controller: _previewTextController,
+              decoration: const InputDecoration(
+                labelText: 'Enter text to translate',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: _selectedTargetLanguages.map((langCode) {
+                  final lang = _languages.firstWhere(
+                    (l) => l.code == langCode,
+                    orElse: () =>
+                        TranslationLanguage(code: langCode, name: langCode),
+                  );
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton.icon(
+                      onPressed: () => _previewTranslation(langCode),
+                      icon: const Icon(Icons.translate),
+                      label: Text(lang.code.toUpperCase()),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            if (_previewResult.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.borderLight),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.translate, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(_previewResult)),
+                  ],
                 ),
               ),
-              onChanged: onChanged,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTranslationActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _isLoading || _selectedTargetLanguages.isEmpty
+                ? null
+                : _startTranslation,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.play_arrow),
+            label: Text(
+              _isLoading ? 'Translating...' : 'Start Bulk Translation',
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActiveJobs(List<TranslationJob> jobs) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Active Translations',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            if (jobs.isEmpty)
+              const Text('No active translation jobs')
+            else
+              ...jobs.map((job) => _buildJobCard(job)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJobHistory(List<TranslationJob> jobs) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Translation History',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            if (jobs.isEmpty)
+              const Text('No completed translation jobs')
+            else
+              ...jobs.map((job) => _buildJobCard(job, showActions: true)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildJobCard(TranslationJob jobItem, {bool showActions = false}) {
+    return ListTile(
+      title: Row(
+        children: [
+          Text('→ ${jobItem.targetLanguages.join(', ').toUpperCase()}'),
+          const Spacer(),
+          _getStatusChip(jobItem.status),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          if (jobItem.status == TranslationJobStatus.inProgress)
+            LinearProgressIndicator(value: jobItem.progress / 100),
+          Text(
+            'Created: ${jobItem.createdAt.toString().split('.').first}',
+            style: const TextStyle(fontSize: 12),
           ),
         ],
       ),
+      trailing: showActions
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (jobItem.status == TranslationJobStatus.completed)
+                  IconButton(
+                    icon: const Icon(Icons.download),
+                    onPressed: () {
+                      // TODO: Download translations
+                    },
+                  ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteJob(jobItem.id),
+                ),
+              ],
+            )
+          : jobItem.status == TranslationJobStatus.inProgress
+          ? TextButton(
+              onPressed: () => _cancelJob(jobItem.id),
+              child: const Text('Cancel'),
+            )
+          : null,
     );
+  }
+
+  Widget _getStatusChip(TranslationJobStatus status) {
+    Color color;
+    String text;
+
+    switch (status) {
+      case TranslationJobStatus.pending:
+        color = Colors.orange;
+        text = 'Pending';
+        break;
+      case TranslationJobStatus.inProgress:
+        color = Colors.blue;
+        text = 'In Progress';
+        break;
+      case TranslationJobStatus.completed:
+        color = Colors.green;
+        text = 'Completed';
+        break;
+      case TranslationJobStatus.failed:
+        color = Colors.red;
+        text = 'Failed';
+        break;
+      case TranslationJobStatus.cancelled:
+        color = Colors.grey;
+        text = 'Cancelled';
+        break;
+    }
+
+    return Chip(
+      label: Text(text, style: TextStyle(color: Colors.white, fontSize: 12)),
+      backgroundColor: color,
+      padding: EdgeInsets.zero,
+    );
+  }
+
+  @override
+  void dispose() {
+    _previewTextController.dispose();
+    super.dispose();
   }
 }
