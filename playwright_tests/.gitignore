@@ -1,0 +1,48 @@
+# Playwright Test Artifacts
+# =========================
+
+# Test results and logs
+*.log
+test_results.log
+playwright-report/
+test-results/
+
+# Screenshots
+*.png
+*.jpg
+*.jpeg
+screenshots/
+
+# Coverage reports
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+playwright/.cache/
+playwright/browsers/
