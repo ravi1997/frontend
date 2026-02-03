@@ -8,7 +8,7 @@ part 'analytics_distribution.g.dart';
 /// Contains field-level response distributions showing how respondents
 /// answered different questions in the form.
 @freezed
-class AnalyticsDistribution with _$AnalyticsDistribution {
+abstract class AnalyticsDistribution with _$AnalyticsDistribution {
   const factory AnalyticsDistribution({
     required String formId,
     required List<FieldDistribution> fieldDistributions,
@@ -20,7 +20,7 @@ class AnalyticsDistribution with _$AnalyticsDistribution {
 
 /// Represents the distribution of responses for a single field/question.
 @freezed
-class FieldDistribution with _$FieldDistribution {
+abstract class FieldDistribution with _$FieldDistribution {
   const factory FieldDistribution({
     required String fieldId,
     required String fieldLabel,
@@ -34,7 +34,7 @@ class FieldDistribution with _$FieldDistribution {
 
 /// Represents a single option's distribution data.
 @freezed
-class DistributionOption with _$DistributionOption {
+abstract class DistributionOption with _$DistributionOption {
   const factory DistributionOption({
     required String label,
     required int count,

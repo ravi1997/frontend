@@ -7,7 +7,7 @@ part 'analytics_summary.g.dart';
 ///
 /// Contains aggregated metrics like total submissions and completion rate.
 @freezed
-class AnalyticsSummary with _$AnalyticsSummary {
+abstract class AnalyticsSummary with _$AnalyticsSummary {
   const factory AnalyticsSummary({
     required String formId,
     required int totalSubmissions,

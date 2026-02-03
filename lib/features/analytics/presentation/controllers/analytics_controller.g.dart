@@ -8,12 +8,36 @@ part of 'analytics_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Controller for managing analytics data using Riverpod state management.
+///
+/// Provides async access to all three types of analytics data:
+/// - Summary statistics
+/// - Timeline data
+/// - Distribution data
+///
+/// Supports individual loading of each analytics type and batch refresh.
 
 @ProviderFor(AnalyticsController)
 final analyticsControllerProvider = AnalyticsControllerFamily._();
 
+/// Controller for managing analytics data using Riverpod state management.
+///
+/// Provides async access to all three types of analytics data:
+/// - Summary statistics
+/// - Timeline data
+/// - Distribution data
+///
+/// Supports individual loading of each analytics type and batch refresh.
 final class AnalyticsControllerProvider
-    extends $AsyncNotifierProvider<AnalyticsController, FormAnalytics> {
+    extends $NotifierProvider<AnalyticsController, AnalyticsState> {
+  /// Controller for managing analytics data using Riverpod state management.
+  ///
+  /// Provides async access to all three types of analytics data:
+  /// - Summary statistics
+  /// - Timeline data
+  /// - Distribution data
+  ///
+  /// Supports individual loading of each analytics type and batch refresh.
   AnalyticsControllerProvider._({
     required AnalyticsControllerFamily super.from,
     required String super.argument,
@@ -39,6 +63,14 @@ final class AnalyticsControllerProvider
   @override
   AnalyticsController create() => AnalyticsController();
 
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AnalyticsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AnalyticsState>(value),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     return other is AnalyticsControllerProvider && other.argument == argument;
@@ -51,15 +83,24 @@ final class AnalyticsControllerProvider
 }
 
 String _$analyticsControllerHash() =>
-    r'852382d7a57111ba798e2ebca74241f70b6fd404';
+    r'd0e9ea515aeb963e9a7f138e3d101663a337bc36';
+
+/// Controller for managing analytics data using Riverpod state management.
+///
+/// Provides async access to all three types of analytics data:
+/// - Summary statistics
+/// - Timeline data
+/// - Distribution data
+///
+/// Supports individual loading of each analytics type and batch refresh.
 
 final class AnalyticsControllerFamily extends $Family
     with
         $ClassFamilyOverride<
           AnalyticsController,
-          AsyncValue<FormAnalytics>,
-          FormAnalytics,
-          FutureOr<FormAnalytics>,
+          AnalyticsState,
+          AnalyticsState,
+          AnalyticsState,
           String
         > {
   AnalyticsControllerFamily._()
@@ -71,6 +112,15 @@ final class AnalyticsControllerFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Controller for managing analytics data using Riverpod state management.
+  ///
+  /// Provides async access to all three types of analytics data:
+  /// - Summary statistics
+  /// - Timeline data
+  /// - Distribution data
+  ///
+  /// Supports individual loading of each analytics type and batch refresh.
+
   AnalyticsControllerProvider call(String formId) =>
       AnalyticsControllerProvider._(argument: formId, from: this);
 
@@ -78,20 +128,29 @@ final class AnalyticsControllerFamily extends $Family
   String toString() => r'analyticsControllerProvider';
 }
 
-abstract class _$AnalyticsController extends $AsyncNotifier<FormAnalytics> {
+/// Controller for managing analytics data using Riverpod state management.
+///
+/// Provides async access to all three types of analytics data:
+/// - Summary statistics
+/// - Timeline data
+/// - Distribution data
+///
+/// Supports individual loading of each analytics type and batch refresh.
+
+abstract class _$AnalyticsController extends $Notifier<AnalyticsState> {
   late final _$args = ref.$arg as String;
   String get formId => _$args;
 
-  FutureOr<FormAnalytics> build(String formId);
+  AnalyticsState build(String formId);
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<FormAnalytics>, FormAnalytics>;
+    final ref = this.ref as $Ref<AnalyticsState, AnalyticsState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<FormAnalytics>, FormAnalytics>,
-              AsyncValue<FormAnalytics>,
+              AnyNotifier<AnalyticsState, AnalyticsState>,
+              AnalyticsState,
               Object?,
               Object?
             >;

@@ -5,6 +5,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../controllers/analytics_controller.dart';
 import '../widgets/submission_trend_chart.dart';
 import '../widgets/response_distribution_chart.dart';
+import '../../domain/entities/analytics_summary.dart';
+import '../../domain/entities/analytics_timeline.dart';
+import '../../domain/entities/analytics_distribution.dart';
 import '../../domain/entities/form_analytics.dart';
 
 class AnalyticsPage extends ConsumerWidget {
@@ -36,55 +39,102 @@ class AnalyticsPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: analyticsState.when(
-        data: (analytics) => SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSummaryGrid(context, analytics),
-              const SizedBox(height: 32),
-              _buildSectionTitle('Submission Trends'),
-              const SizedBox(height: 16),
-              _buildChartCard(
-                child: SubmissionTrendChart(trends: analytics.trends),
-                height: 300,
-              ),
-              const SizedBox(height: 32),
-              _buildSectionTitle('Field Distributions'),
-              const SizedBox(height: 16),
-              ...analytics.fieldDistributions.entries.map((entry) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildChartCard(
-                        child: ResponseDistributionChart(
-                          distribution: entry.value,
-                        ),
-                        height: 250,
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ],
+      body: _buildBody(context, analyticsState),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AnalyticsState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.hasError) {
+      return Center(child: Text('Error: ${state.error}'));
+    }
+
+    final summary = state.summary;
+    final timeline = state.timeline;
+    final distribution = state.distribution;
+
+    if (summary == null || timeline == null || distribution == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSummaryGrid(context, summary),
+          const SizedBox(height: 32),
+          _buildSectionTitle('Submission Trends'),
+          const SizedBox(height: 16),
+          _buildChartCard(
+            child: SubmissionTrendChart(
+              trends: _convertToTimeSeriesData(timeline),
+            ),
+            height: 300,
           ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+          const SizedBox(height: 32),
+          _buildSectionTitle('Field Distributions'),
+          const SizedBox(height: 16),
+          ...distribution.fieldDistributions.map((fieldDist) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    fieldDist.fieldLabel,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildChartCard(
+                    child: ResponseDistributionChart(
+                      distribution: _convertToDistributionData(
+                        fieldDist.options,
+                      ),
+                    ),
+                    height: 250,
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
     );
+  }
+
+  List<TimeSeriesData> _convertToTimeSeriesData(AnalyticsTimeline timeline) {
+    return timeline.dataPoints.map((point) {
+      return TimeSeriesData(date: point.date, value: point.count);
+    }).toList();
+  }
+
+  List<DistributionData> _convertToDistributionData(List<dynamic> options) {
+    // Handle both DistributionOption and DistributionData types
+    return options.map((option) {
+      if (option is DistributionOption) {
+        return DistributionData(
+          label: option.label,
+          count: option.count,
+          percentage: option.percentage,
+        );
+      } else if (option is DistributionData) {
+        return option;
+      }
+      // Fallback for unexpected types
+      return DistributionData(
+        label: option.toString(),
+        count: 0,
+        percentage: 0.0,
+      );
+    }).toList();
   }
 
   Widget _buildSectionTitle(String title) {
@@ -98,7 +148,7 @@ class AnalyticsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryGrid(BuildContext context, FormAnalytics analytics) {
+  Widget _buildSummaryGrid(BuildContext context, AnalyticsSummary summary) {
     return GridView.count(
       crossAxisCount: MediaQuery.of(context).size.width > 900 ? 4 : 2,
       shrinkWrap: true,
@@ -109,26 +159,28 @@ class AnalyticsPage extends ConsumerWidget {
       children: [
         _buildSummaryCard(
           'Total Submissions',
-          analytics.totalSubmissions.toString(),
+          summary.totalSubmissions.toString(),
           Icons.description_outlined,
           AppColors.primary,
         ),
         _buildSummaryCard(
           'Completion Rate',
-          '${(analytics.completionRate * 100).toInt()}%',
+          '${(summary.completionRate * 100).toInt()}%',
           Icons.assignment_turned_in_outlined,
           Colors.teal,
         ),
         _buildSummaryCard(
           'Avg. Time',
-          '2m 14s',
+          summary.averageCompletionTime != null
+              ? '${(summary.averageCompletionTime! / 60).toInt()}m ${(summary.averageCompletionTime! % 60).toInt()}s'
+              : 'N/A',
           Icons.timer_outlined,
           Colors.amber,
         ),
         _buildSummaryCard(
-          'Active Since',
-          'Jan 15',
-          Icons.calendar_today_outlined,
+          'Unique Responders',
+          summary.uniqueResponders?.toString() ?? 'N/A',
+          Icons.people_outline,
           Colors.indigo,
         ),
       ],

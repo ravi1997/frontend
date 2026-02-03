@@ -7,7 +7,7 @@ part 'analytics_timeline.g.dart';
 ///
 /// Contains a list of data points showing metrics over time.
 @freezed
-class AnalyticsTimeline with _$AnalyticsTimeline {
+abstract class AnalyticsTimeline with _$AnalyticsTimeline {
   const factory AnalyticsTimeline({
     required String formId,
     required List<TimelineDataPoint> dataPoints,
@@ -22,7 +22,7 @@ class AnalyticsTimeline with _$AnalyticsTimeline {
 
 /// Represents a single data point in the timeline.
 @freezed
-class TimelineDataPoint with _$TimelineDataPoint {
+abstract class TimelineDataPoint with _$TimelineDataPoint {
   const factory TimelineDataPoint({
     required DateTime date,
     required int count,
