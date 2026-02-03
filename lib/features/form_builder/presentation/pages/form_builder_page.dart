@@ -275,52 +275,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             icon: FontAwesomeIcons.clockRotateLeft,
             label: 'History',
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Version History'),
-                  content: SizedBox(
-                    width: 400,
-                    height: 300,
-                    child: form.versionHistory.isEmpty
-                        ? const Center(child: Text('No version history yet.'))
-                        : ListView.separated(
-                            itemCount: form.versionHistory.length,
-                            separatorBuilder: (_, _) => const Divider(),
-                            itemBuilder: (context, index) {
-                              final history = form.versionHistory.reversed
-                                  .toList()[index];
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: AppColors.primary,
-                                  child: Text(
-                                    history.version.substring(0, 1),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                title: Text('Version ${history.version}'),
-                                subtitle: Text(
-                                  'Published on ${history.createdAt.toString().split('.')[0]}',
-                                ),
-                                trailing: const Icon(
-                                  Icons.chevron_right,
-                                  size: 16,
-                                ),
-                              );
-                            },
-                          ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ],
-                ),
+              context.push(
+                '/forms/${widget.formId}/versions?title=${form.title.translate('en')}',
               );
             },
           ),

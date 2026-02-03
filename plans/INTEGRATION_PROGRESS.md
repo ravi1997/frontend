@@ -1,169 +1,130 @@
-# Backend Integration Progress
+# Form Builder Feature Integration Progress
 
-## ✅ Completed Integrations
+## Completed ✅
 
-### M-12: Form Publishing & Versioning
+### M-12: Form Publishing
 
-- **Status**: ✅ COMPLETE
-- **Repository**: `FormBuilderRepositoryImpl`
-- **Endpoints**:
-  - `POST /forms/{id}/publish`
-- **Features**:
-  - Publish button calls backend API
-  - Backend manages version numbering
-  - Success dialog shows published form link
-- **Summary**: `M-12_INTEGRATION_SUMMARY.md`
+- [x] Repository: `lib/features/form_builder/domain/repositories/form_publisher.dart`
+- [x] Implementation: `lib/features/form_builder/data/repositories/form_publisher_impl.dart`
+- [x] Controller: `lib/features/form_builder/presentation/controllers/form_publisher_controller.dart`
+- [x] UI: `lib/features/form_builder/presentation/pages/form_publisher_page.dart`
+- [x] Integration in FormBuilderPage (History → Publish)
+- [x] Route: `/forms/:formId/publish`
 
-### Dashboard & Form Loading
+### Dashboard
 
-- **Status**: ✅ COMPLETE
-- **Repository**: `DashboardRepositoryImpl`, `FormBuilderRepositoryImpl`
-- **Endpoints**:
-  - `GET /form/` - List all forms
-  - `GET /forms/{id}` - Get single form
-  - `POST /forms` - Create form
-  - `PUT /forms/{id}` - Update form
-  - `DELETE /form/{id}` - Delete form
-  - `POST /form/{id}/clone` - Duplicate form
-- **Features**:
-  - Dashboard loads real forms from backend
-  - Stats calculated from form data
-  - Form builder loads/saves to backend
-  - Data transformation layer for version structure
-- **Summary**: `DASHBOARD_INTEGRATION_SUMMARY.md`
+- [x] Dashboard page with metrics
+- [x] Recent forms list
+- [x] Quick actions
+- [x] Stats cards (Total Forms, Published, Drafts, Responses)
 
----
+### M-17: Workflow Engine
 
-## 🔄 Pending Integrations
-
-### M-11: Analytics
-
-- **Priority**: HIGH
-- **Repository**: Need to create `AnalyticsRepositoryImpl`
-- **Endpoints**:
-  - `GET /forms/{id}/analytics/summary`
-  - `GET /forms/{id}/analytics/timeline`
-  - `GET /forms/{id}/analytics/distribution`
-- **UI**: Already built (`AnalyticsPage`)
-- **Effort**: LOW (similar to dashboard integration)
-
-### M-13: Version History
-
-- **Priority**: MEDIUM
-- **Repository**: Already in `FormBuilderRepositoryImpl`
-- **Endpoints**:
-  - `GET /forms/{id}/versions` (already implemented)
-  - `GET /forms/{id}/versions/{version}` (already implemented)
-- **UI**: Need to build version comparison dialog
-- **Effort**: MEDIUM (need UI work)
-
-### M-14: Field Library
-
-- **Priority**: MEDIUM
-- **Repository**: Need to create `FieldLibraryRepositoryImpl`
-- **Endpoints**:
-  - `GET /custom-fields`
-  - `POST /custom-fields`
-  - `DELETE /custom-fields/{id}`
-- **UI**: Partially built
-- **Effort**: LOW
-
-### M-17: Workflows
-
-- **Priority**: LOW
-- **Backend**: Already implemented (webhook/email triggers)
-- **Frontend**: Need workflow configuration UI
-- **Effort**: MEDIUM (mostly UI work)
+- [x] Enums: `lib/features/form_builder/domain/entities/workflow_enums.dart`
+- [x] Entity: `lib/features/form_builder/domain/entities/workflow_step.dart`
+- [x] Entity: `lib/features/form_builder/domain/entities/workflow_transition.dart`
+- [x] Entity: `lib/features/form_builder/domain/entities/workflow.dart`
+- [x] Repository Interface: `lib/features/form_builder/domain/repositories/workflow_repository.dart`
+- [x] Repository Implementation: `lib/features/form_builder/data/repositories/workflow_repository_impl.dart`
+- [x] Controller: `lib/features/form_builder/presentation/controllers/workflow_controller.dart`
+- [x] UI: `lib/features/form_builder/presentation/pages/workflow_builder_page.dart`
+- [x] Route: `/forms/:formId/workflows`
 
 ### M-19: Bulk Translator
 
-- **Priority**: LOW
-- **Backend**: Uses existing save endpoint
-- **Frontend**: Already built (`TranslatorPage`)
-- **Integration**: Should work automatically via save
-- **Effort**: MINIMAL (just testing)
+- [x] Entity: `lib/features/form_builder/domain/entities/translation_language.dart`
+- [x] Entity: `lib/features/form_builder/domain/entities/translation_job.dart`
+- [x] Repository Interface: `lib/features/form_builder/domain/repositories/translation_repository.dart`
+- [x] Repository Implementation: `lib/features/form_builder/data/repositories/translation_repository_impl.dart`
+- [x] Controller: `lib/features/form_builder/presentation/controllers/translation_controller.dart`
+- [x] UI: `lib/features/form_builder/presentation/pages/translator_page.dart`
+- [x] Route: `/forms/:formId/translate`
 
 ---
 
-## 📊 Integration Statistics
+## Not Started ⏳
 
-- **Total Features**: 6
-- **Completed**: 2 (33%)
-- **In Progress**: 0
-- **Pending**: 4 (67%)
+### M-11: Analytics Dashboard
 
----
+- [ ] Repository interface and implementation
+- [ ] Controller with metrics
+- [ ] Analytics dashboard page
+- [ ] Route: `/forms/:formId/analytics`
 
-## 🎯 Recommended Next Steps
+### M-13: Version History UI
 
-### Option 1: Analytics Integration (RECOMMENDED)
+- [ ] Version history page
+- [ ] Version comparison UI
+- [ ] Restore functionality
+- [ ] Route: `/forms/:formId/versions`
 
-**Why**:
+### M-14: Field Library (Custom Field Templates)
 
-- High user value
-- Backend already complete
-- Frontend UI already built
-- Quick win
+- [ ] Custom field template entity
+- [ ] Repository interface and implementation
+- [ ] Controller update
+- [ ] Field library UI
 
-**Tasks**:
+### M-15: Conditional Logic
 
-1. Create `AnalyticsRepositoryImpl`
-2. Wire up `AnalyticsController` to use real data
-3. Test charts with real backend data
+- [ ] Entity: ConditionalRule
+- [ ] Parser for logic expressions
+- [ ] Integration with form renderer
 
-**Estimated Time**: 1-2 hours
+### M-16: Digital Signature
 
----
+- [ ] Signature pad widget
+- [ ] Signature storage
+- [ ] Verification UI
 
-### Option 2: Version History UI
+### M-18: Form Template Library
 
-**Why**:
+- [ ] Pre-built templates
+- [ ] Template categories
+- [ ] One-click import
 
-- Completes the versioning feature
-- Backend already integrated
-- Good user experience
+### M-20: Offline Mode
 
-**Tasks**:
-
-1. Build version comparison dialog
-2. Add "View History" button
-3. Display version diffs
-
-**Estimated Time**: 2-3 hours
-
----
-
-### Option 3: Field Library
-
-**Why**:
-
-- Useful for power users
-- Backend ready
-- Enhances form building
-
-**Tasks**:
-
-1. Create `FieldLibraryRepositoryImpl`
-2. Wire up field library UI
-3. Add save/load functionality
-
-**Estimated Time**: 1-2 hours
+- [ ] Local storage layer
+- [ ] Sync queue
+- [ ] Conflict resolution
 
 ---
 
-## 🔧 Technical Debt
+## Recent Changes
 
-1. **Error Handling**: Add user-friendly error messages
-2. **Loading States**: Improve loading indicators
-3. **Offline Support**: Consider caching strategy
-4. **Form Validation**: Add client-side validation before save
-5. **Slug Generation**: Implement proper slug from title
+### 2024-02-02: M-19 Bulk Translator Implementation
+
+- Created TranslationLanguage with 12 supported languages
+- Created TranslationJob for tracking bulk translation progress
+- Created TranslationRepository interface with CRUD + translate operations
+- Created TranslationRepositoryImpl with API integration
+- Created TranslationController with Riverpod state management
+- Created TranslatorPage UI with:
+  - Language selection (source + multiple targets)
+  - Live translation preview
+  - Bulk translation job management
+  - Progress tracking with status chips
+  - Job history with download/delete actions
+- Added route `/forms/:formId/translate` to app_router.dart
+- **Status**: Complete ✅
+
+### 2024-02-02: M-17 Workflow Engine Implementation
+
+- Created WorkflowStepType, WorkflowStatus, TransitionType enums
+- Created WorkflowStep, WorkflowTransition, Workflow entities
+- Created WorkflowRepository interface and implementation
+- Created WorkflowController with full CRUD + lifecycle methods
+- Created WorkflowBuilderPage UI with step palette
+- Added route `/forms/:formId/workflows` to app_router.dart
+- **Status**: Complete ✅
 
 ---
 
-## 📝 Notes
+## Next Steps
 
-- All repositories use `ApiClient` wrapper for consistent HTTP calls
-- Data transformation happens in repository layer
-- Frontend entities remain simple and flat
-- Backend complexity isolated from UI layer
+1. **M-11 Analytics Dashboard** - Next recommended task
+2. **M-13 Version History** - Add version comparison UI
+3. **M-14 Field Library** - Complete controller integration
+4. **M-15 Conditional Logic** - Implement rule parser
+5. **M-16 Digital Signature** - Add signature pad widget
