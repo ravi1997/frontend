@@ -1,4 +1,9 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../entities/condition_rule.dart';
+import '../../data/repositories/condition_repository_impl.dart';
+import '../../../../core/network/api_client_wrapper.dart';
+
+part 'condition_repository.g.dart';
 
 /// Repository interface for conditional rule operations.
 ///
@@ -30,4 +35,11 @@ abstract class ConditionRepository {
     String formId,
     Map<String, dynamic> fieldValues,
   );
+}
+
+@riverpod
+ConditionRepository conditionRepository(Ref ref) {
+  // Use real implementation
+  final apiClient = ref.watch(apiClientProvider);
+  return ConditionRepositoryImpl(apiClient);
 }

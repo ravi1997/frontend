@@ -1,4 +1,9 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../entities/signature_request.dart';
+import '../../data/repositories/signature_repository_impl.dart';
+import '../../../../core/network/api_client_wrapper.dart';
+
+part 'signature_repository.g.dart';
 
 /// Repository interface for signature operations.
 ///
@@ -51,4 +56,11 @@ abstract class SignatureRepository {
 
   /// Generates a PDF document for signing.
   Future<String> generateSigningDocument(String requestId);
+}
+
+@riverpod
+SignatureRepository signatureRepository(Ref ref) {
+  // Use real implementation
+  final apiClient = ref.watch(apiClientProvider);
+  return SignatureRepositoryImpl(apiClient);
 }

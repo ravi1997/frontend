@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/signature_request.dart';
 import '../../domain/repositories/signature_repository.dart';
 
@@ -27,7 +26,6 @@ class SignatureController extends _$SignatureController {
     required String signerName,
     String? message,
   }) async {
-    final user = ref.read(authControllerProvider);
     final repository = ref.read(signatureRepositoryProvider);
 
     final request = SignatureRequest.create(
@@ -47,7 +45,10 @@ class SignatureController extends _$SignatureController {
   Future<SignatureRequest> sendRequest(String requestId) async {
     final repository = ref.read(signatureRepositoryProvider);
     final updated = await repository.sendRequest(requestId);
-    state = state.map((r) => r.id == requestId ? updated : r).toList();
+    state = state
+        .map((r) => r.id == requestId ? updated : r)
+        .cast<SignatureRequest>()
+        .toList();
     return updated;
   }
 
@@ -59,11 +60,14 @@ class SignatureController extends _$SignatureController {
   }) async {
     final repository = ref.read(signatureRepositoryProvider);
     final updated = await repository.recordSignature(
-      requestId: requestId,
+      requestId,
       signatureData: signatureData,
       ipAddress: ipAddress,
     );
-    state = state.map((r) => r.id == requestId ? updated : r).toList();
+    state = state
+        .map((r) => r.id == requestId ? updated : r)
+        .cast<SignatureRequest>()
+        .toList();
     return updated;
   }
 
@@ -75,11 +79,14 @@ class SignatureController extends _$SignatureController {
   }) async {
     final repository = ref.read(signatureRepositoryProvider);
     final updated = await repository.declineRequest(
-      requestId: requestId,
+      requestId,
       ipAddress: ipAddress,
       reason: reason,
     );
-    state = state.map((r) => r.id == requestId ? updated : r).toList();
+    state = state
+        .map((r) => r.id == requestId ? updated : r)
+        .cast<SignatureRequest>()
+        .toList();
     return updated;
   }
 
