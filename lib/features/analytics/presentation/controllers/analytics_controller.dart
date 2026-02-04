@@ -65,13 +65,13 @@ class AnalyticsState {
 class AnalyticsController extends _$AnalyticsController {
   @override
   AnalyticsState build(String formId) {
-    // Load initial data
-    _loadAllAnalytics();
+    // Don't load data in build - it causes circular dependency
+    // Load initial data asynchronously via refresh() if needed
     return const AnalyticsState();
   }
 
   /// Loads all three types of analytics data in parallel.
-  Future<void> _loadAllAnalytics() async {
+  Future<void> _loadAllAnalytics(String formId) async {
     state = state.copyWith(
       isLoadingSummary: true,
       isLoadingTimeline: true,
@@ -160,7 +160,7 @@ class AnalyticsController extends _$AnalyticsController {
 
   /// Refreshes all analytics data.
   Future<void> refresh() async {
-    await _loadAllAnalytics();
+    await _loadAllAnalytics(formId);
   }
 
   /// Clears any error state.
