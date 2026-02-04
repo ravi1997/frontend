@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/form_template.dart';
-import '../../domain/repositories/template_library_repository.dart';
+import '../providers/template_library_providers.dart';
 
 part 'template_library_controller.g.dart';
 

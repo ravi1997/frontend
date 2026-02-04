@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/form_template.dart';
 import '../controllers/template_library_controller.dart';
@@ -18,7 +17,6 @@ class TemplateLibraryPage extends ConsumerStatefulWidget {
 
 class _TemplateLibraryPageState extends ConsumerState<TemplateLibraryPage> {
   final TextEditingController _searchController = TextEditingController();
-  FormTemplateCategory? _selectedCategory;
 
   @override
   void dispose() {
@@ -200,16 +198,10 @@ class _TemplateLibraryPageState extends ConsumerState<TemplateLibraryPage> {
         selected: isSelected,
         onSelected: (selected) {
           if (selected) {
-            setState(() {
-              _selectedCategory = category;
-            });
             ref
                 .read(templateLibraryControllerProvider.notifier)
                 .filterByCategory(category);
           } else {
-            setState(() {
-              _selectedCategory = null;
-            });
             ref
                 .read(templateLibraryControllerProvider.notifier)
                 .filterByCategory(null);
@@ -281,7 +273,6 @@ class _TemplateLibraryPageState extends ConsumerState<TemplateLibraryPage> {
               onPressed: () {
                 setState(() {
                   _searchController.clear();
-                  _selectedCategory = null;
                 });
                 ref
                     .read(templateLibraryControllerProvider.notifier)
