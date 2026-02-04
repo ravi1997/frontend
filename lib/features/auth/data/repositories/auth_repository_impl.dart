@@ -16,6 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> login(String identifier, String password) async {
     final response = await _remoteSource.login(identifier, password);
     final accessToken = response['access_token'] as String;
+    // Backend doesn't return refresh_token, tokens are managed via HTTP-only cookies
     final refreshToken = response['refresh_token'] as String?;
     await _tokenService.setTokens(
       accessToken: accessToken,
@@ -33,6 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> loginWithOtp(String mobile, String otp) async {
     final response = await _remoteSource.loginWithOtp(mobile, otp);
     final accessToken = response['access_token'] as String;
+    // Backend doesn't return refresh_token
     final refreshToken = response['refresh_token'] as String?;
     await _tokenService.setTokens(
       accessToken: accessToken,
@@ -90,14 +92,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<String> refreshToken(String refreshToken) async {
-    final response = await _remoteSource.refreshToken(refreshToken);
-    final newAccessToken = response['access_token'] as String;
-    final newRefreshToken = response['refresh_token'] as String?;
-    await _tokenService.setTokens(
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+    // Note: Backend uses HTTP-only cookies for token management
+    // This method is kept for compatibility but tokens are managed by the browser
+    throw UnimplementedError(
+      'Token refresh is handled via HTTP-only cookies on the backend. '
+      'Please re-authenticate if your session expires.',
     );
-    return newAccessToken;
+    // Alternative: If backend adds refresh endpoint, use:
+    // final response = await _remoteSource.refreshToken(refreshToken);
+    // final newAccessToken = response['access_token'] as String;
+    // final newRefreshToken = response['refresh_token'] as String?;
+    // await _tokenService.setTokens(
+    //   accessToken: newAccessToken,
+    //   refreshToken: newRefreshToken,
+    // );
+    // return newAccessToken;
   }
 }
 

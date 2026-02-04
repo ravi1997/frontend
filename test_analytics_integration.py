@@ -13,8 +13,8 @@ import json
 from datetime import datetime, timedelta
 
 # Configuration
-BASE_URL = "http://localhost:8080"
-API_BASE = f"{BASE_URL}/api/v1"
+BASE_URL = "http://127.0.0.1:5000"
+API_BASE = f"{BASE_URL}/form/api/v1"
 
 # Test form ID (use a real form ID from your database)
 TEST_FORM_ID = "test-form-id"  # Replace with actual form ID

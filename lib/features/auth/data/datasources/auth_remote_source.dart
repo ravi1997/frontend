@@ -94,7 +94,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         'password': password,
         'user_type': userType,
         'employee_id': employeeId,
-        'mobile': mobile,
+        'mobile': mobile ?? '', // Backend requires mobile field
         'roles': [
           'user',
           'creator',
