@@ -10,9 +10,9 @@ abstract class User with _$User {
     required String username,
     required String email,
     @Default([]) List<String> roles,
-    required String userType,
-    String? employeeId,
-    String? mobile,
+    @JsonKey(name: 'user_type') required String userType,
+    @JsonKey(name: 'employee_id') String? employeeId,
+    @JsonKey(name: 'mobile') String? mobile,
   }) = _User;
 
   const User._();

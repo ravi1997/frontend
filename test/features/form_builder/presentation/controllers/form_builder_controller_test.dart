@@ -66,7 +66,10 @@ void main() {
         formBuilderControllerProvider('new').notifier,
       );
 
-      when(() => mockRepo.saveForm(any())).thenAnswer((_) async => {});
+      // Mock publishForm which is the actual method called by the controller
+      when(
+        () => mockRepo.publishForm(any()),
+      ).thenAnswer((_) async => {'published_version': '1.0.1'});
 
       final success = await controller.publishForm();
 

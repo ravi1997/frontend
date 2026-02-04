@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id; String get username; String get email; List<String> get roles; String get userType; String? get employeeId; String? get mobile;
+ String get id; String get username; String get email; List<String> get roles;@JsonKey(name: 'user_type') String get userType;@JsonKey(name: 'employee_id') String? get employeeId;@JsonKey(name: 'mobile') String? get mobile;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String username, String email, List<String> roles, String userType, String? employeeId, String? mobile
+ String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles,  String userType,  String? employeeId,  String? mobile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
@@ -180,7 +180,7 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles,  String userType,  String? employeeId,  String? mobile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)  $default,) {final _that = this;
 switch (_that) {
 case _User():
 return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
@@ -200,7 +200,7 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String username,  String email,  List<String> roles,  String userType,  String? employeeId,  String? mobile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
@@ -215,7 +215,7 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 @JsonSerializable()
 
 class _User extends User {
-  const _User({required this.id, required this.username, required this.email, final  List<String> roles = const [], required this.userType, this.employeeId, this.mobile}): _roles = roles,super._();
+  const _User({required this.id, required this.username, required this.email, final  List<String> roles = const [], @JsonKey(name: 'user_type') required this.userType, @JsonKey(name: 'employee_id') this.employeeId, @JsonKey(name: 'mobile') this.mobile}): _roles = roles,super._();
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -228,9 +228,9 @@ class _User extends User {
   return EqualUnmodifiableListView(_roles);
 }
 
-@override final  String userType;
-@override final  String? employeeId;
-@override final  String? mobile;
+@override@JsonKey(name: 'user_type') final  String userType;
+@override@JsonKey(name: 'employee_id') final  String? employeeId;
+@override@JsonKey(name: 'mobile') final  String? mobile;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +265,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String username, String email, List<String> roles, String userType, String? employeeId, String? mobile
+ String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile
 });
 
 
