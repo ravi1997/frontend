@@ -59,7 +59,7 @@ final class TranslationRepositoryProvider
 }
 
 String _$translationRepositoryHash() =>
-    r'ae5e9833491d8adf01e087179ef52e62119a8113';
+    r'd32fc3aeebea3bf35a272af053c62da7ef3537ab';
 
 /// Controller for managing bulk translation operations.
 
@@ -98,7 +98,7 @@ final class TranslationControllerProvider
 }
 
 String _$translationControllerHash() =>
-    r'd6271c1b9c1c64a1d461f9afafb2aac30c22ccd5';
+    r'79b3fb8454ebad878ee1c7eb28e176d35992f9bf';
 
 /// Controller for managing bulk translation operations.
 

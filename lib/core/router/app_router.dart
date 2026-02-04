@@ -15,6 +15,7 @@ import '../../../features/auth/presentation/screens/otp_verification_screen.dart
 import '../../../features/form_builder/presentation/pages/translator_page.dart';
 import '../../../features/form_builder/presentation/pages/version_history_page.dart';
 import '../../../features/form_builder/presentation/pages/workflow_builder_page.dart';
+import '../../../features/form_builder/presentation/pages/template_library_page.dart';
 
 part 'app_router.g.dart';
 
@@ -125,6 +126,10 @@ Raw<GoRouter> appRouter(Ref ref) {
           final workflowId = state.uri.queryParameters['workflowId'];
           return WorkflowBuilderPage(formId: formId, workflowId: workflowId);
         },
+      ),
+      GoRoute(
+        path: '/templates',
+        builder: (context, state) => const TemplateLibraryPage(),
       ),
     ],
   );

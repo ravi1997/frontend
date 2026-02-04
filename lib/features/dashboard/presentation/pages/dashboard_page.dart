@@ -453,6 +453,24 @@ class _ActionButtons extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         OutlinedButton.icon(
+          onPressed: () => context.go('/templates'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF374151),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFD1D5DB)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          icon: const Icon(Icons.dashboard_outlined, size: 20),
+          label: Text(
+            'Template Library',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 12),
+        OutlinedButton.icon(
           onPressed: () {},
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFF374151),

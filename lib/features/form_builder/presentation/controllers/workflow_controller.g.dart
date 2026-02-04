@@ -59,7 +59,7 @@ final class WorkflowRepositoryProvider
 }
 
 String _$workflowRepositoryHash() =>
-    r'ebc49aa2375740aa768d33d846f5312ac76d3222';
+    r'df28363c273e374eb670e84dcc8a9cb7df08bf24';
 
 /// Controller for managing workflow builder state.
 
@@ -98,7 +98,7 @@ final class WorkflowControllerProvider
 }
 
 String _$workflowControllerHash() =>
-    r'd9dac97c2f0219bd631334df3c09827c0e55c59c';
+    r'f56087fd61f6c38fe509d3a59adf4fe8bff2e2b9';
 
 /// Controller for managing workflow builder state.
 

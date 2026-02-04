@@ -45,7 +45,7 @@ final class SignatureControllerProvider
 }
 
 String _$signatureControllerHash() =>
-    r'16b20a9d1be31fa3ff460ebf24e29e58201f48b2';
+    r'f3e7680450b12a795cbe4ab31460b7068550eb0a';
 
 /// Controller for managing signature requests.
 

@@ -41,6 +41,18 @@
 - [x] Workflow entities, repository, controller, UI
 - [x] Route: `/forms/:formId/workflows`
 
+### M-18: Form Template Library
+
+- [x] FormTemplate entity with FormTemplateCategory enum
+- [x] TemplateLibraryRepository interface and implementation
+- [x] TemplateLibraryController with state management
+- [x] TemplateLibraryPage with gallery UI
+- [x] TemplateCard widget
+- [x] TemplatePreviewDialog widget
+- [x] Pre-built templates: Contact, Survey, Registration, Event, Feedback, Order
+- [x] Route: `/templates`
+- [x] Dashboard integration with "Template Library" button
+
 ### M-19: Bulk Translator
 
 - [x] TranslationLanguage, TranslationJob entities
@@ -50,12 +62,6 @@
 ---
 
 ## Not Started ⏳
-
-### M-18: Form Template Library
-
-- [ ] Pre-built templates
-- [ ] Template categories
-- [ ] One-click import
 
 ### M-20: Offline Mode
 
@@ -76,13 +82,55 @@
 | M-15 Conditional Logic | ✅ Complete | Medium |
 | M-16 Digital Signature | ✅ Complete | Medium |
 | M-17 Workflow Engine | ✅ Complete | Medium |
+| M-18 Form Templates | ✅ Complete | Low |
 | M-19 Bulk Translator | ✅ Complete | Medium |
-| M-18 Form Templates | ⏳ Not Started | Low |
 | M-20 Offline Mode | ⏳ Not Started | Low |
 
 ---
 
 ## Recent Changes
+
+### 2025-02-04: Template Library and Generated Files Update
+
+- Added untracked M-18 Template Library files:
+  - `template_library_repository_impl.dart`
+  - `form_template.dart` entities (with freezed)
+  - `template_library_controller.dart` and `.g.dart`
+  - `template_library_page.dart`
+  - `template_card.dart` widget
+  - `template_preview_dialog.dart` widget
+- Updated `app_router.dart` with new routes
+- Updated `dashboard_page.dart` with Template Library integration
+- Generated `.g.dart` files for Riverpod providers
+- M-20 Kickoff: Advanced Analytics Dashboard (note: M-20 is planned as Offline Mode per plan)
+
+- Created FormTemplate entity with FormTemplateCategory enum
+  - 8 categories: Contact, Survey, Registration, Event, Assessment, Feedback, Order, Application, Other
+- Implemented TemplateLibraryRepository with:
+  - getAllTemplates(), getTemplatesByCategory(), searchTemplates()
+  - createFormFromTemplate() for one-click form creation
+  - 6 pre-built templates with full form structures
+- Created TemplateLibraryController with:
+  - TemplateLibraryState for managing templates, filtering, and selection
+  - Category filtering and search functionality
+  - Template usage tracking
+- Built TemplateLibraryPage with:
+  - Search bar for template discovery
+  - Category filter chips
+  - Responsive grid layout with template cards
+  - Empty state handling
+- Created TemplateCard widget with:
+  - Category-based color gradients and icons
+  - Template metadata display (field count, usage count)
+  - Tags display
+  - Quick "Use" button
+- Created TemplatePreviewDialog with:
+  - Full template preview with form structure
+  - Description and tags display
+  - Field-by-field preview
+- Integrated into dashboard with "Template Library" button
+- Added route: `/templates`
+- **Status**: Complete ✅
 
 ### 2024-02-03: M-16 Digital Signature Implementation
 
@@ -109,21 +157,20 @@
 
 ## Next Recommended Task
 
-**M-18: Form Template Library**
+**M-20: Offline Mode**
 
 Features needed:
 
-- Pre-built form templates (Contact, Survey, Registration, etc.)
-- Template gallery UI with categories
-- One-click form creation from template
-- Template preview before import
-- Custom template creation
+- Local storage layer for offline form access
+- Sync queue for pending submissions
+- Conflict resolution for concurrent edits
 
 ---
 
 ## Git Commit History (Recent)
 
 ```
+feat(form-builder): Implement M-18 Form Template Library
 b08c8bf feat(form-builder): Implement M-16 Digital Signature
 c239366 feat(form-builder): Implement M-15 Conditional Logic
 ce9d236 docs: Update integration progress - M-15 Conditional Logic complete
