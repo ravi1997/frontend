@@ -181,7 +181,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppColors.textGrey),
-            onPressed: () => context.go('/dashboard'),
+            onPressed: () => context.go('/'),
           ),
           const SizedBox(width: 8),
           Expanded(

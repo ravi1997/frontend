@@ -65,9 +65,12 @@
 
 ### M-20: Offline Mode
 
-- [ ] Local storage layer
-- [ ] Sync queue
-- [ ] Conflict resolution
+- [x] Local storage layer (Hive-based pending submissions)
+- [x] Sync queue with retry logic
+- [x] Conflict resolution system
+- [x] Enhanced sync service with exponential backoff
+- [x] Offline status indicators (banner, FAB, badge)
+- [x] Conflict resolution UI page
 
 ---
 
@@ -84,11 +87,32 @@
 | M-17 Workflow Engine | ✅ Complete | Medium |
 | M-18 Form Templates | ✅ Complete | Low |
 | M-19 Bulk Translator | ✅ Complete | Medium |
-| M-20 Offline Mode | ⏳ Not Started | Low |
+| M-20 Offline Mode | ✅ Complete | Low |
 
 ---
 
 ## Recent Changes
+
+### 2026-02-04: M-20 Offline Mode Implementation
+
+- Added comprehensive offline mode functionality with conflict resolution:
+  - `SyncConflict` entity with conflict types (concurrent modification, remote deletion, duplicate creation, version mismatch)
+  - `ConflictRepository` interface and `ConflictRepositoryImpl` with Hive-based persistence
+  - `EnhancedSyncService` with:
+    - Exponential backoff retry logic (configurable max retries, delay, backoff multiplier)
+    - Automatic sync on connectivity changes
+    - Conflict detection and creation
+    - Max retry handling with conflict escalation
+  - `OfflineStatusIndicator` widget showing sync status and pending count
+  - `OfflineBanner` full-width banner for offline mode
+  - `SyncFab` floating action button for manual sync trigger
+  - `ConflictResolutionPage` for viewing and resolving conflicts:
+    - Conflict cards with type icons, timestamps, data preview
+    - Resolution options: Keep Local, Keep Remote, Merge
+    - Refresh functionality and empty state handling
+- Generated all Riverpod providers and Freezed code
+- Updated integration progress: M-20 marked as ✅ Complete
+- **Status**: Complete ✅
 
 ### 2025-02-04: Template Library and Generated Files Update
 
@@ -157,13 +181,27 @@
 
 ## Next Recommended Task
 
-**M-20: Offline Mode**
+**All planned milestones (M-11 through M-20) are now complete!** ✅
 
-Features needed:
+The Form Builder feature set is fully implemented with:
 
-- Local storage layer for offline form access
-- Sync queue for pending submissions
-- Conflict resolution for concurrent edits
+- Analytics Dashboard
+- Form Publishing
+- Version History
+- Field Library
+- Conditional Logic
+- Digital Signature
+- Workflow Engine
+- Form Template Library
+- Bulk Translator
+- Offline Mode with Conflict Resolution
+
+**Suggested next steps:**
+
+1. Run comprehensive integration tests
+2. Perform security audit
+3. Optimize performance
+4. Prepare for production deployment
 
 ---
 
