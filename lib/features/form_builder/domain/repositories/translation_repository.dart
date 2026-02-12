@@ -35,4 +35,7 @@ abstract class TranslationRepository {
     required String sourceLanguage,
     required String targetLanguage,
   });
+
+  /// Gets the translated content for a completed job.
+  Future<Map<String, dynamic>?> getTranslatedContent(String jobId);
 }

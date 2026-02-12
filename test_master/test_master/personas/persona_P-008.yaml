@@ -1,0 +1,21 @@
+persona_id: P-008
+name: Sarah Chen
+age_group: 35-44
+technology_experience: Accessibility User
+behavior: Distracted
+testing_style: Security-Focused
+interaction_style: Navigation-Heavy
+role: QA Tester
+agent_profile: Skeptical
+special_focus: Security
+language: German
+accessibility_needs:
+- Screen Reader
+viewport:
+  width: 414
+  height: 896
+browser_preferences:
+- webkit
+typing_speed: Slow
+error_prone: true
+multi_tasking: false

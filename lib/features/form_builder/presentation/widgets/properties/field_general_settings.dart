@@ -6,7 +6,7 @@ import 'package:frontend/features/form_builder/domain/entities/question_type.dar
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
 
-class FieldGeneralSettings extends ConsumerWidget {
+class FieldGeneralSettings extends ConsumerStatefulWidget { // Changed to ConsumerStatefulWidget
   final String formId;
   final FormQuestion question;
   final TextEditingController labelController;
@@ -23,55 +23,73 @@ class FieldGeneralSettings extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label
-        PropertyBuilderUtils.buildTextField(
-          label: 'Field Label',
-          controller: labelController,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionLabel(question.id, val);
-          },
-        ),
-        const SizedBox(height: 20),
+  ConsumerState<FieldGeneralSettings> createState() => _FieldGeneralSettingsState();
+}
 
-        // Helper Text
-        PropertyBuilderUtils.buildTextField(
-          label: 'Helper Text',
-          placeholder: 'e.g. Please enter your full name',
-          controller: helperTextController,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionHelperText(question.id, val);
-          },
-        ),
-        const SizedBox(height: 20),
+class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> { // Added State class
+  final _formKey = GlobalKey<FormState>(); // Added GlobalKey
 
-        // Placeholder
-        PropertyBuilderUtils.buildTextField(
-          label: 'Placeholder',
-          placeholder: 'Input placeholder...',
-          controller: placeholderController,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionPlaceholder(question.id, val);
-          },
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return Form( // Added Form widget
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label
+          PropertyBuilderUtils.buildTextField(
+            label: 'Field Label',
+            controller: widget.labelController, // Access via widget
+            validator: (value) { // Added validator
+              if (value == null || value.isEmpty) {
+                return 'Field label cannot be empty';
+              }
+              return null;
+            },
+            onChanged: (val) {
+              if (_formKey.currentState!.validate()) { // Validate before updating
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionLabel(widget.question.id, val); // Access via widget
+              }
+            },
+          ),
+          const SizedBox(height: 20),
 
-        // Options Editor
-        if (question.type == QuestionType.dropdown ||
-            question.type == QuestionType.checkboxes ||
-            question.type == QuestionType.multipleChoice) ...[
-          const SizedBox(height: 24),
-          _buildOptionsEditor(ref, question),
+          // Helper Text
+          PropertyBuilderUtils.buildTextField(
+            label: 'Helper Text',
+            placeholder: 'e.g. Please enter your full name',
+            controller: widget.helperTextController, // Access via widget
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .updateQuestionHelperText(widget.question.id, val); // Access via widget
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // Placeholder
+          PropertyBuilderUtils.buildTextField(
+            label: 'Placeholder',
+            placeholder: 'Input placeholder...',
+            controller: widget.placeholderController, // Access via widget
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .updateQuestionPlaceholder(widget.question.id, val); // Access via widget
+            },
+          ),
+
+          // Options Editor
+          if (widget.question.type == QuestionType.dropdown || // Access via widget
+              widget.question.type == QuestionType.checkboxes || // Access via widget
+              widget.question.type == QuestionType.multipleChoice) ...[ // Access via widget
+            const SizedBox(height: 24),
+            _buildOptionsEditor(ref, widget.question), // Access via widget
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -104,14 +122,14 @@ class FieldGeneralSettings extends ConsumerWidget {
                 final newOptions = List<String>.from(options);
                 newOptions[index] = newValue;
                 ref
-                    .read(formBuilderControllerProvider(formId).notifier)
+                    .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
                     .updateQuestion(question.copyWith(options: newOptions));
               },
               onDelete: () {
                 final newOptions = List<String>.from(options);
                 newOptions.removeAt(index);
                 ref
-                    .read(formBuilderControllerProvider(formId).notifier)
+                    .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
                     .updateQuestion(question.copyWith(options: newOptions));
               },
             );
@@ -123,7 +141,7 @@ class FieldGeneralSettings extends ConsumerWidget {
             final newOptions = List<String>.from(options);
             newOptions.add('Option ${newOptions.length + 1}');
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
                 .updateQuestion(question.copyWith(options: newOptions));
           },
           icon: const Icon(Icons.add, size: 16),

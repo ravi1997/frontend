@@ -1,0 +1,21 @@
+persona_id: P-023
+name: Stephanie Young
+age_group: 45-54
+technology_experience: Accessibility User
+behavior: Distracted
+testing_style: Technical
+interaction_style: Textual
+role: Developer
+agent_profile: Skeptical
+special_focus: Accessibility
+language: English
+accessibility_needs:
+- Magnification
+viewport:
+  width: 1366
+  height: 768
+browser_preferences:
+- chromium
+typing_speed: Normal
+error_prone: true
+multi_tasking: false

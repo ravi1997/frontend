@@ -1,0 +1,494 @@
+import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'api_client_wrapper.dart';
+import 'api_endpoints.dart';
+
+part 'api_service.g.dart';
+
+/// Comprehensive API service providing typed methods for all backend endpoints.
+///
+/// This service wraps the API client and provides convenient, type-safe methods
+/// for interacting with the backend API. All methods automatically handle:
+/// - JWT authentication via interceptors
+/// - Token refresh on 401 errors
+/// - Retry logic on network failures
+/// - Error handling and user notifications
+/// - Request/response logging
+///
+/// Usage:
+/// ```dart
+/// final apiService = ref.read(apiServiceProvider);
+/// final forms = await apiService.listForms();
+/// ```
+class ApiService {
+  final ApiClient _client;
+
+  ApiService(this._client);
+
+  // ============================================================================
+  // Authentication Methods
+  // ============================================================================
+
+  /// Login with email/username and password
+  Future<Map<String, dynamic>> login({
+    required String identifier,
+    required String password,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.login,
+      data: {
+        'identifier': identifier,
+        'password': password,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Login with mobile number and OTP
+  Future<Map<String, dynamic>> loginWithOtp({
+    required String mobile,
+    required String otp,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.loginWithOtp,
+      data: {
+        'mobile': mobile,
+        'otp': otp,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Generate OTP for mobile number
+  Future<void> generateOtp(String mobile) async {
+    await _client.post(
+      ApiEndpoints.generateOtp,
+      data: {'mobile': mobile},
+    );
+  }
+
+  /// Register new user
+  Future<Map<String, dynamic>> register({
+    required String username,
+    required String email,
+    required String password,
+    required String userType,
+    String? employeeId,
+    String? mobile,
+    List<String>? roles,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.register,
+      data: {
+        'username': username,
+        'email': email,
+        'password': password,
+        'user_type': userType,
+        if (employeeId != null) 'employee_id': employeeId,
+        'mobile': mobile ?? '',
+        'roles': roles ??
+            [
+              'user',
+              'creator',
+              'editor',
+              'publisher',
+              'deo',
+              'manager',
+              'general',
+            ],
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Refresh access token
+  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+    final response = await _client.post(
+      ApiEndpoints.refreshToken,
+      data: {'refresh_token': refreshToken},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Logout user
+  Future<void> logout() async {
+    await _client.post(ApiEndpoints.logout);
+  }
+
+  /// Request password reset
+  Future<void> requestPasswordReset(String email) async {
+    await _client.post(
+      ApiEndpoints.requestPasswordReset,
+      data: {'email': email},
+    );
+  }
+
+  /// Get current user status
+  Future<Map<String, dynamic>> getUserStatus() async {
+    final response = await _client.get(ApiEndpoints.userStatus);
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // Form Management Methods
+  // ============================================================================
+
+  /// List all forms with optional filters
+  Future<List<dynamic>> listForms({
+    int? page,
+    int? limit,
+    String? status,
+    String? search,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.listForms,
+      queryParameters: {
+        if (page != null) 'page': page,
+        if (limit != null) 'limit': limit,
+        if (status != null) 'status': status,
+        if (search != null) 'search': search,
+      },
+    );
+    return response.data as List<dynamic>;
+  }
+
+  /// Get form by ID
+  Future<Map<String, dynamic>> getForm(String formId) async {
+    final response = await _client.get(ApiEndpoints.getForm(formId));
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Create new form
+  Future<Map<String, dynamic>> createForm({
+    required String title,
+    String? slug,
+    String? status,
+    required List<Map<String, dynamic>> sections,
+    String? version,
+    Map<String, dynamic>? workflows,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.createForm,
+      data: {
+        'title': title,
+        'slug': slug ?? title.toLowerCase().replaceAll(' ', '-'),
+        'status': status ?? 'draft',
+        'versions': [
+          {
+            'version': version ?? '1.0',
+            'sections': sections,
+            'created_at': DateTime.now().toIso8601String(),
+          },
+        ],
+        'active_version': version ?? '1.0',
+        if (workflows != null) 'workflows': workflows,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Update existing form
+  Future<Map<String, dynamic>> updateForm({
+    required String formId,
+    required String title,
+    String? slug,
+    String? status,
+    required List<Map<String, dynamic>> sections,
+    String? version,
+    Map<String, dynamic>? workflows,
+  }) async {
+    final response = await _client.put(
+      ApiEndpoints.updateForm(formId),
+      data: {
+        'title': title,
+        'slug': slug ?? title.toLowerCase().replaceAll(' ', '-'),
+        'status': status ?? 'draft',
+        'versions': [
+          {
+            'version': version ?? '1.0',
+            'sections': sections,
+            'created_at': DateTime.now().toIso8601String(),
+          },
+        ],
+        'active_version': version ?? '1.0',
+        if (workflows != null) 'workflows': workflows,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Delete form
+  Future<void> deleteForm(String formId) async {
+    await _client.delete(ApiEndpoints.deleteForm(formId));
+  }
+
+  /// Publish form
+  Future<Map<String, dynamic>> publishForm(String formId) async {
+    final response = await _client.post(
+      ApiEndpoints.publishForm(formId),
+      data: {},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Clone/duplicate form
+  Future<Map<String, dynamic>> cloneForm({
+    required String formId,
+    required String newTitle,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.cloneForm(formId),
+      data: {'title': newTitle},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Get form version history
+  Future<List<dynamic>> getFormVersions(String formId) async {
+    final response = await _client.get(ApiEndpoints.getFormVersions(formId));
+    return response.data as List<dynamic>;
+  }
+
+  /// Get specific form version
+  Future<Map<String, dynamic>> getFormVersion({
+    required String formId,
+    required String version,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.getFormVersion(formId, version),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // Response Submission Methods
+  // ============================================================================
+
+  /// Submit form response
+  Future<Map<String, dynamic>> submitResponse({
+    required String formId,
+    required Map<String, dynamic> responses,
+    String? submittedBy,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.submitResponse,
+      data: {
+        'form_id': formId,
+        'responses': responses,
+        if (submittedBy != null) 'submitted_by': submittedBy,
+        if (metadata != null) 'metadata': metadata,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// List responses with optional filters
+  Future<List<dynamic>> listResponses({
+    String? formId,
+    int? page,
+    int? limit,
+    String? status,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.listResponses,
+      queryParameters: {
+        if (formId != null) 'form_id': formId,
+        if (page != null) 'page': page,
+        if (limit != null) 'limit': limit,
+        if (status != null) 'status': status,
+      },
+    );
+    return response.data as List<dynamic>;
+  }
+
+  /// Get single response by ID
+  Future<Map<String, dynamic>> getResponse(String responseId) async {
+    final response = await _client.get(ApiEndpoints.getResponse(responseId));
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Update response
+  Future<Map<String, dynamic>> updateResponse({
+    required String responseId,
+    required String formId,
+    required Map<String, dynamic> responses,
+    String? submittedBy,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _client.put(
+      ApiEndpoints.updateResponse(responseId),
+      data: {
+        'form_id': formId,
+        'responses': responses,
+        if (submittedBy != null) 'submitted_by': submittedBy,
+        if (metadata != null) 'metadata': metadata,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Delete response
+  Future<void> deleteResponse(String responseId) async {
+    await _client.delete(ApiEndpoints.deleteResponse(responseId));
+  }
+
+  /// Export responses
+  Future<dynamic> exportResponses({
+    required String formId,
+    String format = 'json',
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.exportResponses,
+      queryParameters: {
+        'form_id': formId,
+        'format': format,
+      },
+    );
+    return response.data;
+  }
+
+  // ============================================================================
+  // Analytics Methods
+  // ============================================================================
+
+  /// Get form analytics
+  Future<Map<String, dynamic>> getAnalytics({
+    String? formId,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.getAnalytics,
+      queryParameters: {
+        if (formId != null) 'form_id': formId,
+        if (startDate != null) 'start_date': startDate,
+        if (endDate != null) 'end_date': endDate,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Get dashboard statistics
+  Future<Map<String, dynamic>> getDashboardStats() async {
+    final response = await _client.get(ApiEndpoints.getDashboardStats);
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // Template Library Methods
+  // ============================================================================
+
+  /// List form templates
+  Future<List<dynamic>> listFormTemplates({
+    String? category,
+    String? search,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.listFormTemplates,
+      queryParameters: {
+        if (category != null) 'category': category,
+        if (search != null) 'search': search,
+      },
+    );
+    return response.data as List<dynamic>;
+  }
+
+  /// Get template by ID
+  Future<Map<String, dynamic>> getFormTemplate(String templateId) async {
+    final response = await _client.get(
+      ApiEndpoints.getFormTemplate(templateId),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // Workflow Methods
+  // ============================================================================
+
+  /// List workflows
+  Future<List<dynamic>> listWorkflows() async {
+    final response = await _client.get(ApiEndpoints.listWorkflows);
+    return response.data as List<dynamic>;
+  }
+
+  /// Create workflow
+  Future<Map<String, dynamic>> createWorkflow({
+    required String name,
+    required String type,
+    required Map<String, dynamic> config,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.createWorkflow,
+      data: {
+        'name': name,
+        'type': type,
+        'config': config,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Update workflow
+  Future<Map<String, dynamic>> updateWorkflow({
+    required String workflowId,
+    required String name,
+    required String type,
+    required Map<String, dynamic> config,
+  }) async {
+    final response = await _client.put(
+      ApiEndpoints.updateWorkflow(workflowId),
+      data: {
+        'name': name,
+        'type': type,
+        'config': config,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // File Upload Methods
+  // ============================================================================
+
+  /// Upload file
+  Future<Map<String, dynamic>> uploadFile(FormData formData) async {
+    final response = await _client.post(
+      ApiEndpoints.uploadFile,
+      data: formData,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Upload signature
+  Future<Map<String, dynamic>> uploadSignature({
+    required String signature,
+    required String formId,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.uploadSignature,
+      data: {
+        'signature': signature,
+        'form_id': formId,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  // ============================================================================
+  // Health Check
+  // ============================================================================
+
+  /// Check API health status
+  Future<Map<String, dynamic>> healthCheck() async {
+    final response = await _client.get(ApiEndpoints.healthCheck);
+    return response.data as Map<String, dynamic>;
+  }
+}
+
+/// Riverpod provider for ApiService
+@riverpod
+ApiService apiService(Ref ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return ApiService(apiClient);
+}

@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/translation_controller.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/entities/translation_job.dart';
+import '../controllers/form_builder_controller.dart'; // Added import for FormBuilderController
+import 'package:file_saver/file_saver.dart'; // Added import for FileSaver
+import 'dart:convert'; // Added for jsonEncode
+import 'dart:typed_data'; // Added for Uint8List
 
 /// Bulk Translator Page.
 ///
@@ -31,6 +35,46 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
     _loadTranslationJobs();
   }
 
+  int _countTranslatableFields(form) {
+    // Added helper function
+    int count = 0;
+    // Assuming form.title and form.description are TranslatableString objects
+    // and TranslatableString has a hasDefaultValue getter
+    // For now, a simplified count based on presence.
+    // In a real scenario, this would iterate through the actual structure of the form
+    // and count every string that is marked as translatable.
+
+    // This part depends on the exact structure of BuilderForm and its children.
+    // For example, if form.title is a map of {"en": "...", "es": "..."}, then count translatable keys
+    // For simplicity, we count "potential" translatable fields
+
+    // Count form title and description
+    // Assuming form.title and form.description are TranslatableString objects
+    // For simplicity, checking if the default locale (en) is present
+    if (form.title.translations.containsKey('en')) count++;
+    if (form.description.translations.containsKey('en')) count++;
+
+    for (final section in form.sections) {
+      if (section.title.translations.containsKey('en')) count++;
+      if (section.description.translations.containsKey('en')) count++;
+
+      for (final question in section.questions) {
+        if (question.label.translations.containsKey('en')) count++;
+        if (question.helpText != null &&
+            question.helpText.translations.containsKey('en'))
+          count++;
+        if (question.placeholder != null &&
+            question.placeholder.translations.containsKey('en'))
+          count++;
+
+        for (final option in question.options) {
+          if (option.optionLabel.translations.containsKey('en')) count++;
+        }
+      }
+    }
+    return count;
+  }
+
   Future<void> _loadLanguages() async {
     try {
       final languages = await ref
@@ -56,13 +100,24 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
 
     setState(() => _isLoading = true);
     try {
+      final formState = ref.read(formBuilderControllerProvider(widget.formId));
+      final form = formState.value?.form;
+
+      if (form == null) {
+        _showError('Form data not available to start translation.');
+        setState(() => _isLoading = false);
+        return;
+      }
+
       await ref
           .read(translationControllerProvider.notifier)
           .startTranslation(
             formId: widget.formId,
             sourceLanguage: _sourceLanguage,
             targetLanguages: _selectedTargetLanguages,
-            totalFields: 10, // TODO: Get actual field count
+            totalFields: _countTranslatableFields(
+              form,
+            ), // Get actual field count
           );
       _showSuccess('Translation started!');
       await _loadTranslationJobs();
@@ -113,6 +168,36 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
       await _loadTranslationJobs();
     } catch (e) {
       _showError('Failed to delete: $e');
+    }
+  }
+
+  Future<void> _downloadTranslations(String jobId) async {
+    // Added download function
+    try {
+      final translatedContent = await ref
+          .read(translationControllerProvider.notifier)
+          .getTranslatedContent(
+            jobId,
+          ); // Assuming this method exists in the controller
+
+      if (translatedContent != null) {
+        // Format the content as JSON
+        final String fileName =
+            'form_${widget.formId}_translations_$jobId.json';
+        final String fileContent = jsonEncode(translatedContent);
+
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: Uint8List.fromList(utf8.encode(fileContent)),
+          fileExtension: 'json',
+          mimeType: MimeType.json,
+        );
+        _showSuccess('Translations downloaded successfully!');
+      } else {
+        _showError('No translated content found for this job.');
+      }
+    } catch (e) {
+      _showError('Failed to download translations: $e');
     }
   }
 
@@ -416,9 +501,9 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
                 if (jobItem.status == TranslationJobStatus.completed)
                   IconButton(
                     icon: const Icon(Icons.download),
-                    onPressed: () {
-                      // TODO: Download translations
-                    },
+                    onPressed: () => _downloadTranslations(
+                      jobItem.id,
+                    ), // Call download function
                   ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),

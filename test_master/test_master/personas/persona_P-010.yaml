@@ -1,0 +1,21 @@
+persona_id: P-010
+name: James Wilson
+age_group: 18-24
+technology_experience: Accessibility User
+behavior: Focused
+testing_style: Detailed
+interaction_style: Textual
+role: Power User
+agent_profile: Vandal
+special_focus: Accessibility
+language: French
+accessibility_needs:
+- High Contrast
+viewport:
+  width: 1366
+  height: 768
+browser_preferences:
+- firefox
+typing_speed: Fast
+error_prone: false
+multi_tasking: false

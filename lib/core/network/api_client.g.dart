@@ -8,12 +8,37 @@ part of 'api_client.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Dio HTTP client provider with authentication, error handling, and retry logic.
+///
+/// This provider creates and configures a Dio instance with:
+/// - JWT authentication with automatic token refresh
+/// - Request/response logging for debugging
+/// - Automatic retry on network failures
+/// - Centralized error handling and user notifications
+/// - Connection and timeout configurations
 
 @ProviderFor(dio)
 final dioProvider = DioProvider._();
 
+/// Dio HTTP client provider with authentication, error handling, and retry logic.
+///
+/// This provider creates and configures a Dio instance with:
+/// - JWT authentication with automatic token refresh
+/// - Request/response logging for debugging
+/// - Automatic retry on network failures
+/// - Centralized error handling and user notifications
+/// - Connection and timeout configurations
+
 final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
     with $Provider<Dio> {
+  /// Dio HTTP client provider with authentication, error handling, and retry logic.
+  ///
+  /// This provider creates and configures a Dio instance with:
+  /// - JWT authentication with automatic token refresh
+  /// - Request/response logging for debugging
+  /// - Automatic retry on network failures
+  /// - Centralized error handling and user notifications
+  /// - Connection and timeout configurations
   DioProvider._()
     : super(
         from: null,
@@ -47,4 +72,4 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'1afef33b455d4019bc12248780f4e8f2ba6accd9';
+String _$dioHash() => r'57d5e99fc54bcff3be7aeeacf8c7c418c334fba5';

@@ -25,7 +25,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Loaded ${workflows.length} workflows for form: $formId');
       return workflows;
     } catch (e, stack) {
-      _logger.e('Failed to load workflows: $e');
+      _logger.e('Failed to load workflows', error: e, stackTrace: stack);
       throw _createException(
         'Failed to load workflows for form: $formId',
         e,
@@ -42,7 +42,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Loaded workflow: $workflowId');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to load workflow: $e');
+      _logger.e('Failed to load workflow', error: e, stackTrace: stack);
       throw _createException('Failed to load workflow: $workflowId', e, stack);
     }
   }
@@ -58,7 +58,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Created workflow: ${workflow.name}');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to create workflow: $e');
+      _logger.e('Failed to create workflow', error: e, stackTrace: stack);
       throw _createException(
         'Failed to create workflow: ${workflow.name}',
         e,
@@ -78,7 +78,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Updated workflow: ${workflow.name}');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to update workflow: $e');
+      _logger.e('Failed to update workflow', error: e, stackTrace: stack);
       throw _createException(
         'Failed to update workflow: ${workflow.name}',
         e,
@@ -93,7 +93,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       await _apiClient.delete('/workflows/$workflowId');
       _logger.i('Deleted workflow: $workflowId');
     } catch (e, stack) {
-      _logger.e('Failed to delete workflow: $e');
+      _logger.e('Failed to delete workflow', error: e, stackTrace: stack);
       throw _createException(
         'Failed to delete workflow: $workflowId',
         e,
@@ -110,7 +110,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Activated workflow: $workflowId');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to activate workflow: $e');
+      _logger.e('Failed to activate workflow', error: e, stackTrace: stack);
       throw _createException(
         'Failed to activate workflow: $workflowId',
         e,
@@ -127,7 +127,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Paused workflow: $workflowId');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to pause workflow: $e');
+      _logger.e('Failed to pause workflow', error: e, stackTrace: stack);
       throw _createException('Failed to pause workflow: $workflowId', e, stack);
     }
   }
@@ -140,7 +140,7 @@ class WorkflowRepositoryImpl implements WorkflowRepository {
       _logger.i('Reset workflow to draft: $workflowId');
       return Workflow.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to reset workflow: $e');
+      _logger.e('Failed to reset workflow', error: e, stackTrace: stack);
       throw _createException('Failed to reset workflow: $workflowId', e, stack);
     }
   }

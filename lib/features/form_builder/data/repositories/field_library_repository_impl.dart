@@ -25,7 +25,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
       _logger.i('Loaded ${templates.length} custom field templates');
       return templates;
     } catch (e, stack) {
-      _logger.e('Failed to load custom fields: $e');
+      _logger.e('Failed to load custom fields', error: e, stackTrace: stack);
       throw _createException('Failed to load custom fields', e, stack);
     }
   }
@@ -45,7 +45,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
         response.data as Map<String, dynamic>,
       );
     } catch (e, stack) {
-      _logger.e('Failed to create custom field: $e');
+      _logger.e('Failed to create custom field', error: e, stackTrace: stack);
       throw _createException(
         'Failed to create custom field: ${template.name}',
         e,
@@ -60,7 +60,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
       await _apiClient.delete('/custom-fields/$templateId');
       _logger.i('Deleted custom field template: $templateId');
     } catch (e, stack) {
-      _logger.e('Failed to delete custom field: $e');
+      _logger.e('Failed to delete custom field', error: e, stackTrace: stack);
       throw _createException('Failed to delete custom field', e, stack);
     }
   }
@@ -81,7 +81,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
         response.data as Map<String, dynamic>,
       );
     } catch (e, stack) {
-      _logger.e('Failed to update custom field: $e');
+      _logger.e('Failed to update custom field', error: e, stackTrace: stack);
       throw _createException('Failed to update custom field', e, stack);
     }
   }

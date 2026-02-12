@@ -24,6 +24,7 @@ class LogicRuleDialog extends StatefulWidget {
 }
 
 class _LogicRuleDialogState extends State<LogicRuleDialog> {
+  final _formKey = GlobalKey<FormState>(); // Added GlobalKey
   late String _action;
   late String _matchType;
   late TextEditingController _errorMessageController;
@@ -128,27 +129,28 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
   }
 
   void _onSave() {
-    // Validate
-    // If validation action, require error message
-    if (_action == 'validate' && _errorMessageController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Please enter an error message for the validation rule.',
+    if (_formKey.currentState!.validate()) { // Validate form
+      // If validation action, require error message
+      if (_action == 'validate' && _errorMessageController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Please enter an error message for the validation rule.',
+            ),
           ),
-        ),
-      );
-      return;
+        );
+        return;
+      }
+
+      final rule = {
+        'action': _action,
+        'errorMessage': _errorMessageController.text,
+        'targetOption': _selectedDisableOption,
+        'conditionGroup': {'matchType': _matchType, 'rules': _conditions},
+      };
+
+      Navigator.pop(context, rule);
     }
-
-    final rule = {
-      'action': _action,
-      'errorMessage': _errorMessageController.text,
-      'targetOption': _selectedDisableOption,
-      'conditionGroup': {'matchType': _matchType, 'rules': _conditions},
-    };
-
-    Navigator.pop(context, rule);
   }
 
   @override
@@ -162,137 +164,146 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     return AlertDialog(
       title: const Text('Configure Logic Rule'),
       scrollable: true,
-      content: SizedBox(
-        width: 600,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Action Section
-            const Text(
-              'ACTION',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: AppColors.textGrey,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildDropdown(
-              label: 'Action',
-              value: _action,
-              items: [
-                const DropdownMenuItem(
-                  value: 'show',
-                  child: Text('Show Question'),
-                ),
-                const DropdownMenuItem(
-                  value: 'hide',
-                  child: Text('Hide Question'),
-                ),
-                const DropdownMenuItem(
-                  value: 'require',
-                  child: Text('Make Required'),
-                ),
-                const DropdownMenuItem(
-                  value: 'optional',
-                  child: Text('Make Optional'),
-                ),
-                const DropdownMenuItem(
-                  value: 'validate',
-                  child: Text('Show Validation Error'),
-                ),
-                if (isOptionType)
-                  const DropdownMenuItem(
-                    value: 'disable_option',
-                    child: Text('Disable Option'),
-                  ),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _action = val);
-              },
-            ),
-
-            // Contextual inputs based on Action
-            if (_action == 'validate') ...[
-              const SizedBox(height: 12),
-              TextField(
-                controller: _errorMessageController,
-                decoration: const InputDecoration(
-                  labelText: 'Error Message',
-                  border: OutlineInputBorder(),
-                  hintText: 'e.g. You cannot select this option because...',
+      content: Form( // Added Form widget
+        key: _formKey, // Assign key
+        child: SizedBox(
+          width: 600,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Action Section
+              const Text(
+                'ACTION',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: AppColors.textGrey,
                 ),
               ),
-            ],
-
-            if (_action == 'disable_option' && isOptionType) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               _buildDropdown(
-                label: 'Select Option to Disable',
-                value: _selectedDisableOption,
-                items: (widget.currentQuestion.options ?? []).map((opt) {
-                  return DropdownMenuItem(value: opt, child: Text(opt));
-                }).toList(),
-                onChanged: (val) =>
-                    setState(() => _selectedDisableOption = val),
+                label: 'Action',
+                value: _action,
+                items: [
+                  const DropdownMenuItem(
+                    value: 'show',
+                    child: Text('Show Question'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'hide',
+                    child: Text('Hide Question'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'require',
+                    child: Text('Make Required'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'optional',
+                    child: Text('Make Optional'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'validate',
+                    child: Text('Show Validation Error'),
+                  ),
+                  if (isOptionType)
+                    const DropdownMenuItem(
+                      value: 'disable_option',
+                      child: Text('Disable Option'),
+                    ),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _action = val);
+                },
               ),
-            ],
 
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 12),
-
-            // Conditions Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'CONDITIONS',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    color: AppColors.textGrey,
+              // Contextual inputs based on Action
+              if (_action == 'validate') ...[
+                const SizedBox(height: 12),
+                TextFormField( // Changed to TextFormField for validation
+                  controller: _errorMessageController,
+                  decoration: const InputDecoration(
+                    labelText: 'Error Message',
+                    border: OutlineInputBorder(),
+                    hintText: 'e.g. You cannot select this option because...',
                   ),
-                ),
-                DropdownButton<String>(
-                  value: _matchType,
-                  underline: const SizedBox(),
-                  style: const TextStyle(
-                    color: AppColors.brandBlue,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'and',
-                      child: Text('Match ALL (AND)'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'or',
-                      child: Text('Match ANY (OR)'),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setState(() => _matchType = val);
+                  validator: (value) { // Added validator
+                    if (value == null || value.isEmpty) {
+                      return 'Error message is required for validation rules';
+                    }
+                    return null;
                   },
                 ),
               ],
-            ),
-            const SizedBox(height: 8),
 
-            ..._conditions.asMap().entries.map((entry) {
-              final index = entry.key;
-              final condition = entry.value;
-              return _buildConditionRow(index, condition, triggerQuestions);
-            }),
+              if (_action == 'disable_option' && isOptionType) ...[
+                const SizedBox(height: 12),
+                _buildDropdown(
+                  label: 'Select Option to Disable',
+                  value: _selectedDisableOption,
+                  items: (widget.currentQuestion.options ?? []).map((opt) {
+                    return DropdownMenuItem(value: opt, child: Text(opt));
+                  }).toList(),
+                  onChanged: (val) =>
+                      setState(() => _selectedDisableOption = val),
+                ),
+              ],
 
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _addCondition,
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add Condition'),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 12),
+
+              // Conditions Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'CONDITIONS',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  DropdownButton<String>(
+                    value: _matchType,
+                    underline: const SizedBox(),
+                    style: const TextStyle(
+                      color: AppColors.brandBlue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'and',
+                        child: Text('Match ALL (AND)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'or',
+                        child: Text('Match ANY (OR)'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setState(() => _matchType = val);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              ..._conditions.asMap().entries.map((entry) {
+                final index = entry.key;
+                final condition = entry.value;
+                return _buildConditionRow(index, condition, triggerQuestions);
+              }),
+
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _addCondition,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Condition'),
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -447,20 +458,26 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
           }
         },
         child: IgnorePointer(
-          child: TextField(
+          child: TextFormField( // Changed to TextFormField
             controller: TextEditingController(text: condition['value']),
             decoration: const InputDecoration(
               labelText: 'Date (YYYY-MM-DD)',
               border: OutlineInputBorder(),
               suffixIcon: Icon(Icons.calendar_today),
             ),
+            validator: (value) { // Added validator
+              if (value == null || value.isEmpty) {
+                return 'Date is required';
+              }
+              return null;
+            },
           ),
         ),
       );
     }
 
     // Default text input
-    return TextField(
+    return TextFormField( // Changed to TextFormField
       controller: TextEditingController(text: condition['value'])
         ..selection = TextSelection.collapsed(
           offset: condition['value']?.length ?? 0,
@@ -471,6 +488,14 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
         border: OutlineInputBorder(),
       ),
       onChanged: (val) => condition['value'] = val,
+      validator: (value) { // Added validator
+        final op = condition['operator'];
+        final needsValue = op != 'is_empty' && op != 'is_not_empty';
+        if (needsValue && (value == null || value.isEmpty)) {
+          return 'Value is required';
+        }
+        return null;
+      },
     );
   }
 

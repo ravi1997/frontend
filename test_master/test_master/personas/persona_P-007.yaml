@@ -1,0 +1,23 @@
+persona_id: P-007
+name: Rachel Hill
+age_group: 25-34
+technology_experience: Intermediate
+behavior: Focused
+testing_style: Emotional
+interaction_style: Mobile-First
+role: Casual User
+agent_profile: Skeptical
+special_focus: Accessibility
+language: German
+accessibility_needs:
+- Screen Reader
+- Keyboard-Only
+viewport:
+  width: 1920
+  height: 1080
+browser_preferences:
+- chromium
+- webkit
+typing_speed: Slow
+error_prone: false
+multi_tasking: false

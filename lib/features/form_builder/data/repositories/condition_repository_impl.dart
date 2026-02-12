@@ -25,7 +25,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       _logger.i('Loaded ${rules.length} rules for form: $formId');
       return rules;
     } catch (e, stack) {
-      _logger.e('Failed to load rules: $e');
+      _logger.e('Failed to load rules', error: e, stackTrace: stack);
       throw _createException(
         'Failed to load rules for form: $formId',
         e,
@@ -52,7 +52,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       _logger.i('Loaded ${rules.length} rules for field: $fieldId');
       return rules;
     } catch (e, stack) {
-      _logger.e('Failed to load rules for field: $e');
+      _logger.e('Failed to load rules for field', error: e, stackTrace: stack);
       throw _createException(
         'Failed to load rules for field: $fieldId',
         e,
@@ -69,7 +69,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       _logger.i('Loaded rule: $ruleId');
       return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to load rule: $e');
+      _logger.e('Failed to load rule', error: e, stackTrace: stack);
       throw _createException('Failed to load rule: $ruleId', e, stack);
     }
   }
@@ -85,7 +85,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       _logger.i('Created rule: ${rule.name}');
       return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to create rule: $e');
+      _logger.e('Failed to create rule', error: e, stackTrace: stack);
       throw _createException('Failed to create rule: ${rule.name}', e, stack);
     }
   }
@@ -101,7 +101,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       _logger.i('Updated rule: ${rule.name}');
       return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to update rule: $e');
+      _logger.e('Failed to update rule', error: e, stackTrace: stack);
       throw _createException('Failed to update rule: ${rule.name}', e, stack);
     }
   }
@@ -112,7 +112,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       await _apiClient.delete('/conditions/$ruleId');
       _logger.i('Deleted rule: $ruleId');
     } catch (e, stack) {
-      _logger.e('Failed to delete rule: $e');
+      _logger.e('Failed to delete rule', error: e, stackTrace: stack);
       throw _createException('Failed to delete rule: $ruleId', e, stack);
     }
   }
@@ -126,7 +126,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
       );
       _logger.i('Reordered rules for form: $formId');
     } catch (e, stack) {
-      _logger.e('Failed to reorder rules: $e');
+      _logger.e('Failed to reorder rules', error: e, stackTrace: stack);
       throw _createException('Failed to reorder rules', e, stack);
     }
   }
@@ -151,7 +151,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
 
       return results;
     } catch (e, stack) {
-      _logger.e('Failed to evaluate rules: $e');
+      _logger.e('Failed to evaluate rules', error: e, stackTrace: stack);
       throw _createException('Failed to evaluate rules', e, stack);
     }
   }

@@ -1,0 +1,21 @@
+persona_id: P-002
+name: Joshua King
+age_group: 25-34
+technology_experience: Intermediate
+behavior: Focused
+testing_style: Security-Focused
+interaction_style: Textual
+role: Casual User
+agent_profile: Skeptical
+special_focus: Security
+language: French
+accessibility_needs:
+- High Contrast
+viewport:
+  width: 375
+  height: 667
+browser_preferences:
+- firefox
+typing_speed: Instant
+error_prone: false
+multi_tasking: false

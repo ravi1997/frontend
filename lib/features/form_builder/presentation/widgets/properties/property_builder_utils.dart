@@ -8,6 +8,7 @@ class PropertyBuilderUtils {
     required TextEditingController controller,
     required Function(String) onChanged,
     TextInputType? keyboardType,
+    String? Function(String?)? validator, // Added validator
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -21,9 +22,11 @@ class PropertyBuilderUtils {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
+          // Changed from TextField
           controller: controller,
           keyboardType: keyboardType,
+          validator: validator, // Passed validator
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: const TextStyle(color: Colors.black26),
@@ -120,6 +123,7 @@ class PropertyBuilderUtils {
     required String label,
     required String value,
     required Function(String) onChanged,
+    String? Function(String?)? validator,
   }) {
     Color displayColor;
     try {
@@ -153,12 +157,16 @@ class PropertyBuilderUtils {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: TextField(
+              child: TextFormField(
+                key: ValueKey(
+                  label,
+                ), // Use label as key to avoid losing state but allow updates? No, Key(label) is fine.
                 controller: TextEditingController(text: value)
                   ..selection = TextSelection.fromPosition(
                     TextPosition(offset: value.length),
                   ),
                 onChanged: onChanged,
+                validator: validator,
                 decoration: InputDecoration(
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(

@@ -1,21 +1,23 @@
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../../../features/auth/presentation/controllers/auth_controller.dart';
-import '../../../features/auth/presentation/screens/login_screen.dart';
-import '../../../features/auth/presentation/screens/register_screen.dart';
-import '../../../features/auth/presentation/screens/forgot_password_screen.dart';
-import '../../../features/form_builder/presentation/pages/form_builder_page.dart';
-import '../../../features/responses/presentation/pages/response_list_page.dart';
-import '../../../features/responses/presentation/pages/response_detail_page.dart';
-import '../../../features/form_builder/domain/entities/builder_form.dart';
-import '../../../features/form_builder/presentation/pages/form_preview_page.dart';
-import '../../../features/analytics/presentation/pages/analytics_page.dart';
-import '../../../features/auth/presentation/screens/otp_verification_screen.dart';
-import '../../../features/form_builder/presentation/pages/translator_page.dart';
-import '../../../features/form_builder/presentation/pages/version_history_page.dart';
-import '../../../features/form_builder/presentation/pages/workflow_builder_page.dart';
-import '../../../features/form_builder/presentation/pages/template_library_page.dart';
+import '../../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/form_builder/presentation/pages/form_builder_page.dart';
+import '../../features/responses/presentation/pages/response_list_page.dart';
+import '../../features/responses/presentation/pages/response_detail_page.dart';
+import '../../features/form_builder/domain/entities/builder_form.dart';
+import '../../features/form_builder/presentation/pages/form_preview_page.dart';
+import '../../features/analytics/presentation/pages/analytics_page.dart';
+import '../../features/auth/presentation/screens/otp_verification_screen.dart';
+import '../../features/form_builder/presentation/pages/translator_page.dart';
+import '../../features/form_builder/presentation/pages/version_history_page.dart';
+import '../../features/form_builder/presentation/pages/workflow_builder_page.dart';
+import '../../features/form_builder/presentation/pages/template_library_page.dart';
+import '../../features/analytics/presentation/pages/advanced_analytics_page.dart';
+import '../../features/integrations/presentation/pages/integrations_page.dart';
 
 part 'app_router.g.dart';
 
@@ -130,6 +132,14 @@ Raw<GoRouter> appRouter(Ref ref) {
       GoRoute(
         path: '/templates',
         builder: (context, state) => const TemplateLibraryPage(),
+      ),
+      GoRoute(
+        path: '/analytics/advanced',
+        builder: (context, state) => const AdvancedAnalyticsPage(),
+      ),
+      GoRoute(
+        path: '/integrations',
+        builder: (context, state) => const IntegrationsPage(),
       ),
     ],
   );

@@ -6,7 +6,7 @@ import 'package:frontend/features/form_builder/domain/entities/question_type.dar
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
 
-class FieldValidationSettings extends ConsumerWidget {
+class FieldValidationSettings extends ConsumerStatefulWidget { // Changed to ConsumerStatefulWidget
   final String formId;
   final FormQuestion question;
   final TextEditingController regexController;
@@ -31,177 +31,238 @@ class FieldValidationSettings extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'VALIDATION',
-          style: TextStyle(
-            color: AppColors.textGrey,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 12),
+  ConsumerState<FieldValidationSettings> createState() => _FieldValidationSettingsState();
+}
 
-        // Required Toggle
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Required Field',
-          value: question.isRequired,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(isRequired: val));
-          },
-        ),
-        const SizedBox(height: 12),
+class _FieldValidationSettingsState extends ConsumerState<FieldValidationSettings> { // Added State class
+  final _formKey = GlobalKey<FormState>(); // Added GlobalKey
 
-        // Min/Max Length (Text/Paragraph)
-        if (question.type == QuestionType.shortText ||
-            question.type == QuestionType.paragraph) ...[
-          Row(
-            children: [
-              Expanded(
-                child: PropertyBuilderUtils.buildTextField(
-                  label: 'Min Length',
-                  controller: minLengthController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) {
-                    final n = int.tryParse(val);
-                    ref
-                        .read(formBuilderControllerProvider(formId).notifier)
-                        .updateQuestion(question.copyWith(minLength: n));
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PropertyBuilderUtils.buildTextField(
-                  label: 'Max Length',
-                  controller: maxLengthController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) {
-                    final n = int.tryParse(val);
-                    ref
-                        .read(formBuilderControllerProvider(formId).notifier)
-                        .updateQuestion(question.copyWith(maxLength: n));
-                  },
-                ),
-              ),
-            ],
+  @override
+  Widget build(BuildContext context) {
+    return Form( // Added Form widget
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'VALIDATION',
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
           ),
           const SizedBox(height: 12),
-        ],
 
-        // Min/Max Value (Number)
-        if (question.type == QuestionType.number) ...[
-          Row(
-            children: [
-              Expanded(
-                child: PropertyBuilderUtils.buildTextField(
-                  label: 'Min Value',
-                  controller: minValueController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) {
-                    final n = num.tryParse(val);
-                    ref
-                        .read(formBuilderControllerProvider(formId).notifier)
-                        .updateQuestion(question.copyWith(minValue: n));
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: PropertyBuilderUtils.buildTextField(
-                  label: 'Max Value',
-                  controller: maxValueController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) {
-                    final n = num.tryParse(val);
-                    ref
-                        .read(formBuilderControllerProvider(formId).notifier)
-                        .updateQuestion(question.copyWith(maxValue: n));
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-        ],
-
-        // Regex (Text types)
-        if (question.type == QuestionType.shortText ||
-            question.type == QuestionType.paragraph ||
-            question.type == QuestionType.email ||
-            question.type == QuestionType.url ||
-            question.type == QuestionType.mobile) ...[
-          PropertyBuilderUtils.buildTextField(
-            label: 'Regex Validation',
-            placeholder: 'e.g. ^[0-9]*\$',
-            controller: regexController,
+          // Required Toggle
+          PropertyBuilderUtils.buildSwitch(
+            label: 'Required Field',
+            value: widget.question.isRequired, // Access via widget
             onChanged: (val) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestion(question.copyWith(validationRegex: val));
+                  .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                  .updateQuestion(widget.question.copyWith(isRequired: val)); // Access via widget
             },
           ),
           const SizedBox(height: 12),
 
-          if (question.type == QuestionType.shortText ||
-              question.type == QuestionType.mobile)
+          // Min/Max Length (Text/Paragraph)
+          if (widget.question.type == QuestionType.shortText || // Access via widget
+              widget.question.type == QuestionType.paragraph) ...[ // Access via widget
+            Row(
+              children: [
+                Expanded(
+                  child: PropertyBuilderUtils.buildTextField(
+                    label: 'Min Length',
+                    controller: widget.minLengthController, // Access via widget
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return null;
+                      final n = int.tryParse(value);
+                      if (n == null || n < 0) return 'Invalid number';
+                      final maxLength = int.tryParse(widget.maxLengthController.text);
+                      if (maxLength != null && n > maxLength) return 'Min < Max';
+                      return null;
+                    },
+                    onChanged: (val) {
+                      if (_formKey.currentState!.validate()) { // Validate before updating
+                        final n = int.tryParse(val);
+                        ref
+                            .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                            .updateQuestion(widget.question.copyWith(minLength: n)); // Access via widget
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PropertyBuilderUtils.buildTextField(
+                    label: 'Max Length',
+                    controller: widget.maxLengthController, // Access via widget
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return null;
+                      final n = int.tryParse(value);
+                      if (n == null || n < 0) return 'Invalid number';
+                      final minLength = int.tryParse(widget.minLengthController.text);
+                      if (minLength != null && n < minLength) return 'Max > Min';
+                      return null;
+                    },
+                    onChanged: (val) {
+                      if (_formKey.currentState!.validate()) { // Validate before updating
+                        final n = int.tryParse(val);
+                        ref
+                            .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                            .updateQuestion(widget.question.copyWith(maxLength: n)); // Access via widget
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Min/Max Value (Number)
+          if (widget.question.type == QuestionType.number) ...[ // Access via widget
+            Row(
+              children: [
+                Expanded(
+                  child: PropertyBuilderUtils.buildTextField(
+                    label: 'Min Value',
+                    controller: widget.minValueController, // Access via widget
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return null;
+                      final n = num.tryParse(value);
+                      if (n == null) return 'Invalid number';
+                      final maxValue = num.tryParse(widget.maxValueController.text);
+                      if (maxValue != null && n > maxValue) return 'Min < Max';
+                      return null;
+                    },
+                    onChanged: (val) {
+                      if (_formKey.currentState!.validate()) { // Validate before updating
+                        final n = num.tryParse(val);
+                        ref
+                            .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                            .updateQuestion(widget.question.copyWith(minValue: n)); // Access via widget
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: PropertyBuilderUtils.buildTextField(
+                    label: 'Max Value',
+                    controller: widget.maxValueController, // Access via widget
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return null;
+                      final n = num.tryParse(value);
+                      if (n == null) return 'Invalid number';
+                      final minValue = num.tryParse(widget.minValueController.text);
+                      if (minValue != null && n < minValue) return 'Max > Min';
+                      return null;
+                    },
+                    onChanged: (val) {
+                      if (_formKey.currentState!.validate()) { // Validate before updating
+                        final n = num.tryParse(val);
+                        ref
+                            .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                            .updateQuestion(widget.question.copyWith(maxValue: n)); // Access via widget
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Regex (Text types)
+          if (widget.question.type == QuestionType.shortText || // Access via widget
+              widget.question.type == QuestionType.paragraph || // Access via widget
+              widget.question.type == QuestionType.email || // Access via widget
+              widget.question.type == QuestionType.url || // Access via widget
+              widget.question.type == QuestionType.mobile) ...[ // Access via widget
             PropertyBuilderUtils.buildTextField(
-              label: 'Input Mask',
-              placeholder: 'e.g. (###) ###-####',
-              controller: inputMaskController,
+              label: 'Regex Validation',
+              placeholder: 'e.g. ^[0-9]*\$',
+              controller: widget.regexController, // Access via widget
+              validator: (value) {
+                if (value == null || value.isEmpty) return null;
+                try {
+                  RegExp(value);
+                  return null;
+                } catch (e) {
+                  return 'Invalid regex pattern';
+                }
+              },
               onChanged: (val) {
-                ref
-                    .read(formBuilderControllerProvider(formId).notifier)
-                    .updateQuestion(question.copyWith(inputMask: val));
+                if (_formKey.currentState!.validate()) { // Validate before updating
+                  ref
+                      .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                      .updateQuestion(widget.question.copyWith(validationRegex: val)); // Access via widget
+                }
               },
             ),
-          if (question.type == QuestionType.shortText ||
-              question.type == QuestionType.mobile)
             const SizedBox(height: 12),
 
-          PropertyBuilderUtils.buildTextField(
-            label: 'Custom Error Message',
-            placeholder: 'Error to show when validation fails',
-            controller: customErrorController,
+            if (widget.question.type == QuestionType.shortText || // Access via widget
+                widget.question.type == QuestionType.mobile) // Access via widget
+              PropertyBuilderUtils.buildTextField(
+                label: 'Input Mask',
+                placeholder: 'e.g. (###) ###-####',
+                controller: widget.inputMaskController, // Access via widget
+                onChanged: (val) {
+                  ref
+                      .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                      .updateQuestion(widget.question.copyWith(inputMask: val)); // Access via widget
+                },
+              ),
+            if (widget.question.type == QuestionType.shortText || // Access via widget
+                widget.question.type == QuestionType.mobile) // Access via widget
+              const SizedBox(height: 12),
+
+            PropertyBuilderUtils.buildTextField(
+              label: 'Custom Error Message',
+              placeholder: 'Error to show when validation fails',
+              controller: widget.customErrorController, // Access via widget
+              onChanged: (val) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                    .updateQuestion(widget.question.copyWith(customErrorMessage: val)); // Access via widget
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+          const SizedBox(height: 12),
+
+          // Read Only Toggle
+          PropertyBuilderUtils.buildSwitch(
+            label: 'Read Only',
+            value: widget.question.isReadOnly, // Access via widget
             onChanged: (val) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestion(question.copyWith(customErrorMessage: val));
+                  .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                  .updateQuestion(widget.question.copyWith(isReadOnly: val)); // Access via widget
             },
           ),
           const SizedBox(height: 12),
+
+          // Hidden Toggle
+          PropertyBuilderUtils.buildSwitch(
+            label: 'Hidden Field',
+            value: widget.question.isHidden, // Access via widget
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier) // Access via widget
+                  .updateQuestion(widget.question.copyWith(isHidden: val)); // Access via widget
+            },
+          ),
         ],
-        const SizedBox(height: 12),
-
-        // Read Only Toggle
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Read Only',
-          value: question.isReadOnly,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(isReadOnly: val));
-          },
-        ),
-        const SizedBox(height: 12),
-
-        // Hidden Toggle
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Hidden Field',
-          value: question.isHidden,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestion(question.copyWith(isHidden: val));
-          },
-        ),
-      ],
+      ),
     );
   }
 }

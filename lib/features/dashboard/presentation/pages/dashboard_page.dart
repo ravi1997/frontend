@@ -471,6 +471,42 @@ class _ActionButtons extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         OutlinedButton.icon(
+          onPressed: () => context.go('/analytics/advanced'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF374151),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFD1D5DB)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          icon: const Icon(Icons.analytics_outlined, size: 20),
+          label: Text(
+            'Advanced Analytics',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 12),
+        OutlinedButton.icon(
+          onPressed: () => context.go('/integrations'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF374151),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFD1D5DB)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          icon: const Icon(Icons.integration_instructions_outlined, size: 20),
+          label: Text(
+            'Integrations',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
+        const SizedBox(width: 12),
+        OutlinedButton.icon(
           onPressed: () {},
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFF374151),

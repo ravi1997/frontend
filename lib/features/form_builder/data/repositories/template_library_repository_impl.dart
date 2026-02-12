@@ -34,8 +34,12 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
           .map((json) => FormTemplate.fromJson(json))
           .toList();
       return _cachedTemplates!;
-    } catch (e) {
-      _logger.w('Failed to fetch templates from API, using defaults: $e');
+    } catch (e, s) {
+      _logger.w(
+        'Failed to fetch templates from API, using defaults',
+        error: e,
+        stackTrace: s,
+      );
       // Return default templates if API fails
       _cachedTemplates = _getDefaultTemplates();
       return _cachedTemplates!;
@@ -61,7 +65,12 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     try {
       final response = await _apiClient.get('/templates/$templateId');
       return FormTemplate.fromJson(response.data);
-    } catch (e) {
+    } catch (e, s) {
+      _logger.w(
+        'Failed to fetch template by ID from API, using defaults',
+        error: e,
+        stackTrace: s,
+      );
       final allTemplates = await getAllTemplates();
       final template = allTemplates.firstWhere(
         (t) => t.id == templateId,
@@ -83,8 +92,12 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       );
       await incrementUsageCount(templateId);
       return response.data['formId'];
-    } catch (e) {
-      _logger.w('API create form failed, creating locally: $e');
+    } catch (e, s) {
+      _logger.w(
+        'API create form failed, creating locally',
+        error: e,
+        stackTrace: s,
+      );
       // Fallback: create form locally from template
       final template = await getTemplateById(templateId);
       final newForm = BuilderForm(
@@ -109,9 +122,9 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   Future<void> incrementUsageCount(String templateId) async {
     try {
       await _apiClient.post('/templates/$templateId/increment-usage');
-    } catch (e) {
+    } catch (e, s) {
       // Silently fail for offline mode
-      _logger.d('Failed to increment usage count: $e');
+      _logger.d('Failed to increment usage count', error: e, stackTrace: s);
     }
   }
 
@@ -135,8 +148,12 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         },
       );
       return FormTemplate.fromJson(response.data);
-    } catch (e) {
-      _logger.w('API create template failed, creating locally: $e');
+    } catch (e, s) {
+      _logger.w(
+        'API create template failed, creating locally',
+        error: e,
+        stackTrace: s,
+      );
       // Fallback: create template locally
       final templateId = _uuid.v4();
       return FormTemplate(
@@ -155,8 +172,8 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   Future<void> deleteTemplate(String templateId) async {
     try {
       await _apiClient.delete('/templates/$templateId');
-    } catch (e) {
-      _logger.e('Failed to delete template: $e');
+    } catch (e, s) {
+      _logger.e('Failed to delete template', error: e, stackTrace: s);
       throw Exception('Failed to delete template');
     }
   }

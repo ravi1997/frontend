@@ -1,0 +1,902 @@
+# Test Master: Comprehensive Automated Testing Orchestration System
+
+---
+
+## **System Identity & Core Principles**
+
+### **Agent OS Integration**
+This test orchestration system operates within the Agent OS framework, adhering to all core principles:
+
+- **Safety First**: Never execute destructive commands without explicit confirmation
+- **Explicit State**: Always verify project state via `agent/09_state/` before testing
+- **Traceability**: Every test result must be linked to requirements in SRS or tasks in Backlog
+- **Modularity**: Tests must be independent, repeatable, and modular
+- **Truthfulness**: Report impossibilities or unsupported stacks immediately
+- **Atomic Changes**: Prefer incremental, testable changes over large updates
+- **Documentation is Code**: Test documentation must be treated with same care as source code
+
+### **Operational Standards**
+- **Paths**: Use absolute paths for all tool calls and file operations
+- **Context**: Always summarize current context before starting complex workflows
+- **Errors**: Fail gracefully using `agent/00_system/04_error_handling.md` for recovery
+
+---
+
+## **Objective**
+
+Create an automated testing strategy for web applications using Playwright that integrates with Agent OS workflows. The system will generate 25+ unique personas, randomly select 5+ personas for testing, and execute comprehensive tests based on predefined scenarios. The system generates detailed reports from each persona's perspective and a consolidated manager-level report with actionable insights, bug reports, and improvement recommendations.
+
+---
+
+## **Inputs & Context Sources**
+
+### **1. Agent OS Configuration**
+- **System Principles**: `agent/00_system/00_principles.md` - Core philosophy and behavior standards
+- **Testing Workflow**: `agent/04_workflows/07_testing_and_validation.md` - Testing and validation procedures
+- **Feature Implementation Loop**: `agent/04_workflows/06_feature_implementation_loop.md` - Implementation testing phases
+- **Tester Profile**: `agent/03_profiles/profile_tester.md` - QA and bug hunting instructions
+- **Quality Gate**: `agent/05_gates/global/gate_global_quality.md` - Universal quality baseline
+- **Testing Rules**: `agent/11_rules/testing_rules.md` - Mandatory test requirements
+- **Test State**: `agent/09_state/TEST_STATE.md` - Current testing statistics and known issues
+
+### **2. Project Plans & Context**
+- **Flutter Form Management System**: Complete SRS, architecture, and roadmap in `plans/`
+- **Dependencies**: Core Flutter packages (flutter_riverpod, go_router, dio, hive_flutter, etc.)
+- **Integration Progress**: Milestone status (M-11 through M-20) and completion tracking
+- **Feature Status**: Analytics, Publishing, Version History, Field Library, Conditional Logic, Digital Signature, Workflow Engine, Form Templates, Bulk Translator, Offline Mode
+
+### **3. Test Scenarios (Plans Folder)**
+Contains test scenarios for different testing types:
+- Unit Tests
+- Integration Tests
+- System Tests
+- Regression Tests
+- UI Tests
+- Impression Tests
+- Usability Tests
+- Exploratory Tests
+- Performance Tests
+- Security Tests
+- Accessibility Tests
+- Expected failure cases
+
+Format: YAML/JSON files defining individual test steps, parameters, expected outcomes, and configurations.
+
+### **4. Application Context**
+- **App URL**: The URL of the application to be tested
+- **Tech Stack**: Flutter web application with Riverpod state management
+- **Key Features**: Form builder, analytics dashboard, version history, conditional logic, digital signatures, workflow engine, template library, bulk translator, offline mode
+
+---
+
+## **Enhanced Persona Generation System**
+
+### **Persona Architecture (25+ Personas)**
+
+The system generates diverse personas with the following enhanced characteristics:
+
+#### **Core Persona Dimensions**
+
+1. **Behavior Patterns**
+   - Focused: Methodical, step-by-step execution
+   - Distracted: Prone to errors, skips steps
+   - Multi-tasking: Rapid navigation, multiple tabs
+   - Exploratory: Clicks everything, tries edge cases
+
+2. **Technology Experience**
+   - Novice: Struggles with UI patterns, needs guidance
+   - Intermediate: Comfortable with standard patterns
+   - Expert: Power user, keyboard shortcuts, advanced features
+   - Accessibility User: Screen reader, keyboard-only, magnification
+
+3. **Testing Style**
+   - Fast Testing: Quick execution, surface-level validation
+   - Detailed Critique: Thorough examination, documentation-heavy
+   - Emotional: Impression-based feedback, subjective experience
+   - Technical: Bug detection, code-level analysis, API validation
+   - Security-Focused: Vulnerability hunting, input validation
+
+4. **Interaction Style**
+   - Form-Heavy: Extensive form filling, validation testing
+   - Navigation-Heavy: Deep linking, routing, browser history
+   - Visual: Design critique, responsiveness, aesthetics
+   - Textual: Content validation, localization, accessibility
+   - Mobile-First: Touch interactions, gestures, responsive design
+
+5. **Role & Context**
+   - Casual User: Occasional use, simple tasks
+   - Power User: Daily use, advanced features
+   - Administrator: Configuration, management, permissions
+   - Developer: API testing, technical validation
+   - QA Tester: Systematic testing, edge cases
+
+6. **Agent OS Profile Integration**
+   - Skeptical: Assumes code is broken until proven otherwise
+   - Vandal: Tries to break system with malicious/large inputs
+   - Reporter: Provides clear steps to reproduce every bug
+
+#### **Persona Template Structure**
+
+Each generated persona includes:
+
+```yaml
+persona_id: P-001
+name: [Generated Name]
+age_group: [18-24, 25-34, 35-44, 45-54, 55+]
+technology_experience: [Novice, Intermediate, Expert, Accessibility User]
+behavior: [Focused, Distracted, Multi-tasking, Exploratory]
+testing_style: [Fast, Detailed, Emotional, Technical, Security-Focused]
+interaction_style: [Form-Heavy, Navigation-Heavy, Visual, Textual, Mobile-First]
+role: [Casual User, Power User, Administrator, Developer, QA Tester]
+agent_profile: [Skeptical, Vandal, Reporter]
+special_focus: [e.g., Accessibility, Performance, Security, UX]
+language: [Primary language for testing]
+accessibility_needs: [Screen reader, Keyboard-only, High contrast, etc.]
+```
+
+---
+
+## **Test Generation & Execution Framework**
+
+### **Phase 1: Context Initialization**
+
+1. **Load Agent OS State**
+   - Read `agent/09_state/PROJECT_STATE.md` for current project status
+   - Read `agent/09_state/TEST_STATE.md` for existing test coverage
+   - Read `agent/09_state/BACKLOG_STATE.md` for pending features
+   - Verify stack detection from `agent/02_detection/`
+
+2. **Load Project Context**
+   - Read `plans/INTEGRATION_PROGRESS.md` for completed features
+   - Read `plans/DEPENDENCIES.md` for tech stack understanding
+   - Read relevant SRS documents for feature requirements
+   - Identify test scenarios from `plans/` directory
+
+3. **Establish Test Baseline**
+   - Document current coverage metrics
+   - List known issues from `agent/14_known_issues/`
+   - Identify critical paths requiring 100% coverage
+   - Set quality thresholds per `agent/05_gates/global/gate_global_quality.md`
+
+### **Phase 2: Persona Generation**
+
+1. **Generate 25+ Diverse Personas**
+   - Create personas covering all dimension combinations
+   - Ensure representation of accessibility users
+   - Include security-focused personas
+   - Add personas matching Agent OS profiles (Skeptical, Vandal, Reporter)
+
+2. **Store Personas**
+   - Save to `personas/` directory in YAML format
+   - Include metadata for tracking and analysis
+   - Tag personas with relevant test types
+
+3. **Random Selection**
+   - Select 5+ personas ensuring diversity
+   - Prioritize coverage of different dimensions
+   - Include at least one accessibility user
+   - Include at least one security-focused persona
+
+### **Phase 3: Test Suite Generation**
+
+For each selected persona, generate comprehensive test suites:
+
+#### **Test Types & Coverage**
+
+1. **Unit Tests**
+   - Component-level validation
+   - Widget testing for Flutter components
+   - State management verification (Riverpod providers)
+   - Business logic validation
+
+2. **Integration Tests**
+   - Component interaction validation
+   - API integration testing
+   - State flow verification
+   - Cross-feature interaction
+
+3. **System Tests**
+   - End-to-end user flows
+   - Complete feature workflows
+   - Multi-step scenarios
+   - Real-world usage patterns
+
+4. **Regression Tests**
+   - Validate existing functionality
+   - Prevent feature breakage
+   - Cross-milestone validation
+   - Known issue verification
+
+5. **UI Tests**
+   - Visual regression testing
+   - Responsive design validation
+   - Component rendering verification
+   - Layout and styling validation
+
+6. **Impression Tests**
+   - First impression analysis
+   - UX evaluation
+   - User experience scoring
+   - Emotional response assessment
+
+7. **Usability Tests**
+   - Task completion rates
+   - Navigation efficiency
+   - Error handling validation
+   - User feedback collection
+
+8. **Exploratory Tests**
+   - Edge case discovery
+   - Unexpected behavior hunting
+   - Boundary condition testing
+   - Stress testing
+
+9. **Performance Tests**
+   - Load testing
+   - Response time measurement
+   - Memory usage monitoring
+   - Render performance validation
+
+10. **Security Tests**
+    - Input validation
+    - XSS prevention
+    - CSRF protection
+    - Authentication/authorization
+
+11. **Accessibility Tests**
+    - Screen reader compatibility
+    - Keyboard navigation
+    - Color contrast validation
+    - ARIA attribute verification
+
+12. **Expected Failure Cases**
+    - Error handling validation
+    - Edge case failure scenarios
+    - Network failure simulation
+    - Invalid input handling
+
+#### **Test Specification Format**
+
+Each test includes:
+
+```yaml
+test_id: T-[PersonaID]-[Type]-[Number]
+test_type: [Unit/Integration/System/etc.]
+persona_id: [P-XXX]
+title: [Descriptive test title]
+priority: [Critical/High/Medium/Low]
+description: [Detailed test description]
+preconditions:
+  - [Required setup steps]
+test_steps:
+  - step: 1
+    action: [Specific action]
+    expected: [Expected outcome]
+  - step: 2
+    action: [Next action]
+    expected: [Expected outcome]
+test_data:
+  - [Input data for test]
+expected_result: [Overall expected outcome]
+acceptance_criteria:
+  - [Criteria for test pass]
+related_requirements: [SRS requirement IDs]
+related_backlog_items: [Backlog task IDs]
+tags: [Relevant tags for categorization]
+```
+
+### **Phase 4: Test Execution**
+
+#### **Execution Protocol**
+
+1. **Setup Phase**
+   - Initialize Playwright browser context
+   - Configure viewport per persona preferences
+   - Set up authentication if required
+   - Prepare test data and fixtures
+
+2. **Execution Phase**
+   - Execute tests in priority order
+   - Capture screenshots on failures
+   - Record console logs and network requests
+   - Track execution time per test
+
+3. **Validation Phase**
+   - Compare actual vs expected outcomes
+   - Validate against acceptance criteria
+   - Check for regressions in `agent/09_state/TEST_STATE.md`
+   - Verify compliance with `agent/05_gates/global/gate_global_quality.md`
+
+4. **Agent OS Gate Validation**
+   - **Logic Correctness**: 100% pass rate required
+   - **Static Analysis**: 0 errors allowed
+   - **Build Integrity**: Success without warnings
+   - **Code Hygiene**: No new TODOs/FIXMEs
+   - **Coverage**: >= 80% (or current baseline)
+
+#### **Persona-Specific Execution**
+
+Each persona executes tests according to their characteristics:
+
+- **Focused Personas**: Follow exact steps, document deviations
+- **Distracted Personas**: Skip steps, make errors, report confusion
+- **Multi-tasking Personas**: Rapid navigation, multiple tabs, report performance issues
+- **Exploratory Personas**: Click everything, try edge cases, report unexpected behavior
+- **Skeptical Personas**: Challenge assumptions, look for bugs, verify everything
+- **Vandal Personas**: Try malicious inputs, large inputs, boundary violations
+- **Reporter Personas**: Document clear reproduction steps, provide detailed bug reports
+
+### **Phase 5: Report Generation**
+
+#### **Persona-Level Reports**
+
+Each selected persona generates a comprehensive report:
+
+```markdown
+# Test Report: [Persona Name] ([Persona ID])
+
+## Persona Profile
+- **Name**: [Generated Name]
+- **Age Group**: [Age Range]
+- **Technology Experience**: [Level]
+- **Behavior**: [Pattern]
+- **Testing Style**: [Style]
+- **Interaction Style**: [Style]
+- **Role**: [Role]
+- **Agent Profile**: [Skeptical/Vandal/Reporter]
+- **Special Focus**: [Area of expertise]
+
+## First Impressions
+[Summary of initial app perception from persona's perspective]
+
+## Test Execution Summary
+- **Total Tests Executed**: [Number]
+- **Passed**: [Number]
+- **Failed**: [Number]
+- **Skipped**: [Number]
+- **Execution Time**: [Duration]
+
+## Detailed Test Results
+### [Test Type 1]
+#### Test: [Test Title]
+- **Status**: [Pass/Fail/Skip]
+- **Execution Time**: [Duration]
+- **Steps Performed**: [List of steps]
+- **Actual Result**: [What happened]
+- **Expected Result**: [What should have happened]
+- **Deviation**: [Description of any deviation]
+- **Screenshot**: [Path to screenshot if failure]
+
+## Issues Discovered
+### Bug Report: [Bug ID]
+- **Severity**: [Critical/High/Medium/Low]
+- **Title**: [Bug title]
+- **Description**: [Detailed bug description]
+- **Steps to Reproduce**:
+  1. [Step 1]
+  2. [Step 2]
+  3. [Step 3]
+- **Expected Behavior**: [What should happen]
+- **Actual Behavior**: [What actually happens]
+- **Environment**: [Browser, viewport, etc.]
+- **Frequency**: [Always/Sometimes/Rarely]
+- **Workaround**: [If any]
+
+## Detailed Feedback
+### User Experience
+[Specific UX feedback from persona's perspective]
+
+### Accessibility
+[Accessibility observations and issues]
+
+### Performance
+[Performance observations and metrics]
+
+### Security
+[Security observations and concerns]
+
+### Navigation
+[Navigation flow feedback]
+
+### Content
+[Content validation feedback]
+
+## Suggestions for Improvement
+### Critical Issues (Must Fix)
+1. [Issue] - [Impact] - [Recommended fix]
+
+### High Priority Issues
+1. [Issue] - [Impact] - [Recommended fix]
+
+### Medium Priority Issues
+1. [Issue] - [Impact] - [Recommended fix]
+
+### Low Priority Issues
+1. [Issue] - [Impact] - [Recommended fix]
+
+### Enhancement Suggestions
+1. [Suggestion] - [Benefit]
+
+## Screenshots & Evidence
+[List of screenshots and their descriptions]
+
+## Conclusion
+[Overall assessment from persona's perspective]
+```
+
+#### **Manager-Level Consolidated Report**
+
+The manager agent synthesizes all persona reports into a comprehensive, human-readable report:
+
+```markdown
+# Comprehensive Test Report: [Application Name]
+
+## Executive Summary
+- **Test Execution Date**: [Date/Time]
+- **Total Personas Tested**: [Number]
+- **Total Tests Executed**: [Number]
+- **Overall Pass Rate**: [Percentage]
+- **Critical Issues Found**: [Number]
+- **High Priority Issues Found**: [Number]
+- **Medium Priority Issues Found**: [Number]
+- **Low Priority Issues Found**: [Number]
+- **Enhancement Suggestions**: [Number]
+
+## Test Coverage Analysis
+### Test Type Coverage
+| Test Type | Total | Passed | Failed | Skipped | Pass Rate |
+|-----------|-------|--------|--------|---------|-----------|
+| Unit Tests | [N] | [N] | [N] | [N] | [%] |
+| Integration Tests | [N] | [N] | [N] | [N] | [%] |
+| System Tests | [N] | [N] | [N] | [N] | [%] |
+| Regression Tests | [N] | [N] | [N] | [N] | [%] |
+| UI Tests | [N] | [N] | [N] | [N] | [%] |
+| Impression Tests | [N] | [N] | [N] | [N] | [%] |
+| Usability Tests | [N] | [N] | [N] | [N] | [%] |
+| Exploratory Tests | [N] | [N] | [N] | [N] | [%] |
+| Performance Tests | [N] | [N] | [N] | [N] | [%] |
+| Security Tests | [N] | [N] | [N] | [N] | [%] |
+| Accessibility Tests | [N] | [N] | [N] | [N] | [%] |
+
+### Feature Coverage
+| Feature | Status | Test Coverage | Issues Found |
+|---------|--------|---------------|--------------|
+| Analytics Dashboard | [Status] | [%] | [N] |
+| Form Publishing | [Status] | [%] | [N] |
+| Version History | [Status] | [%] | [N] |
+| Field Library | [Status] | [%] | [N] |
+| Conditional Logic | [Status] | [%] | [N] |
+| Digital Signature | [Status] | [%] | [N] |
+| Workflow Engine | [Status] | [%] | [N] |
+| Form Templates | [Status] | [%] | [N] |
+| Bulk Translator | [Status] | [%] | [N] |
+| Offline Mode | [Status] | [%] | [N] |
+
+## Critical Issues (Must Fix Before Release)
+[Detailed list of critical issues with severity, impact, and recommended fixes]
+
+## High Priority Issues
+[Detailed list of high priority issues]
+
+## Medium Priority Issues
+[Detailed list of medium priority issues]
+
+## Low Priority Issues
+[Detailed list of low priority issues]
+
+## Persona Insights Summary
+### Common Themes Across Personas
+[Themes and patterns identified from multiple personas]
+
+### Persona-Specific Findings
+#### [Persona Name]
+- Key Findings: [Summary]
+- Unique Perspective: [Insight]
+- Recommendations: [Suggestions]
+
+## Quality Gate Assessment
+### Agent OS Gate Compliance
+| Gate | Requirement | Status | Score |
+|------|-------------|--------|-------|
+| Logic Correctness | 100% Pass Rate | [Pass/Fail] | [%] |
+| Static Analysis | 0 Errors | [Pass/Fail] | [Score] |
+| Build Integrity | Success w/o Warnings | [Pass/Fail] | [Score] |
+| Code Hygiene | No new TODOs | [Pass/Fail] | [Score] |
+| Coverage | >= 80% | [Pass/Fail] | [%] |
+
+**Overall Gate Status**: [PASS/FAIL]
+
+## Performance Metrics
+- **Average Page Load Time**: [Time]
+- **Slowest Page**: [Page Name] - [Time]
+- **Fastest Page**: [Page Name] - [Time]
+- **API Response Times**: [Average/Min/Max]
+
+## Accessibility Assessment
+- **WCAG Compliance Level**: [A/AA/AAA]
+- **Keyboard Navigation**: [Pass/Fail]
+- **Screen Reader Compatibility**: [Pass/Fail]
+- **Color Contrast**: [Pass/Fail]
+- **ARIA Implementation**: [Pass/Fail]
+
+## Security Assessment
+- **Input Validation**: [Pass/Fail]
+- **XSS Prevention**: [Pass/Fail]
+- **CSRF Protection**: [Pass/Fail]
+- **Authentication**: [Pass/Fail]
+- **Authorization**: [Pass/Fail]
+- **Data Protection**: [Pass/Fail]
+
+## User Experience Insights
+### Strengths
+[List of UX strengths identified]
+
+### Weaknesses
+[List of UX weaknesses identified]
+
+### Recommendations
+[List of UX improvement recommendations]
+
+## Regression Analysis
+- **New Regressions**: [Number]
+- **Fixed Issues**: [Number]
+- **Recurring Issues**: [Number]
+- **Known Issues**: [Number]
+
+## Test Execution Logs
+- **Total Execution Time**: [Duration]
+- **Average Test Time**: [Duration]
+- **Fastest Test**: [Test Name] - [Time]
+- **Slowest Test**: [Test Name] - [Time]
+
+## Recommendations
+### Immediate Actions (Next Sprint)
+1. [Action item] - [Priority] - [Estimated effort]
+2. [Action item] - [Priority] - [Estimated effort]
+
+### Short-term Improvements (Next Month)
+1. [Improvement] - [Priority] - [Estimated effort]
+2. [Improvement] - [Priority] - [Estimated effort]
+
+### Long-term Enhancements (Next Quarter)
+1. [Enhancement] - [Priority] - [Estimated effort]
+2. [Enhancement] - [Priority] - [Estimated effort]
+
+## Conclusion
+### Overall Assessment
+[Executive summary of application quality and readiness]
+
+### Release Readiness
+- **Ready for Release**: [YES/NO]
+- **Blocking Issues**: [Number]
+- **Recommended Actions**: [List]
+
+### Next Steps
+1. [Next step 1]
+2. [Next step 2]
+3. [Next step 3]
+
+## Appendices
+### Appendix A: Detailed Test Results
+[Full test results table]
+
+### Appendix B: Bug Reports
+[Detailed bug reports with reproduction steps]
+
+### Appendix C: Screenshots
+[List of all screenshots with descriptions]
+
+### Appendix D: Persona Reports
+[Links to individual persona reports]
+
+### Appendix E: Test Execution Logs
+[Raw execution logs]
+```
+
+---
+
+## **Validation and Quality Assurance**
+
+### **Input Validation**
+1. **Plans Folder Validation**
+   - Verify YAML/JSON files are properly formatted
+   - Ensure test steps and parameters are defined
+   - Validate expected outcomes are clear
+   - Check for duplicate or conflicting scenarios
+
+2. **Persona Validation**
+   - Ensure diverse persona generation
+   - Verify coverage of all dimension combinations
+   - Validate persona characteristics are realistic
+   - Check for bias in persona generation
+
+3. **Context Validation**
+   - Verify Agent OS state files are accessible
+   - Confirm project plans are loaded correctly
+   - Validate tech stack identification
+   - Check test scenario completeness
+
+### **Test Validation**
+1. **Test Type Validation**
+   - Ensure each test matches specified type
+   - Validate test steps are executable
+   - Verify expected outcomes are measurable
+   - Check test data is appropriate
+
+2. **Coverage Validation**
+   - Ensure all test types are covered
+   - Verify feature coverage is comprehensive
+   - Check for gaps in test scenarios
+   - Validate critical paths are tested
+
+3. **Result Validation**
+   - Ensure test results are meaningful
+   - Verify results match expected behavior
+   - Validate bug reports are actionable
+   - Check recommendations are practical
+
+### **Report Validation**
+1. **Persona Report Validation**
+   - Ensure balanced and complete critique
+   - Verify feedback is persona-appropriate
+   - Validate bug reports are clear
+   - Check suggestions are actionable
+
+2. **Manager Report Validation**
+   - Ensure accurate synthesis of findings
+   - Verify improvement suggestions are prioritized
+   - Validate executive insights are clear
+   - Check action items are specific
+
+3. **Completeness Check**
+   - Ensure no major test type is skipped
+   - Verify every persona executed relevant tests
+   - Validate final report combines all findings
+   - Check all required sections are present
+
+---
+
+## **Failure Modes & Recovery**
+
+### **Test Execution Failures**
+- **Flaky Tests**: Route to `agent/01_entrypoints/scenarios/scenario_flaky_test.md`
+- **Infrastructure Failure**: Request `agent/03_profiles/profile_devops_engineer.md` assistance
+- **Browser Crashes**: Restart browser context, resume from checkpoint
+- **Network Failures**: Retry with exponential backoff, document in report
+
+### **Agent OS Gate Failures**
+- **Logic Correctness Failure**: Fix failing tests before proceeding
+- **Static Analysis Failure**: Resolve linting errors
+- **Build Integrity Failure**: Fix build warnings
+- **Code Hygiene Failure**: Remove TODOs/FIXMEs
+- **Coverage Failure**: Add tests to meet threshold
+
+### **Persona Generation Issues**
+- **Insufficient Diversity**: Regenerate with different seed
+- **Bias Detection**: Adjust generation algorithm
+- **Unrealistic Characteristics**: Refine persona templates
+- **Missing Dimensions**: Update persona schema
+
+### **Report Generation Issues**
+- **Synthesis Errors**: Manual review of persona reports
+- **Missing Sections**: Regenerate from templates
+- **Format Issues**: Apply report validation
+- **Incomplete Findings**: Re-analyze persona reports
+
+---
+
+## **State Management & Continuity**
+
+### **State Updates**
+1. **Update TEST_STATE.md**
+   - Update `last_run_date`
+   - Update `coverage_percent`
+   - Update `pass_rate`
+   - Update `passed`, `failed`, `skipped` counts
+   - Add new bugs to `Known Issues` table
+
+2. **Update PROJECT_STATE.md**
+   - Increment `tests_executed`
+   - Update `quality_score`
+   - Document test findings
+   - Track feature completion
+
+3. **Create Continuity Snapshots**
+   - Save test execution state to `plans/Continuity/PROGRESS.md`
+   - Document current position in test suite
+   - Save checkpoint for resume capability
+   - Track token usage for budget management
+
+### **Recovery Procedures**
+1. **Session Interruption**
+   - Load latest continuity snapshot
+   - Resume from last completed test
+   - Verify state consistency
+   - Continue execution
+
+2. **Token Budget Exhaustion**
+   - Create final snapshot in `plans/Continuity/`
+   - Inform user of completion status
+   - Provide resume instructions
+   - Save partial reports
+
+3. **Error Recovery**
+   - Use `agent/00_system/04_error_handling.md`
+   - Document error in `agent/14_known_issues/`
+   - Apply appropriate recovery strategy
+   - Update state post-recovery
+
+---
+
+## **Output Structure**
+
+### **Directory Layout**
+```
+test_execution/
+├── personas/
+│   ├── persona_001.yaml
+│   ├── persona_002.yaml
+│   └── ...
+├── test_suites/
+│   ├── suite_persona_001.yaml
+│   ├── suite_persona_002.yaml
+│   └── ...
+├── execution_logs/
+│   ├── execution_persona_001.log
+│   ├── execution_persona_002.log
+│   └── ...
+├── screenshots/
+│   ├── persona_001/
+│   │   ├── test_001_pass.png
+│   │   └── test_002_fail.png
+│   └── ...
+├── reports/
+│   ├── persona/
+│   │   ├── report_persona_001.md
+│   │   ├── report_persona_002.md
+│   │   └── ...
+│   └── manager/
+│       └── comprehensive_test_report.md
+├── artifacts/
+│   ├── coverage_report.html
+│   ├── performance_metrics.json
+│   └── bug_reports.json
+└── continuity/
+    └── progress_snapshot.md
+```
+
+### **File Naming Conventions**
+- **Personas**: `persona_[ID].yaml`
+- **Test Suites**: `suite_persona_[ID].yaml`
+- **Execution Logs**: `execution_persona_[ID].log`
+- **Screenshots**: `[persona_id]/[test_id]_[status].png`
+- **Persona Reports**: `report_persona_[ID].md`
+- **Manager Report**: `comprehensive_test_report_[timestamp].md`
+
+---
+
+## **Example Execution**
+
+### **Input Configuration**
+```yaml
+execution_config:
+  app_url: "https://yourapp.com"
+  plans_folder: "plans/"
+  persona_generation:
+    total_personas: 25
+    selected_personas: 5
+    ensure_diversity: true
+    include_accessibility: true
+    include_security_focused: true
+  test_types:
+    - unit_tests
+    - integration_tests
+    - system_tests
+    - regression_tests
+    - ui_tests
+    - impression_tests
+    - usability_tests
+    - exploratory_tests
+    - performance_tests
+    - security_tests
+    - accessibility_tests
+  quality_gates:
+    logic_correctness: 100%
+    static_analysis: 0_errors
+    build_integrity: no_warnings
+    code_hygiene: no_new_todos
+    coverage: 80%
+  output_format:
+    persona_reports: markdown
+    manager_report: markdown
+    include_screenshots: true
+    include_execution_logs: true
+```
+
+### **Execution Flow**
+1. **Initialize**: Load Agent OS state and project context
+2. **Generate**: Create 25+ diverse personas
+3. **Select**: Randomly select 5+ personas ensuring diversity
+4. **Generate Tests**: Create test suites for each persona
+5. **Execute**: Run tests according to persona characteristics
+6. **Validate**: Apply Agent OS quality gates
+7. **Report**: Generate persona and manager reports
+8. **Update**: Update state files and create continuity snapshot
+9. **Synthesize**: Create comprehensive manager report
+10. **Deliver**: Present final report with actionable insights
+
+---
+
+## **Success Criteria**
+
+### **Execution Success**
+- [ ] All selected personas execute complete test suites
+- [ ] All Agent OS quality gates pass
+- [ ] Test coverage meets or exceeds 80%
+- [ ] All critical issues are documented
+- [ ] All high priority issues have recommendations
+- [ ] Manager report synthesizes all persona findings
+- [ ] State files are updated accurately
+- [ ] Continuity snapshot is created
+
+### **Quality Success**
+- [ ] Test results are meaningful and actionable
+- [ ] Bug reports include clear reproduction steps
+- [ ] Recommendations are prioritized and practical
+- [ ] Executive insights are clear and accurate
+- [ ] Accessibility assessment is comprehensive
+- [ ] Security assessment covers all vectors
+- [ ] Performance metrics are accurate
+- [ ] User experience feedback is valuable
+
+### **Deliverable Success**
+- [ ] All persona reports are complete
+- [ ] Manager report is comprehensive
+- [ ] Screenshots are captured for failures
+- [ ] Execution logs are complete
+- [ ] Artifacts are properly organized
+- [ ] Reports are human-readable
+- [ ] Action items are specific and actionable
+- [ ] Release readiness assessment is clear
+
+---
+
+## **Related Files & References**
+
+### **Agent OS Files**
+- `agent/AGENT_MANIFEST.md` - System overview and components
+- `agent/00_system/00_principles.md` - Core principles
+- `agent/00_system/04_error_handling.md` - Error recovery
+- `agent/03_profiles/profile_tester.md` - Tester profile
+- `agent/04_workflows/07_testing_and_validation.md` - Testing workflow
+- `agent/04_workflows/06_feature_implementation_loop.md` - Implementation testing
+- `agent/05_gates/global/gate_global_quality.md` - Quality gate
+- `agent/11_rules/testing_rules.md` - Testing rules
+- `agent/09_state/TEST_STATE.md` - Test state management
+- `agent/09_state/PROJECT_STATE.md` - Project state
+- `agent/14_known_issues/` - Known issues database
+
+### **Project Files**
+- `plans/INTEGRATION_PROGRESS.md` - Feature completion status
+- `plans/DEPENDENCIES.md` - Tech stack and dependencies
+- `plans/SRS/` - Software requirements specifications
+- `plans/Architecture/` - Architecture documentation
+- `plans/Feature/` - Feature specifications
+
+### **External References**
+- Playwright Documentation: https://playwright.dev/
+- Flutter Testing: https://docs.flutter.dev/testing
+- Riverpod Testing: https://riverpod.dev/docs/concepts/testing
+- WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
+- OWASP Testing Guide: https://owasp.org/www-project-web-security-testing-guide/
+
+---
+
+## **Version History**
+
+- **v2.0** - Enhanced with Agent OS integration, comprehensive persona generation, multi-dimensional testing, and robust reporting framework
+- **v1.0** - Initial test master prompt with basic persona generation and testing
+
+---
+
+**End of Test Master Specification**

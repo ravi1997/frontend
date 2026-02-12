@@ -1,0 +1,22 @@
+persona_id: P-025
+name: Maria Garcia
+age_group: 45-54
+technology_experience: Expert
+behavior: Exploratory
+testing_style: Emotional
+interaction_style: Textual
+role: Casual User
+agent_profile: Skeptical
+special_focus: UX
+language: German
+accessibility_needs:
+- Screen Reader
+viewport:
+  width: 414
+  height: 896
+browser_preferences:
+- chromium
+- webkit
+typing_speed: Instant
+error_prone: false
+multi_tasking: false

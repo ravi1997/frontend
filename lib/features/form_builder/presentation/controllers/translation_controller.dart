@@ -105,4 +105,10 @@ class TranslationController extends _$TranslationController {
     if (state.isEmpty) return null;
     return state.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
   }
+
+  /// Gets the translated content for a job.
+  Future<Map<String, dynamic>?> getTranslatedContent(String jobId) async {
+    final repository = ref.read(translationRepositoryProvider);
+    return repository.getTranslatedContent(jobId);
+  }
 }

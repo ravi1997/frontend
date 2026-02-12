@@ -1,6 +1,108 @@
-node_modules
-__pycache__
-.git
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+doc/
+
+# IDE and editor files
+.idea/
+.vscode/
+.metadata
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+docs/
+
+# Testing
+test/
+tests/
+*.test.dart
+*_test.dart
+test_*.dart
+
+# Environment and secrets
 .env
-dist
-build
+.env.*
+*.env
+.envrc
+secrets/
+*.pem
+*.key
+*.crt
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Node modules (if any)
+node_modules/
+
+# Python cache (if any)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build artifacts
+dist/
+*.apk
+*.app
+*.ipa
+*.aab
+*.zip
+*.tar
+*.tar.gz
+
+# Agent and development files
+agent/
+.kilocode/
+.kilocodemodes
+agent_cli.py
+comprehensive_login_test.py
+flutter_login_test.py
+test_analytics_integration.py
+login_test_failed.png
+FLUTTER_DART_AUDIT_REPORT.md
+route_documentation.md
+
+# Docker files (not needed in image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+docker/
+
+# Misc files
+*.bak
+*.backup
+*.old

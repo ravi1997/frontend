@@ -26,7 +26,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Loaded ${languages.length} available languages');
       return languages;
     } catch (e, stack) {
-      _logger.e('Failed to load languages: $e');
+      _logger.e('Failed to load languages', error: e, stackTrace: stack);
       throw _createException('Failed to load available languages', e, stack);
     }
   }
@@ -53,7 +53,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Started translation job for form: $formId');
       return TranslationJob.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to start translation: $e');
+      _logger.e('Failed to start translation', error: e, stackTrace: stack);
       throw _createException('Failed to start translation job', e, stack);
     }
   }
@@ -66,7 +66,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Loaded translation job: $jobId');
       return TranslationJob.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to load translation job: $e');
+      _logger.e('Failed to load translation job', error: e, stackTrace: stack);
       throw _createException(
         'Failed to load translation job: $jobId',
         e,
@@ -88,7 +88,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Loaded ${jobs.length} translation jobs for form: $formId');
       return jobs;
     } catch (e, stack) {
-      _logger.e('Failed to load translation jobs: $e');
+      _logger.e('Failed to load translation jobs', error: e, stackTrace: stack);
       throw _createException('Failed to load translation jobs', e, stack);
     }
   }
@@ -103,7 +103,11 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Cancelled translation job: $jobId');
       return TranslationJob.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to cancel translation job: $e');
+      _logger.e(
+        'Failed to cancel translation job',
+        error: e,
+        stackTrace: stack,
+      );
       throw _createException(
         'Failed to cancel translation job: $jobId',
         e,
@@ -118,7 +122,11 @@ class TranslationRepositoryImpl implements TranslationRepository {
       await _apiClient.delete('/translations/jobs/$jobId');
       _logger.i('Deleted translation job: $jobId');
     } catch (e, stack) {
-      _logger.e('Failed to delete translation job: $e');
+      _logger.e(
+        'Failed to delete translation job',
+        error: e,
+        stackTrace: stack,
+      );
       throw _createException(
         'Failed to delete translation job: $jobId',
         e,
@@ -146,8 +154,30 @@ class TranslationRepositoryImpl implements TranslationRepository {
       _logger.i('Translated text from $sourceLanguage to $targetLanguage');
       return response.data['translatedText'] as String;
     } catch (e, stack) {
-      _logger.e('Failed to translate text: $e');
+      _logger.e('Failed to translate text', error: e, stackTrace: stack);
       throw _createException('Failed to translate text', e, stack);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getTranslatedContent(String jobId) async {
+    try {
+      final response = await _apiClient.get(
+        '/translations/jobs/$jobId/content',
+      );
+      _logger.i('Fetched translated content for job: $jobId');
+      return response.data as Map<String, dynamic>;
+    } catch (e, stack) {
+      _logger.e(
+        'Failed to fetch translated content',
+        error: e,
+        stackTrace: stack,
+      );
+      throw _createException(
+        'Failed to fetch translated content: $jobId',
+        e,
+        stack,
+      );
     }
   }
 

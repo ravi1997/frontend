@@ -63,7 +63,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     // Left Sidebar: Field Library
                     SizedBox(
                       width: _leftPanelWidth,
-                      child: const FieldLibraryWidget(),
+                      child: FieldLibraryWidget(formId: widget.formId),
                     ),
 
                     // Left Resize Handle
@@ -216,7 +216,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -235,7 +235,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -252,6 +252,19 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               ],
             ),
           ),
+          _buildActionButton(
+            icon: FontAwesomeIcons.wandMagicSparkles,
+            label: 'AI Assistant',
+            onTap: () {
+              // TODO: Implement AI Assistant Features (Suggestions, Validation)
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('AI Assistant: Analyzing form structure...'),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
           _buildActionButton(
             icon: FontAwesomeIcons.listCheck,
             label: 'Features',
@@ -444,9 +457,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

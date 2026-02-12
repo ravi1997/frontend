@@ -1,0 +1,72 @@
+execution_config:
+  app_url: http://localhost:3000
+  timeout: 30000
+  headless: false
+  screenshot_on_failure: true
+persona_generation:
+  total_personas: 25
+  selected_personas: 5
+  ensure_diversity: true
+  include_accessibility: true
+  include_security_focused: true
+  random_seed: null
+test_types:
+- unit_tests
+- integration_tests
+- system_tests
+- regression_tests
+- ui_tests
+- impression_tests
+- usability_tests
+- exploratory_tests
+- performance_tests
+- security_tests
+- accessibility_tests
+- expected_failure_cases
+quality_gates:
+  logic_correctness: 100
+  static_analysis: 0
+  build_integrity: no_warnings
+  code_hygiene: no_new_todos
+  coverage: 80
+output_format:
+  persona_reports: markdown
+  manager_report: markdown
+  include_screenshots: true
+  include_execution_logs: true
+  include_performance_metrics: true
+agent_os_integration:
+  enabled: true
+  state_files:
+    project_state: agent/09_state/PROJECT_STATE.md
+    test_state: agent/09_state/TEST_STATE.md
+    backlog_state: agent/09_state/BACKLOG_STATE.md
+  gates:
+    global_quality: agent/05_gates/global/gate_global_quality.md
+    testing_rules: agent/11_rules/testing_rules.md
+paths:
+  personas_dir: test_master/personas
+  test_suites_dir: test_master/test_suites
+  execution_logs_dir: test_master/execution_logs
+  screenshots_dir: test_master/screenshots
+  reports_dir: test_master/reports
+  artifacts_dir: test_master/artifacts
+  continuity_dir: test_master/continuity
+  plans_dir: plans
+playwright_config:
+  browser: chromium
+  viewport:
+    width: 1280
+    height: 720
+  slow_mo: 0
+  trace: retain-on-failure
+  video: retain-on-failure
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: test_master/execution_logs/test_master.log
+continuity:
+  enabled: true
+  auto_save_interval: 60
+  snapshot_dir: test_master/continuity
+features: []

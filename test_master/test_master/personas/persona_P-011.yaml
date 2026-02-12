@@ -1,0 +1,22 @@
+persona_id: P-011
+name: Kevin Adams
+age_group: 35-44
+technology_experience: Novice
+behavior: Distracted
+testing_style: Security-Focused
+interaction_style: Visual
+role: Developer
+agent_profile: Skeptical
+special_focus: Security
+language: Chinese
+accessibility_needs:
+- Screen Reader
+- Keyboard-Only
+viewport:
+  width: 1920
+  height: 1080
+browser_preferences:
+- webkit
+typing_speed: Normal
+error_prone: true
+multi_tasking: false

@@ -713,4 +713,30 @@ class FormBuilderController extends _$FormBuilderController {
       return false;
     }
   }
+
+  Future<void> generateFieldsWithAI(String prompt) async {
+    if (state.value == null) return;
+
+    try {
+      final repository = ref.read(formBuilderRepositoryProvider);
+      final generatedSections = await repository.generateFieldsWithAI(
+        prompt,
+        currentForm: state.value!.form,
+      );
+
+      final updatedSections = [
+        ...state.value!.form.sections,
+        ...generatedSections,
+      ];
+
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(sections: updatedSections),
+        ),
+      );
+    } catch (e) {
+      final error = ErrorHandler.handle(e);
+      state = AsyncValue.data(state.value!.copyWith(error: error.toString()));
+    }
+  }
 }

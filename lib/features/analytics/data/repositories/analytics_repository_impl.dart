@@ -96,7 +96,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         fieldDistributions: fieldDistributions,
       );
     } catch (e, stack) {
-      _logger.e('Failed to load analytics: $e');
+      _logger.e('Failed to load analytics', error: e, stackTrace: stack);
       throw FormLoadException(formId, originalError: e, stackTrace: stack);
     }
   }
@@ -126,7 +126,11 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         ),
       );
     } catch (e, stack) {
-      _logger.e('Failed to load analytics summary: $e');
+      _logger.e(
+        'Failed to load analytics summary',
+        error: e,
+        stackTrace: stack,
+      );
       throw FormLoadException(formId, originalError: e, stackTrace: stack);
     }
   }
@@ -166,7 +170,11 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
             : null,
       );
     } catch (e, stack) {
-      _logger.e('Failed to load analytics timeline: $e');
+      _logger.e(
+        'Failed to load analytics timeline',
+        error: e,
+        stackTrace: stack,
+      );
       throw FormLoadException(formId, originalError: e, stackTrace: stack);
     }
   }
@@ -222,7 +230,11 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         fieldDistributions: fieldDistributions,
       );
     } catch (e, stack) {
-      _logger.e('Failed to load analytics distribution: $e');
+      _logger.e(
+        'Failed to load analytics distribution',
+        error: e,
+        stackTrace: stack,
+      );
       throw FormLoadException(formId, originalError: e, stackTrace: stack);
     }
   }

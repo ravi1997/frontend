@@ -7,9 +7,12 @@ import '../../domain/entities/question_type.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../controllers/custom_fields_controller.dart';
 import '../../domain/services/field_registry.dart';
+import 'ai_assistant_dialog.dart'; // Added import
 
 class FieldLibraryWidget extends ConsumerStatefulWidget {
-  const FieldLibraryWidget({super.key});
+  final String formId; // Added formId
+
+  const FieldLibraryWidget({super.key, required this.formId}); // Modified constructor
 
   @override
   ConsumerState<FieldLibraryWidget> createState() => _FieldLibraryWidgetState();
@@ -172,15 +175,15 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
           Container(
             padding: const EdgeInsets.all(20.0),
             decoration: BoxDecoration(
-              color: AppColors.builderSidebar.withValues(alpha: 0.9),
+              color: AppColors.builderSidebar.withOpacity( 0.9),
               border: Border(
                 bottom: BorderSide(
-                  color: AppColors.borderLight.withValues(alpha: 0.5),
+                  color: AppColors.borderLight.withOpacity( 0.5),
                 ),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
+                  color: Colors.black.withOpacity( 0.02),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -211,7 +214,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                   decoration: InputDecoration(
                     hintText: 'Search fields (e.g., "Phone")',
                     hintStyle: TextStyle(
-                      color: AppColors.textGrey.withValues(alpha: 0.7),
+                      color: AppColors.textGrey.withOpacity( 0.7),
                       fontSize: 13,
                     ),
                     prefixIcon: Icon(
@@ -233,7 +236,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: AppColors.primary.withOpacity( 0.3),
                         width: 1,
                       ),
                     ),
@@ -253,7 +256,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                         Icon(
                           Icons.search_off,
                           size: 40,
-                          color: AppColors.textGrey.withValues(alpha: 0.3),
+                          color: AppColors.textGrey.withOpacity( 0.3),
                         ),
                         const SizedBox(height: 12),
                         const Text(
@@ -283,18 +286,24 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                AppColors.primary.withValues(alpha: 0.08),
-                                AppColors.primary.withValues(alpha: 0.02),
+                                AppColors.primary.withOpacity( 0.08),
+                                AppColors.primary.withOpacity( 0.02),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.2),
+                              color: AppColors.primary.withOpacity( 0.2),
                             ),
                           ),
                           child: InkWell(
-                            onTap: () {},
-                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              showDialog( // Modified onTap
+                                context: context,
+                                builder: (context) => AiAssistantDialog(
+                                  formId: widget.formId,
+                                ),
+                              );
+                            },                            borderRadius: BorderRadius.circular(8),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -487,13 +496,13 @@ class _FieldButtonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCustom
-              ? AppColors.primary.withValues(alpha: 0.3)
+              ? AppColors.primary.withOpacity( 0.3)
               : AppColors.borderLight,
           width: isCustom ? 1.5 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.05),
+            color: color.withOpacity( 0.05),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -505,7 +514,7 @@ class _FieldButtonCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity( 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(

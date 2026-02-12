@@ -68,4 +68,30 @@ class MockFormBuilderRepository implements FormBuilderRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     return {'published_version': '1.0.0', 'next_draft_version': '1.0.1'};
   }
+
+  @override
+  Future<List<FormSection>> generateFieldsWithAI(
+    String prompt, {
+    BuilderForm? currentForm,
+  }) async {
+    await Future.delayed(const Duration(seconds: 2));
+    return [
+      FormSection(
+        id: 'ai-section',
+        title: 'Generated Content',
+        questions: [
+          const FormQuestion(
+            id: 'ai-q1',
+            label: 'Generated Field 1',
+            type: QuestionType.shortText,
+          ),
+          const FormQuestion(
+            id: 'ai-q2',
+            label: 'Generated Field 2',
+            type: QuestionType.paragraph,
+          ),
+        ],
+      ),
+    ];
+  }
 }

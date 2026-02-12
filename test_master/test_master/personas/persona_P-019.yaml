@@ -1,0 +1,22 @@
+persona_id: P-019
+name: Rachel Hill
+age_group: 18-24
+technology_experience: Expert
+behavior: Distracted
+testing_style: Security-Focused
+interaction_style: Textual
+role: Power User
+agent_profile: Skeptical
+special_focus: Security
+language: Japanese
+accessibility_needs:
+- Screen Reader
+- Keyboard-Only
+viewport:
+  width: 414
+  height: 896
+browser_preferences:
+- chromium
+typing_speed: Instant
+error_prone: false
+multi_tasking: false

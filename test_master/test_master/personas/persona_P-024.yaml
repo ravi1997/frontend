@@ -1,0 +1,21 @@
+persona_id: P-024
+name: Emily Clark
+age_group: 35-44
+technology_experience: Intermediate
+behavior: Exploratory
+testing_style: Emotional
+interaction_style: Navigation-Heavy
+role: QA Tester
+agent_profile: Skeptical
+special_focus: Accessibility
+language: English
+accessibility_needs:
+- Screen Reader
+viewport:
+  width: 768
+  height: 1024
+browser_preferences:
+- chromium
+typing_speed: Normal
+error_prone: false
+multi_tasking: false

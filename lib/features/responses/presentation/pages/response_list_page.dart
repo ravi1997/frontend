@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:file_saver/file_saver.dart';
@@ -10,6 +11,8 @@ import 'package:frontend/features/responses/presentation/controllers/responses_c
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/form_builder/domain/repositories/form_builder_repository.dart';
 import 'package:frontend/features/responses/domain/utils/csv_exporter.dart';
+
+import 'package:frontend/features/responses/presentation/widgets/export_options_dialog.dart';
 
 class ResponseListPage extends ConsumerWidget {
   final String formId;
@@ -50,16 +53,69 @@ class ResponseListPage extends ConsumerWidget {
         ],
       ),
       body: responsesAsync.when(
-        data: (responses) => RefreshIndicator(
-          onRefresh: () => ref.refresh(formResponsesProvider(formId).future),
-          child: responses.isEmpty
-              ? _buildEmptyState()
-              : _buildResponseList(context, responses),
+        data: (responses) => Column(
+          children: [
+            _buildAISearchBar(context),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.refresh(formResponsesProvider(formId).future),
+                child: responses.isEmpty
+                    ? _buildEmptyState()
+                    : _buildResponseList(context, responses),
+              ),
+            ),
+          ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(
           child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAISearchBar(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+      ),
+      child: TextField(
+        style: const TextStyle(color: AppColors.textPrimary),
+        decoration: InputDecoration(
+          hintText:
+              'Search with AI (e.g., "Find all responses from yesterday about complaints")',
+          hintStyle: TextStyle(
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
+          ),
+          prefixIcon: const Icon(
+            FontAwesomeIcons.wandMagicSparkles,
+            size: 16,
+            color: AppColors.primary,
+          ),
+          filled: true,
+          fillColor: AppColors.background.withValues(alpha: 0.5),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+        ),
+        onSubmitted: (value) {
+          // TODO: Call AI Smart Search Endpoint
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('AI Search: Finding results for "$value"...'),
+            ),
+          );
+        },
       ),
     );
   }
@@ -101,10 +157,7 @@ class ResponseListPage extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 8,
-            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
             title: Text(
               'Submission: $dateStr',
               style: const TextStyle(
@@ -131,7 +184,21 @@ class ResponseListPage extends ConsumerWidget {
     WidgetRef ref,
     List<FormResponse> responses,
   ) async {
+    // 1. Fetch Form Definition for headers
+    final form = await ref.read(formBuilderRepositoryProvider).getForm(formId);
+
+    if (!context.mounted) return;
+
+    // 2. Show advanced export options dialog
+    final options = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => ExportOptionsDialog(form: form),
+    );
+
+    if (options == null) return;
+
     // Show loading dialog
+    if (!context.mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -139,30 +206,61 @@ class ResponseListPage extends ConsumerWidget {
     );
 
     try {
-      // 1. Fetch Form Definition for headers
-      final form = await ref
-          .read(formBuilderRepositoryProvider)
-          .getForm(formId);
+      final String format = options['format'];
+      final DateTimeRange? dateRange = options['dateRange'];
 
-      // 2. Generate CSV Content
-      final csvString = CsvExporter.generateCsv(responses, form);
+      // Filter responses by date range
+      var filteredResponses = responses;
+      if (dateRange != null) {
+        filteredResponses = responses
+            .where(
+              (r) =>
+                  r.submittedAt.isAfter(dateRange.start) &&
+                  r.submittedAt.isBefore(
+                    dateRange.end.add(const Duration(days: 1)),
+                  ),
+            )
+            .toList();
+      }
 
-      // 3. Save File
-      // Using generic name 'responses_{formId}_{timestamp}'
+      // 3. Generate Content (For now, we still only have CSV generator, but we can mock others or use local processing)
+      String content = '';
+      String extension = 'csv';
+      MimeType mimeType = MimeType.csv;
+
+      if (format == 'CSV' || format == 'Excel') {
+        content = CsvExporter.generateCsv(filteredResponses, form);
+        if (format == 'Excel') {
+          extension = 'xlsx';
+          mimeType = MimeType.microsoftExcel;
+        }
+      } else if (format == 'JSON') {
+        content = jsonEncode(filteredResponses.map((r) => r.toJson()).toList());
+        extension = 'json';
+        mimeType = MimeType.json;
+      } else {
+        // PDF fallback for now
+        content =
+            'PDF Export Placeholder for ${filteredResponses.length} responses';
+        extension = 'pdf';
+        mimeType = MimeType.pdf;
+      }
+
+      // 4. Save File
       final safeFormId = formId.replaceAll(RegExp(r'[^\w\s]+'), '');
       final fileName =
           'responses_${safeFormId}_${DateTime.now().millisecondsSinceEpoch}';
 
-      final bytes = Uint8List.fromList(utf8.encode(csvString));
+      final bytes = Uint8List.fromList(utf8.encode(content));
 
       await FileSaver.instance.saveFile(
         name: fileName,
         bytes: bytes,
-        fileExtension: 'csv',
-        mimeType: MimeType.csv,
+        fileExtension: extension,
+        mimeType: mimeType,
       );
 
-      // 4. Feedback
+      // 5. Feedback
       if (context.mounted) {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(

@@ -23,7 +23,11 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Created signature request for: ${request.signerEmail}');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to create signature request: $e');
+      _logger.e(
+        'Failed to create signature request',
+        error: e,
+        stackTrace: stack,
+      );
       throw _createException('Failed to create signature request', e, stack);
     }
   }
@@ -36,7 +40,11 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Loaded signature request: $requestId');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to load signature request: $e');
+      _logger.e(
+        'Failed to load signature request',
+        error: e,
+        stackTrace: stack,
+      );
       throw _createException('Failed to load signature request', e, stack);
     }
   }
@@ -56,7 +64,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Loaded ${requests.length} requests for form: $formId');
       return requests;
     } catch (e, stack) {
-      _logger.e('Failed to load requests: $e');
+      _logger.e('Failed to load requests', error: e, stackTrace: stack);
       throw _createException('Failed to load requests for form', e, stack);
     }
   }
@@ -74,7 +82,11 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Loaded ${requests.length} requests for signer: $email');
       return requests;
     } catch (e, stack) {
-      _logger.e('Failed to load requests for signer: $e');
+      _logger.e(
+        'Failed to load requests for signer',
+        error: e,
+        stackTrace: stack,
+      );
       throw _createException('Failed to load requests for signer', e, stack);
     }
   }
@@ -89,7 +101,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Sent signature request: $requestId');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to send request: $e');
+      _logger.e('Failed to send request', error: e, stackTrace: stack);
       throw _createException('Failed to send signature request', e, stack);
     }
   }
@@ -109,7 +121,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Marked request as viewed: $requestId');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to mark as viewed: $e');
+      _logger.e('Failed to mark as viewed', error: e, stackTrace: stack);
       throw _createException('Failed to mark request as viewed', e, stack);
     }
   }
@@ -129,7 +141,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Recorded signature for request: $requestId');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to record signature: $e');
+      _logger.e('Failed to record signature', error: e, stackTrace: stack);
       throw _createException('Failed to record signature', e, stack);
     }
   }
@@ -149,7 +161,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Declined request: $requestId');
       return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
     } catch (e, stack) {
-      _logger.e('Failed to decline request: $e');
+      _logger.e('Failed to decline request', error: e, stackTrace: stack);
       throw _createException('Failed to decline request', e, stack);
     }
   }
@@ -160,7 +172,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       await _apiClient.delete('/signature-requests/$requestId');
       _logger.i('Cancelled request: $requestId');
     } catch (e, stack) {
-      _logger.e('Failed to cancel request: $e');
+      _logger.e('Failed to cancel request', error: e, stackTrace: stack);
       throw _createException('Failed to cancel request', e, stack);
     }
   }
@@ -180,7 +192,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       _logger.i('Loaded ${entries.length} audit entries for: $requestId');
       return entries;
     } catch (e, stack) {
-      _logger.e('Failed to load audit trail: $e');
+      _logger.e('Failed to load audit trail', error: e, stackTrace: stack);
       throw _createException('Failed to load audit trail', e, stack);
     }
   }
@@ -193,7 +205,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       );
       return response.data['valid'] as bool;
     } catch (e, stack) {
-      _logger.e('Failed to verify signature: $e');
+      _logger.e('Failed to verify signature', error: e, stackTrace: stack);
       throw _createException('Failed to verify signature', e, stack);
     }
   }
@@ -206,7 +218,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
       );
       return response.data['documentBase64'] as String;
     } catch (e, stack) {
-      _logger.e('Failed to generate document: $e');
+      _logger.e('Failed to generate document', error: e, stackTrace: stack);
       throw _createException('Failed to generate signing document', e, stack);
     }
   }

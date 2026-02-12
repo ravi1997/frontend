@@ -1,0 +1,20 @@
+persona_id: P-014
+name: Lisa Anderson
+age_group: 25-34
+technology_experience: Intermediate
+behavior: Focused
+testing_style: Emotional
+interaction_style: Navigation-Heavy
+role: Casual User
+agent_profile: Vandal
+special_focus: UX
+language: Spanish
+accessibility_needs: []
+viewport:
+  width: 1366
+  height: 768
+browser_preferences:
+- webkit
+typing_speed: Fast
+error_prone: false
+multi_tasking: false

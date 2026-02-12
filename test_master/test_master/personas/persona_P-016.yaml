@@ -1,0 +1,21 @@
+persona_id: P-016
+name: Andrew Hall
+age_group: 35-44
+technology_experience: Novice
+behavior: Distracted
+testing_style: Security-Focused
+interaction_style: Textual
+role: Administrator
+agent_profile: Skeptical
+special_focus: Security
+language: Japanese
+accessibility_needs:
+- Screen Reader
+viewport:
+  width: 1920
+  height: 1080
+browser_preferences:
+- chromium
+typing_speed: Slow
+error_prone: true
+multi_tasking: false

@@ -1,8 +1,55 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    volumes:
-      - .:/app
-    command: tail -f /dev/null
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    environment:
+      # Application environment
+      - NODE_ENV=${NODE_ENV:-production}
+      - APP_ENV=${APP_ENV:-production}
+
+      # API Configuration (if needed)
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:3000}
+      - API_TIMEOUT=${API_TIMEOUT:-30000}
+
+      # Feature flags
+      - ENABLE_ANALYTICS=${ENABLE_ANALYTICS:-true}
+      - ENABLE_DEBUG_MODE=${ENABLE_DEBUG_MODE:-false}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - frontend-network
+    labels:
+      - "com.docker.compose.project=frontend"
+      - "com.docker.compose.service=frontend"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+networks:
+  frontend-network:
+    driver: bridge
+    name: frontend-network
