@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -14,6 +15,27 @@ class DashboardRepositoryImpl implements DashboardRepository {
   DashboardRepositoryImpl({required ApiClient apiClient})
     : _apiClient = apiClient;
 
+  DateTime _parseDate(dynamic date) {
+    if (date == null) return DateTime.now();
+    if (date is DateTime) return date;
+    final dateStr = date.toString();
+    try {
+      return DateTime.parse(dateStr);
+    } catch (_) {
+      try {
+        // Handle RFC 1123 format: "Sat, 14 Feb 2026 06:44:56 GMT"
+        // Also handle cases where GMT might be missing or different
+        // Using a pattern that matches the log provided
+        return DateFormat(
+          "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+        ).parse(dateStr, true);
+      } catch (e) {
+        // Fallback
+        return DateTime.now();
+      }
+    }
+  }
+
   @override
   Future<DashboardData> getDashboardData() async {
     // Fetch dashboard stats from analytics endpoint
@@ -29,11 +51,9 @@ class DashboardRepositoryImpl implements DashboardRepository {
         id: json['id'] ?? json['_id'] ?? '',
         title: json['title'] ?? 'Untitled Form',
         status: json['status'] ?? 'Draft',
-        updatedAt: DateTime.parse(
-          json['updated_at'] ?? DateTime.now().toIso8601String(),
-        ),
+        updatedAt: _parseDate(json['updated_at']),
         createdAt: json['created_at'] != null
-            ? DateTime.parse(json['created_at'])
+            ? _parseDate(json['created_at'])
             : null,
       );
     }).toList();

@@ -238,7 +238,7 @@ class ResponseDetailPage extends ConsumerWidget {
                   await ref
                       .read(aIControllerProvider.notifier)
                       .analyzeResponse(response.formId, response.id);
-                  ref.refresh(responseDetailProvider(response.id));
+                  ref.invalidate(responseDetailProvider(response.id));
                 } catch (e) {
                   // Error handled by interceptor
                 }

@@ -7,7 +7,7 @@ part of 'form_section.dart';
 // **************************************************************************
 
 _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
-  id: json['id'] as String,
+  id: _readId(json, 'id') as String,
   title: json['title'],
   description: json['description'],
   questions: (json['questions'] as List<dynamic>)

@@ -146,31 +146,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Password',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => context.go('/forgot-password'),
-                            child: Text(
-                              'Forgot password?',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: AppColors.brandBlue,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                       const SizedBox(height: 8),
                       AuthTextFormField(
                         // Changed from TextField
@@ -199,6 +174,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             });
                           },
                         ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            onTap: () => context.go('/forgot-password'),
+                            child: Text(
+                              'Forgot password?',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: AppColors.brandBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ] else ...[
                       AuthTextFormField(

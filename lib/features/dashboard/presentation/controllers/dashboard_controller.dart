@@ -5,7 +5,7 @@ import '../../data/repositories/dashboard_repository_impl.dart';
 
 part 'dashboard_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class DashboardController extends _$DashboardController {
   @override
   FutureOr<DashboardData> build() async {

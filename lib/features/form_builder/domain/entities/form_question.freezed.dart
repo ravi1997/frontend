@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormQuestion {
 
- String get id; Object? get label; QuestionType get type; Object? get helperText; Object? get placeholder; bool get isRequired; List<String>? get options; bool get isReadOnly; bool get isHidden; String? get validationRegex; int? get minLength; int? get maxLength; num? get minValue; num? get maxValue; String? get inputMask; String? get customErrorMessage; Map<String, dynamic>? get conditionalLogic; Map<String, dynamic>? get metadata; QuestionStyle get style;
+@JsonKey(readValue: _readId) String get id; Object? get label;@JsonKey(name: 'field_type') QuestionType get type; Object? get helperText; Object? get placeholder; bool get isRequired; List<String>? get options; bool get isReadOnly; bool get isHidden; String? get validationRegex; int? get minLength; int? get maxLength; num? get minValue; num? get maxValue; String? get inputMask; String? get customErrorMessage; Map<String, dynamic>? get conditionalLogic; Map<String, dynamic>? get metadata; QuestionStyle get style;
 /// Create a copy of FormQuestion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FormQuestionCopyWith<$Res>  {
   factory $FormQuestionCopyWith(FormQuestion value, $Res Function(FormQuestion) _then) = _$FormQuestionCopyWithImpl;
 @useResult
 $Res call({
- String id, Object? label, QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
+@JsonKey(readValue: _readId) String id, Object? label,@JsonKey(name: 'field_type') QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
 });
 
 
@@ -177,7 +177,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: _readId)  String id,  Object? label, @JsonKey(name: 'field_type')  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormQuestion() when $default != null:
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -198,7 +198,7 @@ return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placehold
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: _readId)  String id,  Object? label, @JsonKey(name: 'field_type')  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestion():
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -218,7 +218,7 @@ return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placehold
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? label,  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: _readId)  String id,  Object? label, @JsonKey(name: 'field_type')  QuestionType type,  Object? helperText,  Object? placeholder,  bool isRequired,  List<String>? options,  bool isReadOnly,  bool isHidden,  String? validationRegex,  int? minLength,  int? maxLength,  num? minValue,  num? maxValue,  String? inputMask,  String? customErrorMessage,  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? metadata,  QuestionStyle style)?  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestion() when $default != null:
 return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placeholder,_that.isRequired,_that.options,_that.isReadOnly,_that.isHidden,_that.validationRegex,_that.minLength,_that.maxLength,_that.minValue,_that.maxValue,_that.inputMask,_that.customErrorMessage,_that.conditionalLogic,_that.metadata,_that.style);case _:
@@ -233,12 +233,12 @@ return $default(_that.id,_that.label,_that.type,_that.helperText,_that.placehold
 @JsonSerializable()
 
 class _FormQuestion extends FormQuestion {
-  const _FormQuestion({required this.id, required this.label, required this.type, this.helperText, this.placeholder, this.isRequired = false, final  List<String>? options, this.isReadOnly = false, this.isHidden = false, this.validationRegex, this.minLength, this.maxLength, this.minValue, this.maxValue, this.inputMask, this.customErrorMessage, final  Map<String, dynamic>? conditionalLogic, final  Map<String, dynamic>? metadata, this.style = const QuestionStyle()}): _options = options,_conditionalLogic = conditionalLogic,_metadata = metadata,super._();
+  const _FormQuestion({@JsonKey(readValue: _readId) required this.id, required this.label, @JsonKey(name: 'field_type') required this.type, this.helperText, this.placeholder, this.isRequired = false, final  List<String>? options, this.isReadOnly = false, this.isHidden = false, this.validationRegex, this.minLength, this.maxLength, this.minValue, this.maxValue, this.inputMask, this.customErrorMessage, final  Map<String, dynamic>? conditionalLogic, final  Map<String, dynamic>? metadata, this.style = const QuestionStyle()}): _options = options,_conditionalLogic = conditionalLogic,_metadata = metadata,super._();
   factory _FormQuestion.fromJson(Map<String, dynamic> json) => _$FormQuestionFromJson(json);
 
-@override final  String id;
+@override@JsonKey(readValue: _readId) final  String id;
 @override final  Object? label;
-@override final  QuestionType type;
+@override@JsonKey(name: 'field_type') final  QuestionType type;
 @override final  Object? helperText;
 @override final  Object? placeholder;
 @override@JsonKey() final  bool isRequired;
@@ -313,7 +313,7 @@ abstract mixin class _$FormQuestionCopyWith<$Res> implements $FormQuestionCopyWi
   factory _$FormQuestionCopyWith(_FormQuestion value, $Res Function(_FormQuestion) _then) = __$FormQuestionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, Object? label, QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
+@JsonKey(readValue: _readId) String id, Object? label,@JsonKey(name: 'field_type') QuestionType type, Object? helperText, Object? placeholder, bool isRequired, List<String>? options, bool isReadOnly, bool isHidden, String? validationRegex, int? minLength, int? maxLength, num? minValue, num? maxValue, String? inputMask, String? customErrorMessage, Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? metadata, QuestionStyle style
 });
 
 
