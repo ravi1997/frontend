@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,8 @@ import 'package:frontend/features/responses/domain/utils/csv_exporter.dart';
 
 import 'package:frontend/features/responses/presentation/widgets/export_options_dialog.dart';
 
+final _searchQueryProvider = StateProvider<String?>((ref) => null);
+
 class ResponseListPage extends ConsumerWidget {
   final String formId;
 
@@ -21,7 +24,10 @@ class ResponseListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final responsesAsync = ref.watch(formResponsesProvider(formId));
+    final searchQuery = ref.watch(_searchQueryProvider);
+    final responsesAsync = ref.watch(
+      formResponsesProvider(formId, searchQuery: searchQuery),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -55,11 +61,15 @@ class ResponseListPage extends ConsumerWidget {
       body: responsesAsync.when(
         data: (responses) => Column(
           children: [
-            _buildAISearchBar(context),
+            _buildAISearchBar(context, ref),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () =>
-                    ref.refresh(formResponsesProvider(formId).future),
+                onRefresh: () => ref.refresh(
+                  formResponsesProvider(
+                    formId,
+                    searchQuery: searchQuery,
+                  ).future,
+                ),
                 child: responses.isEmpty
                     ? _buildEmptyState()
                     : _buildResponseList(context, responses),
@@ -75,7 +85,7 @@ class ResponseListPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAISearchBar(BuildContext context) {
+  Widget _buildAISearchBar(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -108,13 +118,10 @@ class ResponseListPage extends ConsumerWidget {
             vertical: 12,
           ),
         ),
-        onSubmitted: (value) {
-          // TODO: Call AI Smart Search Endpoint
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('AI Search: Finding results for "$value"...'),
-            ),
-          );
+        onSubmitted: (value) async {
+          ref.read(_searchQueryProvider.notifier).state = value.trim().isEmpty
+              ? null
+              : value.trim();
         },
       ),
     );
@@ -223,7 +230,7 @@ class ResponseListPage extends ConsumerWidget {
             .toList();
       }
 
-      // 3. Generate Content (For now, we still only have CSV generator, but we can mock others or use local processing)
+      // 3. Generate Content
       String content = '';
       String extension = 'csv';
       MimeType mimeType = MimeType.csv;
@@ -239,7 +246,7 @@ class ResponseListPage extends ConsumerWidget {
         extension = 'json';
         mimeType = MimeType.json;
       } else {
-        // PDF fallback for now
+        // PDF fallback
         content =
             'PDF Export Placeholder for ${filteredResponses.length} responses';
         extension = 'pdf';

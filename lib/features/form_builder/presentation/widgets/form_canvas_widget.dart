@@ -86,7 +86,7 @@ class FormCanvasWidget extends ConsumerWidget {
                           ),
                           child: CustomPaint(
                             painter: _DashedBorderPainter(
-                              color: AppColors.textGrey.withOpacity( 0.3),
+                              color: AppColors.textGrey.withValues(alpha: 0.3),
                               borderRadius: 16,
                             ),
                             child: Column(
@@ -300,7 +300,7 @@ class FormCanvasWidget extends ConsumerWidget {
             Text(
               'Click to edit form properties',
               style: TextStyle(
-                color: AppColors.textGrey.withOpacity( 0.5),
+                color: AppColors.textGrey.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -333,7 +333,7 @@ class FormCanvasWidget extends ConsumerWidget {
       );
     } catch (_) {
       sectionBg = Colors.white;
-      headerBg = AppColors.builderElement.withOpacity( 0.5);
+      headerBg = AppColors.builderElement.withValues(alpha: 0.5);
     }
 
     return DragTarget<Object>(
@@ -406,7 +406,7 @@ class FormCanvasWidget extends ConsumerWidget {
                             bottom: BorderSide(color: AppColors.borderLight),
                           ),
                           color: isSectionSelected
-                              ? AppColors.primary.withOpacity( 0.05)
+                              ? AppColors.primary.withValues(alpha: 0.05)
                               : headerBg,
                           borderRadius: BorderRadius.vertical(
                             top: Radius.circular(sectionStyle.borderRadius),

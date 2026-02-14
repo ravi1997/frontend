@@ -65,9 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               border: Border.all(color: AppColors.borderLight, width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(
-                    0.05,
-                  ), // Changed from .withValues
+                  color: Colors.black.withValues(alpha: 0.05,), // Changed from .withValues
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),

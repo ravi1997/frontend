@@ -120,6 +120,19 @@ class WorkflowController extends _$WorkflowController {
     await updateWorkflow(updated);
   }
 
+  /// Updates a step in a workflow.
+  Future<void> updateStep(String workflowId, WorkflowStep updatedStep) async {
+    final workflow = state.firstWhere((w) => w.id == workflowId);
+    final updatedSteps = workflow.steps
+        .map((s) => s.id == updatedStep.id ? updatedStep : s)
+        .toList();
+    final updatedWorkflow = workflow.copyWith(
+      steps: updatedSteps,
+      updatedAt: DateTime.now(),
+    );
+    await updateWorkflow(updatedWorkflow);
+  }
+
   /// Adds a transition between steps.
   Future<void> addTransition(
     String workflowId, {

@@ -7,6 +7,7 @@ import '../../domain/entities/builder_form.dart';
 import '../../../../core/localization/locale_controller.dart';
 
 import '../controllers/form_builder_controller.dart';
+import '../widgets/ai_assistant_dialog.dart';
 import '../widgets/field_library_widget.dart';
 import '../widgets/field_properties_widget.dart';
 import '../widgets/form_properties_widget.dart';
@@ -216,7 +217,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -235,7 +236,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: const Text(
@@ -256,11 +257,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             icon: FontAwesomeIcons.wandMagicSparkles,
             label: 'AI Assistant',
             onTap: () {
-              // TODO: Implement AI Assistant Features (Suggestions, Validation)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('AI Assistant: Analyzing form structure...'),
-                ),
+              showDialog(
+                context: context,
+                builder: (context) => AiAssistantDialog(formId: widget.formId),
               );
             },
           ),
@@ -457,9 +456,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(

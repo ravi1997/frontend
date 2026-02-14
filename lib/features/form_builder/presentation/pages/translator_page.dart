@@ -7,6 +7,7 @@ import '../controllers/form_builder_controller.dart'; // Added import for FormBu
 import 'package:file_saver/file_saver.dart'; // Added import for FileSaver
 import 'dart:convert'; // Added for jsonEncode
 import 'dart:typed_data'; // Added for Uint8List
+import '../../domain/entities/builder_form.dart'; // Add import for BuilderForm
 
 /// Bulk Translator Page.
 ///
@@ -35,40 +36,39 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
     _loadTranslationJobs();
   }
 
-  int _countTranslatableFields(form) {
-    // Added helper function
+  int _countTranslatableFields(BuilderForm form) {
     int count = 0;
-    // Assuming form.title and form.description are TranslatableString objects
-    // and TranslatableString has a hasDefaultValue getter
-    // For now, a simplified count based on presence.
-    // In a real scenario, this would iterate through the actual structure of the form
-    // and count every string that is marked as translatable.
 
-    // This part depends on the exact structure of BuilderForm and its children.
-    // For example, if form.title is a map of {"en": "...", "es": "..."}, then count translatable keys
-    // For simplicity, we count "potential" translatable fields
+    bool hasEn(Object? field) {
+      if (field is Map) return field.containsKey('en');
+      return field != null;
+    }
 
-    // Count form title and description
-    // Assuming form.title and form.description are TranslatableString objects
-    // For simplicity, checking if the default locale (en) is present
-    if (form.title.translations.containsKey('en')) count++;
-    if (form.description.translations.containsKey('en')) count++;
+    if (hasEn(form.title)) {
+      count++;
+    }
 
     for (final section in form.sections) {
-      if (section.title.translations.containsKey('en')) count++;
-      if (section.description.translations.containsKey('en')) count++;
+      if (hasEn(section.title)) {
+        count++;
+      }
+      if (hasEn(section.description)) {
+        count++;
+      }
 
       for (final question in section.questions) {
-        if (question.label.translations.containsKey('en')) count++;
-        if (question.helpText != null &&
-            question.helpText.translations.containsKey('en'))
+        if (hasEn(question.label)) {
           count++;
-        if (question.placeholder != null &&
-            question.placeholder.translations.containsKey('en'))
+        }
+        if (hasEn(question.helperText)) {
           count++;
+        }
+        if (hasEn(question.placeholder)) {
+          count++;
+        }
 
-        for (final option in question.options) {
-          if (option.optionLabel.translations.containsKey('en')) count++;
+        if (question.options != null) {
+          count += question.options!.length;
         }
       }
     }

@@ -18,6 +18,7 @@ abstract class AuthRepository {
     String? mobile,
   });
   Future<void> requestPasswordReset(String email);
+  Future<String> refreshToken(String refreshToken);
 }
 
 @riverpod

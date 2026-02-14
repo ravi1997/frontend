@@ -739,4 +739,30 @@ class FormBuilderController extends _$FormBuilderController {
       state = AsyncValue.data(state.value!.copyWith(error: error.toString()));
     }
   }
+
+  Future<List<Map<String, dynamic>>> getAISuggestions() async {
+    if (state.value == null) return [];
+    try {
+      final repository = ref.read(formBuilderRepositoryProvider);
+      return await repository.getAISuggestions(state.value!.form);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<Map<String, dynamic>> validateFormWithAI() async {
+    if (state.value == null) return {};
+    try {
+      final repository = ref.read(formBuilderRepositoryProvider);
+      return await repository.validateFormWithAI(state.value!.form);
+    } catch (e) {
+      return {
+        'score': 0,
+        'issues': [
+          {'type': 'error', 'message': 'Validation failed: $e'},
+        ],
+        'suggestions': [],
+      };
+    }
+  }
 }

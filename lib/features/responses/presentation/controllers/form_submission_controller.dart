@@ -3,7 +3,7 @@ import '../../domain/entities/form_response.dart';
 import '../../data/services/sync_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import 'package:uuid/uuid.dart';
-import 'package:frontend/features/responses/data/repositories/mock_response_repository.dart';
+import '../../data/repositories/response_repository_impl.dart';
 
 part 'form_submission_controller.g.dart';
 

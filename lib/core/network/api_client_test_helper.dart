@@ -33,8 +33,12 @@ class ApiClientTestHelper {
       );
 
       debugPrint('  ✓ Login successful!');
-      debugPrint('    Access Token: ${result['access_token']?.substring(0, 20)}...');
-      debugPrint('    Refresh Token: ${result['refresh_token']?.substring(0, 20)}...');
+      debugPrint(
+        '    Access Token: ${result['access_token']?.substring(0, 20)}...',
+      );
+      debugPrint(
+        '    Refresh Token: ${result['refresh_token']?.substring(0, 20)}...',
+      );
 
       // Save tokens
       await tokenStorage.saveTokens(
@@ -98,9 +102,9 @@ class ApiClientTestHelper {
                 'type': 'text',
                 'label': 'Test Field',
                 'required': false,
-              }
+              },
             ],
-          }
+          },
         ],
       );
 
@@ -122,9 +126,9 @@ class ApiClientTestHelper {
                 'type': 'text',
                 'label': 'Updated Test Field',
                 'required': true,
-              }
+              },
             ],
-          }
+          },
         ],
       );
       debugPrint('  ✓ Form updated');
@@ -232,6 +236,7 @@ class ApiClientTestHelper {
     } catch (e, stackTrace) {
       debugPrint('❌ Retry logic test FAILED (after all retries)');
       debugPrint('   Error: $e');
+      debugPrint('   Stack trace: $stackTrace');
     }
   }
 
@@ -306,6 +311,7 @@ class ApiClientTestHelper {
     } catch (e, stackTrace) {
       debugPrint('❌ API health test FAILED');
       debugPrint('   Error: $e');
+      debugPrint('   Stack trace: $stackTrace');
       debugPrint('   This likely means the backend is not running');
     }
   }

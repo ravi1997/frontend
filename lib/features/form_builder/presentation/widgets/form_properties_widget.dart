@@ -104,7 +104,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  color: AppColors.builderBackground.withOpacity(0.5),
+                  color: AppColors.builderBackground.withValues(alpha: 0.5),
                   child: Row(
                     children: [
                       const Icon(

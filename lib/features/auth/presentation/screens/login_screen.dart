@@ -63,7 +63,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               border: Border.all(color: AppColors.borderLight, width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Changed from .withValues
+                  color: Colors.black.withValues(
+                    alpha: 0.05,
+                  ), // Changed from .withValues
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -71,7 +73,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-              child: Form( // Added Form widget
+              child: Form(
+                // Added Form widget
                 key: _formKey, // Assign key
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -127,7 +130,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
                     if (_isEmailTab) ...[
-                      AuthTextFormField( // Changed from _LoginTextField
+                      AuthTextFormField(
+                        // Changed from _LoginTextField
                         controller: _emailController,
                         label: 'Email',
                         placeholder: 'you@example.com',
@@ -168,7 +172,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      AuthTextFormField( // Changed from TextField
+                      AuthTextFormField(
+                        // Changed from TextField
                         controller: _passwordController,
                         placeholder: '••••••••',
                         obscureText: _obscurePassword, // Use state variable
@@ -180,7 +185,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // Add more password validation rules if needed
                           return null;
                         },
-                        suffixIcon: IconButton( // Added password visibility toggle
+                        suffixIcon: IconButton(
+                          // Added password visibility toggle
                           icon: Icon(
                             _obscurePassword
                                 ? Icons.visibility
@@ -195,7 +201,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ] else ...[
-                      AuthTextFormField( // Changed from _LoginTextField
+                      AuthTextFormField(
+                        // Changed from _LoginTextField
                         controller: _phoneController,
                         label: 'Mobile Number',
                         placeholder: '9876543210',
@@ -230,7 +237,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: authState.isLoading
                             ? null
                             : () {
-                                if (_formKey.currentState!.validate()) { // Added validation check
+                                if (_formKey.currentState!.validate()) {
+                                  // Added validation check
                                   final notifier = ref.read(
                                     authControllerProvider.notifier,
                                   );
@@ -311,28 +319,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: GoogleFonts.inter(color: Colors.grey[400], fontSize: 14),
-      filled: true,
-      fillColor: AppColors.fieldBackground,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.borderLight),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.borderLight),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: AppColors.brandBlue, width: 1.5),
-      ),
-    );
-  }
 }
 
 class _TabButton extends StatelessWidget {
@@ -381,5 +367,3 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
-
-

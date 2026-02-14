@@ -87,7 +87,7 @@ class AdvancedAnalyticsPage extends ConsumerWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -119,9 +119,7 @@ class AdvancedAnalyticsPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: (isPositive ? Colors.green : Colors.red).withOpacity(
-                    0.1,
-                  ),
+                  color: (isPositive ? Colors.green : Colors.red).withValues(alpha: 0.1,),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -309,7 +307,7 @@ class AdvancedAnalyticsPage extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: (status == 'Active' ? Colors.blue : Colors.grey)
-                  .withOpacity(0.1),
+                  .withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

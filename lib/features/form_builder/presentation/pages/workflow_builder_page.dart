@@ -39,16 +39,21 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
     setState(() => _isLoading = true);
     try {
       if (widget.workflowId != null) {
-        _currentWorkflow = await ref
+        final workflow = await ref
             .read(workflowControllerProvider.notifier)
             .getWorkflow(widget.workflowId!);
+        if (!mounted) return;
+        _currentWorkflow = workflow;
         _nameController.text = _currentWorkflow!.name;
         _descriptionController.text = _currentWorkflow!.description ?? '';
       }
     } catch (e) {
+      if (!mounted) return;
       _showError('Failed to load workflow: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -66,8 +71,10 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
             name: _nameController.text,
             description: _descriptionController.text,
           );
+      if (!mounted) return;
       setState(() => _currentWorkflow = workflow);
     } catch (e) {
+      if (!mounted) return;
       _showError('Failed to create workflow: $e');
     }
   }
@@ -93,10 +100,12 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
                 ? _assigneeController.text
                 : null,
           );
+      if (!mounted) return;
       _stepNameController.clear();
       _assigneeController.clear();
       await _loadWorkflow();
     } catch (e) {
+      if (!mounted) return;
       _showError('Failed to add step: $e');
     }
   }
@@ -108,8 +117,10 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
       await ref
           .read(workflowControllerProvider.notifier)
           .removeStep(_currentWorkflow!.id, stepId);
+      if (!mounted) return;
       await _loadWorkflow();
     } catch (e) {
+      if (!mounted) return;
       _showError('Failed to delete step: $e');
     }
   }
@@ -121,9 +132,12 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
       await ref
           .read(workflowControllerProvider.notifier)
           .activateWorkflow(_currentWorkflow!.id);
+      if (!mounted) return;
       await _loadWorkflow();
+      if (!mounted) return;
       _showSuccess('Workflow activated successfully');
     } catch (e) {
+      if (!mounted) return;
       _showError('Failed to activate workflow: $e');
     }
   }
@@ -345,9 +359,128 @@ class _WorkflowBuilderPageState extends ConsumerState<WorkflowBuilderPage> {
         icon: const Icon(Icons.delete, color: Colors.red),
         onPressed: () => _deleteStep(step.id),
       ),
-      onTap: () {
-        // TODO: Show step editor dialog
-      },
+      onTap: () => _showStepEditorDialog(step),
+    );
+  }
+
+  void _showStepEditorDialog(WorkflowStep step) {
+    final nameController = TextEditingController(text: step.name);
+    final descriptionController = TextEditingController(text: step.description);
+    final assigneeController = TextEditingController(text: step.assigneeId);
+    final dueInDaysController = TextEditingController(
+      text: step.dueInDays?.toString() ?? '',
+    );
+
+    bool localManual = step.requiresManualAction;
+    bool localSkippable = step.skippable;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Step: ${step.type.name}'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Step Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: assigneeController,
+                decoration: const InputDecoration(
+                  labelText: 'Assignee ID',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: dueInDaysController,
+                decoration: const InputDecoration(
+                  labelText: 'Due In Days',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              StatefulBuilder(
+                builder: (context, setDialogState) {
+                  return Column(
+                    children: [
+                      CheckboxListTile(
+                        title: const Text('Requires Manual Action'),
+                        value: localManual,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            localManual = value ?? false;
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: const Text('Skippable'),
+                        value: localSkippable,
+                        onChanged: (value) {
+                          setDialogState(() {
+                            localSkippable = value ?? false;
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (_currentWorkflow == null) return;
+
+              final updatedStep = step.copyWith(
+                name: nameController.text,
+                description: descriptionController.text,
+                assigneeId: assigneeController.text.isNotEmpty
+                    ? assigneeController.text
+                    : null,
+                dueInDays: int.tryParse(dueInDaysController.text),
+                requiresManualAction: localManual,
+                skippable: localSkippable,
+              );
+
+              try {
+                await ref
+                    .read(workflowControllerProvider.notifier)
+                    .updateStep(_currentWorkflow!.id, updatedStep);
+                if (context.mounted) Navigator.pop(context);
+                if (!mounted) return;
+                await _loadWorkflow();
+              } catch (e) {
+                if (!mounted) return;
+                _showError('Failed to update step: $e');
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 

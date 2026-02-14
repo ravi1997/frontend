@@ -62,7 +62,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               border: Border.all(color: AppColors.borderLight, width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05), // Corrected
+                  color: Colors.black.withValues(alpha: 0.05), // Corrected
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -70,7 +70,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-              child: Form( // Added Form widget
+              child: Form(
+                // Added Form widget
                 key: _formKey, // Assign key
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -80,7 +81,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.brandBlue.withOpacity(0.1), // Corrected
+                        color: AppColors.brandBlue.withValues(
+                          alpha: 0.1,
+                        ), // Corrected
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -108,7 +111,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    AuthTextFormField( // Replaced _buildTextField
+                    AuthTextFormField(
+                      // Replaced _buildTextField
                       controller: _emailController,
                       label: 'Email Address',
                       placeholder: 'you@example.com',
@@ -131,8 +135,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         onPressed: authState.isLoading
                             ? null
                             : () async {
-                                if (_formKey.currentState!.validate()) { // Added validation check
-                                  final ctx = context;
+                                if (_formKey.currentState!.validate()) {
+                                  // Added validation check
                                   await ref
                                       .read(authControllerProvider.notifier)
                                       .requestPasswordReset(

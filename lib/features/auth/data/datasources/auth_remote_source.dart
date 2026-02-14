@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../core/network/api_client.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/entities/user.dart';
 
 part 'auth_remote_source.g.dart';
@@ -24,43 +24,43 @@ abstract class AuthRemoteSource {
 }
 
 class AuthRemoteSourceImpl implements AuthRemoteSource {
-  final Dio _dio;
-  AuthRemoteSourceImpl(this._dio);
+  final ApiClient _apiClient;
+  AuthRemoteSourceImpl(this._apiClient);
 
   @override
   Future<Map<String, dynamic>> login(String identifier, String password) async {
-    final response = await _dio.post(
-      '/auth/login',
+    final response = await _apiClient.post(
+      ApiEndpoints.login,
       data: {'identifier': identifier, 'password': password},
     );
-    return response.data;
+    return response.data as Map<String, dynamic>;
   }
 
   @override
   Future<Map<String, dynamic>> loginWithOtp(String mobile, String otp) async {
-    final response = await _dio.post(
-      '/auth/login',
+    final response = await _apiClient.post(
+      ApiEndpoints.loginWithOtp,
       data: {'mobile': mobile, 'otp': otp},
     );
-    return response.data;
+    return response.data as Map<String, dynamic>;
   }
 
   @override
   Future<void> generateOtp(String mobile) async {
-    await _dio.post('/auth/generate-otp', data: {'mobile': mobile});
+    await _apiClient.post(ApiEndpoints.generateOtp, data: {'mobile': mobile});
   }
 
   @override
   Future<void> logout() async {
-    await _dio.post('/auth/logout');
+    await _apiClient.post(ApiEndpoints.logout);
   }
 
   @override
   Future<User?> getCurrentUser() async {
     try {
-      final response = await _dio.get('/user/status');
+      final response = await _apiClient.get(ApiEndpoints.userStatus);
       if (response.data != null && response.data['user'] != null) {
-        return User.fromJson(response.data['user']);
+        return User.fromJson(response.data['user'] as Map<String, dynamic>);
       }
     } catch (e) {
       return null;
@@ -70,11 +70,11 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
 
   @override
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
-    final response = await _dio.post(
-      '/auth/refresh',
+    final response = await _apiClient.post(
+      ApiEndpoints.refreshToken,
       data: {'refresh_token': refreshToken},
     );
-    return response.data;
+    return response.data as Map<String, dynamic>;
   }
 
   @override
@@ -86,15 +86,15 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
     String? employeeId,
     String? mobile,
   }) async {
-    final response = await _dio.post(
-      '/auth/register',
+    final response = await _apiClient.post(
+      ApiEndpoints.register,
       data: {
         'username': username,
         'email': email,
         'password': password,
         'user_type': userType,
         'employee_id': employeeId,
-        'mobile': mobile ?? '', // Backend requires mobile field
+        'mobile': mobile ?? '',
         'roles': [
           'user',
           'creator',
@@ -106,17 +106,20 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         ],
       },
     );
-    return response.data;
+    return response.data as Map<String, dynamic>;
   }
 
   @override
   Future<void> requestPasswordReset(String email) async {
-    await _dio.post('/auth/request-password-reset', data: {'email': email});
+    await _apiClient.post(
+      ApiEndpoints.requestPasswordReset,
+      data: {'email': email},
+    );
   }
 }
 
 @riverpod
 AuthRemoteSource authRemoteSource(Ref ref) {
-  final dioClient = ref.watch(dioProvider);
-  return AuthRemoteSourceImpl(dioClient);
+  final apiClient = ref.watch(apiClientProvider);
+  return AuthRemoteSourceImpl(apiClient);
 }

@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:frontend/features/auth/domain/entities/user.dart';
 import 'package:frontend/features/auth/domain/repositories/auth_repository.dart';
-import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:frontend/features/auth/presentation/controllers/otp_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Mock classes
@@ -33,8 +31,9 @@ void main() {
         roles: ['user'],
       );
 
-      when(() => mockRepository.login('test@example.com', 'Password123!'))
-          .thenAnswer((_) async => testUser);
+      when(
+        () => mockRepository.login('test@example.com', 'Password123!'),
+      ).thenAnswer((_) async => testUser);
 
       // Act
       // Note: In real tests, you'd inject the mock repository
@@ -48,8 +47,9 @@ void main() {
     test('generateOtp should call repository method', () async {
       // Arrange
       const mobile = '9876543210';
-      when(() => mockRepository.generateOtp(mobile))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.generateOtp(mobile),
+      ).thenAnswer((_) async => {});
 
       // Act
       await mockRepository.generateOtp(mobile);
@@ -68,16 +68,18 @@ void main() {
         mobile: '9876543210',
       );
 
-      when(() => mockRepository.loginWithOtp('9876543210', '123456'))
-          .thenAnswer((_) async => testUser);
+      when(
+        () => mockRepository.loginWithOtp('9876543210', '123456'),
+      ).thenAnswer((_) async => testUser);
 
       // Act
       final result = await mockRepository.loginWithOtp('9876543210', '123456');
 
       // Assert
       expect(result.mobile, '9876543210');
-      verify(() => mockRepository.loginWithOtp('9876543210', '123456'))
-          .called(1);
+      verify(
+        () => mockRepository.loginWithOtp('9876543210', '123456'),
+      ).called(1);
     });
 
     test('register should create new user account', () async {
@@ -116,8 +118,9 @@ void main() {
     test('requestPasswordReset should send reset request', () async {
       // Arrange
       const email = 'forgot@example.com';
-      when(() => mockRepository.requestPasswordReset(email))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.requestPasswordReset(email),
+      ).thenAnswer((_) async => {});
 
       // Act
       await mockRepository.requestPasswordReset(email);
@@ -318,8 +321,9 @@ void main() {
 
     test('login with invalid credentials should throw error', () async {
       // Arrange
-      when(() => mockRepository.login('wrong@example.com', 'wrongpass'))
-          .thenThrow(Exception('Invalid credentials'));
+      when(
+        () => mockRepository.login('wrong@example.com', 'wrongpass'),
+      ).thenThrow(Exception('Invalid credentials'));
 
       // Act & Assert
       expect(
@@ -330,20 +334,19 @@ void main() {
 
     test('generateOtp with invalid mobile should throw error', () async {
       // Arrange
-      when(() => mockRepository.generateOtp('invalid'))
-          .thenThrow(Exception('Invalid mobile number'));
+      when(
+        () => mockRepository.generateOtp('invalid'),
+      ).thenThrow(Exception('Invalid mobile number'));
 
       // Act & Assert
-      expect(
-        () => mockRepository.generateOtp('invalid'),
-        throwsException,
-      );
+      expect(() => mockRepository.generateOtp('invalid'), throwsException);
     });
 
     test('loginWithOtp with invalid OTP should throw error', () async {
       // Arrange
-      when(() => mockRepository.loginWithOtp('9876543210', '000000'))
-          .thenThrow(Exception('Invalid OTP'));
+      when(
+        () => mockRepository.loginWithOtp('9876543210', '000000'),
+      ).thenThrow(Exception('Invalid OTP'));
 
       // Act & Assert
       expect(

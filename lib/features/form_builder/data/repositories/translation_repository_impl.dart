@@ -3,6 +3,7 @@ import '../../domain/entities/translation_job.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/repositories/translation_repository.dart';
 import '../../../../core/network/api_client_wrapper.dart';
+import '../../../../core/network/api_endpoints.dart';
 
 /// Implementation of [TranslationRepository] for translation operations.
 ///
@@ -16,7 +17,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<List<TranslationLanguage>> getAvailableLanguages() async {
     try {
-      final response = await _apiClient.get('/translations/languages');
+      final response = await _apiClient.get(
+        ApiEndpoints.listTranslationLanguages,
+      );
       final data = response.data as List<dynamic>;
 
       final languages = data.map((item) {
@@ -41,12 +44,13 @@ class TranslationRepositoryImpl implements TranslationRepository {
   }) async {
     try {
       final response = await _apiClient.post(
-        '/forms/$formId/translations',
+        ApiEndpoints.startTranslationJob,
         data: {
-          'sourceLanguage': sourceLanguage,
-          'targetLanguages': targetLanguages,
+          'form_id': formId,
+          'source_language': sourceLanguage,
+          'target_languages': targetLanguages,
           'createdBy': createdBy,
-          'totalFields': totalFields,
+          'total_fields': totalFields,
         },
       );
 
@@ -61,7 +65,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<TranslationJob> getTranslationJob(String jobId) async {
     try {
-      final response = await _apiClient.get('/translations/jobs/$jobId');
+      final response = await _apiClient.get(
+        ApiEndpoints.getTranslationJob(jobId),
+      );
 
       _logger.i('Loaded translation job: $jobId');
       return TranslationJob.fromJson(response.data as Map<String, dynamic>);
@@ -78,7 +84,12 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<List<TranslationJob>> getTranslationJobs(String formId) async {
     try {
-      final response = await _apiClient.get('/forms/$formId/translations');
+      // Note: ApiEndpoints doesn't have listJobs fixated, but we can use listTranslationJobs if we add it or use baseUrl
+      // For now, let's assume we use startTranslationJob as a generic jobs endpoint for GET if query param is form_id
+      final response = await _apiClient.get(
+        ApiEndpoints.startTranslationJob,
+        queryParameters: {'form_id': formId},
+      );
       final data = response.data as List<dynamic>;
 
       final jobs = data.map((item) {
@@ -96,8 +107,8 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<TranslationJob> cancelTranslationJob(String jobId) async {
     try {
-      final response = await _apiClient.post(
-        '/translations/jobs/$jobId/cancel',
+      final response = await _apiClient.patch(
+        ApiEndpoints.cancelTranslationJob(jobId),
       );
 
       _logger.i('Cancelled translation job: $jobId');
@@ -119,7 +130,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<void> deleteTranslationJob(String jobId) async {
     try {
-      await _apiClient.delete('/translations/jobs/$jobId');
+      await _apiClient.delete(ApiEndpoints.deleteTranslationJob(jobId));
       _logger.i('Deleted translation job: $jobId');
     } catch (e, stack) {
       _logger.e(
@@ -143,16 +154,16 @@ class TranslationRepositoryImpl implements TranslationRepository {
   }) async {
     try {
       final response = await _apiClient.post(
-        '/translations/translate',
+        ApiEndpoints.previewTranslation,
         data: {
           'text': text,
-          'sourceLanguage': sourceLanguage,
-          'targetLanguage': targetLanguage,
+          'source_language': sourceLanguage,
+          'target_language': targetLanguage,
         },
       );
 
       _logger.i('Translated text from $sourceLanguage to $targetLanguage');
-      return response.data['translatedText'] as String;
+      return response.data['translated_text'] as String;
     } catch (e, stack) {
       _logger.e('Failed to translate text', error: e, stackTrace: stack);
       throw _createException('Failed to translate text', e, stack);
@@ -163,7 +174,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
   Future<Map<String, dynamic>?> getTranslatedContent(String jobId) async {
     try {
       final response = await _apiClient.get(
-        '/translations/jobs/$jobId/content',
+        ApiEndpoints.getTranslatedContent(jobId),
       );
       _logger.i('Fetched translated content for job: $jobId');
       return response.data as Map<String, dynamic>;

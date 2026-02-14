@@ -94,4 +94,38 @@ class MockFormBuilderRepository implements FormBuilderRepository {
       ),
     ];
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAISuggestions(BuilderForm form) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      {
+        'label': 'Phone Number',
+        'field_type': 'mobile',
+        'reason': 'To contact candidates directly.',
+      },
+      {
+        'label': 'Interview Date',
+        'field_type': 'date',
+        'reason': 'To schedule the next step.',
+      },
+    ];
+  }
+
+  @override
+  Future<Map<String, dynamic>> validateFormWithAI(BuilderForm form) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'score': 85,
+      'issues': [
+        {
+          'type': 'clarity',
+          'message': 'Consider adding help text to the Email field.',
+        },
+      ],
+      'suggestions': [
+        'Organize fields into two sections for better readability.',
+      ],
+    };
+  }
 }

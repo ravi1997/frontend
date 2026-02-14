@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormResponse {
 
- String get id; String get formId; DateTime get submittedAt; Map<String, dynamic> get answers;
+ String get id; String get formId; DateTime get submittedAt; Map<String, dynamic> get answers; Map<String, dynamic> get aiResults;
 /// Create a copy of FormResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FormResponseCopyWith<FormResponse> get copyWith => _$FormResponseCopyWithImpl<F
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.formId, formId) || other.formId == formId)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&const DeepCollectionEquality().equals(other.answers, answers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.formId, formId) || other.formId == formId)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&const DeepCollectionEquality().equals(other.answers, answers)&&const DeepCollectionEquality().equals(other.aiResults, aiResults));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,formId,submittedAt,const DeepCollectionEquality().hash(answers));
+int get hashCode => Object.hash(runtimeType,id,formId,submittedAt,const DeepCollectionEquality().hash(answers),const DeepCollectionEquality().hash(aiResults));
 
 @override
 String toString() {
-  return 'FormResponse(id: $id, formId: $formId, submittedAt: $submittedAt, answers: $answers)';
+  return 'FormResponse(id: $id, formId: $formId, submittedAt: $submittedAt, answers: $answers, aiResults: $aiResults)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FormResponseCopyWith<$Res>  {
   factory $FormResponseCopyWith(FormResponse value, $Res Function(FormResponse) _then) = _$FormResponseCopyWithImpl;
 @useResult
 $Res call({
- String id, String formId, DateTime submittedAt, Map<String, dynamic> answers
+ String id, String formId, DateTime submittedAt, Map<String, dynamic> answers, Map<String, dynamic> aiResults
 });
 
 
@@ -65,12 +65,13 @@ class _$FormResponseCopyWithImpl<$Res>
 
 /// Create a copy of FormResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? formId = null,Object? submittedAt = null,Object? answers = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? formId = null,Object? submittedAt = null,Object? answers = null,Object? aiResults = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,formId: null == formId ? _self.formId : formId // ignore: cast_nullable_to_non_nullable
 as String,submittedAt: null == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,answers: null == answers ? _self.answers : answers // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,aiResults: null == aiResults ? _self.aiResults : aiResults // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers,  Map<String, dynamic> aiResults)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormResponse() when $default != null:
-return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
+return $default(_that.id,_that.formId,_that.submittedAt,_that.answers,_that.aiResults);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers,  Map<String, dynamic> aiResults)  $default,) {final _that = this;
 switch (_that) {
 case _FormResponse():
-return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
+return $default(_that.id,_that.formId,_that.submittedAt,_that.answers,_that.aiResults);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String formId,  DateTime submittedAt,  Map<String, dynamic> answers,  Map<String, dynamic> aiResults)?  $default,) {final _that = this;
 switch (_that) {
 case _FormResponse() when $default != null:
-return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
+return $default(_that.id,_that.formId,_that.submittedAt,_that.answers,_that.aiResults);case _:
   return null;
 
 }
@@ -212,7 +213,7 @@ return $default(_that.id,_that.formId,_that.submittedAt,_that.answers);case _:
 @JsonSerializable()
 
 class _FormResponse implements FormResponse {
-  const _FormResponse({required this.id, required this.formId, required this.submittedAt, required final  Map<String, dynamic> answers}): _answers = answers;
+  const _FormResponse({required this.id, required this.formId, required this.submittedAt, required final  Map<String, dynamic> answers, final  Map<String, dynamic> aiResults = const {}}): _answers = answers,_aiResults = aiResults;
   factory _FormResponse.fromJson(Map<String, dynamic> json) => _$FormResponseFromJson(json);
 
 @override final  String id;
@@ -223,6 +224,13 @@ class _FormResponse implements FormResponse {
   if (_answers is EqualUnmodifiableMapView) return _answers;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_answers);
+}
+
+ final  Map<String, dynamic> _aiResults;
+@override@JsonKey() Map<String, dynamic> get aiResults {
+  if (_aiResults is EqualUnmodifiableMapView) return _aiResults;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_aiResults);
 }
 
 
@@ -239,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.formId, formId) || other.formId == formId)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&const DeepCollectionEquality().equals(other._answers, _answers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormResponse&&(identical(other.id, id) || other.id == id)&&(identical(other.formId, formId) || other.formId == formId)&&(identical(other.submittedAt, submittedAt) || other.submittedAt == submittedAt)&&const DeepCollectionEquality().equals(other._answers, _answers)&&const DeepCollectionEquality().equals(other._aiResults, _aiResults));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,formId,submittedAt,const DeepCollectionEquality().hash(_answers));
+int get hashCode => Object.hash(runtimeType,id,formId,submittedAt,const DeepCollectionEquality().hash(_answers),const DeepCollectionEquality().hash(_aiResults));
 
 @override
 String toString() {
-  return 'FormResponse(id: $id, formId: $formId, submittedAt: $submittedAt, answers: $answers)';
+  return 'FormResponse(id: $id, formId: $formId, submittedAt: $submittedAt, answers: $answers, aiResults: $aiResults)';
 }
 
 
@@ -259,7 +267,7 @@ abstract mixin class _$FormResponseCopyWith<$Res> implements $FormResponseCopyWi
   factory _$FormResponseCopyWith(_FormResponse value, $Res Function(_FormResponse) _then) = __$FormResponseCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String formId, DateTime submittedAt, Map<String, dynamic> answers
+ String id, String formId, DateTime submittedAt, Map<String, dynamic> answers, Map<String, dynamic> aiResults
 });
 
 
@@ -276,12 +284,13 @@ class __$FormResponseCopyWithImpl<$Res>
 
 /// Create a copy of FormResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? formId = null,Object? submittedAt = null,Object? answers = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? formId = null,Object? submittedAt = null,Object? answers = null,Object? aiResults = null,}) {
   return _then(_FormResponse(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,formId: null == formId ? _self.formId : formId // ignore: cast_nullable_to_non_nullable
 as String,submittedAt: null == submittedAt ? _self.submittedAt : submittedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,answers: null == answers ? _self._answers : answers // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,aiResults: null == aiResults ? _self._aiResults : aiResults // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }

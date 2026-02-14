@@ -10,6 +10,7 @@ abstract class FormResponse with _$FormResponse {
     required String formId,
     required DateTime submittedAt,
     required Map<String, dynamic> answers,
+    @Default({}) Map<String, dynamic> aiResults,
   }) = _FormResponse;
 
   factory FormResponse.fromJson(Map<String, dynamic> json) =>

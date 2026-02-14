@@ -20,7 +20,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<BuilderForm> getForm(String id) async {
     try {
-      final response = await _apiClient.get('/forms/$id');
+      final response = await _apiClient.get(ApiEndpoints.getForm(id));
       final data = response.data as Map<String, dynamic>;
 
       // Backend returns form with versions array
@@ -90,9 +90,12 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
 
       // If form exists update, otherwise create
       if (form.id.isEmpty || form.id == 'new' || form.updatedAt == null) {
-        await _apiClient.post('/forms', data: backendData);
+        await _apiClient.post(ApiEndpoints.createForm, data: backendData);
       } else {
-        await _apiClient.put('/forms/${form.id}', data: backendData);
+        await _apiClient.put(
+          ApiEndpoints.updateForm(form.id),
+          data: backendData,
+        );
       }
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
@@ -104,7 +107,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   Future<Map<String, dynamic>> publishForm(String formId) async {
     try {
       final response = await _apiClient.post(
-        '/forms/$formId/publish',
+        ApiEndpoints.publishForm(formId),
         data: {},
       );
       return response.data;
@@ -117,7 +120,9 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<List<FormVersionHistory>> getVersionHistory(String formId) async {
     try {
-      final response = await _apiClient.get('/forms/$formId/versions');
+      final response = await _apiClient.get(
+        ApiEndpoints.getFormVersions(formId),
+      );
       return (response.data as List)
           .map((e) => FormVersionHistory.fromJson(e))
           .toList();
@@ -134,7 +139,9 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<BuilderForm> getFormVersion(String formId, String version) async {
     try {
-      final response = await _apiClient.get('/forms/$formId/versions/$version');
+      final response = await _apiClient.get(
+        ApiEndpoints.getFormVersion(formId, version),
+      );
       return BuilderForm.fromJson(response.data);
     } catch (e, s) {
       _logger.e('Failed to load form version', error: e, stackTrace: s);
@@ -197,6 +204,45 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     } catch (e, s) {
       _logger.e('Failed to generate fields with AI', error: e, stackTrace: s);
       rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getAISuggestions(BuilderForm form) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.getFieldSuggestions,
+        data: {'current_form': form.toJson()},
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      final suggestions = data['suggestions'] as List<dynamic>;
+
+      return suggestions.cast<Map<String, dynamic>>();
+    } catch (e, s) {
+      _logger.e('Failed to get AI suggestions', error: e, stackTrace: s);
+      return [];
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> validateFormWithAI(BuilderForm form) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.validateFormDesign(form.id),
+        data: {'form': form.toJson()},
+      );
+
+      return response.data as Map<String, dynamic>;
+    } catch (e, s) {
+      _logger.e('Failed to validate form with AI', error: e, stackTrace: s);
+      return {
+        'score': 0,
+        'issues': [
+          {'type': 'error', 'message': 'AI validation failed: $e'},
+        ],
+        'suggestions': [],
+      };
     }
   }
 }

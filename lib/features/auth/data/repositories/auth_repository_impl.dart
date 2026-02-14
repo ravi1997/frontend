@@ -91,22 +91,18 @@ class AuthRepositoryImpl implements AuthRepository {
     await _remoteSource.requestPasswordReset(email);
   }
 
+  @override
   Future<String> refreshToken(String refreshToken) async {
-    // Note: Backend uses HTTP-only cookies for token management
-    // This method is kept for compatibility but tokens are managed by the browser
-    throw UnimplementedError(
-      'Token refresh is handled via HTTP-only cookies on the backend. '
-      'Please re-authenticate if your session expires.',
+    final response = await _remoteSource.refreshToken(refreshToken);
+    final newAccessToken = response['access_token'] as String;
+    final newRefreshToken = response['refresh_token'] as String?;
+
+    await _tokenService.setTokens(
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     );
-    // Alternative: If backend adds refresh endpoint, use:
-    // final response = await _remoteSource.refreshToken(refreshToken);
-    // final newAccessToken = response['access_token'] as String;
-    // final newRefreshToken = response['refresh_token'] as String?;
-    // await _tokenService.setTokens(
-    //   accessToken: newAccessToken,
-    //   refreshToken: newRefreshToken,
-    // );
-    // return newAccessToken;
+
+    return newAccessToken;
   }
 }
 

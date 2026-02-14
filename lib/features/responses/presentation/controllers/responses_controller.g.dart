@@ -24,7 +24,7 @@ final class FormResponsesProvider
         $FutureProvider<List<FormResponse>> {
   FormResponsesProvider._({
     required FormResponsesFamily super.from,
-    required String super.argument,
+    required (String, {String? searchQuery}) super.argument,
   }) : super(
          retry: null,
          name: r'formResponsesProvider',
@@ -40,7 +40,7 @@ final class FormResponsesProvider
   String toString() {
     return r'formResponsesProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -51,8 +51,8 @@ final class FormResponsesProvider
 
   @override
   FutureOr<List<FormResponse>> create(Ref ref) {
-    final argument = this.argument as String;
-    return formResponses(ref, argument);
+    final argument = this.argument as (String, {String? searchQuery});
+    return formResponses(ref, argument.$1, searchQuery: argument.searchQuery);
   }
 
   @override
@@ -66,10 +66,14 @@ final class FormResponsesProvider
   }
 }
 
-String _$formResponsesHash() => r'7f5bb219c5479f8745425ab46b119095270af083';
+String _$formResponsesHash() => r'd63956a5f62b1faaaff78eb73c3df84deb2e0746';
 
 final class FormResponsesFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<List<FormResponse>>, String> {
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<FormResponse>>,
+          (String, {String? searchQuery})
+        > {
   FormResponsesFamily._()
     : super(
         retry: null,
@@ -79,8 +83,11 @@ final class FormResponsesFamily extends $Family
         isAutoDispose: true,
       );
 
-  FormResponsesProvider call(String formId) =>
-      FormResponsesProvider._(argument: formId, from: this);
+  FormResponsesProvider call(String formId, {String? searchQuery}) =>
+      FormResponsesProvider._(
+        argument: (formId, searchQuery: searchQuery),
+        from: this,
+      );
 
   @override
   String toString() => r'formResponsesProvider';

@@ -302,7 +302,8 @@ class ApiEndpoints {
   /// GET - Get translation job details
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "job_id": string, "status": string, "progress": int, ... }
-  static String getTranslationJob(String jobId) => '/forms/translations/jobs/$jobId'; // New
+  static String getTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId'; // New
 
   /// POST - Start a new translation job
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -313,12 +314,14 @@ class ApiEndpoints {
   /// PATCH - Cancel a translation job
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
-  static String cancelTranslationJob(String jobId) => '/forms/translations/jobs/$jobId/cancel'; // New
+  static String cancelTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId/cancel'; // New
 
   /// DELETE - Delete a translation job
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
-  static String deleteTranslationJob(String jobId) => '/forms/translations/jobs/$jobId'; // New
+  static String deleteTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId'; // New
 
   /// POST - Preview translation
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -329,12 +332,14 @@ class ApiEndpoints {
   /// GET - List available languages for translation
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "code": string, "name": string, "native_name": string }]
-  static const String listTranslationLanguages = '/forms/translations/languages'; // New
+  static const String listTranslationLanguages =
+      '/forms/translations/languages'; // New
 
   /// GET - Get translated content for a job
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "form_id": string, "language": string, "translations": {...} }
-  static String getTranslatedContent(String jobId) => '/forms/translations/jobs/$jobId/content'; // New
+  static String getTranslatedContent(String jobId) =>
+      '/forms/translations/jobs/$jobId/content'; // New
 
   // ============================================================================
   // AI Endpoints
@@ -347,18 +352,27 @@ class ApiEndpoints {
   /// POST - Analyze response with AI (Sentiment, PII)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string, "results": {...} }
-  static String analyzeResponseAI(String formId, String responseId) => '/ai/$formId/responses/$responseId/analyze';
+  static String analyzeResponseAI(String formId, String responseId) =>
+      '/ai/$formId/responses/$responseId/analyze';
 
   /// POST - Moderate response with AI (PII, PHI, Profanity, Injection)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string, "moderation": {...} }
-  static String moderateResponseAI(String formId, String responseId) => '/ai/$formId/responses/$responseId/moderate';
+  static String moderateResponseAI(String formId, String responseId) =>
+      '/ai/$formId/responses/$responseId/moderate';
 
   /// POST - Generate form structure with AI
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "prompt": string, "current_form": {...} (optional) }
   /// Returns: { "message": string, "suggestion": {...} }
   static const String generateFormAI = '/ai/generate';
+
+  /// POST - AI Form Design Validation
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "form": {...} }
+  /// Returns: { "score": int, "issues": [...], "suggestions": [...] }
+  static String validateFormDesign(String formId) =>
+      '/ai/$formId/validate-design';
 
   /// POST - Get AI field suggestions
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -379,7 +393,8 @@ class ApiEndpoints {
   /// GET - Get form sentiment trends
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "form_id": string, "distribution": {...}, "average_score": float }
-  static String getFormSentimentTrends(String formId) => '/ai/$formId/sentiment';
+  static String getFormSentimentTrends(String formId) =>
+      '/ai/$formId/sentiment';
 
   /// POST - AI-Powered Smart Search for form responses
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -395,12 +410,14 @@ class ApiEndpoints {
   /// POST - Detect predictive anomalies (spam, statistical outliers, timing)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "form_id": string, "flagged_responses": [...] }
-  static String detectPredictiveAnomalies(String formId) => '/ai/$formId/anomaly-detect';
+  static String detectPredictiveAnomalies(String formId) =>
+      '/ai/$formId/anomaly-detect';
 
   /// POST - Automated Security Scanning for Form Definitions
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "form_id": string, "security_score": int, "status": string, ... }
-  static String scanFormSecurityAI(String formId) => '/ai/$formId/security-scan';
+  static String scanFormSecurityAI(String formId) =>
+      '/ai/$formId/security-scan';
 
   /// POST - Compare multiple forms' performance and sentiment
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -412,7 +429,8 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "response_ids": string[] (optional), "max_bullet_points": int, ... }
   /// Returns: { "form_id": string, "summary": {...} }
-  static String summarizeFormResponses(String formId) => '/ai/$formId/summarize';
+  static String summarizeFormResponses(String formId) =>
+      '/ai/$formId/summarize';
 
   /// POST - Generate AI-powered export reports for form analytics
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -424,7 +442,8 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "pattern": "all" | "nlp_search" | "summarization" | "by_query", "query": string (optional) }
   /// Returns: { "form_id": string, "keys_invalidated": int, ... }
-  static String invalidateFormCache(String formId) => '/ai/$formId/cache/invalidate';
+  static String invalidateFormCache(String formId) =>
+      '/ai/$formId/cache/invalidate';
 
   /// DELETE - Clear all cache for a specific form
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -468,9 +487,11 @@ class ApiEndpoints {
     Map<String, dynamic> params,
   ) {
     final uri = Uri.parse('$baseUrl$endpoint');
-    final newUri = uri.replace(queryParameters: params.map(
-      (key, value) => MapEntry(key, value.toString()),
-    ));
+    final newUri = uri.replace(
+      queryParameters: params.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
+    );
     return newUri.toString();
   }
 }

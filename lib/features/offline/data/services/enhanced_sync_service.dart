@@ -5,7 +5,7 @@ import 'package:frontend/features/offline/domain/entities/sync_conflict.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:frontend/features/responses/data/repositories/mock_response_repository.dart';
+import 'package:frontend/features/responses/data/repositories/response_repository_impl.dart';
 
 part 'enhanced_sync_service.g.dart';
 

@@ -50,6 +50,19 @@ class MockResponseRepository implements ResponseRepository {
     // ignore: avoid_print
     print('Response submitted successfully: ${response.id}');
   }
+
+  @override
+  Future<List<FormResponse>> aiSearch(String formId, String query) async {
+    await Future.delayed(const Duration(seconds: 1));
+    final responses = await getResponsesForForm(formId);
+    return responses
+        .where(
+          (r) => r.answers.values.any(
+            (v) => v.toString().toLowerCase().contains(query.toLowerCase()),
+          ),
+        )
+        .toList();
+  }
 }
 
 @riverpod

@@ -42,7 +42,7 @@ class OfflineStatusIndicator extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 
@@ -129,62 +129,52 @@ class OfflineBanner extends ConsumerWidget {
         final pendingCount = ref
             .read(enhancedSyncServiceProvider.notifier)
             .pendingCount;
-        final conflictCountFuture = ref
-            .read(enhancedSyncServiceProvider.notifier)
-            .pendingConflictCount;
 
-        return FutureBuilder<int>(
-          future: conflictCountFuture,
-          builder: (context, snapshot) {
-            final conflictCount = snapshot.data ?? 0;
-
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
-                border: const Border(
-                  bottom: BorderSide(color: Colors.orange, width: 1),
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.orange.withValues(alpha: 0.1),
+            border: const Border(
+              bottom: BorderSide(color: Colors.orange, width: 1),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.cloud_off, color: Colors.orange, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'You are offline. Changes will be saved locally and synced when you reconnect.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.orange.shade900,
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  const Icon(Icons.cloud_off, color: Colors.orange, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'You are offline. Changes will be saved locally and synced when you reconnect.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.orange.shade900,
-                      ),
+              if (pendingCount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$pendingCount pending',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (pendingCount > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$pendingCount pending',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          },
+                ),
+            ],
+          ),
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -249,7 +239,7 @@ class SyncFab extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

@@ -17,6 +17,8 @@ abstract class FormBuilderRepository {
     String prompt, {
     BuilderForm? currentForm,
   });
+  Future<List<Map<String, dynamic>>> getAISuggestions(BuilderForm form);
+  Future<Map<String, dynamic>> validateFormWithAI(BuilderForm form);
 }
 
 @riverpod
