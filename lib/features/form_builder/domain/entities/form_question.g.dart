@@ -15,7 +15,7 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       placeholder: json['placeholder'],
       isRequired: json['isRequired'] as bool? ?? false,
       options: (json['options'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => FormQuestionOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       isReadOnly: json['isReadOnly'] as bool? ?? false,
       isHidden: json['isHidden'] as bool? ?? false,

@@ -9,7 +9,7 @@ part of 'form_version_history.dart';
 _FormVersionHistory _$FormVersionHistoryFromJson(Map<String, dynamic> json) =>
     _FormVersionHistory(
       version: json['version'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      createdAt: _dateTimeFromJson(json['createdAt'] as String),
       authorId: json['authorId'] as String?,
       changeLog: json['changeLog'] as String?,
     );

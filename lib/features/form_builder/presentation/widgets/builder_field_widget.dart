@@ -3,6 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/form_question.dart';
+
+import '../../domain/entities/form_question_option.dart';
 import '../../domain/entities/question_type.dart';
 
 class BuilderFieldWidget extends StatelessWidget {
@@ -300,46 +302,80 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.checkboxes:
         return Column(
-          children: (q.options ?? ['Option 1', 'Option 2']).map((opt) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: textStyle.color ?? AppColors.textGrey,
+          children:
+              (q.options ??
+                      const [
+                        FormQuestionOption(
+                          id: '1',
+                          label: 'Option 1',
+                          value: '1',
+                          order: 0,
+                        ),
+                        FormQuestionOption(
+                          id: '2',
+                          label: 'Option 2',
+                          value: '2',
+                          order: 1,
+                        ),
+                      ])
+                  .map((opt) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: textStyle.color ?? AppColors.textGrey,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(opt.label, style: textStyle),
+                        ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(opt, style: textStyle),
-                ],
-              ),
-            );
-          }).toList(),
+                    );
+                  })
+                  .toList(),
         );
       case QuestionType.multipleChoice:
         return Column(
-          children: (q.options ?? ['Option 1', 'Option 2']).map((opt) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.radio_button_unchecked,
-                    size: 20,
-                    color: textStyle.color ?? AppColors.textGrey,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(opt, style: textStyle),
-                ],
-              ),
-            );
-          }).toList(),
+          children:
+              (q.options ??
+                      const [
+                        FormQuestionOption(
+                          id: '1',
+                          label: 'Option 1',
+                          value: '1',
+                          order: 0,
+                        ),
+                        FormQuestionOption(
+                          id: '2',
+                          label: 'Option 2',
+                          value: '2',
+                          order: 1,
+                        ),
+                      ])
+                  .map((opt) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.radio_button_unchecked,
+                            size: 20,
+                            color: textStyle.color ?? AppColors.textGrey,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(opt.label, style: textStyle),
+                        ],
+                      ),
+                    );
+                  })
+                  .toList(),
         );
       case QuestionType.fileUpload:
         return Container(

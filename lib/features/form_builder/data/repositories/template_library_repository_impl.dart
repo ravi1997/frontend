@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 import '../../domain/entities/form_template.dart';
 import '../../domain/entities/form_question.dart';
+import '../../domain/entities/form_question_option.dart';
 import '../../domain/entities/form_section.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/question_type.dart';
@@ -15,6 +16,17 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   final Dio _apiClient;
   final Logger _logger = Logger();
   final Uuid _uuid = const Uuid();
+
+  List<FormQuestionOption> _createOptions(List<String> labels) {
+    return labels.asMap().entries.map((entry) {
+      return FormQuestionOption(
+        id: _uuid.v4(),
+        label: entry.value,
+        value: entry.value,
+        order: entry.key,
+      );
+    }).toList();
+  }
 
   TemplateLibraryRepositoryImpl(this._apiClient);
 
@@ -279,13 +291,13 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         type: QuestionType.multipleChoice,
         label: {'en': 'How did you hear about us?'},
         isRequired: true,
-        options: [
+        options: _createOptions([
           'Social Media',
           'Friend/Family',
           'Search Engine',
           'Advertisement',
           'Other',
-        ],
+        ]),
       ),
       FormQuestion(
         id: 'q4',
@@ -352,20 +364,20 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         type: QuestionType.dropdown,
         label: {'en': 'Country'},
         isRequired: true,
-        options: [
+        options: _createOptions([
           'United States',
           'United Kingdom',
           'Canada',
           'Australia',
           'Other',
-        ],
+        ]),
       ),
       FormQuestion(
         id: 'q6',
         type: QuestionType.checkboxes,
         label: {'en': 'I agree to the terms and conditions'},
         isRequired: true,
-        options: ['I agree'],
+        options: _createOptions(['I agree']),
       ),
     ];
 
@@ -433,7 +445,13 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         type: QuestionType.multipleChoice,
         label: {'en': 'Event Type'},
         isRequired: true,
-        options: ['Conference', 'Workshop', 'Webinar', 'Meetup', 'Other'],
+        options: _createOptions([
+          'Conference',
+          'Workshop',
+          'Webinar',
+          'Meetup',
+          'Other',
+        ]),
       ),
       FormQuestion(
         id: 'q7',
@@ -491,26 +509,26 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         type: QuestionType.multipleChoice,
         label: {'en': 'Would you recommend us?'},
         isRequired: true,
-        options: [
+        options: _createOptions([
           'Definitely',
           'Probably',
           'Maybe',
           'Probably Not',
           'Definitely Not',
-        ],
+        ]),
       ),
       FormQuestion(
         id: 'q4',
         type: QuestionType.checkboxes,
         label: {'en': 'What did you like?'},
         isRequired: false,
-        options: [
+        options: _createOptions([
           'Customer Service',
           'Product Quality',
           'Pricing',
           'User Experience',
           'Speed of Delivery',
-        ],
+        ]),
       ),
       FormQuestion(
         id: 'q5',

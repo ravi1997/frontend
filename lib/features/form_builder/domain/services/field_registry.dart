@@ -2,6 +2,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import '../entities/question_type.dart';
 import '../entities/form_question.dart';
+import '../entities/form_question_option.dart';
 import 'package:uuid/uuid.dart';
 
 class FieldRegistry {
@@ -36,7 +37,20 @@ class FieldRegistry {
           (type == QuestionType.dropdown ||
               type == QuestionType.checkboxes ||
               type == QuestionType.multipleChoice)
-          ? ['Option 1', 'Option 2']
+          ? [
+              FormQuestionOption(
+                id: const Uuid().v4(),
+                label: 'Option 1',
+                value: 'Option 1',
+                order: 0,
+              ),
+              FormQuestionOption(
+                id: const Uuid().v4(),
+                label: 'Option 2',
+                value: 'Option 2',
+                order: 1,
+              ),
+            ]
           : null,
     );
   }

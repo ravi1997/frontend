@@ -129,9 +129,11 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
   }
 
   void _onSave() {
-    if (_formKey.currentState!.validate()) { // Validate form
+    if (_formKey.currentState!.validate()) {
+      // Validate form
       // If validation action, require error message
-      if (_action == 'validate' && _errorMessageController.text.trim().isEmpty) {
+      if (_action == 'validate' &&
+          _errorMessageController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -164,7 +166,8 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     return AlertDialog(
       title: const Text('Configure Logic Rule'),
       scrollable: true,
-      content: Form( // Added Form widget
+      content: Form(
+        // Added Form widget
         key: _formKey, // Assign key
         child: SizedBox(
           width: 600,
@@ -220,14 +223,16 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
               // Contextual inputs based on Action
               if (_action == 'validate') ...[
                 const SizedBox(height: 12),
-                TextFormField( // Changed to TextFormField for validation
+                TextFormField(
+                  // Changed to TextFormField for validation
                   controller: _errorMessageController,
                   decoration: const InputDecoration(
                     labelText: 'Error Message',
                     border: OutlineInputBorder(),
                     hintText: 'e.g. You cannot select this option because...',
                   ),
-                  validator: (value) { // Added validator
+                  validator: (value) {
+                    // Added validator
                     if (value == null || value.isEmpty) {
                       return 'Error message is required for validation rules';
                     }
@@ -242,7 +247,10 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                   label: 'Select Option to Disable',
                   value: _selectedDisableOption,
                   items: (widget.currentQuestion.options ?? []).map((opt) {
-                    return DropdownMenuItem(value: opt, child: Text(opt));
+                    return DropdownMenuItem(
+                      value: opt.value,
+                      child: Text(opt.label),
+                    );
                   }).toList(),
                   onChanged: (val) =>
                       setState(() => _selectedDisableOption = val),
@@ -433,9 +441,11 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
       final opts = trigger.options!;
       return _buildDropdown(
         label: 'Value',
-        value: opts.contains(condition['value']) ? condition['value'] : null,
+        value: opts.any((o) => o.value == condition['value'])
+            ? condition['value']
+            : null,
         items: opts
-            .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+            .map((o) => DropdownMenuItem(value: o.value, child: Text(o.label)))
             .toList(),
         onChanged: (val) => setState(() => condition['value'] = val ?? ''),
       );
@@ -458,14 +468,16 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
           }
         },
         child: IgnorePointer(
-          child: TextFormField( // Changed to TextFormField
+          child: TextFormField(
+            // Changed to TextFormField
             controller: TextEditingController(text: condition['value']),
             decoration: const InputDecoration(
               labelText: 'Date (YYYY-MM-DD)',
               border: OutlineInputBorder(),
               suffixIcon: Icon(Icons.calendar_today),
             ),
-            validator: (value) { // Added validator
+            validator: (value) {
+              // Added validator
               if (value == null || value.isEmpty) {
                 return 'Date is required';
               }
@@ -477,7 +489,8 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     }
 
     // Default text input
-    return TextFormField( // Changed to TextFormField
+    return TextFormField(
+      // Changed to TextFormField
       controller: TextEditingController(text: condition['value'])
         ..selection = TextSelection.collapsed(
           offset: condition['value']?.length ?? 0,
@@ -488,7 +501,8 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
         border: OutlineInputBorder(),
       ),
       onChanged: (val) => condition['value'] = val,
-      validator: (value) { // Added validator
+      validator: (value) {
+        // Added validator
         final op = condition['operator'];
         final needsValue = op != 'is_empty' && op != 'is_not_empty';
         if (needsValue && (value == null || value.isEmpty)) {

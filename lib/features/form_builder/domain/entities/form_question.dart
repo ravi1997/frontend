@@ -3,6 +3,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'question_type.dart';
 import 'form_style.dart';
+import 'form_question_option.dart';
 
 part 'form_question.freezed.dart';
 part 'form_question.g.dart';
@@ -24,7 +25,7 @@ abstract class FormQuestion with _$FormQuestion {
     Object? helperText,
     Object? placeholder,
     @Default(false) bool isRequired,
-    List<String>? options,
+    List<FormQuestionOption>? options,
     @Default(false) bool isReadOnly,
     @Default(false) bool isHidden,
     String? validationRegex,

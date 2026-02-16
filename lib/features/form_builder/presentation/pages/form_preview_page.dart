@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -12,6 +13,10 @@ import '../../domain/entities/section_layout_type.dart';
 import '../../domain/services/workflow_executor_provider.dart';
 import '../../../responses/presentation/controllers/form_submission_controller.dart';
 import '../../../../core/localization/locale_controller.dart';
+
+final previewFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
+  (ref) => {},
+);
 
 class FormPreviewPage extends ConsumerStatefulWidget {
   final BuilderForm form;
@@ -317,18 +322,20 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         onPressed: submissionState.isLoading
             ? null
             : () async {
-                final dummyData = {
+                final formData = ref.read(previewFormDataProvider);
+                final submissionData = {
+                  ...formData,
                   'preview': 'true',
                   'timestamp': DateTime.now().toIso8601String(),
                 };
                 final success = await ref
                     .read(formSubmissionControllerProvider.notifier)
-                    .submit(widget.form.id, dummyData);
+                    .submit(widget.form.id, submissionData);
 
                 if (success && context.mounted) {
                   await ref
                       .read(workflowExecutorProvider)
-                      .execute(widget.form, dummyData);
+                      .execute(widget.form, submissionData);
 
                   // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -560,10 +567,30 @@ class _PreviewSectionWidget extends ConsumerWidget {
   }
 }
 
-class _PreviewFieldWidget extends ConsumerWidget {
+class _PreviewFieldWidget extends ConsumerStatefulWidget {
   final FormQuestion question;
 
   const _PreviewFieldWidget({required this.question});
+
+  @override
+  ConsumerState<_PreviewFieldWidget> createState() =>
+      _PreviewFieldWidgetState();
+}
+
+class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Color _parseColor(String hex, Color fallback) {
     try {
@@ -585,9 +612,9 @@ class _PreviewFieldWidget extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final locale = ref.watch(localeControllerProvider).languageCode;
-    final style = question.style;
+    final style = widget.question.style;
     final labelColor = _parseColor(style.labelColor, AppColors.textDark);
     final helperColor = _parseColor(style.helperColor, AppColors.textGrey);
 
@@ -595,11 +622,11 @@ class _PreviewFieldWidget extends ConsumerWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInput(question, locale),
-          if (question.helperText.translate(locale).isNotEmpty) ...[
+          _buildInput(widget.question, locale),
+          if (widget.question.helperText.translate(locale).isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              question.helperText.translate(locale),
+              widget.question.helperText.translate(locale),
               style: TextStyle(
                 color: helperColor,
                 fontSize: style.helperFontSize,
@@ -620,7 +647,7 @@ class _PreviewFieldWidget extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: Text(
-                question.label.translate(locale),
+                widget.question.label.translate(locale),
                 style: TextStyle(
                   color: labelColor,
                   fontSize: style.labelFontSize,
@@ -635,11 +662,13 @@ class _PreviewFieldWidget extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInput(question, locale),
-                if (question.helperText.translate(locale).isNotEmpty) ...[
+                _buildInput(widget.question, locale),
+                if (widget.question.helperText
+                    .translate(locale)
+                    .isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    question.helperText.translate(locale),
+                    widget.question.helperText.translate(locale),
                     style: TextStyle(
                       color: helperColor,
                       fontSize: style.helperFontSize,
@@ -662,7 +691,7 @@ class _PreviewFieldWidget extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                question.label.translate(locale),
+                widget.question.label.translate(locale),
                 style: TextStyle(
                   color: labelColor,
                   fontSize: style.labelFontSize,
@@ -670,7 +699,7 @@ class _PreviewFieldWidget extends ConsumerWidget {
                 ),
               ),
             ),
-            if (question.isRequired)
+            if (widget.question.isRequired)
               const Padding(
                 padding: EdgeInsets.only(left: 4.0),
                 child: Text(
@@ -680,10 +709,10 @@ class _PreviewFieldWidget extends ConsumerWidget {
               ),
           ],
         ),
-        if (question.helperText.translate(locale).isNotEmpty) ...[
+        if (widget.question.helperText.translate(locale).isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            question.helperText.translate(locale),
+            widget.question.helperText.translate(locale),
             style: TextStyle(
               color: helperColor,
               fontSize: style.helperFontSize,
@@ -692,7 +721,7 @@ class _PreviewFieldWidget extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: 8),
-        _buildInput(question, locale),
+        _buildInput(widget.question, locale),
       ],
     );
   }
@@ -700,43 +729,38 @@ class _PreviewFieldWidget extends ConsumerWidget {
   Widget _buildInput(FormQuestion q, String locale) {
     final style = q.style;
     final inputStyle = style.inputStyle;
+
+    // Determine colors
     Color fillColor = _parseColor(
       style.backgroundColor,
       AppColors.fieldBackground,
     );
-    BoxBorder border = Border.all(
-      color: _parseColor(style.borderColor, AppColors.borderLight),
-      width: style.borderWidth,
-    );
+    Color borderColor = _parseColor(style.borderColor, AppColors.borderLight);
     double radius = style.borderRadius;
+    bool isUnderlined = false;
 
     switch (inputStyle) {
       case 'filled':
         fillColor = Colors.grey.shade100;
-        border = Border(
-          bottom: BorderSide(color: AppColors.textGrey, width: 2),
-        );
+        borderColor = AppColors.textGrey;
+        isUnderlined = true;
         break;
       case 'glass':
-        fillColor = Colors.white.withValues(alpha: 0.3);
-        border = Border.all(color: Colors.white.withValues(alpha: 0.5));
+        fillColor = Colors.white.withAlpha(76); // 0.3
+        borderColor = Colors.white.withAlpha(127); // 0.5
         break;
       case 'minimalist':
         fillColor = Colors.transparent;
-        border = const Border(bottom: BorderSide(color: AppColors.borderLight));
+        borderColor = AppColors.borderLight;
+        isUnderlined = true;
         break;
       case 'underlined':
         fillColor = Colors.transparent;
-        border = const Border(bottom: BorderSide(color: AppColors.borderLight));
+        borderColor = AppColors.borderLight;
         radius = 0;
+        isUnderlined = true;
         break;
     }
-
-    final decoration = BoxDecoration(
-      color: fillColor,
-      borderRadius: BorderRadius.circular(radius),
-      border: border,
-    );
 
     final inputColor = _parseColor(style.inputFontColor, AppColors.textDark);
     final textStyle = TextStyle(
@@ -745,107 +769,163 @@ class _PreviewFieldWidget extends ConsumerWidget {
       fontWeight: _parseFontWeight(style.inputFontWeight),
     );
 
+    InputBorder getBorder(Color color, {bool focused = false}) {
+      if (isUnderlined) {
+        return UnderlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: focused ? 2.0 : style.borderWidth,
+          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+        );
+      }
+
+      return OutlineInputBorder(
+        borderRadius: BorderRadius.circular(radius),
+        borderSide: BorderSide(
+          color: color,
+          width: focused ? 2.0 : style.borderWidth,
+        ),
+      );
+    }
+
+    final inputDecoration = InputDecoration(
+      filled: true,
+      fillColor: fillColor,
+      hintText: q.placeholder.translate(locale),
+      hintStyle: textStyle.copyWith(color: inputColor.withAlpha(102)), // 0.4
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: getBorder(borderColor),
+      enabledBorder: getBorder(borderColor),
+      focusedBorder: getBorder(Theme.of(context).primaryColor, focused: true),
+      prefixIcon: (style.prefixIcon != null && style.prefixIcon!.isNotEmpty)
+          ? Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(style.prefixIcon!, style: textStyle),
+            )
+          : null,
+      prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+      suffixIcon: (style.suffixIcon != null && style.suffixIcon!.isNotEmpty)
+          ? Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(style.suffixIcon!, style: textStyle),
+            )
+          : null,
+      suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+    );
+
     switch (q.type) {
       case QuestionType.shortText:
       case QuestionType.number:
       case QuestionType.email:
       case QuestionType.mobile:
       case QuestionType.url:
-        return Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: decoration,
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: [
-              if (style.prefixIcon != null && style.prefixIcon!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Text(style.prefixIcon!, style: textStyle),
-                ),
-              Expanded(
-                child: Text(
-                  q.placeholder.translate(locale),
-                  style: textStyle.copyWith(
-                    color: inputColor.withValues(alpha: 0.4),
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (style.suffixIcon != null && style.suffixIcon!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(style.suffixIcon!, style: textStyle),
-                ),
-            ],
-          ),
+        TextInputType keyboardType = TextInputType.text;
+        if (q.type == QuestionType.number) keyboardType = TextInputType.number;
+        if (q.type == QuestionType.email)
+          keyboardType = TextInputType.emailAddress;
+        if (q.type == QuestionType.mobile) keyboardType = TextInputType.phone;
+        if (q.type == QuestionType.url) keyboardType = TextInputType.url;
+
+        return TextFormField(
+          controller: _controller,
+          style: textStyle,
+          decoration: inputDecoration,
+          keyboardType: keyboardType,
+          onChanged: (val) {
+            ref.read(previewFormDataProvider.notifier).update((state) {
+              return {...state, q.id: val};
+            });
+          },
         );
+
       case QuestionType.paragraph:
-        return Container(
-          height: 120,
-          padding: const EdgeInsets.all(14),
-          decoration: decoration,
-          alignment: Alignment.topLeft,
-          child: Text(
-            q.placeholder.translate(locale).isEmpty
-                ? 'Your answer...'
-                : q.placeholder.translate(locale),
-            style: textStyle.copyWith(color: inputColor.withValues(alpha: 0.4)),
-          ),
+        return TextFormField(
+          controller: _controller,
+          style: textStyle,
+          decoration: inputDecoration.copyWith(alignLabelWithHint: true),
+          maxLines: 5,
+          minLines: 3,
+          onChanged: (val) {
+            ref.read(previewFormDataProvider.notifier).update((state) {
+              return {...state, q.id: val};
+            });
+          },
         );
+
       case QuestionType.dropdown:
-        return Container(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: decoration,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  q.placeholder.translate(locale).isEmpty
-                      ? 'Select...'
-                      : q.placeholder.translate(locale),
-                  style: textStyle.copyWith(
-                    color: inputColor.withValues(alpha: 0.4),
-                  ),
-                ),
-              ),
-              const Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
-            ],
-          ),
-        );
-      case QuestionType.checkboxes:
-      case QuestionType.multipleChoice:
-        final isRadio = q.type == QuestionType.multipleChoice;
-        return Column(
-          children: (q.options ?? ['Option 1', 'Option 2']).map((opt) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Row(
-                children: [
-                  Icon(
-                    isRadio
-                        ? Icons.radio_button_unchecked
-                        : Icons.check_box_outline_blank,
-                    size: 20,
-                    color: AppColors.textGrey,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(opt, style: textStyle),
-                ],
-              ),
+        final options = q.options ?? [];
+        final formData = ref.watch(previewFormDataProvider);
+        return DropdownButtonFormField<String>(
+          value: formData[q.id] as String?,
+          style: textStyle,
+          decoration: inputDecoration,
+          icon: const Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
+          items: options.map((opt) {
+            return DropdownMenuItem(
+              value: opt.value,
+              child: Text(opt.label, style: textStyle),
             );
           }).toList(),
+          onChanged: (val) {
+            if (val != null) {
+              ref.read(previewFormDataProvider.notifier).update((state) {
+                return {...state, q.id: val};
+              });
+            }
+          },
         );
-      default:
+
+      case QuestionType.checkboxes:
+      case QuestionType.multipleChoice:
+        final options = q.options ?? [];
+        final isRadio = q.type == QuestionType.multipleChoice;
+        // Preview only: show options
         return Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: decoration,
-          child: Center(
-            child: Text(
-              'Preview of ${q.type.label}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(radius),
+            color: fillColor,
+          ),
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: options.map((opt) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      isRadio
+                          ? Icons.radio_button_unchecked
+                          : Icons.check_box_outline_blank,
+                      color: AppColors.textGrey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(opt.label, style: textStyle),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+
+      default:
+        // Fallback
+        return Container(
+          height: 48,
+          decoration: BoxDecoration(
+            color: fillColor,
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Text(
+            'Preview: ${q.type.name}',
+            style: const TextStyle(
+              color: Colors.grey,
+              fontStyle: FontStyle.italic,
             ),
           ),
         );

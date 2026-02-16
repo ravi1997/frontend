@@ -2,6 +2,7 @@ import 'package:frontend/features/form_builder/domain/entities/builder_form.dart
 import 'package:frontend/features/form_builder/domain/entities/form_version_history.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/features/form_builder/domain/entities/form_question_option.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/domain/repositories/form_builder_repository.dart';
 
@@ -33,7 +34,26 @@ class MockFormBuilderRepository implements FormBuilderRepository {
               id: 'q3',
               label: 'Gender',
               type: QuestionType.dropdown,
-              options: ['Male', 'Female', 'Other'],
+              options: const [
+                FormQuestionOption(
+                  id: 'opt_m',
+                  label: 'Male',
+                  value: 'Male',
+                  order: 0,
+                ),
+                FormQuestionOption(
+                  id: 'opt_f',
+                  label: 'Female',
+                  value: 'Female',
+                  order: 1,
+                ),
+                FormQuestionOption(
+                  id: 'opt_o',
+                  label: 'Other',
+                  value: 'Other',
+                  order: 2,
+                ),
+              ],
             ),
           ],
         ),
