@@ -45,6 +45,19 @@ abstract class FormQuestion with _$FormQuestion {
     bool? isUnique,
     bool? requiresConfirmation,
 
+    // Checkbox / Select Limits
+    int? minSelection,
+    int? maxSelection,
+
+    // Word Count (Paragraph)
+    int? minWordCount,
+    int? maxWordCount,
+
+    // Date Constraints
+    bool? disablePastDates,
+    bool? disableFutureDates,
+    bool? disableWeekends,
+
     Map<String, dynamic>? conditionalLogic,
     Map<String, dynamic>? metadata,
     @Default(QuestionStyle()) QuestionStyle style,

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$BuilderForm {
 
  String get id; Object? get title; String get status; bool get isPublished; String get version; bool get isLatest; List<FormSection> get sections; FormLayoutType get layout;// ignore: invalid_annotation_target
-@JsonKey(fromJson: _parseDateTime) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows;
+@JsonKey(fromJson: _parseDateTime) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows; Map<String, dynamic> get metadata;
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $BuilderFormCopyWith<BuilderForm> get copyWith => _$BuilderFormCopyWithImpl<Buil
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuilderForm&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.version, version) || other.version == version)&&(identical(other.isLatest, isLatest) || other.isLatest == isLatest)&&const DeepCollectionEquality().equals(other.sections, sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other.versionHistory, versionHistory)&&const DeepCollectionEquality().equals(other.workflows, workflows));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuilderForm&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.version, version) || other.version == version)&&(identical(other.isLatest, isLatest) || other.isLatest == isLatest)&&const DeepCollectionEquality().equals(other.sections, sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other.versionHistory, versionHistory)&&const DeepCollectionEquality().equals(other.workflows, workflows)&&const DeepCollectionEquality().equals(other.metadata, metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),status,isPublished,version,isLatest,const DeepCollectionEquality().hash(sections),layout,updatedAt,style,const DeepCollectionEquality().hash(versionHistory),const DeepCollectionEquality().hash(workflows));
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),status,isPublished,version,isLatest,const DeepCollectionEquality().hash(sections),layout,updatedAt,style,const DeepCollectionEquality().hash(versionHistory),const DeepCollectionEquality().hash(workflows),const DeepCollectionEquality().hash(metadata));
 
 @override
 String toString() {
-  return 'BuilderForm(id: $id, title: $title, status: $status, isPublished: $isPublished, version: $version, isLatest: $isLatest, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style, versionHistory: $versionHistory, workflows: $workflows)';
+  return 'BuilderForm(id: $id, title: $title, status: $status, isPublished: $isPublished, version: $version, isLatest: $isLatest, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style, versionHistory: $versionHistory, workflows: $workflows, metadata: $metadata)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $BuilderFormCopyWith<$Res>  {
   factory $BuilderFormCopyWith(BuilderForm value, $Res Function(BuilderForm) _then) = _$BuilderFormCopyWithImpl;
 @useResult
 $Res call({
- String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: _parseDateTime) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows
+ String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: _parseDateTime) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata
 });
 
 
@@ -66,7 +66,7 @@ class _$BuilderFormCopyWithImpl<$Res>
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? status = null,Object? isPublished = null,Object? version = null,Object? isLatest = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,Object? versionHistory = null,Object? workflows = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? status = null,Object? isPublished = null,Object? version = null,Object? isLatest = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,Object? versionHistory = null,Object? workflows = null,Object? metadata = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: freezed == title ? _self.title : title ,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
@@ -79,6 +79,7 @@ as FormLayoutType,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt 
 as DateTime?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
 as FormStyle,versionHistory: null == versionHistory ? _self.versionHistory : versionHistory // ignore: cast_nullable_to_non_nullable
 as List<FormVersionHistory>,workflows: null == workflows ? _self.workflows : workflows // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,metadata: null == metadata ? _self.metadata : metadata // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }
@@ -173,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows);case _:
+return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata);case _:
   return orElse();
 
 }
@@ -194,10 +195,10 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata)  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm():
-return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows);case _:
+return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +215,10 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: _parseDateTime)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata)?  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows);case _:
+return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata);case _:
   return null;
 
 }
@@ -229,7 +230,7 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 @JsonSerializable()
 
 class _BuilderForm extends BuilderForm {
-  const _BuilderForm({required this.id, required this.title, this.status = 'draft', this.isPublished = false, this.version = '1.0.0', this.isLatest = true, required final  List<FormSection> sections, this.layout = FormLayoutType.singleColumn, @JsonKey(fromJson: _parseDateTime) this.updatedAt, this.style = const FormStyle(), final  List<FormVersionHistory> versionHistory = const [], final  Map<String, dynamic> workflows = const {}}): _sections = sections,_versionHistory = versionHistory,_workflows = workflows,super._();
+  const _BuilderForm({required this.id, required this.title, this.status = 'draft', this.isPublished = false, this.version = '1.0.0', this.isLatest = true, required final  List<FormSection> sections, this.layout = FormLayoutType.singleColumn, @JsonKey(fromJson: _parseDateTime) this.updatedAt, this.style = const FormStyle(), final  List<FormVersionHistory> versionHistory = const [], final  Map<String, dynamic> workflows = const {}, final  Map<String, dynamic> metadata = const {}}): _sections = sections,_versionHistory = versionHistory,_workflows = workflows,_metadata = metadata,super._();
   factory _BuilderForm.fromJson(Map<String, dynamic> json) => _$BuilderFormFromJson(json);
 
 @override final  String id;
@@ -263,6 +264,13 @@ class _BuilderForm extends BuilderForm {
   return EqualUnmodifiableMapView(_workflows);
 }
 
+ final  Map<String, dynamic> _metadata;
+@override@JsonKey() Map<String, dynamic> get metadata {
+  if (_metadata is EqualUnmodifiableMapView) return _metadata;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_metadata);
+}
+
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
@@ -277,16 +285,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuilderForm&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.version, version) || other.version == version)&&(identical(other.isLatest, isLatest) || other.isLatest == isLatest)&&const DeepCollectionEquality().equals(other._sections, _sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other._versionHistory, _versionHistory)&&const DeepCollectionEquality().equals(other._workflows, _workflows));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuilderForm&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&(identical(other.status, status) || other.status == status)&&(identical(other.isPublished, isPublished) || other.isPublished == isPublished)&&(identical(other.version, version) || other.version == version)&&(identical(other.isLatest, isLatest) || other.isLatest == isLatest)&&const DeepCollectionEquality().equals(other._sections, _sections)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other._versionHistory, _versionHistory)&&const DeepCollectionEquality().equals(other._workflows, _workflows)&&const DeepCollectionEquality().equals(other._metadata, _metadata));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),status,isPublished,version,isLatest,const DeepCollectionEquality().hash(_sections),layout,updatedAt,style,const DeepCollectionEquality().hash(_versionHistory),const DeepCollectionEquality().hash(_workflows));
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),status,isPublished,version,isLatest,const DeepCollectionEquality().hash(_sections),layout,updatedAt,style,const DeepCollectionEquality().hash(_versionHistory),const DeepCollectionEquality().hash(_workflows),const DeepCollectionEquality().hash(_metadata));
 
 @override
 String toString() {
-  return 'BuilderForm(id: $id, title: $title, status: $status, isPublished: $isPublished, version: $version, isLatest: $isLatest, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style, versionHistory: $versionHistory, workflows: $workflows)';
+  return 'BuilderForm(id: $id, title: $title, status: $status, isPublished: $isPublished, version: $version, isLatest: $isLatest, sections: $sections, layout: $layout, updatedAt: $updatedAt, style: $style, versionHistory: $versionHistory, workflows: $workflows, metadata: $metadata)';
 }
 
 
@@ -297,7 +305,7 @@ abstract mixin class _$BuilderFormCopyWith<$Res> implements $BuilderFormCopyWith
   factory _$BuilderFormCopyWith(_BuilderForm value, $Res Function(_BuilderForm) _then) = __$BuilderFormCopyWithImpl;
 @override @useResult
 $Res call({
- String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: _parseDateTime) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows
+ String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: _parseDateTime) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata
 });
 
 
@@ -314,7 +322,7 @@ class __$BuilderFormCopyWithImpl<$Res>
 
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? status = null,Object? isPublished = null,Object? version = null,Object? isLatest = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,Object? versionHistory = null,Object? workflows = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? status = null,Object? isPublished = null,Object? version = null,Object? isLatest = null,Object? sections = null,Object? layout = null,Object? updatedAt = freezed,Object? style = null,Object? versionHistory = null,Object? workflows = null,Object? metadata = null,}) {
   return _then(_BuilderForm(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: freezed == title ? _self.title : title ,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
@@ -327,6 +335,7 @@ as FormLayoutType,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt 
 as DateTime?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
 as FormStyle,versionHistory: null == versionHistory ? _self._versionHistory : versionHistory // ignore: cast_nullable_to_non_nullable
 as List<FormVersionHistory>,workflows: null == workflows ? _self._workflows : workflows // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,metadata: null == metadata ? _self._metadata : metadata // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }

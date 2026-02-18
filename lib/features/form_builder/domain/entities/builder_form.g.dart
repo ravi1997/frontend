@@ -29,6 +29,7 @@ _BuilderForm _$BuilderFormFromJson(Map<String, dynamic> json) => _BuilderForm(
           .toList() ??
       const [],
   workflows: json['workflows'] as Map<String, dynamic>? ?? const {},
+  metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$BuilderFormToJson(_BuilderForm instance) =>
@@ -45,6 +46,7 @@ Map<String, dynamic> _$BuilderFormToJson(_BuilderForm instance) =>
       'style': instance.style,
       'versionHistory': instance.versionHistory,
       'workflows': instance.workflows,
+      'metadata': instance.metadata,
     };
 
 const _$FormLayoutTypeEnumMap = {

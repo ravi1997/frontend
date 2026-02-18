@@ -22,6 +22,7 @@ _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
   style: json['style'] == null
       ? const SectionStyle()
       : SectionStyle.fromJson(json['style'] as Map<String, dynamic>),
+  metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$FormSectionToJson(_FormSection instance) =>
@@ -35,6 +36,7 @@ Map<String, dynamic> _$FormSectionToJson(_FormSection instance) =>
       'isHidden': instance.isHidden,
       'conditionalLogic': instance.conditionalLogic,
       'style': instance.style,
+      'metadata': instance.metadata,
     };
 
 const _$SectionLayoutTypeEnumMap = {

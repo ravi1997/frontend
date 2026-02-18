@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'form_section.dart';
 import 'form_layout_type.dart';
 import 'form_style.dart';
@@ -26,6 +25,7 @@ abstract class BuilderForm with _$BuilderForm {
     @Default(FormStyle()) FormStyle style,
     @Default([]) List<FormVersionHistory> versionHistory,
     @Default({}) Map<String, dynamic> workflows,
+    @Default({}) Map<String, dynamic> metadata,
   }) = _BuilderForm;
 
   factory BuilderForm.fromJson(Map<String, dynamic> json) =>

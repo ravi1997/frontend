@@ -28,6 +28,7 @@ abstract class FormSection with _$FormSection {
     @Default(false) bool isHidden,
     Map<String, dynamic>? conditionalLogic,
     @Default(SectionStyle()) SectionStyle style,
+    @Default({}) Map<String, dynamic> metadata,
   }) = _FormSection;
 
   factory FormSection.fromJson(Map<String, dynamic> json) =>
