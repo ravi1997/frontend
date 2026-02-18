@@ -6,6 +6,8 @@ import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../domain/entities/form_section.dart';
+import '../dto/form_dto.dart';
+import '../mappers/form_mapper.dart';
 
 /// Implementation of [FormBuilderRepository] for managing form CRUD operations.
 ///
@@ -21,88 +23,20 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   Future<BuilderForm> getForm(String id) async {
     try {
       final response = await _apiClient.get(ApiEndpoints.getForm(id));
-      final data = response.data;
+      final dto = FormDto.fromJson(response.data as Map<String, dynamic>);
 
-      return _parseBuilderForm(data);
+      return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to load form', error: e, stackTrace: s);
       throw FormLoadException(id, originalError: e);
     }
   }
 
-  BuilderForm _parseBuilderForm(dynamic data) {
-    if (data == null) {
-      throw FormLoadException(
-        'unknown',
-        originalError: 'Response data is null',
-      );
-    }
-
-    // Ensure data is deeply sanitized to Map<String, dynamic>
-    // This handles LinkedHashMap and other dynamic map types from backend
-    final Map<String, dynamic> mapData =
-        _sanitizeData(data) as Map<String, dynamic>;
-
-    // Backend returns form with versions array
-    // We need to extract the active/latest version's sections
-    List<dynamic> versions = mapData['versions'] ?? [];
-    String activeVersion = mapData['active_version'] ?? '1.0';
-
-    // Find the active version or use the last one
-    Map<String, dynamic>? versionData;
-    if (versions.isNotEmpty) {
-      final foundVersion = versions.firstWhere(
-        (v) => v['version'] == activeVersion,
-        orElse: () => versions.last,
-      );
-      versionData = foundVersion as Map<String, dynamic>;
-    }
-
-    // Extract sections from the version
-    List<dynamic> sections = versionData?['sections'] ?? [];
-
-    // Transform to frontend format
-    final Map<String, dynamic> transformedData = {
-      'id': mapData['id'] ?? mapData['_id'],
-      'title': mapData['title'] ?? 'Untitled Form',
-      'status': mapData['status'] ?? 'draft',
-      'isPublished': mapData['status'] == 'published',
-      'version': activeVersion,
-      'isLatest': true,
-      'sections': sections.cast<Map<String, dynamic>>().toList(),
-      'updatedAt': mapData['updated_at'],
-
-      'workflows': mapData['workflows'] ?? <String, dynamic>{},
-      'versionHistory': versions.map((v) {
-        return {
-          'version': v['version'],
-          'createdAt': v['created_at'],
-          'changeLog': 'Version ${v['version']}',
-        };
-      }).toList(),
-    };
-
-    return BuilderForm.fromJson(transformedData);
-  }
-
   @override
   Future<BuilderForm> saveForm(BuilderForm form) async {
     try {
       // Transform frontend format to backend format
-      final backendData = {
-        'title': form.title,
-        'status': form.status,
-        'slug': form.id, // Use ID as slug for now
-        'versions': [
-          {
-            'version': form.version,
-            'sections': form.sections.map((s) => s.toJson()).toList(),
-            'created_at': DateTime.now().toIso8601String(),
-          },
-        ],
-        'active_version': form.version,
-        'workflows': form.workflows,
-      };
+      final backendData = FormMapper.toBackendJson(form);
 
       dynamic responseData;
       // If form exists update, otherwise create
@@ -119,7 +53,9 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         );
         responseData = response.data['form'];
       }
-      return _parseBuilderForm(responseData);
+      // Ideally backend returns consistent structure.
+      final dto = FormDto.fromJson(responseData as Map<String, dynamic>);
+      return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
       throw FormSaveException(form.id, originalError: e);
@@ -166,7 +102,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         ApiEndpoints.getFormVersion(formId, version),
       );
 
-      return _parseBuilderForm(response.data);
+      final dto = FormDto.fromJson(response.data as Map<String, dynamic>);
+      return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to load form version', error: e, stackTrace: s);
       throw FormVersionException(formId, version, originalError: e);
@@ -191,40 +128,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final suggestion = data['suggestion'] as Map<String, dynamic>;
       final sectionsJson = suggestion['sections'] as List<dynamic>;
 
-      final transformedSections = sectionsJson.map((s) {
-        final section = Map<String, dynamic>.from(s);
-        final questions = (section['questions'] as List<dynamic>).map((q) {
-          final question = Map<String, dynamic>.from(q);
-
-          // Map backend to frontend fields
-          if (question.containsKey('question_text')) {
-            question['label'] = question['question_text'];
-          }
-          if (question.containsKey('field_type')) {
-            // Normalize field types
-            String type = question['field_type'];
-            if (type == 'long_text') type = 'paragraph';
-            if (type == 'radio' || type == 'boolean') type = 'multiple_choice';
-            if (type == 'checkbox') type = 'checkboxes';
-            question['type'] = type;
-          }
-
-          // Map options from List<Map> to List<String>
-          if (question.containsKey('options') && question['options'] is List) {
-            question['options'] = (question['options'] as List).map((o) {
-              if (o is Map) return o['option_label'] ?? o['label'] ?? '';
-              return o.toString();
-            }).toList();
-          }
-
-          return question;
-        }).toList();
-
-        section['questions'] = questions;
-        return FormSection.fromJson(section);
-      }).toList();
-
-      return transformedSections;
+      return FormMapper.mapAISectionsToFrontend(sectionsJson);
     } catch (e, s) {
       _logger.e('Failed to generate fields with AI', error: e, stackTrace: s);
       rethrow;
@@ -268,19 +172,5 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         'suggestions': [],
       };
     }
-  }
-
-  dynamic _sanitizeData(dynamic data) {
-    if (data is Map) {
-      final sanitized = <String, dynamic>{};
-      data.forEach((key, value) {
-        sanitized[key.toString()] = _sanitizeData(value);
-      });
-      return sanitized;
-    }
-    if (data is List) {
-      return data.map((item) => _sanitizeData(item)).toList();
-    }
-    return data;
   }
 }

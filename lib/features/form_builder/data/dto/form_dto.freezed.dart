@@ -1,0 +1,601 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'form_dto.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$FormDto {
+
+// Handle both 'id' and '_id' from backend
+// ignore: invalid_annotation_target
+@JsonKey(name: 'id', readValue: _readId) String get id; String get title; String get status;// ignore: invalid_annotation_target
+@JsonKey(name: 'active_version') String? get activeVersion;// The backend returns a list of version objects under 'versions'
+ List<FormVersionDto> get versions;// ignore: invalid_annotation_target
+@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get createdAt;// ignore: invalid_annotation_target
+@JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get updatedAt;// Workflows might be a Map or dynamic
+ Map<String, dynamic> get workflows;
+/// Create a copy of FormDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormDtoCopyWith<FormDto> get copyWith => _$FormDtoCopyWithImpl<FormDto>(this as FormDto, _$identity);
+
+  /// Serializes this FormDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other.versions, versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.workflows, workflows));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,status,activeVersion,const DeepCollectionEquality().hash(versions),createdAt,updatedAt,const DeepCollectionEquality().hash(workflows));
+
+@override
+String toString() {
+  return 'FormDto(id: $id, title: $title, status: $status, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormDtoCopyWith<$Res>  {
+  factory $FormDtoCopyWith(FormDto value, $Res Function(FormDto) _then) = _$FormDtoCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'id', readValue: _readId) String id, String title, String status,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? updatedAt, Map<String, dynamic> workflows
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormDtoCopyWithImpl<$Res>
+    implements $FormDtoCopyWith<$Res> {
+  _$FormDtoCopyWithImpl(this._self, this._then);
+
+  final FormDto _self;
+  final $Res Function(FormDto) _then;
+
+/// Create a copy of FormDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
+as String?,versions: null == versions ? _self.versions : versions // ignore: cast_nullable_to_non_nullable
+as List<FormVersionDto>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,workflows: null == workflows ? _self.workflows : workflows // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FormDto].
+extension FormDtoPatterns on FormDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FormDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FormDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FormDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _FormDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FormDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FormDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? updatedAt,  Map<String, dynamic> workflows)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FormDto() when $default != null:
+return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? updatedAt,  Map<String, dynamic> workflows)  $default,) {final _that = this;
+switch (_that) {
+case _FormDto():
+return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? updatedAt,  Map<String, dynamic> workflows)?  $default,) {final _that = this;
+switch (_that) {
+case _FormDto() when $default != null:
+return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FormDto extends FormDto {
+  const _FormDto({@JsonKey(name: 'id', readValue: _readId) required this.id, this.title = 'Untitled Form', this.status = 'draft', @JsonKey(name: 'active_version') this.activeVersion, final  List<FormVersionDto> versions = const [], @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) this.createdAt, @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) this.updatedAt, final  Map<String, dynamic> workflows = const {}}): _versions = versions,_workflows = workflows,super._();
+  factory _FormDto.fromJson(Map<String, dynamic> json) => _$FormDtoFromJson(json);
+
+// Handle both 'id' and '_id' from backend
+// ignore: invalid_annotation_target
+@override@JsonKey(name: 'id', readValue: _readId) final  String id;
+@override@JsonKey() final  String title;
+@override@JsonKey() final  String status;
+// ignore: invalid_annotation_target
+@override@JsonKey(name: 'active_version') final  String? activeVersion;
+// The backend returns a list of version objects under 'versions'
+ final  List<FormVersionDto> _versions;
+// The backend returns a list of version objects under 'versions'
+@override@JsonKey() List<FormVersionDto> get versions {
+  if (_versions is EqualUnmodifiableListView) return _versions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_versions);
+}
+
+// ignore: invalid_annotation_target
+@override@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) final  DateTime? createdAt;
+// ignore: invalid_annotation_target
+@override@JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) final  DateTime? updatedAt;
+// Workflows might be a Map or dynamic
+ final  Map<String, dynamic> _workflows;
+// Workflows might be a Map or dynamic
+@override@JsonKey() Map<String, dynamic> get workflows {
+  if (_workflows is EqualUnmodifiableMapView) return _workflows;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_workflows);
+}
+
+
+/// Create a copy of FormDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FormDtoCopyWith<_FormDto> get copyWith => __$FormDtoCopyWithImpl<_FormDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FormDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other._versions, _versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._workflows, _workflows));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,title,status,activeVersion,const DeepCollectionEquality().hash(_versions),createdAt,updatedAt,const DeepCollectionEquality().hash(_workflows));
+
+@override
+String toString() {
+  return 'FormDto(id: $id, title: $title, status: $status, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FormDtoCopyWith<$Res> implements $FormDtoCopyWith<$Res> {
+  factory _$FormDtoCopyWith(_FormDto value, $Res Function(_FormDto) _then) = __$FormDtoCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'id', readValue: _readId) String id, String title, String status,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? updatedAt, Map<String, dynamic> workflows
+});
+
+
+
+
+}
+/// @nodoc
+class __$FormDtoCopyWithImpl<$Res>
+    implements _$FormDtoCopyWith<$Res> {
+  __$FormDtoCopyWithImpl(this._self, this._then);
+
+  final _FormDto _self;
+  final $Res Function(_FormDto) _then;
+
+/// Create a copy of FormDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,}) {
+  return _then(_FormDto(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
+as String?,versions: null == versions ? _self._versions : versions // ignore: cast_nullable_to_non_nullable
+as List<FormVersionDto>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,workflows: null == workflows ? _self._workflows : workflows // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$FormVersionDto {
+
+ String get version; List<Map<String, dynamic>> get sections;@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get createdAt;
+/// Create a copy of FormVersionDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormVersionDtoCopyWith<FormVersionDto> get copyWith => _$FormVersionDtoCopyWithImpl<FormVersionDto>(this as FormVersionDto, _$identity);
+
+  /// Serializes this FormVersionDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormVersionDto&&(identical(other.version, version) || other.version == version)&&const DeepCollectionEquality().equals(other.sections, sections)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,version,const DeepCollectionEquality().hash(sections),createdAt);
+
+@override
+String toString() {
+  return 'FormVersionDto(version: $version, sections: $sections, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormVersionDtoCopyWith<$Res>  {
+  factory $FormVersionDtoCopyWith(FormVersionDto value, $Res Function(FormVersionDto) _then) = _$FormVersionDtoCopyWithImpl;
+@useResult
+$Res call({
+ String version, List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormVersionDtoCopyWithImpl<$Res>
+    implements $FormVersionDtoCopyWith<$Res> {
+  _$FormVersionDtoCopyWithImpl(this._self, this._then);
+
+  final FormVersionDto _self;
+  final $Res Function(FormVersionDto) _then;
+
+/// Create a copy of FormVersionDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? sections = null,Object? createdAt = freezed,}) {
+  return _then(_self.copyWith(
+version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as String,sections: null == sections ? _self.sections : sections // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FormVersionDto].
+extension FormVersionDtoPatterns on FormVersionDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FormVersionDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FormVersionDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FormVersionDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _FormVersionDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FormVersionDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FormVersionDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FormVersionDto() when $default != null:
+return $default(_that.version,_that.sections,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _FormVersionDto():
+return $default(_that.version,_that.sections,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson)  DateTime? createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _FormVersionDto() when $default != null:
+return $default(_that.version,_that.sections,_that.createdAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FormVersionDto implements FormVersionDto {
+  const _FormVersionDto({this.version = '1.0', final  List<Map<String, dynamic>> sections = const [], @JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) this.createdAt}): _sections = sections;
+  factory _FormVersionDto.fromJson(Map<String, dynamic> json) => _$FormVersionDtoFromJson(json);
+
+@override@JsonKey() final  String version;
+ final  List<Map<String, dynamic>> _sections;
+@override@JsonKey() List<Map<String, dynamic>> get sections {
+  if (_sections is EqualUnmodifiableListView) return _sections;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_sections);
+}
+
+@override@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) final  DateTime? createdAt;
+
+/// Create a copy of FormVersionDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FormVersionDtoCopyWith<_FormVersionDto> get copyWith => __$FormVersionDtoCopyWithImpl<_FormVersionDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FormVersionDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormVersionDto&&(identical(other.version, version) || other.version == version)&&const DeepCollectionEquality().equals(other._sections, _sections)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,version,const DeepCollectionEquality().hash(_sections),createdAt);
+
+@override
+String toString() {
+  return 'FormVersionDto(version: $version, sections: $sections, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FormVersionDtoCopyWith<$Res> implements $FormVersionDtoCopyWith<$Res> {
+  factory _$FormVersionDtoCopyWith(_FormVersionDto value, $Res Function(_FormVersionDto) _then) = __$FormVersionDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String version, List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$FormVersionDtoCopyWithImpl<$Res>
+    implements _$FormVersionDtoCopyWith<$Res> {
+  __$FormVersionDtoCopyWithImpl(this._self, this._then);
+
+  final _FormVersionDto _self;
+  final $Res Function(_FormVersionDto) _then;
+
+/// Create a copy of FormVersionDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? sections = null,Object? createdAt = freezed,}) {
+  return _then(_FormVersionDto(
+version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as String,sections: null == sections ? _self._sections : sections // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
+  ));
+}
+
+
+}
+
+// dart format on
