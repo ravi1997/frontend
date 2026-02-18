@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 import 'property_builder_utils.dart';
 
 class FieldGeneralSettings extends ConsumerStatefulWidget {
-  // Changed to ConsumerStatefulWidget
   final String formId;
   final FormQuestion question;
   final TextEditingController labelController;
@@ -47,6 +46,25 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   }
 
   @override
+  void didUpdateWidget(covariant FieldGeneralSettings oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.question.metadata?['defaultValue']?.toString() !=
+        _defaultValueController.text) {
+      if (!FocusScope.of(context).hasFocus) {
+        _defaultValueController.text =
+            widget.question.metadata?['defaultValue']?.toString() ?? '';
+      }
+    }
+    if (widget.question.metadata?['dividerText']?.toString() !=
+        _dividerTextController.text) {
+      if (!FocusScope.of(context).hasFocus) {
+        _dividerTextController.text =
+            widget.question.metadata?['dividerText']?.toString() ?? '';
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _defaultValueController.dispose();
     _dividerTextController.dispose();
@@ -81,7 +99,14 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     QuestionType.shortText,
     QuestionType.paragraph,
     QuestionType.number,
+    QuestionType.date,
+    QuestionType.time,
+    QuestionType.dropdown,
+    QuestionType.multipleChoice,
   ].contains(widget.question.type);
+
+  bool get _showContentFormat =>
+      [QuestionType.shortText].contains(widget.question.type);
 
   bool get _showDividerText => widget.question.type == QuestionType.divider;
 
@@ -118,7 +143,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.builderElement.withOpacity(0.5),
+                  color: AppColors.builderElement.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.borderLight),
                 ),
@@ -177,16 +202,38 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
           // Helper Text
           if (_showHelperText) ...[
-            PropertyBuilderUtils.buildTextField(
-              label: 'Helper Text',
-              placeholder: 'e.g. Please enter your full name',
-              controller: widget.helperTextController,
-              onChanged: (val) {
-                ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestionHelperText(widget.question.id, val);
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PropertyBuilderUtils.buildTextField(
+                  label: 'Helper Text',
+                  placeholder: 'e.g. Please enter your full name',
+                  controller: widget.helperTextController,
+                  onChanged: (val) {
+                    ref
+                        .read(
+                          formBuilderControllerProvider(widget.formId).notifier,
+                        )
+                        .updateQuestionHelperText(widget.question.id, val);
+                  },
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Supports Markdown',
+                  style: TextStyle(
+                    color: AppColors.textGrey,
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 20),
+          ],
+
+          // Content Format (Phone, Credit Card, Currency)
+          if (_showContentFormat) ...[
+            _buildContentFormat(),
             const SizedBox(height: 20),
           ],
 
@@ -207,20 +254,31 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
           // Default Value
           if (_showDefaultValue) ...[
-            PropertyBuilderUtils.buildTextField(
-              label: 'Default Value',
-              placeholder: 'Initial value',
-              controller: _defaultValueController,
-              onChanged: (val) {
-                ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestionMetadata(widget.question.id, {
-                      'defaultValue': val,
-                    });
-              },
-            ),
+            _buildDefaultValuePicker(),
             const SizedBox(height: 20),
           ],
+
+          // Behavior
+          const Text(
+            'BEHAVIOR',
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          PropertyBuilderUtils.buildSwitch(
+            label: 'Hidden Field',
+            value: widget.question.isHidden,
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .updateQuestion(widget.question.copyWith(isHidden: val));
+            },
+          ),
+          const SizedBox(height: 20),
 
           // Options Editor
           if (_showOptions) ...[
@@ -232,32 +290,320 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     );
   }
 
-  Widget _buildOptionsEditor(WidgetRef ref, FormQuestion question) {
-    final options = question.options ?? [];
-
+  Widget _buildContentFormat() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'OPTIONS',
+          'Content Format',
           style: TextStyle(
-            color: AppColors.textGrey,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
+            color: AppColors.textDark,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.borderLight),
+            ),
+            filled: true,
+            fillColor: AppColors.builderElement,
+          ),
+          initialValue: null,
+          items: const [
+            DropdownMenuItem(value: null, child: Text('None')),
+            DropdownMenuItem(value: 'phone', child: Text('Phone Number')),
+            DropdownMenuItem(value: 'email', child: Text('Email')),
+            DropdownMenuItem(value: 'currency', child: Text('Currency')),
+            DropdownMenuItem(value: 'credit_card', child: Text('Credit Card')),
+          ],
+          onChanged: (value) {
+            String? mask;
+            String? regex;
+
+            if (value == 'phone') {
+              mask = '(###) ###-####';
+              regex = r'^\(\d{3}\) \d{3}-\d{4}$';
+            } else if (value == 'email') {
+              regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+            } else if (value == 'currency') {
+              mask = '\$###,###.##';
+              regex = r'^\$?\d+(,\d{3})*(\.\d{1,2})?$';
+            } else if (value == 'credit_card') {
+              mask = '#### #### #### ####';
+              regex = r'^\d{4} \d{4} \d{4} \d{4}$';
+            }
+
+            final notifier = ref.read(
+              formBuilderControllerProvider(widget.formId).notifier,
+            );
+
+            var q = widget.question;
+            if (mask != null) q = q.copyWith(inputMask: mask);
+            if (regex != null) q = q.copyWith(validationRegex: regex);
+
+            notifier.updateQuestion(q);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDefaultValuePicker() {
+    if (widget.question.type == QuestionType.date) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Default Date',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionMetadata(widget.question.id, {
+                      'defaultValue': picked.toIso8601String(),
+                    });
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.borderLight),
+                borderRadius: BorderRadius.circular(8),
+                color: AppColors.builderElement,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.question.metadata?['defaultValue'] != null
+                        ? widget.question.metadata!['defaultValue']
+                              .toString()
+                              .split('T')
+                              .first
+                        : 'Select Date',
+                    style: TextStyle(
+                      color: widget.question.metadata?['defaultValue'] != null
+                          ? AppColors.textDark
+                          : AppColors.textGrey,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: AppColors.textGrey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.question.type == QuestionType.time) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Default Time',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final TimeOfDay? picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (picked != null) {
+                final formatted =
+                    '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionMetadata(widget.question.id, {
+                      'defaultValue': formatted,
+                    });
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.borderLight),
+                borderRadius: BorderRadius.circular(8),
+                color: AppColors.builderElement,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.question.metadata?['defaultValue'] ?? 'Select Time',
+                    style: TextStyle(
+                      color: widget.question.metadata?['defaultValue'] != null
+                          ? AppColors.textDark
+                          : AppColors.textGrey,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: AppColors.textGrey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.question.type == QuestionType.dropdown ||
+        widget.question.type == QuestionType.multipleChoice) {
+      final options = widget.question.options ?? [];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Default Selection',
+            style: TextStyle(
+              color: AppColors.textDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            initialValue: widget.question.metadata?['defaultValue'],
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: AppColors.borderLight),
+              ),
+              filled: true,
+              fillColor: AppColors.builderElement,
+            ),
+            items: [
+              const DropdownMenuItem(value: null, child: Text('None')),
+              ...{for (var opt in options) opt.value: opt}.values.map(
+                (opt) =>
+                    DropdownMenuItem(value: opt.value, child: Text(opt.label)),
+              ),
+            ],
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .updateQuestionMetadata(widget.question.id, {
+                    'defaultValue': val,
+                  });
+            },
+          ),
+        ],
+      );
+    }
+
+    return PropertyBuilderUtils.buildTextField(
+      label: 'Default Value',
+      placeholder: 'Initial value',
+      controller: _defaultValueController,
+      onChanged: (val) {
+        ref
+            .read(formBuilderControllerProvider(widget.formId).notifier)
+            .updateQuestionMetadata(widget.question.id, {'defaultValue': val});
+      },
+    );
+  }
+
+  Widget _buildOptionsEditor(WidgetRef ref, FormQuestion question) {
+    final options = question.options ?? [];
+    final hasOtherOption = question.metadata?['hasOtherOption'] == true;
+
+    final optionValues = options
+        .map((e) => e.value.trim().toLowerCase())
+        .toList();
+    final duplicateValues = optionValues
+        .where((e) => optionValues.indexOf(e) != optionValues.lastIndexOf(e))
+        .toSet();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'OPTIONS',
+              style: TextStyle(
+                color: AppColors.textGrey,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+            TextButton(
+              onPressed: () => _showBulkAddDialog(options),
+              child: const Text('Bulk Add', style: TextStyle(fontSize: 12)),
+            ),
+          ],
+        ),
         const SizedBox(height: 12),
-        ListView.separated(
+        ReorderableListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: options.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          onReorder: (oldIndex, newIndex) {
+            if (oldIndex < newIndex) newIndex -= 1;
+            final newOptions = List<FormQuestionOption>.from(options);
+            final item = newOptions.removeAt(oldIndex);
+            newOptions.insert(newIndex, item);
+
+            // Re-assign order
+            final orderedOptions = newOptions.asMap().entries.map((e) {
+              return e.value.copyWith(order: e.key);
+            }).toList();
+
+            ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .updateQuestion(question.copyWith(options: orderedOptions));
+          },
           itemBuilder: (context, index) {
             final option = options[index];
+            final isDuplicate = duplicateValues.contains(
+              option.value.trim().toLowerCase(),
+            );
+
             return _OptionRow(
               key: ValueKey(option.id),
               initialValue: option.label,
+              errorText: isDuplicate ? 'Duplicate option value' : null,
               onChanged: (newValue) {
                 final newOptions = List<FormQuestionOption>.from(options);
                 newOptions[index] = option.copyWith(
@@ -302,7 +648,86 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             side: const BorderSide(color: AppColors.primary),
           ),
         ),
+        const SizedBox(height: 12),
+
+        PropertyBuilderUtils.buildSwitch(
+          label: "Include 'Other' Option",
+          value: hasOtherOption,
+          onChanged: (val) {
+            ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .updateQuestionMetadata(widget.question.id, {
+                  'hasOtherOption': val,
+                });
+          },
+        ),
       ],
+    );
+  }
+
+  void _showBulkAddDialog(List<FormQuestionOption> currentOptions) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Bulk Add Options'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Enter one option per line:',
+              style: TextStyle(fontSize: 13, color: AppColors.textGrey),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: controller,
+              maxLines: 8,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Option 1\nOption 2\nOption 3',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final lines = controller.text
+                  .split('\n')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList();
+
+              if (lines.isNotEmpty) {
+                final newOptions = List<FormQuestionOption>.from(
+                  currentOptions,
+                );
+                for (var line in lines) {
+                  newOptions.add(
+                    FormQuestionOption(
+                      id: const Uuid().v4(),
+                      label: line,
+                      value: line,
+                      order: newOptions.length,
+                    ),
+                  );
+                }
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestion(
+                      widget.question.copyWith(options: newOptions),
+                    );
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Add Options'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -311,12 +736,14 @@ class _OptionRow extends StatefulWidget {
   final String initialValue;
   final Function(String) onChanged;
   final VoidCallback onDelete;
+  final String? errorText;
 
   const _OptionRow({
     super.key,
     required this.initialValue,
     required this.onChanged,
     required this.onDelete,
+    this.errorText,
   });
 
   @override
@@ -337,7 +764,9 @@ class _OptionRowState extends State<_OptionRow> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialValue != widget.initialValue &&
         _controller.text != widget.initialValue) {
-      _controller.text = widget.initialValue;
+      if (!FocusScope.of(context).hasFocus) {
+        _controller.text = widget.initialValue;
+      }
     }
   }
 
@@ -349,38 +778,68 @@ class _OptionRowState extends State<_OptionRow> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.drag_indicator, color: AppColors.textGrey, size: 20),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.drag_indicator,
+                color: AppColors.textGrey,
+                size: 20,
               ),
-              fillColor: AppColors.builderElement,
-              filled: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
-                borderSide: BorderSide.none,
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    fillColor: AppColors.builderElement,
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: widget.errorText != null
+                          ? const BorderSide(color: Colors.red, width: 1)
+                          : BorderSide.none,
+                    ),
+                    errorStyle: const TextStyle(
+                      height: 0,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                  onChanged: widget.onChanged,
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(
+                  Icons.close,
+                  size: 18,
+                  color: AppColors.textGrey,
+                ),
+                onPressed: widget.onDelete,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          if (widget.errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 28, top: 4),
+              child: Text(
+                widget.errorText!,
+                style: const TextStyle(color: Colors.red, fontSize: 11),
               ),
             ),
-            style: const TextStyle(fontSize: 14),
-            onChanged: widget.onChanged,
-          ),
-        ),
-        const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.close, size: 18, color: AppColors.textGrey),
-          onPressed: widget.onDelete,
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

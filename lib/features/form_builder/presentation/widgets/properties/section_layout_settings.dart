@@ -16,8 +16,22 @@ class SectionLayoutSettings extends ConsumerWidget {
     required this.section,
   });
 
+  void _updateSection(WidgetRef ref, FormSection updatedSection) {
+    ref
+        .read(formBuilderControllerProvider(formId).notifier)
+        .updateSection(updatedSection);
+  }
+
+  void _updateMetadata(WidgetRef ref, String key, dynamic value) {
+    ref
+        .read(formBuilderControllerProvider(formId).notifier)
+        .updateSectionMetadata(section.id, {key: value});
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final metadata = section.metadata;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,9 +43,7 @@ class SectionLayoutSettings extends ConsumerWidget {
           }).toList(),
           onChanged: (val) {
             if (val != null) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateSection(section.copyWith(layout: val));
+              _updateSection(ref, section.copyWith(layout: val));
             }
           },
         ),
@@ -70,15 +82,14 @@ class SectionLayoutSettings extends ConsumerWidget {
             min: 2,
             max: 4,
             onChanged: (val) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateSection(section.copyWith(gridColumns: val.toInt()));
+              _updateSection(ref, section.copyWith(gridColumns: val.toInt()));
             },
           ),
         ],
+
         const SizedBox(height: 24),
         const Text(
-          'SPACING',
+          'SPACING & ALIGNMENT',
           style: TextStyle(
             color: AppColors.textGrey,
             fontSize: 12,
@@ -87,18 +98,54 @@ class SectionLayoutSettings extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
+
         PropertyBuilderUtils.buildNumberSlider(
-          label: 'Inner Padding',
-          value: section.style.padding,
+          label: 'Field Spacing (Gap)',
+          value: (metadata['fieldGap'] ?? 16.0).toDouble(),
+          min: 0,
+          max: 48,
+          onChanged: (val) => _updateMetadata(ref, 'fieldGap', val),
+        ),
+        const SizedBox(height: 12),
+
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Vertical Padding',
+          value: (metadata['verticalPadding'] ?? section.style.padding)
+              .toDouble(),
           min: 0,
           max: 64,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateSection(
-                  section.copyWith(style: section.style.copyWith(padding: val)),
-                );
-          },
+          onChanged: (val) => _updateMetadata(ref, 'verticalPadding', val),
+        ),
+        const SizedBox(height: 12),
+
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Horizontal Padding',
+          value: (metadata['horizontalPadding'] ?? section.style.padding)
+              .toDouble(),
+          min: 0,
+          max: 64,
+          onChanged: (val) => _updateMetadata(ref, 'horizontalPadding', val),
+        ),
+        const SizedBox(height: 12),
+
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Content Alignment',
+          value: metadata['alignment'] ?? 'center',
+          items: const [
+            DropdownMenuItem(value: 'left', child: Text('Left')),
+            DropdownMenuItem(value: 'center', child: Text('Center')),
+            DropdownMenuItem(value: 'right', child: Text('Right')),
+          ],
+          onChanged: (val) => _updateMetadata(ref, 'alignment', val),
+        ),
+
+        const SizedBox(height: 24),
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Max Width (px)',
+          value: (metadata['maxWidth'] ?? 1200.0).toDouble(),
+          min: 400,
+          max: 2000,
+          onChanged: (val) => _updateMetadata(ref, 'maxWidth', val),
         ),
       ],
     );

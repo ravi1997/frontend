@@ -88,12 +88,15 @@ class _SectionPropertiesWidgetState
                         color: AppColors.textGrey,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Section Properties',
-                        style: TextStyle(
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      const Flexible(
+                        child: Text(
+                          'Section Properties',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                       const Spacer(),
@@ -118,6 +121,8 @@ class _SectionPropertiesWidgetState
                 Material(
                   color: Colors.white,
                   child: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
                     tabs: const [
                       Tab(text: 'General'),
                       Tab(text: 'Layout'),

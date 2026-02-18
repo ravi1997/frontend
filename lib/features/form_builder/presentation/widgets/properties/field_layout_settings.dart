@@ -125,6 +125,27 @@ class FieldLayoutSettings extends ConsumerWidget {
         ],
         if (question.style.widthMode == 'percentage') ...[
           const SizedBox(height: 12),
+          PropertyBuilderUtils.buildDropdown<int>(
+            label: 'Quick Columns',
+            value: null,
+            items: const [
+              DropdownMenuItem(value: 100, child: Text('Full Width (100%)')),
+              DropdownMenuItem(value: 66, child: Text('2/3 (66%)')),
+              DropdownMenuItem(value: 50, child: Text('1/2 (50%)')),
+              DropdownMenuItem(value: 33, child: Text('1/3 (33%)')),
+              DropdownMenuItem(value: 25, child: Text('1/4 (25%)')),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                ref
+                    .read(formBuilderControllerProvider(formId).notifier)
+                    .updateQuestionMetadata(question.id, {
+                      'widthPercentage': val,
+                    });
+              }
+            },
+          ),
+          const SizedBox(height: 12),
           PropertyBuilderUtils.buildNumberSlider(
             label: 'Width (%)',
             value: (question.metadata?['widthPercentage'] ?? 100).toDouble(),
@@ -139,6 +160,18 @@ class FieldLayoutSettings extends ConsumerWidget {
             },
           ),
         ],
+        const SizedBox(height: 12),
+        // Force Full Width on Mobile
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Force Full Width on Mobile',
+          value: question.metadata?['mobileFullWidth'] ?? true,
+          onChanged: (val) {
+            ref
+                .read(formBuilderControllerProvider(formId).notifier)
+                .updateQuestionMetadata(question.id, {'mobileFullWidth': val});
+          },
+        ),
+
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildNumberSlider(
           label: 'Custom Height (Optional)',

@@ -6,7 +6,7 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'package:frontend/core/theme/app_colors.dart';
 import 'property_builder_utils.dart';
 
-class FieldSpecificSettings extends ConsumerWidget {
+class FieldSpecificSettings extends ConsumerStatefulWidget {
   final String formId;
   final FormQuestion question;
 
@@ -17,14 +17,26 @@ class FieldSpecificSettings extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final metadata = question.metadata ?? {};
+  ConsumerState<FieldSpecificSettings> createState() =>
+      _FieldSpecificSettingsState();
+}
+
+class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
+  void _updateMetadata(String key, dynamic value) {
+    ref
+        .read(formBuilderControllerProvider(widget.formId).notifier)
+        .updateQuestionMetadata(widget.question.id, {key: value});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final metadata = widget.question.metadata ?? {};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Specific Settings for ${question.type.label}',
+          'Specific Settings for ${widget.question.type.label}',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textGrey,
@@ -32,33 +44,29 @@ class FieldSpecificSettings extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        if (question.type == QuestionType.rating)
-          _buildRatingSettings(context, ref, metadata),
-
-        if (question.type == QuestionType.slider)
-          _buildSliderSettings(context, ref, metadata),
-
-        if (question.type == QuestionType.matrixChoice)
-          _buildMatrixSettings(context, ref, metadata),
-
-        if (question.type == QuestionType.date)
-          _buildDateSettings(context, ref, metadata),
-
-        if (question.type == QuestionType.signature)
-          _buildSignatureSettings(context, ref, metadata),
-
-        if (question.type == QuestionType.shortText)
-          _buildShortTextSettings(context, ref, metadata),
-
+        if (widget.question.type == QuestionType.image)
+          _buildImageSettings(metadata),
+        if (widget.question.type == QuestionType.rating)
+          _buildRatingSettings(metadata),
+        if (widget.question.type == QuestionType.slider)
+          _buildSliderSettings(metadata),
+        if (widget.question.type == QuestionType.matrixChoice)
+          _buildMatrixSettings(metadata),
+        if (widget.question.type == QuestionType.date)
+          _buildDateSettings(metadata),
+        if (widget.question.type == QuestionType.signature)
+          _buildSignatureSettings(metadata),
+        if (widget.question.type == QuestionType.shortText)
+          _buildShortTextSettings(metadata),
         if (![
+          QuestionType.image,
           QuestionType.rating,
           QuestionType.slider,
           QuestionType.matrixChoice,
           QuestionType.date,
           QuestionType.signature,
           QuestionType.shortText,
-        ].contains(question.type))
+        ].contains(widget.question.type))
           const Center(
             child: Padding(
               padding: EdgeInsets.all(20.0),
@@ -72,31 +80,79 @@ class FieldSpecificSettings extends ConsumerWidget {
     );
   }
 
-  Widget _buildShortTextSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildImageSettings(Map<String, dynamic> metadata) {
     return Column(
       children: [
         PropertyBuilderUtils.buildSwitch(
-          label: 'Obscure Text (Password)',
-          value: metadata['obscureText'] ?? false,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'obscureText': val});
-          },
+          label: 'Use Upload (vs URL)',
+          value: metadata['useUpload'] ?? false,
+          onChanged: (val) => _updateMetadata('useUpload', val),
+        ),
+        const SizedBox(height: 12),
+        if (metadata['useUpload'] != true)
+          Column(
+            children: [
+              _MetadataTextField(
+                label: 'Image URL',
+                initialValue: metadata['imageUrl']?.toString() ?? '',
+                onChanged: (val) => _updateMetadata('imageUrl', val),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Aspect Ratio',
+          value: metadata['aspectRatio'] ?? 'original',
+          items: const [
+            DropdownMenuItem(value: 'original', child: Text('Original')),
+            DropdownMenuItem(value: '1:1', child: Text('1:1 (Square)')),
+            DropdownMenuItem(value: '16:9', child: Text('16:9 (Widescreen)')),
+            DropdownMenuItem(value: '4:3', child: Text('4:3 (Standard)')),
+          ],
+          onChanged: (val) => _updateMetadata('aspectRatio', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Fit Mode',
+          value: metadata['fit'] ?? 'cover',
+          items: const [
+            DropdownMenuItem(value: 'cover', child: Text('Cover')),
+            DropdownMenuItem(value: 'contain', child: Text('Contain')),
+            DropdownMenuItem(value: 'fill', child: Text('Fill')),
+          ],
+          onChanged: (val) => _updateMetadata('fit', val),
         ),
       ],
     );
   }
 
-  Widget _buildDateSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildShortTextSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Keyboard Type',
+          value: metadata['keyboardType'] ?? 'text',
+          items: const [
+            DropdownMenuItem(value: 'text', child: Text('Text')),
+            DropdownMenuItem(value: 'number', child: Text('Number')),
+            DropdownMenuItem(value: 'phone', child: Text('Phone')),
+            DropdownMenuItem(value: 'email', child: Text('Email')),
+            DropdownMenuItem(value: 'multiline', child: Text('Multiline')),
+            DropdownMenuItem(value: 'url', child: Text('URL')),
+          ],
+          onChanged: (val) => _updateMetadata('keyboardType', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Obscure Text (Password)',
+          value: metadata['obscureText'] ?? false,
+          onChanged: (val) => _updateMetadata('obscureText', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSettings(Map<String, dynamic> metadata) {
     return Column(
       children: [
         PropertyBuilderUtils.buildDropdown<String>(
@@ -108,11 +164,7 @@ class FieldSpecificSettings extends ConsumerWidget {
             DropdownMenuItem(value: 'yyyy-MM-dd', child: Text('YYYY-MM-DD')),
           ],
           onChanged: (val) {
-            if (val != null) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestionMetadata(question.id, {'dateFormat': val});
-            }
+            if (val != null) _updateMetadata('dateFormat', val);
           },
         ),
         const SizedBox(height: 12),
@@ -124,11 +176,7 @@ class FieldSpecificSettings extends ConsumerWidget {
             DropdownMenuItem(value: '24h', child: Text('24 Hour')),
           ],
           onChanged: (val) {
-            if (val != null) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestionMetadata(question.id, {'timeFormat': val});
-            }
+            if (val != null) _updateMetadata('timeFormat', val);
           },
         ),
         const SizedBox(height: 12),
@@ -141,62 +189,44 @@ class FieldSpecificSettings extends ConsumerWidget {
             DropdownMenuItem(value: 'datetime', child: Text('Date & Time')),
           ],
           onChanged: (val) {
-            if (val != null) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestionMetadata(question.id, {'mode': val});
-            }
+            if (val != null) _updateMetadata('mode', val);
           },
         ),
       ],
     );
   }
 
-  Widget _buildSignatureSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildSignatureSettings(Map<String, dynamic> metadata) {
     return Column(
       children: [
         PropertyBuilderUtils.buildColorPicker(
           label: 'Pen Color',
           value: metadata['penColor'] ?? '#000000',
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'penColor': val});
-          },
+          onChanged: (val) => _updateMetadata('penColor', val),
         ),
         const SizedBox(height: 12),
-        _buildNumberField(
+        _MetadataNumberField(
           label: 'Stroke Width',
-          value: metadata['strokeWidth'] ?? 2.0,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'strokeWidth': val});
-          },
+          initialValue: metadata['strokeWidth'] ?? 2.0,
+          onChanged: (val) => _updateMetadata('strokeWidth', val),
         ),
       ],
     );
   }
 
-  Widget _buildRatingSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildRatingSettings(Map<String, dynamic> metadata) {
     return Column(
       children: [
-        _buildNumberField(
+        _MetadataNumberField(
           label: 'Number of Stars',
-          value: metadata['maxStars'] ?? 5,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'maxStars': val});
-          },
+          initialValue: metadata['maxStars'] ?? 5,
+          onChanged: (val) => _updateMetadata('maxStars', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Allow Half Stars',
+          value: metadata['allowHalfRating'] ?? false,
+          onChanged: (val) => _updateMetadata('allowHalfRating', val),
         ),
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildDropdown<String>(
@@ -207,64 +237,54 @@ class FieldSpecificSettings extends ConsumerWidget {
             DropdownMenuItem(value: 'heart', child: Text('Heart')),
             DropdownMenuItem(value: 'thumb_up', child: Text('Thumb Up')),
             DropdownMenuItem(value: 'sentiment', child: Text('Face')),
+            DropdownMenuItem(value: 'circle', child: Text('Circle')),
+            DropdownMenuItem(value: 'square', child: Text('Square')),
           ],
           onChanged: (val) {
-            if (val != null) {
-              ref
-                  .read(formBuilderControllerProvider(formId).notifier)
-                  .updateQuestionMetadata(question.id, {'iconStyle': val});
-            }
+            if (val != null) _updateMetadata('iconStyle', val);
           },
         ),
       ],
     );
   }
 
-  Widget _buildSliderSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildSliderSettings(Map<String, dynamic> metadata) {
     return Column(
       children: [
-        _buildNumberField(
+        _MetadataNumberField(
           label: 'Minimum Value',
-          value: metadata['min'] ?? 0,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'min': val});
-          },
+          initialValue: metadata['min'] ?? 0,
+          onChanged: (val) => _updateMetadata('min', val),
         ),
         const SizedBox(height: 12),
-        _buildNumberField(
+        _MetadataNumberField(
           label: 'Maximum Value',
-          value: metadata['max'] ?? 100,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'max': val});
-          },
+          initialValue: metadata['max'] ?? 100,
+          onChanged: (val) => _updateMetadata('max', val),
         ),
         const SizedBox(height: 12),
-        _buildNumberField(
+        _MetadataNumberField(
           label: 'Step Size',
-          value: metadata['step'] ?? 1,
-          onChanged: (val) {
-            ref
-                .read(formBuilderControllerProvider(formId).notifier)
-                .updateQuestionMetadata(question.id, {'step': val});
-          },
+          initialValue: metadata['step'] ?? 1,
+          onChanged: (val) => _updateMetadata('step', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Range Slider',
+          value: metadata['isRange'] ?? false,
+          onChanged: (val) => _updateMetadata('isRange', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Show Labels',
+          value: metadata['showLabels'] ?? true,
+          onChanged: (val) => _updateMetadata('showLabels', val),
         ),
       ],
     );
   }
 
-  Widget _buildMatrixSettings(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> metadata,
-  ) {
+  Widget _buildMatrixSettings(Map<String, dynamic> metadata) {
     final rows =
         (metadata['rows'] as List?)?.cast<String>() ?? ['Row 1', 'Row 2'];
     final cols =
@@ -274,62 +294,77 @@ class FieldSpecificSettings extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Cell Input Type',
+          value: metadata['cellType'] ?? 'radio',
+          items: const [
+            DropdownMenuItem(
+              value: 'radio',
+              child: Text('Radio Buttons (Single)'),
+            ),
+            DropdownMenuItem(
+              value: 'checkbox',
+              child: Text('Checkboxes (Multi)'),
+            ),
+            DropdownMenuItem(value: 'text', child: Text('Text Inputs')),
+          ],
+          onChanged: (val) => _updateMetadata('cellType', val),
+        ),
+        const SizedBox(height: 24),
         const Text(
           'Rows',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
         const SizedBox(height: 8),
-        _buildListEditor(context, rows, (newRows) {
-          ref
-              .read(formBuilderControllerProvider(formId).notifier)
-              .updateQuestionMetadata(question.id, {'rows': newRows});
-        }, 'Row'),
+        _buildListEditor(
+          rows,
+          (newRows) => _updateMetadata('rows', newRows),
+          'Row',
+        ),
         const SizedBox(height: 24),
         const Text(
           'Columns',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
         const SizedBox(height: 8),
-        _buildListEditor(context, cols, (newCols) {
-          ref
-              .read(formBuilderControllerProvider(formId).notifier)
-              .updateQuestionMetadata(question.id, {'columns': newCols});
-        }, 'Column'),
+        _buildListEditor(
+          cols,
+          (newCols) => _updateMetadata('columns', newCols),
+          'Column',
+        ),
       ],
     );
   }
 
   Widget _buildListEditor(
-    BuildContext context,
     List<String> items,
     Function(List<String>) onChanged,
     String itemLabel,
   ) {
+    final trimmedItems = items.map((e) => e.trim().toLowerCase()).toList();
+    final duplicateItems = trimmedItems
+        .where((e) => trimmedItems.indexOf(e) != trimmedItems.lastIndexOf(e))
+        .toSet();
+
     return Column(
       children: [
         ...items.asMap().entries.map((entry) {
           final index = entry.key;
           final item = entry.value;
+          final isDuplicate = duplicateItems.contains(
+            item.trim().toLowerCase(),
+          );
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: _StatefulListItemValue(
+                    key: ValueKey('$itemLabel-$index'),
                     initialValue: item,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      fillColor: AppColors.builderElement,
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    style: const TextStyle(fontSize: 14),
+                    errorText: isDuplicate ? 'Duplicate $itemLabel' : null,
                     onChanged: (val) {
                       final newItems = List<String>.from(items);
                       newItems[index] = val;
@@ -370,18 +405,106 @@ class FieldSpecificSettings extends ConsumerWidget {
       ],
     );
   }
+}
 
-  Widget _buildNumberField({
-    required String label,
-    required num value,
-    required Function(num) onChanged,
-  }) {
+class _MetadataTextField extends StatefulWidget {
+  final String label;
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+
+  const _MetadataTextField({
+    required this.label,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  @override
+  State<_MetadataTextField> createState() => _MetadataTextFieldState();
+}
+
+class _MetadataTextFieldState extends State<_MetadataTextField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void didUpdateWidget(covariant _MetadataTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != _controller.text) {
+      if (!FocusScope.of(context).hasFocus) {
+        _controller.text = widget.initialValue;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PropertyBuilderUtils.buildTextField(
+      label: widget.label,
+      controller: _controller,
+      onChanged: widget.onChanged,
+    );
+  }
+}
+
+class _MetadataNumberField extends StatefulWidget {
+  final String label;
+  final num initialValue;
+  final ValueChanged<num> onChanged;
+
+  const _MetadataNumberField({
+    required this.label,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  @override
+  State<_MetadataNumberField> createState() => _MetadataNumberFieldState();
+}
+
+class _MetadataNumberFieldState extends State<_MetadataNumberField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue.toString());
+  }
+
+  @override
+  void didUpdateWidget(covariant _MetadataNumberField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue.toString() != _controller.text) {
+      if (!FocusScope.of(context).hasFocus) {
+        _controller.text = widget.initialValue.toString();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: Text(
-            label,
+            widget.label,
             style: const TextStyle(fontSize: 13, color: AppColors.textDark),
           ),
         ),
@@ -389,6 +512,7 @@ class FieldSpecificSettings extends ConsumerWidget {
           child: SizedBox(
             height: 36,
             child: TextField(
+              controller: _controller,
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 border: OutlineInputBorder(
@@ -397,14 +521,81 @@ class FieldSpecificSettings extends ConsumerWidget {
                 isDense: true,
               ),
               keyboardType: TextInputType.number,
-              controller: TextEditingController(text: value.toString()),
-              onSubmitted: (val) {
+              onChanged: (val) {
                 final n = num.tryParse(val);
-                if (n != null) onChanged(n);
+                if (n != null) widget.onChanged(n);
               },
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _StatefulListItemValue extends StatefulWidget {
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+  final String? errorText;
+
+  const _StatefulListItemValue({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+    this.errorText,
+  });
+
+  @override
+  State<_StatefulListItemValue> createState() => _StatefulListItemValueState();
+}
+
+class _StatefulListItemValueState extends State<_StatefulListItemValue> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _controller,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+            fillColor: AppColors.builderElement,
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(6),
+              borderSide: widget.errorText != null
+                  ? const BorderSide(color: Colors.red, width: 1)
+                  : BorderSide.none,
+            ),
+          ),
+          style: const TextStyle(fontSize: 14),
+          onChanged: widget.onChanged,
+        ),
+        if (widget.errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 4, top: 4),
+            child: Text(
+              widget.errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 11),
+            ),
+          ),
       ],
     );
   }
