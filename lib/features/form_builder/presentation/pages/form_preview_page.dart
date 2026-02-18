@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../widgets/signature_pad_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1394,7 +1396,93 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
   Widget _buildImageUploadField(FormQuestion q, WidgetRef ref) {
     final formData = ref.watch(previewFormDataProvider);
-    final imageUrl = formData[q.id]?.toString() ?? '';
+    // Store image bytes as Uint8List in form data
+    final imageBytes = formData[q.id];
+    final hasImage = imageBytes is List && imageBytes.isNotEmpty;
+
+    Future<void> pickImage(ImageSource source) async {
+      try {
+        final picker = ImagePicker();
+        final picked = await picker.pickImage(
+          source: source,
+          imageQuality: 85,
+          maxWidth: 1200,
+        );
+        if (picked != null) {
+          final bytes = await picked.readAsBytes();
+          ref
+              .read(previewFormDataProvider.notifier)
+              .update((s) => {...s, q.id: bytes});
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Could not pick image: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+
+    void showPickerSheet() {
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Select Image Source',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFEFF6FF),
+                    child: Icon(Icons.camera_alt, color: Color(0xFF3B82F6)),
+                  ),
+                  title: const Text('Camera'),
+                  subtitle: const Text('Take a new photo'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    pickImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFF0FDF4),
+                    child: Icon(Icons.photo_library, color: Color(0xFF22C55E)),
+                  ),
+                  title: const Text('Gallery'),
+                  subtitle: const Text('Choose from your photos'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    pickImage(ImageSource.gallery);
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Container(
       height: 200,
@@ -1404,64 +1492,80 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         border: Border.all(color: AppColors.borderLight),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: imageUrl.isEmpty
-          ? InkWell(
-              onTap: () {
-                // High fidelity mock of image selection
-                ref
-                    .read(previewFormDataProvider.notifier)
-                    .update(
-                      (s) => {
-                        ...s,
-                        q.id:
-                            'https://images.unsplash.com/photo-1481349518771-2005b9565124?q=80&w=2000&auto=format&fit=crop',
-                      },
-                    );
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.add_a_photo_outlined,
-                    size: 48,
-                    color: AppColors.textGrey,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Click to Upload Image',
-                    style: TextStyle(color: AppColors.textGrey),
-                  ),
-                  Text(
-                    '(Simulation)',
-                    style: TextStyle(
-                      color: AppColors.textGrey.withValues(alpha: 0.5),
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : Stack(
+      child: hasImage
+          ? Stack(
               fit: StackFit.expand,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(7),
-                  child: Image.network(imageUrl, fit: BoxFit.cover),
+                  child: Image.memory(
+                    imageBytes as Uint8List,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () => ref
-                          .read(previewFormDataProvider.notifier)
-                          .update((s) => {...s, q.id: ''}),
-                    ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.edit,
+                            color: AppColors.brandBlue,
+                            size: 18,
+                          ),
+                          onPressed: showPickerSheet,
+                          tooltip: 'Change image',
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 18,
+                          ),
+                          onPressed: () => ref
+                              .read(previewFormDataProvider.notifier)
+                              .update((s) => {...s, q.id: null}),
+                          tooltip: 'Remove image',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
+            )
+          : InkWell(
+              onTap: showPickerSheet,
+              borderRadius: BorderRadius.circular(8),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_a_photo_outlined,
+                    size: 48,
+                    color: AppColors.textGrey,
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    'Tap to add image',
+                    style: TextStyle(
+                      color: AppColors.textGrey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Camera or Gallery',
+                    style: TextStyle(color: AppColors.textGrey, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
     );
   }
