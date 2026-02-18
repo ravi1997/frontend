@@ -35,6 +35,16 @@ abstract class FormQuestion with _$FormQuestion {
     num? maxValue,
     String? inputMask,
     String? customErrorMessage,
+
+    // Advanced Validation
+    DateTime? dateMin,
+    DateTime? dateMax,
+    List<String>? allowedFileTypes,
+    int? maxFileSize, // in MB
+    int? maxFiles,
+    bool? isUnique,
+    bool? requiresConfirmation,
+
     Map<String, dynamic>? conditionalLogic,
     Map<String, dynamic>? metadata,
     @Default(QuestionStyle()) QuestionStyle style,

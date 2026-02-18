@@ -26,6 +26,19 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       maxValue: json['maxValue'] as num?,
       inputMask: json['inputMask'] as String?,
       customErrorMessage: json['customErrorMessage'] as String?,
+      dateMin: json['dateMin'] == null
+          ? null
+          : DateTime.parse(json['dateMin'] as String),
+      dateMax: json['dateMax'] == null
+          ? null
+          : DateTime.parse(json['dateMax'] as String),
+      allowedFileTypes: (json['allowedFileTypes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      maxFileSize: (json['maxFileSize'] as num?)?.toInt(),
+      maxFiles: (json['maxFiles'] as num?)?.toInt(),
+      isUnique: json['isUnique'] as bool?,
+      requiresConfirmation: json['requiresConfirmation'] as bool?,
       conditionalLogic: json['conditionalLogic'] as Map<String, dynamic>?,
       metadata: json['metadata'] as Map<String, dynamic>?,
       style: json['style'] == null
@@ -51,6 +64,13 @@ Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
       'maxValue': instance.maxValue,
       'inputMask': instance.inputMask,
       'customErrorMessage': instance.customErrorMessage,
+      'dateMin': instance.dateMin?.toIso8601String(),
+      'dateMax': instance.dateMax?.toIso8601String(),
+      'allowedFileTypes': instance.allowedFileTypes,
+      'maxFileSize': instance.maxFileSize,
+      'maxFiles': instance.maxFiles,
+      'isUnique': instance.isUnique,
+      'requiresConfirmation': instance.requiresConfirmation,
       'conditionalLogic': instance.conditionalLogic,
       'metadata': instance.metadata,
       'style': instance.style,

@@ -30,20 +30,18 @@ class BuilderFieldWidget extends StatelessWidget {
     final style = question.style;
     Color bgColor;
     Color borderColor;
-    Color labelColor;
-    Color helperColor;
 
     try {
       bgColor = Color(int.parse(style.backgroundColor.replaceAll('#', '0xFF')));
       borderColor = Color(int.parse(style.borderColor.replaceAll('#', '0xFF')));
-      labelColor = Color(int.parse(style.labelColor.replaceAll('#', '0xFF')));
-      helperColor = Color(int.parse(style.helperColor.replaceAll('#', '0xFF')));
     } catch (_) {
       bgColor = Colors.white;
       borderColor = AppColors.borderLight;
-      labelColor = AppColors.textDark;
-      helperColor = AppColors.textGrey;
     }
+
+    final labelPosition = style.labelPosition;
+    final isLeftAligned = labelPosition == 'left';
+    final isHidden = labelPosition == 'hidden';
 
     return GestureDetector(
       onTap: onTap,
@@ -64,73 +62,142 @@ class BuilderFieldWidget extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(style.containerPadding ?? 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(
-                  FontAwesomeIcons.gripVertical,
-                  size: 14,
-                  color: AppColors.textGrey.withValues(alpha: 0.5),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    question.label.translate(locale).isEmpty
-                        ? 'Untitled ${question.type.label}'
-                        : question.label.translate(locale),
-                    style: TextStyle(
-                      color: labelColor,
-                      fontSize: style.labelFontSize,
-                      fontWeight: _parseFontWeight(style.labelFontWeight),
+            // Header Row (Drag handle + Actions + Optional Label)
+            _buildHeader(context, isLeftAligned, isHidden),
+
+            if (isLeftAligned) ...[
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width:
+                        style.labelColumnWidth ??
+                        120, // Fixed width for label column
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLabelText(context),
+                        if (question.helperText
+                            .translate(locale)
+                            .isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          _buildHelperText(context),
+                        ],
+                      ],
                     ),
                   ),
-                ),
-                if (question.isRequired)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Text(
-                      '*',
-                      style: TextStyle(color: Colors.red[400], fontSize: 16),
-                    ),
-                  ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.copy,
-                    size: 18,
-                    color: AppColors.textGrey,
-                  ),
-                  onPressed: onDuplicate,
-                  tooltip: 'Duplicate Field',
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.delete_outline,
-                    size: 20,
-                    color: isSelected ? Colors.redAccent : AppColors.textGrey,
-                  ),
-                  onPressed: onDelete,
-                  tooltip: 'Delete Field',
-                ),
-              ],
-            ),
-            if (question.helperText.translate(locale).isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                question.helperText.translate(locale),
-                style: TextStyle(
-                  color: helperColor,
-                  fontSize: style.helperFontSize,
-                  fontWeight: _parseFontWeight(style.helperFontWeight),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildFieldPreview(question, locale)),
+                ],
               ),
+            ] else ...[
+              // Top or Hidden
+              if (!isHidden &&
+                  question.helperText.translate(locale).isNotEmpty) ...[
+                const SizedBox(height: 4),
+                _buildHelperText(context),
+              ],
+              const SizedBox(height: 16),
+              _buildFieldPreview(question, locale),
             ],
-            const SizedBox(height: 16),
-            _buildFieldPreview(question, locale),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, bool isLeftAligned, bool isHidden) {
+    return Row(
+      children: [
+        Icon(
+          FontAwesomeIcons.gripVertical,
+          size: 14,
+          color: AppColors.textGrey.withValues(alpha: 0.5),
+        ),
+        const SizedBox(width: 8),
+        if (!isLeftAligned)
+          Expanded(
+            child: isHidden
+                ? Text(
+                    '${question.label.translate(locale)} (Hidden)',
+                    style: const TextStyle(
+                      color: AppColors.textGrey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                : _buildLabelText(context),
+          )
+        else
+          const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.copy, size: 18, color: AppColors.textGrey),
+          onPressed: onDuplicate,
+          tooltip: 'Duplicate Field',
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.delete_outline,
+            size: 20,
+            color: isSelected ? Colors.redAccent : AppColors.textGrey,
+          ),
+          onPressed: onDelete,
+          tooltip: 'Delete Field',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabelText(BuildContext context) {
+    final style = question.style;
+    Color labelColor;
+    try {
+      labelColor = Color(int.parse(style.labelColor.replaceAll('#', '0xFF')));
+    } catch (_) {
+      labelColor = AppColors.textDark;
+    }
+
+    return RichText(
+      text: TextSpan(
+        text: question.label.translate(locale).isEmpty
+            ? 'Untitled ${question.type.label}'
+            : question.label.translate(locale),
+        style: TextStyle(
+          color: labelColor,
+          fontSize: style.labelFontSize,
+          fontWeight: _parseFontWeight(style.labelFontWeight),
+          fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
+        ),
+        children: [
+          if (question.isRequired)
+            TextSpan(
+              text: ' *',
+              style: TextStyle(color: Colors.red[400], fontSize: 16),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelperText(BuildContext context) {
+    final style = question.style;
+    Color helperColor;
+    try {
+      helperColor = Color(int.parse(style.helperColor.replaceAll('#', '0xFF')));
+    } catch (_) {
+      helperColor = AppColors.textGrey;
+    }
+
+    return Text(
+      question.helperText.translate(locale),
+      style: TextStyle(
+        color: helperColor,
+        fontSize: style.helperFontSize,
+        fontWeight: _parseFontWeight(style.helperFontWeight),
       ),
     );
   }
@@ -230,7 +297,7 @@ class BuilderFieldWidget extends StatelessWidget {
       case QuestionType.mobile:
       case QuestionType.url:
         return Container(
-          height: 42,
+          height: q.style.height ?? 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           alignment: Alignment.centerLeft,
@@ -262,7 +329,7 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.paragraph:
         return Container(
-          height: 90,
+          height: q.style.height ?? 90,
           padding: const EdgeInsets.all(12),
           decoration: containerDecor,
           alignment: Alignment.topLeft,
@@ -277,7 +344,7 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.dropdown:
         return Container(
-          height: 42,
+          height: q.style.height ?? 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           child: Row(
@@ -379,7 +446,7 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.fileUpload:
         return Container(
-          height: 80,
+          height: q.style.height ?? 80,
           decoration: BoxDecoration(
             border: Border.all(
               color: AppColors.borderLight,
@@ -413,23 +480,9 @@ class BuilderFieldWidget extends StatelessWidget {
             ),
           ),
         );
-      case QuestionType.rating:
-        return Row(
-          children: List.generate(
-            5,
-            (i) => Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Icon(
-                Icons.star_border,
-                color: textStyle.color ?? Colors.orange,
-                size: 28,
-              ),
-            ),
-          ),
-        );
       case QuestionType.signature:
         return Container(
-          height: 100,
+          height: q.style.height ?? 100,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Icon(
@@ -440,29 +493,9 @@ class BuilderFieldWidget extends StatelessWidget {
             ),
           ),
         );
-      case QuestionType.slider:
-        return Column(
-          children: [
-            Slider(
-              value: 0.5,
-              onChanged: (_) {},
-              activeColor: textStyle.color ?? AppColors.brandBlue,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('0', style: textStyle.copyWith(fontSize: 12)),
-                  Text('100', style: textStyle.copyWith(fontSize: 12)),
-                ],
-              ),
-            ),
-          ],
-        );
       case QuestionType.image:
         return Container(
-          height: 120,
+          height: q.style.height ?? 120,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Column(
@@ -487,14 +520,49 @@ class BuilderFieldWidget extends StatelessWidget {
             ),
           ),
         );
-      case QuestionType.divider:
+      case QuestionType.rating:
+        return Row(
+          children: List.generate(
+            5,
+            (i) => Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Icon(
+                Icons.star_border,
+                color: textStyle.color ?? Colors.orange,
+                size: 28,
+              ),
+            ),
+          ),
+        );
+      case QuestionType.slider:
+        return Column(
+          children: [
+            Slider(
+              value: 0.5,
+              onChanged: (_) {},
+              activeColor: textStyle.color ?? AppColors.brandBlue,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('0', style: textStyle.copyWith(fontSize: 12)),
+                  Text('100', style: textStyle.copyWith(fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        );
+      case QuestionType
+          .divider: // Added manually as switch needs to cover all or default
         return Divider(
           height: 32,
           thickness: 1,
           color: textStyle.color ?? AppColors.borderLight,
         );
       case QuestionType.spacer:
-        return const SizedBox(height: 32);
+        return SizedBox(height: q.style.height ?? 32);
       case QuestionType.matrixChoice:
         return Container(
           padding: const EdgeInsets.all(8),

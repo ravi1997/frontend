@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormQuestionOption {
 
- String get id; String? get description;@JsonKey(name: 'is_default') bool get isDefault;@JsonKey(name: 'is_disabled') bool get isDisabled;@JsonKey(name: 'option_label') String get label;@JsonKey(name: 'option_value') String get value; int get order;@JsonKey(name: 'followup_visibility_condition') String? get followupVisibilityCondition;
+@JsonKey(name: 'id', readValue: _readId) String get id; String? get description;@JsonKey(name: 'is_default') bool get isDefault;@JsonKey(name: 'is_disabled') bool get isDisabled;@JsonKey(name: 'option_label') String get label;@JsonKey(name: 'option_value') String get value; int get order;@JsonKey(name: 'followup_visibility_condition') String? get followupVisibilityCondition;
 /// Create a copy of FormQuestionOption
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FormQuestionOptionCopyWith<$Res>  {
   factory $FormQuestionOptionCopyWith(FormQuestionOption value, $Res Function(FormQuestionOption) _then) = _$FormQuestionOptionCopyWithImpl;
 @useResult
 $Res call({
- String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
+@JsonKey(name: 'id', readValue: _readId) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
 });
 
 
@@ -160,7 +160,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormQuestionOption() when $default != null:
 return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
@@ -181,7 +181,7 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestionOption():
 return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
@@ -201,7 +201,7 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: _readId)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestionOption() when $default != null:
 return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
@@ -216,10 +216,10 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 @JsonSerializable()
 
 class _FormQuestionOption implements FormQuestionOption {
-  const _FormQuestionOption({required this.id, this.description, @JsonKey(name: 'is_default') this.isDefault = false, @JsonKey(name: 'is_disabled') this.isDisabled = false, @JsonKey(name: 'option_label') required this.label, @JsonKey(name: 'option_value') required this.value, this.order = 0, @JsonKey(name: 'followup_visibility_condition') this.followupVisibilityCondition});
+  const _FormQuestionOption({@JsonKey(name: 'id', readValue: _readId) required this.id, this.description, @JsonKey(name: 'is_default') this.isDefault = false, @JsonKey(name: 'is_disabled') this.isDisabled = false, @JsonKey(name: 'option_label') required this.label, @JsonKey(name: 'option_value') required this.value, this.order = 0, @JsonKey(name: 'followup_visibility_condition') this.followupVisibilityCondition});
   factory _FormQuestionOption.fromJson(Map<String, dynamic> json) => _$FormQuestionOptionFromJson(json);
 
-@override final  String id;
+@override@JsonKey(name: 'id', readValue: _readId) final  String id;
 @override final  String? description;
 @override@JsonKey(name: 'is_default') final  bool isDefault;
 @override@JsonKey(name: 'is_disabled') final  bool isDisabled;
@@ -261,7 +261,7 @@ abstract mixin class _$FormQuestionOptionCopyWith<$Res> implements $FormQuestion
   factory _$FormQuestionOptionCopyWith(_FormQuestionOption value, $Res Function(_FormQuestionOption) _then) = __$FormQuestionOptionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
+@JsonKey(name: 'id', readValue: _readId) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
 });
 
 

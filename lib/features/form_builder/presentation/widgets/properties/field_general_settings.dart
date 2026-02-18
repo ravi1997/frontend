@@ -31,82 +31,201 @@ class FieldGeneralSettings extends ConsumerStatefulWidget {
 }
 
 class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
-  // Added State class
-  final _formKey = GlobalKey<FormState>(); // Added GlobalKey
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _defaultValueController;
+  late TextEditingController _dividerTextController;
+
+  @override
+  void initState() {
+    super.initState();
+    _defaultValueController = TextEditingController(
+      text: widget.question.metadata?['defaultValue']?.toString() ?? '',
+    );
+    _dividerTextController = TextEditingController(
+      text: widget.question.metadata?['dividerText']?.toString() ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _defaultValueController.dispose();
+    _dividerTextController.dispose();
+    super.dispose();
+  }
+
+  bool get _showLabel =>
+      widget.question.type != QuestionType.divider &&
+      widget.question.type != QuestionType.spacer;
+
+  bool get _showHelperText =>
+      widget.question.type != QuestionType.divider &&
+      widget.question.type != QuestionType.spacer;
+
+  bool get _showPlaceholder => ![
+    QuestionType.dropdown,
+    QuestionType.checkboxes,
+    QuestionType.multipleChoice,
+    QuestionType.rating,
+    QuestionType.matrixChoice,
+    QuestionType.slider,
+    QuestionType.fileUpload,
+    QuestionType.image,
+    QuestionType.signature,
+    QuestionType.divider,
+    QuestionType.spacer,
+    QuestionType.date,
+    QuestionType.time,
+  ].contains(widget.question.type);
+
+  bool get _showDefaultValue => [
+    QuestionType.shortText,
+    QuestionType.paragraph,
+    QuestionType.number,
+  ].contains(widget.question.type);
+
+  bool get _showDividerText => widget.question.type == QuestionType.divider;
+
+  bool get _showOptions => [
+    QuestionType.dropdown,
+    QuestionType.checkboxes,
+    QuestionType.multipleChoice,
+  ].contains(widget.question.type);
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      // Added Form widget
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Field Type
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Field Type',
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.builderElement.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: Text(
+                  widget.question.type.label,
+                  style: const TextStyle(
+                    color: AppColors.textGrey,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
           // Label
-          PropertyBuilderUtils.buildTextField(
-            label: 'Field Label',
-            controller: widget.labelController, // Access via widget
-            validator: (value) {
-              // Added validator
-              if (value == null || value.isEmpty) {
-                return 'Field label cannot be empty';
-              }
-              return null;
-            },
-            onChanged: (val) {
-              if (_formKey.currentState!.validate()) {
-                // Validate before updating
+          if (_showLabel) ...[
+            PropertyBuilderUtils.buildTextField(
+              label: 'Field Label',
+              controller: widget.labelController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Field label cannot be empty';
+                }
+                return null;
+              },
+              onChanged: (val) {
+                if (_formKey.currentState!.validate()) {
+                  ref
+                      .read(
+                        formBuilderControllerProvider(widget.formId).notifier,
+                      )
+                      .updateQuestionLabel(widget.question.id, val);
+                }
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Divider Text
+          if (_showDividerText) ...[
+            PropertyBuilderUtils.buildTextField(
+              label: 'Divider Text',
+              placeholder: 'Section Break',
+              controller: _dividerTextController,
+              onChanged: (val) {
                 ref
                     .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestionLabel(
-                      widget.question.id,
-                      val,
-                    ); // Access via widget
-              }
-            },
-          ),
-          const SizedBox(height: 20),
+                    .updateQuestionMetadata(widget.question.id, {
+                      'dividerText': val,
+                    });
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
 
           // Helper Text
-          PropertyBuilderUtils.buildTextField(
-            label: 'Helper Text',
-            placeholder: 'e.g. Please enter your full name',
-            controller: widget.helperTextController, // Access via widget
-            onChanged: (val) {
-              ref
-                  .read(formBuilderControllerProvider(widget.formId).notifier)
-                  .updateQuestionHelperText(
-                    widget.question.id,
-                    val,
-                  ); // Access via widget
-            },
-          ),
-          const SizedBox(height: 20),
+          if (_showHelperText) ...[
+            PropertyBuilderUtils.buildTextField(
+              label: 'Helper Text',
+              placeholder: 'e.g. Please enter your full name',
+              controller: widget.helperTextController,
+              onChanged: (val) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionHelperText(widget.question.id, val);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
 
           // Placeholder
-          PropertyBuilderUtils.buildTextField(
-            label: 'Placeholder',
-            placeholder: 'Input placeholder...',
-            controller: widget.placeholderController, // Access via widget
-            onChanged: (val) {
-              ref
-                  .read(formBuilderControllerProvider(widget.formId).notifier)
-                  .updateQuestionPlaceholder(
-                    widget.question.id,
-                    val,
-                  ); // Access via widget
-            },
-          ),
+          if (_showPlaceholder) ...[
+            PropertyBuilderUtils.buildTextField(
+              label: 'Placeholder',
+              placeholder: 'Input placeholder...',
+              controller: widget.placeholderController,
+              onChanged: (val) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionPlaceholder(widget.question.id, val);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // Default Value
+          if (_showDefaultValue) ...[
+            PropertyBuilderUtils.buildTextField(
+              label: 'Default Value',
+              placeholder: 'Initial value',
+              controller: _defaultValueController,
+              onChanged: (val) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestionMetadata(widget.question.id, {
+                      'defaultValue': val,
+                    });
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
 
           // Options Editor
-          if (widget.question.type ==
-                  QuestionType.dropdown || // Access via widget
-              widget.question.type ==
-                  QuestionType.checkboxes || // Access via widget
-              widget.question.type == QuestionType.multipleChoice) ...[
-            // Access via widget
-            const SizedBox(height: 24),
-            _buildOptionsEditor(ref, widget.question), // Access via widget
+          if (_showOptions) ...[
+            const SizedBox(height: 4),
+            _buildOptionsEditor(ref, widget.question),
           ],
         ],
       ),

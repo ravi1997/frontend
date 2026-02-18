@@ -24,7 +24,9 @@ mixin _$QuestionStyle {
  String get labelFontWeight; String get helperFontWeight; String get inputFontWeight;// State Colors
  String get focusColor; String get errorColor; String get hoverColor;// Icons
  String? get prefixIcon; String? get suffixIcon;// Spacing
- double get verticalMargin;
+ double get verticalMargin;// New Layout Props
+ double? get labelColumnWidth; String? get containerAlignment;// left, center, right
+ double? get containerPadding; double? get height;
 /// Create a copy of QuestionStyle
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,16 +39,16 @@ $QuestionStyleCopyWith<QuestionStyle> get copyWith => _$QuestionStyleCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionStyle&&(identical(other.labelFontSize, labelFontSize) || other.labelFontSize == labelFontSize)&&(identical(other.labelColor, labelColor) || other.labelColor == labelColor)&&(identical(other.helperFontSize, helperFontSize) || other.helperFontSize == helperFontSize)&&(identical(other.helperColor, helperColor) || other.helperColor == helperColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth)&&(identical(other.columnSpan, columnSpan) || other.columnSpan == columnSpan)&&(identical(other.labelPosition, labelPosition) || other.labelPosition == labelPosition)&&(identical(other.widthMode, widthMode) || other.widthMode == widthMode)&&(identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth)&&(identical(other.inputStyle, inputStyle) || other.inputStyle == inputStyle)&&(identical(other.inputFontSize, inputFontSize) || other.inputFontSize == inputFontSize)&&(identical(other.inputFontColor, inputFontColor) || other.inputFontColor == inputFontColor)&&(identical(other.labelFontWeight, labelFontWeight) || other.labelFontWeight == labelFontWeight)&&(identical(other.helperFontWeight, helperFontWeight) || other.helperFontWeight == helperFontWeight)&&(identical(other.inputFontWeight, inputFontWeight) || other.inputFontWeight == inputFontWeight)&&(identical(other.focusColor, focusColor) || other.focusColor == focusColor)&&(identical(other.errorColor, errorColor) || other.errorColor == errorColor)&&(identical(other.hoverColor, hoverColor) || other.hoverColor == hoverColor)&&(identical(other.prefixIcon, prefixIcon) || other.prefixIcon == prefixIcon)&&(identical(other.suffixIcon, suffixIcon) || other.suffixIcon == suffixIcon)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuestionStyle&&(identical(other.labelFontSize, labelFontSize) || other.labelFontSize == labelFontSize)&&(identical(other.labelColor, labelColor) || other.labelColor == labelColor)&&(identical(other.helperFontSize, helperFontSize) || other.helperFontSize == helperFontSize)&&(identical(other.helperColor, helperColor) || other.helperColor == helperColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth)&&(identical(other.columnSpan, columnSpan) || other.columnSpan == columnSpan)&&(identical(other.labelPosition, labelPosition) || other.labelPosition == labelPosition)&&(identical(other.widthMode, widthMode) || other.widthMode == widthMode)&&(identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth)&&(identical(other.inputStyle, inputStyle) || other.inputStyle == inputStyle)&&(identical(other.inputFontSize, inputFontSize) || other.inputFontSize == inputFontSize)&&(identical(other.inputFontColor, inputFontColor) || other.inputFontColor == inputFontColor)&&(identical(other.labelFontWeight, labelFontWeight) || other.labelFontWeight == labelFontWeight)&&(identical(other.helperFontWeight, helperFontWeight) || other.helperFontWeight == helperFontWeight)&&(identical(other.inputFontWeight, inputFontWeight) || other.inputFontWeight == inputFontWeight)&&(identical(other.focusColor, focusColor) || other.focusColor == focusColor)&&(identical(other.errorColor, errorColor) || other.errorColor == errorColor)&&(identical(other.hoverColor, hoverColor) || other.hoverColor == hoverColor)&&(identical(other.prefixIcon, prefixIcon) || other.prefixIcon == prefixIcon)&&(identical(other.suffixIcon, suffixIcon) || other.suffixIcon == suffixIcon)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.labelColumnWidth, labelColumnWidth) || other.labelColumnWidth == labelColumnWidth)&&(identical(other.containerAlignment, containerAlignment) || other.containerAlignment == containerAlignment)&&(identical(other.containerPadding, containerPadding) || other.containerPadding == containerPadding)&&(identical(other.height, height) || other.height == height));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,labelFontSize,labelColor,helperFontSize,helperColor,borderRadius,backgroundColor,borderColor,borderWidth,columnSpan,labelPosition,widthMode,fixedWidth,inputStyle,inputFontSize,inputFontColor,labelFontWeight,helperFontWeight,inputFontWeight,focusColor,errorColor,hoverColor,prefixIcon,suffixIcon,verticalMargin]);
+int get hashCode => Object.hashAll([runtimeType,labelFontSize,labelColor,helperFontSize,helperColor,borderRadius,backgroundColor,borderColor,borderWidth,columnSpan,labelPosition,widthMode,fixedWidth,inputStyle,inputFontSize,inputFontColor,labelFontWeight,helperFontWeight,inputFontWeight,focusColor,errorColor,hoverColor,prefixIcon,suffixIcon,verticalMargin,labelColumnWidth,containerAlignment,containerPadding,height]);
 
 @override
 String toString() {
-  return 'QuestionStyle(labelFontSize: $labelFontSize, labelColor: $labelColor, helperFontSize: $helperFontSize, helperColor: $helperColor, borderRadius: $borderRadius, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth, columnSpan: $columnSpan, labelPosition: $labelPosition, widthMode: $widthMode, fixedWidth: $fixedWidth, inputStyle: $inputStyle, inputFontSize: $inputFontSize, inputFontColor: $inputFontColor, labelFontWeight: $labelFontWeight, helperFontWeight: $helperFontWeight, inputFontWeight: $inputFontWeight, focusColor: $focusColor, errorColor: $errorColor, hoverColor: $hoverColor, prefixIcon: $prefixIcon, suffixIcon: $suffixIcon, verticalMargin: $verticalMargin)';
+  return 'QuestionStyle(labelFontSize: $labelFontSize, labelColor: $labelColor, helperFontSize: $helperFontSize, helperColor: $helperColor, borderRadius: $borderRadius, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth, columnSpan: $columnSpan, labelPosition: $labelPosition, widthMode: $widthMode, fixedWidth: $fixedWidth, inputStyle: $inputStyle, inputFontSize: $inputFontSize, inputFontColor: $inputFontColor, labelFontWeight: $labelFontWeight, helperFontWeight: $helperFontWeight, inputFontWeight: $inputFontWeight, focusColor: $focusColor, errorColor: $errorColor, hoverColor: $hoverColor, prefixIcon: $prefixIcon, suffixIcon: $suffixIcon, verticalMargin: $verticalMargin, labelColumnWidth: $labelColumnWidth, containerAlignment: $containerAlignment, containerPadding: $containerPadding, height: $height)';
 }
 
 
@@ -57,7 +59,7 @@ abstract mixin class $QuestionStyleCopyWith<$Res>  {
   factory $QuestionStyleCopyWith(QuestionStyle value, $Res Function(QuestionStyle) _then) = _$QuestionStyleCopyWithImpl;
 @useResult
 $Res call({
- double labelFontSize, String labelColor, double helperFontSize, String helperColor, double borderRadius, String backgroundColor, String borderColor, double borderWidth, int columnSpan, String labelPosition, String widthMode, String fixedWidth, String inputStyle, double inputFontSize, String inputFontColor, String labelFontWeight, String helperFontWeight, String inputFontWeight, String focusColor, String errorColor, String hoverColor, String? prefixIcon, String? suffixIcon, double verticalMargin
+ double labelFontSize, String labelColor, double helperFontSize, String helperColor, double borderRadius, String backgroundColor, String borderColor, double borderWidth, int columnSpan, String labelPosition, String widthMode, String fixedWidth, String inputStyle, double inputFontSize, String inputFontColor, String labelFontWeight, String helperFontWeight, String inputFontWeight, String focusColor, String errorColor, String hoverColor, String? prefixIcon, String? suffixIcon, double verticalMargin, double? labelColumnWidth, String? containerAlignment, double? containerPadding, double? height
 });
 
 
@@ -74,7 +76,7 @@ class _$QuestionStyleCopyWithImpl<$Res>
 
 /// Create a copy of QuestionStyle
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? labelFontSize = null,Object? labelColor = null,Object? helperFontSize = null,Object? helperColor = null,Object? borderRadius = null,Object? backgroundColor = null,Object? borderColor = null,Object? borderWidth = null,Object? columnSpan = null,Object? labelPosition = null,Object? widthMode = null,Object? fixedWidth = null,Object? inputStyle = null,Object? inputFontSize = null,Object? inputFontColor = null,Object? labelFontWeight = null,Object? helperFontWeight = null,Object? inputFontWeight = null,Object? focusColor = null,Object? errorColor = null,Object? hoverColor = null,Object? prefixIcon = freezed,Object? suffixIcon = freezed,Object? verticalMargin = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? labelFontSize = null,Object? labelColor = null,Object? helperFontSize = null,Object? helperColor = null,Object? borderRadius = null,Object? backgroundColor = null,Object? borderColor = null,Object? borderWidth = null,Object? columnSpan = null,Object? labelPosition = null,Object? widthMode = null,Object? fixedWidth = null,Object? inputStyle = null,Object? inputFontSize = null,Object? inputFontColor = null,Object? labelFontWeight = null,Object? helperFontWeight = null,Object? inputFontWeight = null,Object? focusColor = null,Object? errorColor = null,Object? hoverColor = null,Object? prefixIcon = freezed,Object? suffixIcon = freezed,Object? verticalMargin = null,Object? labelColumnWidth = freezed,Object? containerAlignment = freezed,Object? containerPadding = freezed,Object? height = freezed,}) {
   return _then(_self.copyWith(
 labelFontSize: null == labelFontSize ? _self.labelFontSize : labelFontSize // ignore: cast_nullable_to_non_nullable
 as double,labelColor: null == labelColor ? _self.labelColor : labelColor // ignore: cast_nullable_to_non_nullable
@@ -100,7 +102,11 @@ as String,hoverColor: null == hoverColor ? _self.hoverColor : hoverColor // igno
 as String,prefixIcon: freezed == prefixIcon ? _self.prefixIcon : prefixIcon // ignore: cast_nullable_to_non_nullable
 as String?,suffixIcon: freezed == suffixIcon ? _self.suffixIcon : suffixIcon // ignore: cast_nullable_to_non_nullable
 as String?,verticalMargin: null == verticalMargin ? _self.verticalMargin : verticalMargin // ignore: cast_nullable_to_non_nullable
-as double,
+as double,labelColumnWidth: freezed == labelColumnWidth ? _self.labelColumnWidth : labelColumnWidth // ignore: cast_nullable_to_non_nullable
+as double?,containerAlignment: freezed == containerAlignment ? _self.containerAlignment : containerAlignment // ignore: cast_nullable_to_non_nullable
+as String?,containerPadding: freezed == containerPadding ? _self.containerPadding : containerPadding // ignore: cast_nullable_to_non_nullable
+as double?,height: freezed == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -185,10 +191,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin,  double? labelColumnWidth,  String? containerAlignment,  double? containerPadding,  double? height)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuestionStyle() when $default != null:
-return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin);case _:
+return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin,_that.labelColumnWidth,_that.containerAlignment,_that.containerPadding,_that.height);case _:
   return orElse();
 
 }
@@ -206,10 +212,10 @@ return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin,  double? labelColumnWidth,  String? containerAlignment,  double? containerPadding,  double? height)  $default,) {final _that = this;
 switch (_that) {
 case _QuestionStyle():
-return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin);case _:
+return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin,_that.labelColumnWidth,_that.containerAlignment,_that.containerPadding,_that.height);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -226,10 +232,10 @@ return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double labelFontSize,  String labelColor,  double helperFontSize,  String helperColor,  double borderRadius,  String backgroundColor,  String borderColor,  double borderWidth,  int columnSpan,  String labelPosition,  String widthMode,  String fixedWidth,  String inputStyle,  double inputFontSize,  String inputFontColor,  String labelFontWeight,  String helperFontWeight,  String inputFontWeight,  String focusColor,  String errorColor,  String hoverColor,  String? prefixIcon,  String? suffixIcon,  double verticalMargin,  double? labelColumnWidth,  String? containerAlignment,  double? containerPadding,  double? height)?  $default,) {final _that = this;
 switch (_that) {
 case _QuestionStyle() when $default != null:
-return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin);case _:
+return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.helperColor,_that.borderRadius,_that.backgroundColor,_that.borderColor,_that.borderWidth,_that.columnSpan,_that.labelPosition,_that.widthMode,_that.fixedWidth,_that.inputStyle,_that.inputFontSize,_that.inputFontColor,_that.labelFontWeight,_that.helperFontWeight,_that.inputFontWeight,_that.focusColor,_that.errorColor,_that.hoverColor,_that.prefixIcon,_that.suffixIcon,_that.verticalMargin,_that.labelColumnWidth,_that.containerAlignment,_that.containerPadding,_that.height);case _:
   return null;
 
 }
@@ -241,7 +247,7 @@ return $default(_that.labelFontSize,_that.labelColor,_that.helperFontSize,_that.
 @JsonSerializable()
 
 class _QuestionStyle implements QuestionStyle {
-  const _QuestionStyle({this.labelFontSize = 16.0, this.labelColor = '#1E293B', this.helperFontSize = 13.0, this.helperColor = '#64748B', this.borderRadius = 8.0, this.backgroundColor = '#FFFFFF', this.borderColor = '#E2E8F0', this.borderWidth = 1.0, this.columnSpan = 1, this.labelPosition = 'top', this.widthMode = 'auto', this.fixedWidth = 'medium', this.inputStyle = 'outlined', this.inputFontSize = 14.0, this.inputFontColor = '#0F172A', this.labelFontWeight = 'medium', this.helperFontWeight = 'normal', this.inputFontWeight = 'normal', this.focusColor = '#3B82F6', this.errorColor = '#EF4444', this.hoverColor = '#F1F5F9', this.prefixIcon, this.suffixIcon, this.verticalMargin = 16.0});
+  const _QuestionStyle({this.labelFontSize = 16.0, this.labelColor = '#1E293B', this.helperFontSize = 13.0, this.helperColor = '#64748B', this.borderRadius = 8.0, this.backgroundColor = '#FFFFFF', this.borderColor = '#E2E8F0', this.borderWidth = 1.0, this.columnSpan = 1, this.labelPosition = 'top', this.widthMode = 'auto', this.fixedWidth = 'medium', this.inputStyle = 'outlined', this.inputFontSize = 14.0, this.inputFontColor = '#0F172A', this.labelFontWeight = 'medium', this.helperFontWeight = 'normal', this.inputFontWeight = 'normal', this.focusColor = '#3B82F6', this.errorColor = '#EF4444', this.hoverColor = '#F1F5F9', this.prefixIcon, this.suffixIcon, this.verticalMargin = 16.0, this.labelColumnWidth, this.containerAlignment, this.containerPadding, this.height});
   factory _QuestionStyle.fromJson(Map<String, dynamic> json) => _$QuestionStyleFromJson(json);
 
 @override@JsonKey() final  double labelFontSize;
@@ -277,6 +283,12 @@ class _QuestionStyle implements QuestionStyle {
 @override final  String? suffixIcon;
 // Spacing
 @override@JsonKey() final  double verticalMargin;
+// New Layout Props
+@override final  double? labelColumnWidth;
+@override final  String? containerAlignment;
+// left, center, right
+@override final  double? containerPadding;
+@override final  double? height;
 
 /// Create a copy of QuestionStyle
 /// with the given fields replaced by the non-null parameter values.
@@ -291,16 +303,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionStyle&&(identical(other.labelFontSize, labelFontSize) || other.labelFontSize == labelFontSize)&&(identical(other.labelColor, labelColor) || other.labelColor == labelColor)&&(identical(other.helperFontSize, helperFontSize) || other.helperFontSize == helperFontSize)&&(identical(other.helperColor, helperColor) || other.helperColor == helperColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth)&&(identical(other.columnSpan, columnSpan) || other.columnSpan == columnSpan)&&(identical(other.labelPosition, labelPosition) || other.labelPosition == labelPosition)&&(identical(other.widthMode, widthMode) || other.widthMode == widthMode)&&(identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth)&&(identical(other.inputStyle, inputStyle) || other.inputStyle == inputStyle)&&(identical(other.inputFontSize, inputFontSize) || other.inputFontSize == inputFontSize)&&(identical(other.inputFontColor, inputFontColor) || other.inputFontColor == inputFontColor)&&(identical(other.labelFontWeight, labelFontWeight) || other.labelFontWeight == labelFontWeight)&&(identical(other.helperFontWeight, helperFontWeight) || other.helperFontWeight == helperFontWeight)&&(identical(other.inputFontWeight, inputFontWeight) || other.inputFontWeight == inputFontWeight)&&(identical(other.focusColor, focusColor) || other.focusColor == focusColor)&&(identical(other.errorColor, errorColor) || other.errorColor == errorColor)&&(identical(other.hoverColor, hoverColor) || other.hoverColor == hoverColor)&&(identical(other.prefixIcon, prefixIcon) || other.prefixIcon == prefixIcon)&&(identical(other.suffixIcon, suffixIcon) || other.suffixIcon == suffixIcon)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuestionStyle&&(identical(other.labelFontSize, labelFontSize) || other.labelFontSize == labelFontSize)&&(identical(other.labelColor, labelColor) || other.labelColor == labelColor)&&(identical(other.helperFontSize, helperFontSize) || other.helperFontSize == helperFontSize)&&(identical(other.helperColor, helperColor) || other.helperColor == helperColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth)&&(identical(other.columnSpan, columnSpan) || other.columnSpan == columnSpan)&&(identical(other.labelPosition, labelPosition) || other.labelPosition == labelPosition)&&(identical(other.widthMode, widthMode) || other.widthMode == widthMode)&&(identical(other.fixedWidth, fixedWidth) || other.fixedWidth == fixedWidth)&&(identical(other.inputStyle, inputStyle) || other.inputStyle == inputStyle)&&(identical(other.inputFontSize, inputFontSize) || other.inputFontSize == inputFontSize)&&(identical(other.inputFontColor, inputFontColor) || other.inputFontColor == inputFontColor)&&(identical(other.labelFontWeight, labelFontWeight) || other.labelFontWeight == labelFontWeight)&&(identical(other.helperFontWeight, helperFontWeight) || other.helperFontWeight == helperFontWeight)&&(identical(other.inputFontWeight, inputFontWeight) || other.inputFontWeight == inputFontWeight)&&(identical(other.focusColor, focusColor) || other.focusColor == focusColor)&&(identical(other.errorColor, errorColor) || other.errorColor == errorColor)&&(identical(other.hoverColor, hoverColor) || other.hoverColor == hoverColor)&&(identical(other.prefixIcon, prefixIcon) || other.prefixIcon == prefixIcon)&&(identical(other.suffixIcon, suffixIcon) || other.suffixIcon == suffixIcon)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.labelColumnWidth, labelColumnWidth) || other.labelColumnWidth == labelColumnWidth)&&(identical(other.containerAlignment, containerAlignment) || other.containerAlignment == containerAlignment)&&(identical(other.containerPadding, containerPadding) || other.containerPadding == containerPadding)&&(identical(other.height, height) || other.height == height));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,labelFontSize,labelColor,helperFontSize,helperColor,borderRadius,backgroundColor,borderColor,borderWidth,columnSpan,labelPosition,widthMode,fixedWidth,inputStyle,inputFontSize,inputFontColor,labelFontWeight,helperFontWeight,inputFontWeight,focusColor,errorColor,hoverColor,prefixIcon,suffixIcon,verticalMargin]);
+int get hashCode => Object.hashAll([runtimeType,labelFontSize,labelColor,helperFontSize,helperColor,borderRadius,backgroundColor,borderColor,borderWidth,columnSpan,labelPosition,widthMode,fixedWidth,inputStyle,inputFontSize,inputFontColor,labelFontWeight,helperFontWeight,inputFontWeight,focusColor,errorColor,hoverColor,prefixIcon,suffixIcon,verticalMargin,labelColumnWidth,containerAlignment,containerPadding,height]);
 
 @override
 String toString() {
-  return 'QuestionStyle(labelFontSize: $labelFontSize, labelColor: $labelColor, helperFontSize: $helperFontSize, helperColor: $helperColor, borderRadius: $borderRadius, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth, columnSpan: $columnSpan, labelPosition: $labelPosition, widthMode: $widthMode, fixedWidth: $fixedWidth, inputStyle: $inputStyle, inputFontSize: $inputFontSize, inputFontColor: $inputFontColor, labelFontWeight: $labelFontWeight, helperFontWeight: $helperFontWeight, inputFontWeight: $inputFontWeight, focusColor: $focusColor, errorColor: $errorColor, hoverColor: $hoverColor, prefixIcon: $prefixIcon, suffixIcon: $suffixIcon, verticalMargin: $verticalMargin)';
+  return 'QuestionStyle(labelFontSize: $labelFontSize, labelColor: $labelColor, helperFontSize: $helperFontSize, helperColor: $helperColor, borderRadius: $borderRadius, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth, columnSpan: $columnSpan, labelPosition: $labelPosition, widthMode: $widthMode, fixedWidth: $fixedWidth, inputStyle: $inputStyle, inputFontSize: $inputFontSize, inputFontColor: $inputFontColor, labelFontWeight: $labelFontWeight, helperFontWeight: $helperFontWeight, inputFontWeight: $inputFontWeight, focusColor: $focusColor, errorColor: $errorColor, hoverColor: $hoverColor, prefixIcon: $prefixIcon, suffixIcon: $suffixIcon, verticalMargin: $verticalMargin, labelColumnWidth: $labelColumnWidth, containerAlignment: $containerAlignment, containerPadding: $containerPadding, height: $height)';
 }
 
 
@@ -311,7 +323,7 @@ abstract mixin class _$QuestionStyleCopyWith<$Res> implements $QuestionStyleCopy
   factory _$QuestionStyleCopyWith(_QuestionStyle value, $Res Function(_QuestionStyle) _then) = __$QuestionStyleCopyWithImpl;
 @override @useResult
 $Res call({
- double labelFontSize, String labelColor, double helperFontSize, String helperColor, double borderRadius, String backgroundColor, String borderColor, double borderWidth, int columnSpan, String labelPosition, String widthMode, String fixedWidth, String inputStyle, double inputFontSize, String inputFontColor, String labelFontWeight, String helperFontWeight, String inputFontWeight, String focusColor, String errorColor, String hoverColor, String? prefixIcon, String? suffixIcon, double verticalMargin
+ double labelFontSize, String labelColor, double helperFontSize, String helperColor, double borderRadius, String backgroundColor, String borderColor, double borderWidth, int columnSpan, String labelPosition, String widthMode, String fixedWidth, String inputStyle, double inputFontSize, String inputFontColor, String labelFontWeight, String helperFontWeight, String inputFontWeight, String focusColor, String errorColor, String hoverColor, String? prefixIcon, String? suffixIcon, double verticalMargin, double? labelColumnWidth, String? containerAlignment, double? containerPadding, double? height
 });
 
 
@@ -328,7 +340,7 @@ class __$QuestionStyleCopyWithImpl<$Res>
 
 /// Create a copy of QuestionStyle
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? labelFontSize = null,Object? labelColor = null,Object? helperFontSize = null,Object? helperColor = null,Object? borderRadius = null,Object? backgroundColor = null,Object? borderColor = null,Object? borderWidth = null,Object? columnSpan = null,Object? labelPosition = null,Object? widthMode = null,Object? fixedWidth = null,Object? inputStyle = null,Object? inputFontSize = null,Object? inputFontColor = null,Object? labelFontWeight = null,Object? helperFontWeight = null,Object? inputFontWeight = null,Object? focusColor = null,Object? errorColor = null,Object? hoverColor = null,Object? prefixIcon = freezed,Object? suffixIcon = freezed,Object? verticalMargin = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? labelFontSize = null,Object? labelColor = null,Object? helperFontSize = null,Object? helperColor = null,Object? borderRadius = null,Object? backgroundColor = null,Object? borderColor = null,Object? borderWidth = null,Object? columnSpan = null,Object? labelPosition = null,Object? widthMode = null,Object? fixedWidth = null,Object? inputStyle = null,Object? inputFontSize = null,Object? inputFontColor = null,Object? labelFontWeight = null,Object? helperFontWeight = null,Object? inputFontWeight = null,Object? focusColor = null,Object? errorColor = null,Object? hoverColor = null,Object? prefixIcon = freezed,Object? suffixIcon = freezed,Object? verticalMargin = null,Object? labelColumnWidth = freezed,Object? containerAlignment = freezed,Object? containerPadding = freezed,Object? height = freezed,}) {
   return _then(_QuestionStyle(
 labelFontSize: null == labelFontSize ? _self.labelFontSize : labelFontSize // ignore: cast_nullable_to_non_nullable
 as double,labelColor: null == labelColor ? _self.labelColor : labelColor // ignore: cast_nullable_to_non_nullable
@@ -354,7 +366,11 @@ as String,hoverColor: null == hoverColor ? _self.hoverColor : hoverColor // igno
 as String,prefixIcon: freezed == prefixIcon ? _self.prefixIcon : prefixIcon // ignore: cast_nullable_to_non_nullable
 as String?,suffixIcon: freezed == suffixIcon ? _self.suffixIcon : suffixIcon // ignore: cast_nullable_to_non_nullable
 as String?,verticalMargin: null == verticalMargin ? _self.verticalMargin : verticalMargin // ignore: cast_nullable_to_non_nullable
-as double,
+as double,labelColumnWidth: freezed == labelColumnWidth ? _self.labelColumnWidth : labelColumnWidth // ignore: cast_nullable_to_non_nullable
+as double?,containerAlignment: freezed == containerAlignment ? _self.containerAlignment : containerAlignment // ignore: cast_nullable_to_non_nullable
+as String?,containerPadding: freezed == containerPadding ? _self.containerPadding : containerPadding // ignore: cast_nullable_to_non_nullable
+as double?,height: freezed == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

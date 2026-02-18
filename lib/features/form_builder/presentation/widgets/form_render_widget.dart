@@ -295,45 +295,95 @@ class _RenderFieldWidget extends StatelessWidget {
       helperColor = AppColors.textGrey;
     }
 
+    final labelPosition = style.labelPosition;
+    final isLeftAligned = labelPosition == 'left';
+    final isHidden = labelPosition == 'hidden';
+
+    Widget labelWidget = Row(
+      children: [
+        Expanded(
+          child: Text(
+            question.label.translate(locale).isEmpty
+                ? 'Untitled ${question.type.label}'
+                : question.label.translate(locale),
+            style: TextStyle(
+              color: labelColor,
+              fontSize: style.labelFontSize,
+              fontWeight: _parseFontWeight(style.labelFontWeight),
+            ),
+          ),
+        ),
+        if (question.isRequired)
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(
+              '*',
+              style: TextStyle(color: Colors.red[400], fontSize: 16),
+            ),
+          ),
+      ],
+    );
+
+    Widget? helperWidget;
+    if (question.helperText.translate(locale).isNotEmpty) {
+      helperWidget = Text(
+        question.helperText.translate(locale),
+        style: TextStyle(
+          color: helperColor,
+          fontSize: style.helperFontSize,
+          fontWeight: _parseFontWeight(style.helperFontWeight),
+        ),
+      );
+    }
+
+    if (isHidden) {
+      return Container(
+        margin: EdgeInsets.only(bottom: style.verticalMargin),
+        padding: EdgeInsets.all(style.containerPadding ?? 0),
+        child: _buildFieldInput(question, locale),
+      );
+    }
+
+    if (isLeftAligned) {
+      return Container(
+        margin: EdgeInsets.only(bottom: style.verticalMargin),
+        padding: EdgeInsets.all(style.containerPadding ?? 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width:
+                  style.labelColumnWidth ??
+                  120, // Fixed width for left aligned label
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  labelWidget,
+                  if (helperWidget != null) ...[
+                    const SizedBox(height: 4),
+                    helperWidget,
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: _buildFieldInput(question, locale)),
+          ],
+        ),
+      );
+    }
+
+    // Default Top Aligned
     return Container(
       margin: EdgeInsets.only(bottom: style.verticalMargin),
+      padding: EdgeInsets.all(style.containerPadding ?? 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  question.label.translate(locale).isEmpty
-                      ? 'Untitled ${question.type.label}'
-                      : question.label.translate(locale),
-                  style: TextStyle(
-                    color: labelColor,
-                    fontSize: style.labelFontSize,
-                    fontWeight: _parseFontWeight(style.labelFontWeight),
-                  ),
-                ),
-              ),
-              if (question.isRequired)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red[400], fontSize: 16),
-                  ),
-                ),
-            ],
-          ),
-          if (question.helperText.translate(locale).isNotEmpty) ...[
+          labelWidget,
+          if (helperWidget != null) ...[
             const SizedBox(height: 4),
-            Text(
-              question.helperText.translate(locale),
-              style: TextStyle(
-                color: helperColor,
-                fontSize: style.helperFontSize,
-                fontWeight: _parseFontWeight(style.helperFontWeight),
-              ),
-            ),
+            helperWidget,
           ],
           const SizedBox(height: 8),
           _buildFieldInput(question, locale),
@@ -420,7 +470,7 @@ class _RenderFieldWidget extends StatelessWidget {
       case QuestionType.mobile:
       case QuestionType.url:
         return Container(
-          height: 48,
+          height: q.style.height ?? 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           alignment: Alignment.centerLeft,
@@ -452,7 +502,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.paragraph:
         return Container(
-          height: 120,
+          height: q.style.height ?? 120,
           padding: const EdgeInsets.all(12),
           decoration: containerDecor,
           alignment: Alignment.topLeft,
@@ -467,7 +517,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.dropdown:
         return Container(
-          height: 48,
+          height: q.style.height ?? 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           child: Row(
@@ -569,7 +619,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.fileUpload:
         return Container(
-          height: 100,
+          height: q.style.height ?? 100,
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.borderLight, width: 1),
             color: AppColors.fieldBackground,
@@ -612,7 +662,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.signature:
         return Container(
-          height: 150,
+          height: q.style.height ?? 150,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Icon(
@@ -645,7 +695,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.image:
         return Container(
-          height: 200,
+          height: q.style.height ?? 200,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Column(
@@ -677,7 +727,7 @@ class _RenderFieldWidget extends StatelessWidget {
           color: textStyle.color ?? AppColors.borderLight,
         );
       case QuestionType.spacer:
-        return const SizedBox(height: 32);
+        return SizedBox(height: q.style.height ?? 32);
       case QuestionType.matrixChoice:
         return Container(
           padding: const EdgeInsets.all(12),

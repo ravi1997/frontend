@@ -41,6 +41,12 @@ abstract class QuestionStyle with _$QuestionStyle {
 
     // Spacing
     @Default(16.0) double verticalMargin,
+
+    // New Layout Props
+    double? labelColumnWidth,
+    String? containerAlignment, // left, center, right
+    double? containerPadding,
+    double? height,
   }) = _QuestionStyle;
 
   factory QuestionStyle.fromJson(Map<String, dynamic> json) =>

@@ -116,6 +116,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     }
 
     // Default (Text, etc)
+    // Default (Text, etc)
     return {
       'equals': 'Equals',
       'not_equals': 'Not Equals',
@@ -123,6 +124,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
       'not_contains': 'Does Not Contain',
       'starts_with': 'Starts With',
       'ends_with': 'Ends With',
+      'regex': 'Regex Match',
       'is_empty': 'Is Empty',
       'is_not_empty': 'Is Not Empty',
     };
@@ -196,6 +198,14 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                   const DropdownMenuItem(
                     value: 'hide',
                     child: Text('Hide Question'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'enable',
+                    child: Text('Enable Question'),
+                  ),
+                  const DropdownMenuItem(
+                    value: 'disable',
+                    child: Text('Disable Question'),
                   ),
                   const DropdownMenuItem(
                     value: 'require',

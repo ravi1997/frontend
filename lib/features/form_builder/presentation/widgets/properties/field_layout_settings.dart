@@ -5,6 +5,7 @@ import 'package:frontend/features/form_builder/domain/entities/form_question.dar
 import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
+import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 
 class FieldLayoutSettings extends ConsumerWidget {
   final String formId;
@@ -24,35 +25,45 @@ class FieldLayoutSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (question.type == QuestionType.spacer) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'SPACER SETTINGS',
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 16),
+          PropertyBuilderUtils.buildNumberSlider(
+            label: 'Height (px)',
+            value: question.style.height ?? 32,
+            min: 8,
+            max: 500,
+            onChanged: (val) {
+              _updateStyle(
+                ref,
+                question.style.copyWith(height: val > 0 ? val : null),
+              );
+            },
+          ),
+        ],
+      );
+    }
+
+    final hideLabelPosition = [
+      QuestionType.divider,
+      QuestionType.image,
+      QuestionType.signature,
+    ].contains(question.type);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'GRID SETTINGS',
-          style: TextStyle(
-            color: AppColors.textGrey,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildDropdown<int>(
-          label: 'Columns Spanned',
-          value: question.style.columnSpan,
-          items: const [
-            DropdownMenuItem(value: 1, child: Text('1 Column')),
-            DropdownMenuItem(value: 2, child: Text('2 Columns')),
-            DropdownMenuItem(value: 3, child: Text('3 Columns')),
-            DropdownMenuItem(value: 4, child: Text('4 Columns')),
-          ],
-          onChanged: (val) {
-            if (val != null) {
-              _updateStyle(ref, question.style.copyWith(columnSpan: val));
-            }
-          },
-        ),
-        const SizedBox(height: 24),
         const Text(
           'SIZING & WIDTH',
           style: TextStyle(
@@ -69,6 +80,7 @@ class FieldLayoutSettings extends ConsumerWidget {
           items: const [
             DropdownMenuItem(value: 'auto', child: Text('Auto (Full Grid)')),
             DropdownMenuItem(value: 'fixed', child: Text('Fixed Width')),
+            DropdownMenuItem(value: 'percentage', child: Text('Percentage')),
           ],
           onChanged: (val) {
             if (val != null) {
@@ -92,37 +104,101 @@ class FieldLayoutSettings extends ConsumerWidget {
               }
             },
           ),
-        ],
-        const SizedBox(height: 24),
-        const Text(
-          'POSITIONING',
-          style: TextStyle(
-            color: AppColors.textGrey,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
+          const SizedBox(height: 12),
+          PropertyBuilderUtils.buildDropdown<String>(
+            label: 'Alignment',
+            value: question.style.containerAlignment ?? 'left',
+            items: const [
+              DropdownMenuItem(value: 'left', child: Text('Left')),
+              DropdownMenuItem(value: 'center', child: Text('Center')),
+              DropdownMenuItem(value: 'right', child: Text('Right')),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                _updateStyle(
+                  ref,
+                  question.style.copyWith(containerAlignment: val),
+                );
+              }
+            },
           ),
-        ),
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildDropdown<String>(
-          label: 'Label Position',
-          value: question.style.labelPosition,
-          items: const [
-            DropdownMenuItem(value: 'top', child: Text('Top Aligned')),
-            DropdownMenuItem(value: 'left', child: Text('Left Aligned')),
-            DropdownMenuItem(
-              value: 'floating',
-              child: Text('Floating / Inline'),
-            ),
-            DropdownMenuItem(value: 'hidden', child: Text('Hidden')),
-          ],
+        ],
+        if (question.style.widthMode == 'percentage') ...[
+          const SizedBox(height: 12),
+          PropertyBuilderUtils.buildNumberSlider(
+            label: 'Width (%)',
+            value: (question.metadata?['widthPercentage'] ?? 100).toDouble(),
+            min: 10,
+            max: 100,
+            onChanged: (val) {
+              ref
+                  .read(formBuilderControllerProvider(formId).notifier)
+                  .updateQuestionMetadata(question.id, {
+                    'widthPercentage': val.toInt(),
+                  });
+            },
+          ),
+        ],
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Custom Height (Optional)',
+          value: question.style.height ?? 0,
+          min: 0,
+          max: 500,
           onChanged: (val) {
-            if (val != null) {
-              _updateStyle(ref, question.style.copyWith(labelPosition: val));
-            }
+            _updateStyle(
+              ref,
+              question.style.copyWith(height: val > 0 ? val : null),
+            );
           },
         ),
         const SizedBox(height: 24),
+
+        if (!hideLabelPosition) ...[
+          const Text(
+            'POSITIONING',
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 16),
+          PropertyBuilderUtils.buildDropdown<String>(
+            label: 'Label Position',
+            value: question.style.labelPosition,
+            items: const [
+              DropdownMenuItem(value: 'top', child: Text('Top Aligned')),
+              DropdownMenuItem(value: 'left', child: Text('Left Aligned')),
+              DropdownMenuItem(
+                value: 'floating',
+                child: Text('Floating / Inline'),
+              ),
+              DropdownMenuItem(value: 'hidden', child: Text('Hidden')),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                _updateStyle(ref, question.style.copyWith(labelPosition: val));
+              }
+            },
+          ),
+          if (question.style.labelPosition == 'left') ...[
+            const SizedBox(height: 12),
+            PropertyBuilderUtils.buildNumberSlider(
+              label: 'Label Column Width',
+              value: question.style.labelColumnWidth ?? 120,
+              min: 50,
+              max: 300,
+              onChanged: (val) => _updateStyle(
+                ref,
+                question.style.copyWith(labelColumnWidth: val),
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
+        ],
+
         const Text(
           'SPACING',
           style: TextStyle(
@@ -140,6 +216,15 @@ class FieldLayoutSettings extends ConsumerWidget {
           max: 64,
           onChanged: (val) =>
               _updateStyle(ref, question.style.copyWith(verticalMargin: val)),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Internal Padding',
+          value: question.style.containerPadding ?? 0,
+          min: 0,
+          max: 48,
+          onChanged: (val) =>
+              _updateStyle(ref, question.style.copyWith(containerPadding: val)),
         ),
       ],
     );

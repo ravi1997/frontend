@@ -32,6 +32,10 @@ _QuestionStyle _$QuestionStyleFromJson(Map<String, dynamic> json) =>
       prefixIcon: json['prefixIcon'] as String?,
       suffixIcon: json['suffixIcon'] as String?,
       verticalMargin: (json['verticalMargin'] as num?)?.toDouble() ?? 16.0,
+      labelColumnWidth: (json['labelColumnWidth'] as num?)?.toDouble(),
+      containerAlignment: json['containerAlignment'] as String?,
+      containerPadding: (json['containerPadding'] as num?)?.toDouble(),
+      height: (json['height'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$QuestionStyleToJson(_QuestionStyle instance) =>
@@ -60,6 +64,10 @@ Map<String, dynamic> _$QuestionStyleToJson(_QuestionStyle instance) =>
       'prefixIcon': instance.prefixIcon,
       'suffixIcon': instance.suffixIcon,
       'verticalMargin': instance.verticalMargin,
+      'labelColumnWidth': instance.labelColumnWidth,
+      'containerAlignment': instance.containerAlignment,
+      'containerPadding': instance.containerPadding,
+      'height': instance.height,
     };
 
 _SectionStyle _$SectionStyleFromJson(Map<String, dynamic> json) =>

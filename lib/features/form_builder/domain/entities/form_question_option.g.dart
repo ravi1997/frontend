@@ -8,7 +8,7 @@ part of 'form_question_option.dart';
 
 _FormQuestionOption _$FormQuestionOptionFromJson(Map<String, dynamic> json) =>
     _FormQuestionOption(
-      id: json['id'] as String,
+      id: _readId(json, 'id') as String,
       description: json['description'] as String?,
       isDefault: json['is_default'] as bool? ?? false,
       isDisabled: json['is_disabled'] as bool? ?? false,
