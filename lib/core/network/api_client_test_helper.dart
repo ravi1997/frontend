@@ -78,14 +78,14 @@ class ApiClientTestHelper {
 
       if (forms.isNotEmpty) {
         final firstForm = forms[0];
-        debugPrint('    First form: ${firstForm['title']}');
+        debugPrint('    First form: ${firstForm.title}');
 
         // Get form details
-        final formId = firstForm['id'] ?? firstForm['_id'];
+        final formId = firstForm.id;
         debugPrint('  → Fetching form details for ID: $formId');
         final formDetails = await apiService.getForm(formId);
         debugPrint('  ✓ Form details retrieved');
-        debugPrint('    Sections: ${formDetails['sections']?.length ?? 0}');
+        debugPrint('    Sections: ${formDetails.sections.length}');
       }
 
       // Test form creation
@@ -108,7 +108,7 @@ class ApiClientTestHelper {
         ],
       );
 
-      final newFormId = newForm['id'];
+      final newFormId = newForm.id;
       debugPrint('  ✓ Form created with ID: $newFormId');
 
       // Test form update

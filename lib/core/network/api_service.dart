@@ -3,6 +3,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'api_client_wrapper.dart';
 import 'api_endpoints.dart';
 
+import '../../features/form_builder/data/dto/form_dto.dart';
+
 part 'api_service.g.dart';
 
 /// Comprehensive API service providing typed methods for all backend endpoints.
@@ -36,10 +38,7 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.login,
-      data: {
-        'identifier': identifier,
-        'password': password,
-      },
+      data: {'identifier': identifier, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -51,20 +50,14 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.loginWithOtp,
-      data: {
-        'mobile': mobile,
-        'otp': otp,
-      },
+      data: {'mobile': mobile, 'otp': otp},
     );
     return response.data as Map<String, dynamic>;
   }
 
   /// Generate OTP for mobile number
   Future<void> generateOtp(String mobile) async {
-    await _client.post(
-      ApiEndpoints.generateOtp,
-      data: {'mobile': mobile},
-    );
+    await _client.post(ApiEndpoints.generateOtp, data: {'mobile': mobile});
   }
 
   /// Register new user
@@ -86,7 +79,8 @@ class ApiService {
         'user_type': userType,
         if (employeeId != null) 'employee_id': employeeId,
         'mobile': mobile ?? '',
-        'roles': roles ??
+        'roles':
+            roles ??
             [
               'user',
               'creator',
@@ -134,7 +128,8 @@ class ApiService {
   // ============================================================================
 
   /// List all forms with optional filters
-  Future<List<dynamic>> listForms({
+  /// List all forms with optional filters
+  Future<List<FormDto>> listForms({
     int? page,
     int? limit,
     String? status,
@@ -149,17 +144,19 @@ class ApiService {
         if (search != null) 'search': search,
       },
     );
-    return response.data as List<dynamic>;
+    return (response.data as List)
+        .map((e) => FormDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// Get form by ID
-  Future<Map<String, dynamic>> getForm(String formId) async {
+  Future<FormDto> getForm(String formId) async {
     final response = await _client.get(ApiEndpoints.getForm(formId));
-    return response.data as Map<String, dynamic>;
+    return FormDto.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// Create new form
-  Future<Map<String, dynamic>> createForm({
+  Future<FormDto> createForm({
     required String title,
     String? slug,
     String? status,
@@ -184,11 +181,12 @@ class ApiService {
         if (workflows != null) 'workflows': workflows,
       },
     );
-    return response.data as Map<String, dynamic>;
+    // Backend returns { "form": { ... } }
+    return FormDto.fromJson(response.data['form'] as Map<String, dynamic>);
   }
 
   /// Update existing form
-  Future<Map<String, dynamic>> updateForm({
+  Future<FormDto> updateForm({
     required String formId,
     required String title,
     String? slug,
@@ -214,7 +212,8 @@ class ApiService {
         if (workflows != null) 'workflows': workflows,
       },
     );
-    return response.data as Map<String, dynamic>;
+    // Backend returns { "form": { ... } }
+    return FormDto.fromJson(response.data['form'] as Map<String, dynamic>);
   }
 
   /// Delete form
@@ -340,10 +339,7 @@ class ApiService {
   }) async {
     final response = await _client.get(
       ApiEndpoints.exportResponses,
-      queryParameters: {
-        'form_id': formId,
-        'format': format,
-      },
+      queryParameters: {'form_id': formId, 'format': format},
     );
     return response.data;
   }
@@ -420,11 +416,7 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.createWorkflow,
-      data: {
-        'name': name,
-        'type': type,
-        'config': config,
-      },
+      data: {'name': name, 'type': type, 'config': config},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -438,11 +430,7 @@ class ApiService {
   }) async {
     final response = await _client.put(
       ApiEndpoints.updateWorkflow(workflowId),
-      data: {
-        'name': name,
-        'type': type,
-        'config': config,
-      },
+      data: {'name': name, 'type': type, 'config': config},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -467,10 +455,7 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.uploadSignature,
-      data: {
-        'signature': signature,
-        'form_id': formId,
-      },
+      data: {'signature': signature, 'form_id': formId},
     );
     return response.data as Map<String, dynamic>;
   }

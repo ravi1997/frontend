@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import '../network/token_service.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -8,6 +9,10 @@ class AuthInterceptor extends QueuedInterceptor {
   final AuthRepositoryImpl Function() _getAuthRepository;
   final Function() _onNavigateToLogin;
   final Dio _dio;
+
+  // Lock to prevent multiple concurrent refresh requests
+  bool _isRefreshing = false;
+  Completer<void>? _refreshCompleter;
 
   AuthInterceptor({
     required AuthTokens? Function() getTokens,
@@ -36,45 +41,94 @@ class AuthInterceptor extends QueuedInterceptor {
     ErrorInterceptorHandler handler,
   ) async {
     if (err.response?.statusCode == 401) {
+      // If the request was already retried, it means refresh failed or token is still invalid.
       if (err.requestOptions.extra['_retried'] == true) {
         await _clearTokens();
         _onNavigateToLogin();
         return handler.next(err);
       }
 
-      final currentTokens = _getTokens();
-      final accessToken = currentTokens?.accessToken;
-      final refreshToken = currentTokens?.refreshToken;
+      // If a refresh is already in progress, wait for it to complete
+      if (_isRefreshing) {
+        try {
+          // Wait for the pending refresh to complete
+          await _refreshCompleter?.future;
 
-      if (refreshToken == null) {
-        await _clearTokens();
-        _onNavigateToLogin();
-        return handler.next(err);
+          // Get the new token (it should be updated in storage by the refresher)
+          final newTokens = _getTokens();
+          final newAccessToken = newTokens?.accessToken;
+
+          if (newAccessToken != null) {
+            return _retry(err.requestOptions, newAccessToken, handler);
+          } else {
+            // New token not found? potentially refresh failed.
+            // Let the original error proceed or maybe 401 again.
+            return handler.next(err);
+          }
+        } catch (e) {
+          // If the refresh failed, we fail too
+          return handler.next(err);
+        }
       }
 
-      // Check if the token in the request is different from current storage
-      // This happens if a previous request already refreshed the token
-      final requestToken = err.requestOptions.headers['Authorization']
-          ?.toString()
-          .replaceFirst('Bearer ', '');
-
-      if (accessToken != null && requestToken != accessToken) {
-        // Token has already been refreshed
-        return _retry(err.requestOptions, accessToken, handler);
-      }
+      // Start a new refresh
+      _isRefreshing = true;
+      _refreshCompleter = Completer<void>();
 
       try {
+        final currentTokens = _getTokens();
+        final accessToken = currentTokens?.accessToken;
+        final refreshToken = currentTokens?.refreshToken;
+
+        if (refreshToken == null) {
+          _failRefresh(handler, err);
+          return;
+        }
+
+        // Double check: Check if the token in the request is different from current storage
+        // This optimizes if a refresh happened between the request start and now (unlikely with lock but possible in edge cases)
+        final requestToken = err.requestOptions.headers['Authorization']
+            ?.toString()
+            .replaceFirst('Bearer ', '');
+
+        if (accessToken != null && requestToken != accessToken) {
+          _completeRefresh();
+          return _retry(err.requestOptions, accessToken, handler);
+        }
+
         final repo = _getAuthRepository();
         final newAccessToken = await repo.refreshToken(refreshToken);
 
+        _completeRefresh();
         return _retry(err.requestOptions, newAccessToken, handler);
       } catch (e) {
-        // Refresh failed (or concurrent refresh failed and we are seeing it)
-        await _clearTokens();
-        _onNavigateToLogin();
-        return handler.next(err);
+        _failRefresh(handler, err);
       }
+    } else {
+      handler.next(err);
     }
+  }
+
+  void _completeRefresh() {
+    _isRefreshing = false;
+    if (_refreshCompleter?.isCompleted == false) {
+      _refreshCompleter?.complete();
+    }
+    _refreshCompleter = null;
+  }
+
+  Future<void> _failRefresh(
+    ErrorInterceptorHandler handler,
+    DioException err,
+  ) async {
+    _isRefreshing = false;
+    if (_refreshCompleter?.isCompleted == false) {
+      _refreshCompleter?.completeError(err);
+    }
+    _refreshCompleter = null;
+
+    await _clearTokens();
+    _onNavigateToLogin();
     handler.next(err);
   }
 
