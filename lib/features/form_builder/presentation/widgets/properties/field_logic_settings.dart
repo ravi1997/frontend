@@ -21,39 +21,27 @@ class FieldLogicSettings extends ConsumerWidget {
 
   Map<String, dynamic> _getLogicState(FormQuestion question) {
     final logic = question.conditionalLogic ?? {};
+    if (logic['version'] == 3) return Map<String, dynamic>.from(logic);
 
-    // Check for V2 structure
-    if (logic['version'] == 2 && logic['rules'] is List) {
-      return Map<String, dynamic>.from(logic);
-    }
-
-    // Convert V1 (or empty) to V2
-    final v1Rules = (logic['rules'] as List? ?? [])
-        .cast<Map<String, dynamic>>();
-
-    if (v1Rules.isNotEmpty) {
-      return {
-        'version': 2,
-        'rules': [
-          {
-            'action': 'show',
-            'conditionGroup': {
-              'matchType': logic['matchType'] ?? 'and',
-              'rules': v1Rules,
-            },
+    // Auto-migrate to V3 smoothly
+    final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
+    return {
+      'version': 3,
+      'rules': rules.map((r) {
+        if (r.containsKey('conditionGroup')) return r;
+        // Convert old flat rule to group
+        return {
+          'action': r['action'] ?? 'show',
+          'conditionGroup': {
+            'matchType': 'and',
+            'rules': [r],
           },
-        ],
-      };
-    }
-
-    return {'version': 2, 'rules': []};
+        };
+      }).toList(),
+    };
   }
 
-  void _updateLogic(
-    WidgetRef ref,
-    FormQuestion question,
-    Map<String, dynamic> newLogic,
-  ) {
+  void _updateLogic(WidgetRef ref, Map<String, dynamic> newLogic) {
     ref
         .read(formBuilderControllerProvider(formId).notifier)
         .updateQuestion(question.copyWith(conditionalLogic: newLogic));
@@ -64,12 +52,15 @@ class FieldLogicSettings extends ConsumerWidget {
     final logicState = _getLogicState(question);
     final rules = (logicState['rules'] as List? ?? [])
         .cast<Map<String, dynamic>>();
+    final locale =
+        ref.watch(formBuilderControllerProvider(formId)).value?.editingLocale ??
+        'en';
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'CONDITIONAL LOGIC',
+          'FIELD LOGIC CONTROLS',
           style: TextStyle(
             color: AppColors.textGrey,
             fontSize: 12,
@@ -81,10 +72,7 @@ class FieldLogicSettings extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.borderLight,
-              style: BorderStyle.solid,
-            ),
+            border: Border.all(color: AppColors.borderLight),
             borderRadius: BorderRadius.circular(8),
             color: AppColors.builderElement,
           ),
@@ -94,42 +82,30 @@ class FieldLogicSettings extends ConsumerWidget {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'Add logic to control visibility, validation, and requirements.',
+                    'No logic rules applied to this field.',
                     style: TextStyle(color: AppColors.textGrey, fontSize: 13),
-                    textAlign: TextAlign.center,
                   ),
                 )
               else
-                Column(
-                  children: rules.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final rule = entry.value;
-                    final locale =
-                        ref
-                            .watch(formBuilderControllerProvider(formId))
-                            .value
-                            ?.editingLocale ??
-                        'en';
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: _buildLogicRuleCard(
-                        context,
-                        ref,
-                        rule,
-                        index,
-                        locale,
-                      ),
-                    );
-                  }).toList(),
+                ...rules.asMap().entries.map(
+                  (entry) => _buildLogicSummary(
+                    context,
+                    ref,
+                    entry.value,
+                    entry.key,
+                    locale,
+                  ),
                 ),
               const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => _showRuleDialog(context, ref),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Rule'),
-                style: OutlinedButton.styleFrom(
+              ElevatedButton.icon(
+                onPressed: () => _showDialog(context, ref),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Logical Action'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
+                  minimumSize: const Size(double.infinity, 44),
                 ),
               ),
             ],
@@ -139,7 +115,7 @@ class FieldLogicSettings extends ConsumerWidget {
     );
   }
 
-  Widget _buildLogicRuleCard(
+  Widget _buildLogicSummary(
     BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> rule,
@@ -147,193 +123,131 @@ class FieldLogicSettings extends ConsumerWidget {
     String locale,
   ) {
     final action = rule['action'] ?? 'show';
-    final actionLabel = action.toString().toUpperCase().replaceAll('_', ' ');
-    final conditionGroup =
-        rule['conditionGroup'] as Map<String, dynamic>? ?? {};
-    final conditions = (conditionGroup['rules'] as List? ?? []);
+    final conditions = (rule['conditionGroup']?['rules'] as List? ?? []);
 
-    Color color = AppColors.brandBlue;
-    if (action == 'hide') color = Colors.orange;
-    if (action == 'validate') color = Colors.red;
-    if (action == 'require') color = Colors.purple;
-    if (action == 'disable_option') color = Colors.grey;
+    Color actionColor = AppColors.brandBlue;
+    IconData icon = Icons.visibility;
+
+    if (action == 'hide') {
+      actionColor = Colors.orange;
+      icon = Icons.visibility_off;
+    }
+    if (action == 'validate') {
+      actionColor = Colors.red;
+      icon = Icons.error_outline;
+    }
+    if (action == 'set_value') {
+      actionColor = Colors.green;
+      icon = Icons.edit;
+    }
 
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  actionLabel,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
+              Icon(icon, size: 16, color: actionColor),
+              const SizedBox(width: 8),
+              Text(
+                action.toString().toUpperCase().replaceAll('_', ' '),
+                style: TextStyle(
+                  color: actionColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
                 ),
               ),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () => _editRule(context, ref, index),
-                    child: const Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: AppColors.textGrey,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => _deleteRule(ref, index),
-                    child: const Icon(
-                      Icons.delete_outline,
-                      size: 16,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                ],
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.edit, size: 14),
+                onPressed: () =>
+                    _showDialog(context, ref, initialRule: rule, index: index),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 14,
+                  color: Colors.red,
+                ),
+                onPressed: () {
+                  final state = _getLogicState(question);
+                  final newRules = List<Map<String, dynamic>>.from(
+                    state['rules'],
+                  )..removeAt(index);
+                  _updateLogic(ref, {...state, 'rules': newRules});
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          if (action == 'validate')
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                "Error: \"${rule['errorMessage'] ?? ''}\"",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.red,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-          if (action == 'disable_option')
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                "Target: \"${rule['targetOption'] ?? ''}\"",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           Text(
-            '${conditions.length} Condition(s)',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            'If ${conditions.length} condition(s) are met:',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
-          ...conditions
-              .map((c) {
-                final triggerId = c['triggerId'];
-                String triggerLabel = 'Unknown';
-                for (final s in sections) {
-                  for (final q in s.questions) {
-                    if (q.id == triggerId) {
-                      triggerLabel = q.label.translate(locale);
-                      break;
-                    }
-                  }
-                }
-                final op = c['operator'] ?? 'equals';
-                final val = c['value'] ?? '';
-                final isUnary = op == 'is_empty' || op == 'is_not_empty';
-
-                return Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Text(
-                    "• $triggerLabel $op ${isUnary ? '' : '"$val"'}".trim(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGrey,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              })
-              .take(3),
-          if (conditions.length > 3)
-            const Text(
-              '...',
-              style: TextStyle(fontSize: 10, color: AppColors.textGrey),
-            ),
+          ...conditions.take(2).map((c) {
+            return Text(
+              '• ${c['triggerId'] != null ? _getFieldLabel(c['triggerId'], locale) : 'Unknown'} ${c['operator']} "${c['value']}"',
+              style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            );
+          }),
+          if (conditions.length > 2)
+            const Text('...', style: TextStyle(fontSize: 10)),
         ],
       ),
     );
   }
 
-  void _editRule(BuildContext context, WidgetRef ref, int index) async {
-    final state = ref.read(formBuilderControllerProvider(formId)).value;
-    final locale = state?.editingLocale ?? 'en';
-    final logicState = _getLogicState(question);
-    final rules = (logicState['rules'] as List).cast<Map<String, dynamic>>();
-    final ruleToEdit = rules[index];
-
-    final updatedRule = await showDialog(
-      context: context,
-      builder: (_) => LogicRuleDialog(
-        currentQuestion: question,
-        sections: sections,
-        initialRule: ruleToEdit,
-        locale: locale,
-      ),
-    );
-
-    if (updatedRule != null) {
-      final newRules = List<Map<String, dynamic>>.from(rules);
-      newRules[index] = updatedRule;
-      _updateLogic(ref, question, {...logicState, 'rules': newRules});
+  String _getFieldLabel(String id, String locale) {
+    for (final s in sections) {
+      for (final q in s.questions) {
+        if (q.id == id) return q.label.translate(locale);
+      }
     }
+    return id;
   }
 
-  void _deleteRule(WidgetRef ref, int index) {
-    final logicState = _getLogicState(question);
-    final rules = (logicState['rules'] as List).cast<Map<String, dynamic>>();
-    final newRules = List<Map<String, dynamic>>.from(rules);
-    newRules.removeAt(index);
-    _updateLogic(ref, question, {...logicState, 'rules': newRules});
-  }
-
-  void _showRuleDialog(BuildContext context, WidgetRef ref) async {
+  void _showDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    Map<String, dynamic>? initialRule,
+    int? index,
+  }) async {
     final state = ref.read(formBuilderControllerProvider(formId)).value;
     final locale = state?.editingLocale ?? 'en';
-    final resultRule = await showDialog(
+
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => LogicRuleDialog(
         currentQuestion: question,
         sections: sections,
+        initialRule: initialRule,
         locale: locale,
       ),
     );
 
-    if (resultRule != null) {
+    if (result != null) {
       final logicState = _getLogicState(question);
-      final rules = (logicState['rules'] as List).cast<Map<String, dynamic>>();
-      final newRules = List<Map<String, dynamic>>.from(rules)..add(resultRule);
-      _updateLogic(ref, question, {...logicState, 'rules': newRules});
+      final newRules = List<Map<String, dynamic>>.from(logicState['rules']);
+      if (index != null) {
+        newRules[index] = result;
+      } else {
+        newRules.add(result);
+      }
+      _updateLogic(ref, {...logicState, 'rules': newRules});
     }
   }
 }

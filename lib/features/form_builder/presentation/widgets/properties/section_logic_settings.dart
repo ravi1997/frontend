@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
+import '../logic_rule_dialog.dart';
+import 'property_builder_utils.dart';
 
 class SectionLogicSettings extends ConsumerWidget {
   final String formId;
@@ -18,11 +20,17 @@ class SectionLogicSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+    final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
+    final locale =
+        ref.watch(formBuilderControllerProvider(formId)).value?.editingLocale ??
+        'en';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'CONDITIONAL VISIBILITY',
+          'SECTION FLOW & VISIBILITY',
           style: TextStyle(
             color: AppColors.textGrey,
             fontSize: 12,
@@ -39,14 +47,31 @@ class SectionLogicSettings extends ConsumerWidget {
             color: AppColors.builderElement,
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildLogicList(ref),
+              if (rules.isEmpty) ...[
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      'This section is always visible and follows standard flow.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                    ),
+                  ),
+                ),
+              ] else
+                ...rules.asMap().entries.map(
+                  (e) => _buildRuleItem(context, ref, e.value, e.key, locale),
+                ),
+
               const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: () => _showRuleDialog(context, ref),
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add Rule'),
+                icon: const Icon(Icons.add_road, size: 18),
+                label: const Text('Add Show/Jump Logic'),
                 style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 44),
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
                 ),
@@ -54,80 +79,155 @@ class SectionLogicSettings extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Disable Section when hidden',
+          value: section.metadata['disableWhenHidden'] ?? true,
+          onChanged: (val) {
+            ref
+                .read(formBuilderControllerProvider(formId).notifier)
+                .updateSectionMetadata(section.id, {'disableWhenHidden': val});
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildLogicList(WidgetRef ref) {
-    final logic = section.conditionalLogic ?? {'matchType': 'and', 'rules': []};
-    final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
+  Widget _buildRuleItem(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> rule,
+    int index,
+    String locale,
+  ) {
+    final action = rule['action'] ?? 'show';
+    final conditions = (rule['conditionGroup']?['rules'] as List? ?? []);
 
-    if (rules.isEmpty) {
-      return const Text(
-        'This section is always visible.',
-        style: TextStyle(color: AppColors.textGrey, fontSize: 13),
-      );
-    }
-
-    return Column(
-      children: rules.asMap().entries.map((entry) {
-        final index = entry.key;
-        final rule = entry.value;
-        return _buildRuleItem(ref, rule, index);
-      }).toList(),
-    );
-  }
-
-  Widget _buildRuleItem(WidgetRef ref, Map<String, dynamic> rule, int index) {
-    // Basic representation
-    return ListTile(
-      title: Text(
-        'Rule ${index + 1}',
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.borderLight),
       ),
-      subtitle: Text(
-        'If ${rule['triggerId']} ${rule['condition']} ${rule['value']}',
-        style: const TextStyle(fontSize: 12),
-      ),
-      trailing: IconButton(
-        icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-        onPressed: () {
-          final newRules = List<Map<String, dynamic>>.from(
-            section.conditionalLogic?['rules'] ?? [],
-          );
-          newRules.removeAt(index);
-          ref
-              .read(formBuilderControllerProvider(formId).notifier)
-              .updateSection(
-                section.copyWith(
-                  conditionalLogic: {
-                    ...section.conditionalLogic ?? {},
-                    'rules': newRules,
-                  },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _getActionBadge(action),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.edit, size: 14),
+                onPressed: () => _showRuleDialog(
+                  context,
+                  ref,
+                  initialRule: rule,
+                  index: index,
                 ),
-              );
-        },
-      ),
-    );
-  }
-
-  void _showRuleDialog(BuildContext context, WidgetRef ref) {
-    // Reusing logic would be better but for now let's just make it a placeholder
-    // In a real app we'd want a shared LogicRuleDialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Visibility Rule'),
-        content: const Text(
-          'Please use the field logic settings for more granular control. Section logic is managed via rules.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 14,
+                  color: Colors.red,
+                ),
+                onPressed: () => _deleteRule(ref, index),
+              ),
+            ],
           ),
+          const SizedBox(height: 8),
+          Text(
+            'Conditions: match ${rule['conditionGroup']?['matchType'] ?? 'all'}',
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+          ...conditions
+              .take(2)
+              .map(
+                (c) => Text(
+                  '• ${c['triggerId'] ?? 'Field'} ${c['operator']} ${c['value']}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textGrey,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
         ],
       ),
     );
+  }
+
+  Widget _getActionBadge(String action) {
+    Color color = AppColors.brandBlue;
+    if (action == 'jump_to_section') color = Colors.purple;
+    if (action == 'end_form') color = Colors.red;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        action.toUpperCase().replaceAll('_', ' '),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _showRuleDialog(
+    BuildContext context,
+    WidgetRef ref, {
+    Map<String, dynamic>? initialRule,
+    int? index,
+  }) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => LogicRuleDialog(
+        currentSection: section,
+        sections: allSections,
+        initialRule: initialRule,
+        locale:
+            ref
+                .read(formBuilderControllerProvider(formId))
+                .value
+                ?.editingLocale ??
+            'en',
+      ),
+    );
+
+    if (result != null) {
+      final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+      final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? []);
+      if (index != null) {
+        newRules[index] = result;
+      } else {
+        newRules.add(result);
+      }
+
+      ref
+          .read(formBuilderControllerProvider(formId).notifier)
+          .updateSection(
+            section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+          );
+    }
+  }
+
+  void _deleteRule(WidgetRef ref, int index) {
+    final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+    final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? [])
+      ..removeAt(index);
+    ref
+        .read(formBuilderControllerProvider(formId).notifier)
+        .updateSection(
+          section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+        );
   }
 }

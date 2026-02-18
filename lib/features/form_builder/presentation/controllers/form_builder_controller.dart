@@ -666,7 +666,7 @@ class FormBuilderController extends _$FormBuilderController {
     } catch (e) {
       final error = ErrorHandler.handle(e);
       state = AsyncValue.data(
-        state.value!.copyWith(isSaving: false, error: error.toString()),
+        state.value!.copyWith(isSaving: false, error: error),
       );
       return false;
     }
@@ -710,7 +710,7 @@ class FormBuilderController extends _$FormBuilderController {
     } catch (e) {
       final error = ErrorHandler.handle(e);
       state = AsyncValue.data(
-        state.value!.copyWith(isSaving: false, error: error.toString()),
+        state.value!.copyWith(isSaving: false, error: error),
       );
       return false;
     }
@@ -738,7 +738,7 @@ class FormBuilderController extends _$FormBuilderController {
       );
     } catch (e) {
       final error = ErrorHandler.handle(e);
-      state = AsyncValue.data(state.value!.copyWith(error: error.toString()));
+      state = AsyncValue.data(state.value!.copyWith(error: error));
     }
   }
 
@@ -766,5 +766,32 @@ class FormBuilderController extends _$FormBuilderController {
         'suggestions': [],
       };
     }
+  }
+
+  void updateSectionMetadata(String sectionId, Map<String, dynamic> metadata) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      if (s.id == sectionId) {
+        return s.copyWith(metadata: {...s.metadata, ...metadata});
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateFormMetadata(Map<String, dynamic> metadata) {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(
+          metadata: {...state.value!.form.metadata, ...metadata},
+        ),
+      ),
+    );
   }
 }
