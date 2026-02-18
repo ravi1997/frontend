@@ -658,8 +658,10 @@ class FormBuilderController extends _$FormBuilderController {
     state = AsyncValue.data(state.value!.copyWith(isSaving: true));
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      await repository.saveForm(state.value!.form);
-      state = AsyncValue.data(state.value!.copyWith(isSaving: false));
+      final savedForm = await repository.saveForm(state.value!.form);
+      state = AsyncValue.data(
+        state.value!.copyWith(form: savedForm, isSaving: false),
+      );
       return true;
     } catch (e) {
       final error = ErrorHandler.handle(e);

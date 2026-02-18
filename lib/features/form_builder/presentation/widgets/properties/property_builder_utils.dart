@@ -147,15 +147,15 @@ class PropertyBuilderUtils {
         Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 32, // Reduced from 36
+              height: 32, // Reduced from 36
               decoration: BoxDecoration(
                 color: displayColor,
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(color: AppColors.borderLight),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8), // Reduced from 12
             Expanded(
               child: TextFormField(
                 key: ValueKey(

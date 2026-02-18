@@ -62,35 +62,29 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 2,
-              child: PropertyBuilderUtils.buildNumberSlider(
-                label: 'Size',
-                value: fontSize,
-                min: 10,
-                max: 32,
-                onChanged: (val) => onChanged(val, color, fontWeight),
-              ),
+            PropertyBuilderUtils.buildNumberSlider(
+              label: 'Size',
+              value: fontSize,
+              min: 10,
+              max: 32,
+              onChanged: (val) => onChanged(val, color, fontWeight),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 1,
-              child: PropertyBuilderUtils.buildColorPicker(
-                label: 'Color',
-                value: color,
-                onChanged: (val) => onChanged(fontSize, val, fontWeight),
-                validator: (value) {
-                  // Added validator
-                  if (value == null || value.isEmpty)
-                    return 'Color is required';
-                  if (!RegExp(r'^#([0-9a-fA-F]{3}){1,2}$').hasMatch(value)) {
-                    return 'Invalid hex color';
-                  }
-                  return null;
-                },
-              ),
+            const SizedBox(height: 12),
+            PropertyBuilderUtils.buildColorPicker(
+              label: 'Color',
+              value: color,
+              onChanged: (val) => onChanged(fontSize, val, fontWeight),
+              validator: (value) {
+                // Added validator
+                if (value == null || value.isEmpty) return 'Color is required';
+                if (!RegExp(r'^#([0-9a-fA-F]{3}){1,2}$').hasMatch(value)) {
+                  return 'Invalid hex color';
+                }
+                return null;
+              },
             ),
           ],
         ),

@@ -79,8 +79,9 @@ class MockFormBuilderRepository implements FormBuilderRepository {
   }
 
   @override
-  Future<void> saveForm(BuilderForm form) async {
+  Future<BuilderForm> saveForm(BuilderForm form) async {
     await Future.delayed(const Duration(milliseconds: 500));
+    return form;
   }
 
   @override

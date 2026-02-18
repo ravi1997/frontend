@@ -11,7 +11,7 @@ abstract class FormBuilderRepository {
   Future<BuilderForm> getForm(String id);
   Future<List<FormVersionHistory>> getVersionHistory(String formId);
   Future<BuilderForm> getFormVersion(String formId, String version);
-  Future<void> saveForm(BuilderForm form);
+  Future<BuilderForm> saveForm(BuilderForm form);
   Future<Map<String, dynamic>> publishForm(String formId);
   Future<List<FormSection>> generateFieldsWithAI(
     String prompt, {
