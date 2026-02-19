@@ -4,6 +4,8 @@ import 'package:frontend/core/network/api_endpoints.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/responses/domain/repositories/response_repository.dart';
 
+import 'package:frontend/features/responses/domain/entities/response_history.dart';
+
 part 'response_repository_impl.g.dart';
 
 class ResponseRepositoryImpl implements ResponseRepository {
@@ -41,10 +43,18 @@ class ResponseRepositoryImpl implements ResponseRepository {
     final List<dynamic> results = response.data['results'] as List<dynamic>;
     return results.map((json) => FormResponse.fromJson(json)).toList();
   }
+
+  @override
+  Future<List<ResponseHistory>> getResponseHistory(String responseId) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.getResponseHistory(responseId),
+    );
+    final List<dynamic> data = response.data as List<dynamic>;
+    return data.map((json) => ResponseHistory.fromJson(json)).toList();
+  }
 }
 
 @riverpod
 ResponseRepository responseRepository(Ref ref) {
-  // For now, we are switching from Mock to Real
   return ResponseRepositoryImpl(ref.watch(apiClientProvider));
 }
