@@ -11,7 +11,21 @@ abstract class FormBuilderRepository {
   Future<BuilderForm> getForm(String id);
   Future<List<FormVersionHistory>> getVersionHistory(String formId);
   Future<BuilderForm> getFormVersion(String formId, String version);
-  Future<BuilderForm> saveForm(BuilderForm form);
+  Future<BuilderForm> saveForm(
+    BuilderForm form, {
+    String versionType = 'patch',
+  });
+  Future<void> updateFormVersion(
+    String formId,
+    String version,
+    Map<String, dynamic> data,
+  );
+  Future<void> createFormVersion(
+    String formId,
+    Map<String, dynamic> data, {
+    String type = 'patch',
+    bool activate = true,
+  });
   Future<Map<String, dynamic>> publishForm(String formId);
   Future<List<FormSection>> generateFieldsWithAI(
     String prompt, {

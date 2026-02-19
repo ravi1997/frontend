@@ -30,6 +30,7 @@ class FormMapper {
       'sections': sections,
       'updatedAt': dto.updatedAt?.toIso8601String(),
       'workflows': dto.workflows,
+      'accessPolicy': dto.accessPolicy,
       'versionHistory': dto.versions.map((v) {
         return {
           'version': v.version,
@@ -83,6 +84,7 @@ class FormMapper {
       'sections': sections.cast<Map<String, dynamic>>().toList(),
       'updatedAt': mapData['updated_at'],
       'workflows': mapData['workflows'] ?? <String, dynamic>{},
+      'accessPolicy': mapData['access_policy'],
       'versionHistory': versions.map((v) {
         return {
           'version': v['version'],
@@ -96,10 +98,11 @@ class FormMapper {
   }
 
   static Map<String, dynamic> toBackendJson(BuilderForm form) {
+    // Legacy support or new creation (initial version)
     return {
       'title': form.title,
       'status': form.status,
-      'slug': form.id, // Use ID as slug for now
+      'slug': form.id,
       'versions': [
         {
           'version': form.version,
@@ -109,6 +112,28 @@ class FormMapper {
       ],
       'active_version': form.version,
       'workflows': form.workflows,
+      'access_policy': form.accessPolicy.toJson(),
+    };
+  }
+
+  static Map<String, dynamic> toFormMetadataJson(BuilderForm form) {
+    return {
+      'title': form.title,
+      'status': form.status,
+      'slug': form.id,
+      'active_version': form.version,
+      'workflows': form.workflows,
+      'access_policy': form.accessPolicy.toJson(),
+      // 'is_template': form.isTemplate, // If applicable
+      // versions are EXCLUDED to prevent overwrite
+    };
+  }
+
+  static Map<String, dynamic> toVersionJson(BuilderForm form) {
+    return {
+      'version': form.version,
+      'sections': form.sections.map((s) => s.toJson()).toList(),
+      'created_at': DateTime.now().toIso8601String(),
     };
   }
 

@@ -33,32 +33,91 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<BuilderForm> saveForm(BuilderForm form) async {
+  Future<BuilderForm> saveForm(
+    BuilderForm form, {
+    String versionType = 'patch',
+  }) async {
     try {
-      // Transform frontend format to backend format
-      final backendData = FormMapper.toBackendJson(form);
-
       dynamic responseData;
       // If form exists update, otherwise create
       if (form.id.isEmpty || form.id == 'new' || form.updatedAt == null) {
+        // New form: Use legacy full payload which initializes versions
+        final backendData = FormMapper.toBackendJson(form);
         final response = await _apiClient.post(
           ApiEndpoints.createForm,
           data: backendData,
         );
         responseData = response.data['form'];
+        final dto = FormDto.fromJson(responseData as Map<String, dynamic>);
+        return FormMapper.fromDto(dto);
       } else {
-        final response = await _apiClient.put(
-          ApiEndpoints.updateForm(form.id),
-          data: backendData,
+        // Existing form: Split into metadata and content update to preserve history
+
+        // 1. Update metadata (excluding versions list)
+        final metadata = FormMapper.toFormMetadataJson(form);
+        await _apiClient.put(ApiEndpoints.updateForm(form.id), data: metadata);
+
+        // 2. Update current version content
+        // This ensures other versions in history are not overwritten
+        final versionData = FormMapper.toVersionJson(form);
+        versionData.remove('version'); // Let backend auto-generate
+
+        await createFormVersion(
+          form.id,
+          versionData,
+          type: versionType,
+          activate: true,
         );
-        responseData = response.data['form'];
+
+        // Return updated form by fetching it to ensure state consistency
+        return getForm(form.id);
       }
-      // Ideally backend returns consistent structure.
-      final dto = FormDto.fromJson(responseData as Map<String, dynamic>);
-      return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
       throw FormSaveException(form.id, originalError: e);
+    }
+  }
+
+  @override
+  Future<void> updateFormVersion(
+    String formId,
+    String version,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _apiClient.put(
+        ApiEndpoints.updateFormVersion(formId, version),
+        data: data,
+      );
+    } catch (e, s) {
+      _logger.e(
+        'Failed to update form version $version',
+        error: e,
+        stackTrace: s,
+      );
+      throw FormSaveException(formId, originalError: e);
+    }
+  }
+
+  @override
+  Future<void> createFormVersion(
+    String formId,
+    Map<String, dynamic> data, {
+    String type = 'patch',
+    bool activate = true,
+  }) async {
+    try {
+      final payload = Map<String, dynamic>.from(data);
+      payload['type'] = type;
+      payload['activate'] = activate;
+
+      await _apiClient.post(
+        ApiEndpoints.createFormVersion(formId),
+        data: payload,
+      );
+    } catch (e, s) {
+      _logger.e('Failed to create form version', error: e, stackTrace: s);
+      throw FormSaveException(formId, originalError: e);
     }
   }
 

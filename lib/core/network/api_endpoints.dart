@@ -114,12 +114,22 @@ class ApiEndpoints {
   /// GET - Get form version history
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "version": string, "created_at": string, ... }]
+  /// GET - Get form version history
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: [{ "version": string, "created_at": string, ... }]
   static String getFormVersions(String formId) => '/forms/$formId/versions';
+
+  /// POST - Create new form version
+  static String createFormVersion(String formId) => '/forms/$formId/versions';
 
   /// GET - Get specific form version
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "version": string, "sections": [...], ... }
   static String getFormVersion(String formId, String version) =>
+      '/forms/$formId/versions/$version';
+
+  /// PUT - Update specific form version
+  static String updateFormVersion(String formId, String version) =>
       '/forms/$formId/versions/$version';
 
   // ============================================================================
@@ -147,6 +157,8 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "form_id": string, "responses": {...}, ... }
   static String getResponse(String responseId) => '/responses/$responseId';
+  static String getResponseHistory(String responseId) =>
+      '/responses/$responseId/history';
 
   /// PUT - Update response
   /// Headers: { "Authorization": "Bearer {token}" }

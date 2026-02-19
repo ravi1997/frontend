@@ -10,6 +10,7 @@ import '../../domain/repositories/form_builder_repository.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/services/field_registry.dart';
 import '../../domain/entities/custom_field_template.dart';
+import '../../domain/entities/access_policy.dart';
 
 part 'form_builder_controller.g.dart';
 
@@ -653,12 +654,15 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  Future<bool> saveForm() async {
+  Future<bool> saveForm({String versionType = 'patch'}) async {
     if (state.value == null) return false;
     state = AsyncValue.data(state.value!.copyWith(isSaving: true));
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final savedForm = await repository.saveForm(state.value!.form);
+      final savedForm = await repository.saveForm(
+        state.value!.form,
+        versionType: versionType,
+      );
       state = AsyncValue.data(
         state.value!.copyWith(form: savedForm, isSaving: false),
       );
@@ -670,6 +674,10 @@ class FormBuilderController extends _$FormBuilderController {
       );
       return false;
     }
+  }
+
+  Future<bool> promoteVersion(String type) async {
+    return saveForm(versionType: type);
   }
 
   Future<bool> publishForm() async {
@@ -689,7 +697,7 @@ class FormBuilderController extends _$FormBuilderController {
 
       final newHistoryEntry = FormVersionHistory(
         version: publishedVersion,
-        createdAt: DateTime.now(),
+        created_at: DateTime.now(),
         changeLog: 'Form published',
       );
 
@@ -791,6 +799,15 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(
           metadata: {...state.value!.form.metadata, ...metadata},
         ),
+      ),
+    );
+  }
+
+  void updateAccessPolicy(AccessPolicy policy) {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(accessPolicy: policy),
       ),
     );
   }
