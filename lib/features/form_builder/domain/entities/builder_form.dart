@@ -5,6 +5,8 @@ import 'form_layout_type.dart';
 import 'form_style.dart';
 import 'form_version_history.dart';
 
+import 'access_policy.dart';
+
 part 'builder_form.freezed.dart';
 part 'builder_form.g.dart';
 
@@ -26,6 +28,7 @@ abstract class BuilderForm with _$BuilderForm {
     @Default([]) List<FormVersionHistory> versionHistory,
     @Default({}) Map<String, dynamic> workflows,
     @Default({}) Map<String, dynamic> metadata,
+    @Default(AccessPolicy()) AccessPolicy accessPolicy,
   }) = _BuilderForm;
 
   factory BuilderForm.fromJson(Map<String, dynamic> json) =>

@@ -38,6 +38,10 @@ abstract class FormDto with _$FormDto {
 
     // Workflows might be a Map or dynamic
     @Default({}) Map<String, dynamic> workflows,
+
+    // Access Policy
+    // ignore: invalid_annotation_target
+    @JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy,
   }) = _FormDto;
 
   factory FormDto.fromJson(Map<String, dynamic> json) =>

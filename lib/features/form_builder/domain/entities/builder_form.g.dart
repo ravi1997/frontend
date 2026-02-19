@@ -30,6 +30,9 @@ _BuilderForm _$BuilderFormFromJson(Map<String, dynamic> json) => _BuilderForm(
       const [],
   workflows: json['workflows'] as Map<String, dynamic>? ?? const {},
   metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
+  accessPolicy: json['accessPolicy'] == null
+      ? const AccessPolicy()
+      : AccessPolicy.fromJson(json['accessPolicy'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$BuilderFormToJson(_BuilderForm instance) =>
@@ -47,6 +50,7 @@ Map<String, dynamic> _$BuilderFormToJson(_BuilderForm instance) =>
       'versionHistory': instance.versionHistory,
       'workflows': instance.workflows,
       'metadata': instance.metadata,
+      'accessPolicy': instance.accessPolicy,
     };
 
 const _$FormLayoutTypeEnumMap = {

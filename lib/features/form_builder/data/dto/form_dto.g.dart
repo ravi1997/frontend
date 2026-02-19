@@ -19,6 +19,7 @@ _FormDto _$FormDtoFromJson(Map<String, dynamic> json) => _FormDto(
   createdAt: _dateTimeFromJson(json['created_at'] as String?),
   updatedAt: _dateTimeFromJson(json['updated_at'] as String?),
   workflows: json['workflows'] as Map<String, dynamic>? ?? const {},
+  accessPolicy: json['accessPolicy'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$FormDtoToJson(_FormDto instance) => <String, dynamic>{
@@ -30,6 +31,7 @@ Map<String, dynamic> _$FormDtoToJson(_FormDto instance) => <String, dynamic>{
   'created_at': _dateTimeToJson(instance.createdAt),
   'updated_at': _dateTimeToJson(instance.updatedAt),
   'workflows': instance.workflows,
+  'accessPolicy': instance.accessPolicy,
 };
 
 _FormVersionDto _$FormVersionDtoFromJson(Map<String, dynamic> json) =>
