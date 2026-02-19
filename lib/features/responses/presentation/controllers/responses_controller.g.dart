@@ -167,3 +167,80 @@ final class ResponseDetailFamily extends $Family
   @override
   String toString() => r'responseDetailProvider';
 }
+
+@ProviderFor(responseHistory)
+final responseHistoryProvider = ResponseHistoryFamily._();
+
+final class ResponseHistoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ResponseHistory>>,
+          List<ResponseHistory>,
+          FutureOr<List<ResponseHistory>>
+        >
+    with
+        $FutureModifier<List<ResponseHistory>>,
+        $FutureProvider<List<ResponseHistory>> {
+  ResponseHistoryProvider._({
+    required ResponseHistoryFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'responseHistoryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$responseHistoryHash();
+
+  @override
+  String toString() {
+    return r'responseHistoryProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<ResponseHistory>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<ResponseHistory>> create(Ref ref) {
+    final argument = this.argument as String;
+    return responseHistory(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ResponseHistoryProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$responseHistoryHash() => r'f103a5f66cd122e0f71510abbe5eb7e4b7b9e8e7';
+
+final class ResponseHistoryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<ResponseHistory>>, String> {
+  ResponseHistoryFamily._()
+    : super(
+        retry: null,
+        name: r'responseHistoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ResponseHistoryProvider call(String responseId) =>
+      ResponseHistoryProvider._(argument: responseId, from: this);
+
+  @override
+  String toString() => r'responseHistoryProvider';
+}

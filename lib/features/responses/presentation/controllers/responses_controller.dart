@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/responses/data/repositories/response_repository_impl.dart';
+import 'package:frontend/features/responses/domain/entities/response_history.dart';
 
 part 'responses_controller.g.dart';
 
@@ -21,4 +22,10 @@ Future<List<FormResponse>> formResponses(
 Future<FormResponse> responseDetail(Ref ref, String responseId) {
   final repository = ref.watch(responseRepositoryProvider);
   return repository.getResponseDetail(responseId);
+}
+
+@riverpod
+Future<List<ResponseHistory>> responseHistory(Ref ref, String responseId) {
+  final repository = ref.watch(responseRepositoryProvider);
+  return repository.getResponseHistory(responseId);
 }
