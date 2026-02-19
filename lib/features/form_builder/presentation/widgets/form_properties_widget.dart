@@ -7,6 +7,7 @@ import 'properties/form_general_settings.dart';
 import 'properties/form_layout_settings.dart';
 import 'properties/form_style_settings.dart';
 import 'properties/form_logic_settings.dart';
+import 'properties/form_access_settings.dart';
 import 'package:frontend/core/localization/locale_controller.dart';
 
 class FormPropertiesWidget extends ConsumerStatefulWidget {
@@ -51,7 +52,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
         }
 
         return DefaultTabController(
-          length: 4,
+          length: 5,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -174,6 +175,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       Tab(text: 'Layout'),
                       Tab(text: 'Style'),
                       Tab(text: 'Logic'),
+                      Tab(text: 'Access & Security'),
                     ],
                     labelColor: AppColors.brandBlue,
                     unselectedLabelColor: AppColors.textGrey,
@@ -214,6 +216,13 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormLogicSettings(
+                          formId: widget.formId,
+                          form: form,
+                        ),
+                      ),
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: FormAccessSettings(
                           formId: widget.formId,
                           form: form,
                         ),

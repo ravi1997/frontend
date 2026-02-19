@@ -285,8 +285,306 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             const SizedBox(height: 4),
             _buildOptionsEditor(ref, widget.question),
           ],
+
+          const SizedBox(height: 32),
+
+          // Field Actions
+          _buildFieldActions(ref),
         ],
       ),
+    );
+  }
+
+  Widget _buildFieldActions(WidgetRef ref) {
+    final actionConfig = widget.question.actionConfig ?? {};
+    final hasButton = actionConfig['hasButton'] ?? false;
+    final buttonLabel = actionConfig['buttonLabel'] ?? 'Search';
+    final webhookUrl = actionConfig['webhookUrl'] ?? '';
+    final webhookMethod = actionConfig['webhookMethod'] ?? 'GET';
+    final mappings = List<Map<String, dynamic>>.from(
+      actionConfig['mappings'] ?? [],
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'INTERACTIVE FIELD ACTIONS',
+          style: TextStyle(
+            color: AppColors.textGrey,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.brandBlue.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.brandBlue.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              PropertyBuilderUtils.buildSwitch(
+                label: 'Show Action Button',
+                value: hasButton,
+                onChanged: (val) {
+                  final newConfig = Map<String, dynamic>.from(actionConfig);
+                  newConfig['hasButton'] = val;
+                  ref
+                      .read(
+                        formBuilderControllerProvider(widget.formId).notifier,
+                      )
+                      .updateQuestion(
+                        widget.question.copyWith(actionConfig: newConfig),
+                      );
+                },
+              ),
+              if (hasButton) ...[
+                const SizedBox(height: 16),
+                PropertyBuilderUtils.buildTextField(
+                  label: 'Button Label',
+                  controller: TextEditingController(text: buttonLabel),
+                  onChanged: (val) {
+                    final newConfig = Map<String, dynamic>.from(actionConfig);
+                    newConfig['buttonLabel'] = val;
+                    ref
+                        .read(
+                          formBuilderControllerProvider(widget.formId).notifier,
+                        )
+                        .updateQuestion(
+                          widget.question.copyWith(actionConfig: newConfig),
+                        );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<String>(
+                        value: webhookMethod,
+                        decoration: const InputDecoration(
+                          labelText: 'Method',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'GET', child: Text('GET')),
+                          DropdownMenuItem(value: 'POST', child: Text('POST')),
+                        ],
+                        onChanged: (v) {
+                          final newConfig = Map<String, dynamic>.from(
+                            actionConfig,
+                          );
+                          newConfig['webhookMethod'] = v;
+                          ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.formId,
+                                ).notifier,
+                              )
+                              .updateQuestion(
+                                widget.question.copyWith(
+                                  actionConfig: newConfig,
+                                ),
+                              );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 5,
+                      child: TextFormField(
+                        initialValue: webhookUrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Webhook URL',
+                          hintText: 'https://api.example.com/search',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (val) {
+                          final newConfig = Map<String, dynamic>.from(
+                            actionConfig,
+                          );
+                          newConfig['webhookUrl'] = val;
+                          ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.formId,
+                                ).notifier,
+                              )
+                              .updateQuestion(
+                                widget.question.copyWith(
+                                  actionConfig: newConfig,
+                                ),
+                              );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'RESPONSE MAPPING',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...mappings.asMap().entries.map((e) {
+                  final i = e.key;
+                  final m = e.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: m['responseKey'],
+                            onChanged: (v) {
+                              mappings[i]['responseKey'] = v;
+                              final newConfig = Map<String, dynamic>.from(
+                                actionConfig,
+                              );
+                              newConfig['mappings'] = mappings;
+                              ref
+                                  .read(
+                                    formBuilderControllerProvider(
+                                      widget.formId,
+                                    ).notifier,
+                                  )
+                                  .updateQuestion(
+                                    widget.question.copyWith(
+                                      actionConfig: newConfig,
+                                    ),
+                                  );
+                            },
+                            decoration: const InputDecoration(
+                              hintText: 'JSON Key',
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward, size: 14),
+                        Expanded(
+                          child: _buildFieldTargetDropdown(m['targetFieldId'], (
+                            v,
+                          ) {
+                            mappings[i]['targetFieldId'] = v;
+                            final newConfig = Map<String, dynamic>.from(
+                              actionConfig,
+                            );
+                            newConfig['mappings'] = mappings;
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.formId,
+                                  ).notifier,
+                                )
+                                .updateQuestion(
+                                  widget.question.copyWith(
+                                    actionConfig: newConfig,
+                                  ),
+                                );
+                          }),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            size: 18,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            final newConfig = Map<String, dynamic>.from(
+                              actionConfig,
+                            );
+                            final newList = List<Map<String, dynamic>>.from(
+                              mappings,
+                            )..removeAt(i);
+                            newConfig['mappings'] = newList;
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.formId,
+                                  ).notifier,
+                                )
+                                .updateQuestion(
+                                  widget.question.copyWith(
+                                    actionConfig: newConfig,
+                                  ),
+                                );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                TextButton.icon(
+                  onPressed: () {
+                    final newConfig = Map<String, dynamic>.from(actionConfig);
+                    final newList = List<Map<String, dynamic>>.from(mappings)
+                      ..add({'responseKey': '', 'targetFieldId': null});
+                    newConfig['mappings'] = newList;
+                    ref
+                        .read(
+                          formBuilderControllerProvider(widget.formId).notifier,
+                        )
+                        .updateQuestion(
+                          widget.question.copyWith(actionConfig: newConfig),
+                        );
+                  },
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text(
+                    'Add Mapping',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFieldTargetDropdown(String? value, Function(String?) onChanged) {
+    final state = ref.read(formBuilderControllerProvider(widget.formId)).value;
+    if (state == null) return const SizedBox();
+
+    final allQuestions = state.form.sections
+        .expand((s) => s.questions)
+        .where((q) => q.id != widget.question.id)
+        .toList();
+
+    return DropdownButtonFormField<String>(
+      value: value,
+      isExpanded: true,
+      decoration: const InputDecoration(
+        hintText: 'Target Field',
+        isDense: true,
+        border: OutlineInputBorder(),
+      ),
+      items: allQuestions.map((q) {
+        return DropdownMenuItem(
+          value: q.id,
+          child: Text(
+            q.label is String
+                ? q.label as String
+                : (q.label as Map?)?['en'] ?? 'Untitled',
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12),
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
     );
   }
 

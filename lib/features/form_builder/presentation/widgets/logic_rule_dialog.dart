@@ -42,10 +42,14 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
   late TextEditingController _errorMessageController;
   late TextEditingController _valueController;
   late TextEditingController _formulaController;
+  late TextEditingController _webhookUrlController;
+  late List<Map<String, dynamic>> _webhookMappings;
   late List<Map<String, dynamic>> _conditions;
   String? _selectedDisableOption;
   String? _targetSectionId;
   String? _selectedDepartment;
+  String _webhookMethod = 'GET';
+  List<Map<String, dynamic>> _dynamicOptions = [];
 
   @override
   void initState() {
@@ -57,6 +61,16 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     );
     _valueController = TextEditingController(text: rule['value'] ?? '');
     _formulaController = TextEditingController(text: rule['formula'] ?? '');
+    _webhookUrlController = TextEditingController(
+      text: rule['webhookUrl'] ?? '',
+    );
+    _webhookMethod = rule['webhookMethod'] ?? 'GET';
+    _webhookMappings = List<Map<String, dynamic>>.from(
+      rule['webhookMappings'] ?? [],
+    );
+    _dynamicOptions = List<Map<String, dynamic>>.from(
+      rule['dynamicOptions'] ?? [],
+    );
     _selectedDisableOption = rule['targetOption'];
     _targetSectionId = rule['targetSectionId'];
     _selectedDepartment = rule['department'];
@@ -80,6 +94,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     _errorMessageController.dispose();
     _valueController.dispose();
     _formulaController.dispose();
+    _webhookUrlController.dispose();
     super.dispose();
   }
 
@@ -142,6 +157,10 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
         'errorMessage': _errorMessageController.text,
         'value': _valueController.text,
         'formula': _formulaController.text,
+        'webhookUrl': _webhookUrlController.text,
+        'webhookMethod': _webhookMethod,
+        'webhookMappings': _webhookMappings,
+        'dynamicOptions': _dynamicOptions,
         'targetOption': _selectedDisableOption,
         'targetSectionId': _targetSectionId,
         'department': _selectedDepartment,
@@ -340,6 +359,11 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
         },
       ],
       {'value': 'webhook', 'label': 'Trigger Webhook', 'icon': Icons.webhook},
+      {
+        'value': 'update_options',
+        'label': 'Update Options',
+        'icon': Icons.list_alt,
+      },
     ];
 
     return Wrap(
@@ -461,6 +485,167 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
           DropdownMenuItem(value: 'ai', child: Text('Aetheris AI')),
         ],
         onChanged: (val) => setState(() => _selectedDepartment = val),
+      );
+    }
+    if (_action == 'webhook') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _buildDropdown(
+                  label: 'Method',
+                  value: _webhookMethod,
+                  items: const [
+                    DropdownMenuItem(value: 'GET', child: Text('GET')),
+                    DropdownMenuItem(value: 'POST', child: Text('POST')),
+                  ],
+                  onChanged: (v) => setState(() => _webhookMethod = v!),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 5,
+                child: TextFormField(
+                  controller: _webhookUrlController,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'Webhook URL',
+                    hintText: 'https://api.example.com/data',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'RESPONSE MAPPING',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ..._webhookMappings.asMap().entries.map((e) {
+            final i = e.key;
+            final m = e.value;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      initialValue: m['responseKey'],
+                      onChanged: (v) => m['responseKey'] = v,
+                      decoration: const InputDecoration(
+                        hintText: 'JSON Key (e.g. data.name)',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Icon(Icons.arrow_forward, size: 14),
+                  ),
+                  Expanded(
+                    child: _buildDropdown(
+                      label: 'Target Field',
+                      value: m['targetFieldId'],
+                      items: _getAvailableTriggers()
+                          .map(
+                            (q) => DropdownMenuItem(
+                              value: q.id,
+                              child: Text(q.label.translate(widget.locale)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => m['targetFieldId'] = v),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline, size: 20),
+                    onPressed: () =>
+                        setState(() => _webhookMappings.removeAt(i)),
+                  ),
+                ],
+              ),
+            );
+          }),
+          TextButton.icon(
+            onPressed: () => setState(() {
+              _webhookMappings.add({'responseKey': '', 'targetFieldId': null});
+            }),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Add Mapping'),
+          ),
+        ],
+      );
+    }
+    if (_action == 'update_options') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'DEFINE NEW OPTIONS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ..._dynamicOptions.asMap().entries.map((e) {
+            final i = e.key;
+            final o = e.value;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      initialValue: o['label'],
+                      onChanged: (v) => o['label'] = v,
+                      decoration: const InputDecoration(
+                        hintText: 'Label',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextFormField(
+                      initialValue: o['value'],
+                      onChanged: (v) => o['value'] = v,
+                      decoration: const InputDecoration(
+                        hintText: 'Value',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline, size: 20),
+                    onPressed: () =>
+                        setState(() => _dynamicOptions.removeAt(i)),
+                  ),
+                ],
+              ),
+            );
+          }),
+          TextButton.icon(
+            onPressed: () => setState(() {
+              _dynamicOptions.add({'label': '', 'value': ''});
+            }),
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('Add Option'),
+          ),
+        ],
       );
     }
     return const SizedBox();
