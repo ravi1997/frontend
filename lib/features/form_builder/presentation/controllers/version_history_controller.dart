@@ -64,13 +64,13 @@ class VersionHistoryController extends _$VersionHistoryController {
   @override
   VersionHistoryState build(String formId) {
     // Load initial data
-    _loadVersionHistory();
-    return const VersionHistoryState();
+    Future.microtask(() => _loadVersionHistory());
+    return const VersionHistoryState(isLoading: true);
   }
 
-  /// Loads all version history for the form.
   Future<void> _loadVersionHistory() async {
-    state = state.copyWith(isLoading: true, error: null);
+    // Avoid setting loading state again if we already returned it as true
+    // state = state.copyWith(isLoading: true, error: null);
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
