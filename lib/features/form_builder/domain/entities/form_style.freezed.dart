@@ -381,7 +381,7 @@ as double?,
 /// @nodoc
 mixin _$SectionStyle {
 
- String get backgroundColor; double get borderRadius; double get elevation; double get padding; bool get showHeader; String get headerBackgroundColor; String get borderColor; double get borderWidth;
+ String get backgroundColor; double get borderRadius; double get elevation; double get padding; bool get showHeader; String get headerBackgroundColor; String get titleColor; String get descriptionColor; String get borderColor; double get borderWidth;
 /// Create a copy of SectionStyle
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -394,16 +394,16 @@ $SectionStyleCopyWith<SectionStyle> get copyWith => _$SectionStyleCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SectionStyle&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.elevation, elevation) || other.elevation == elevation)&&(identical(other.padding, padding) || other.padding == padding)&&(identical(other.showHeader, showHeader) || other.showHeader == showHeader)&&(identical(other.headerBackgroundColor, headerBackgroundColor) || other.headerBackgroundColor == headerBackgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SectionStyle&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.elevation, elevation) || other.elevation == elevation)&&(identical(other.padding, padding) || other.padding == padding)&&(identical(other.showHeader, showHeader) || other.showHeader == showHeader)&&(identical(other.headerBackgroundColor, headerBackgroundColor) || other.headerBackgroundColor == headerBackgroundColor)&&(identical(other.titleColor, titleColor) || other.titleColor == titleColor)&&(identical(other.descriptionColor, descriptionColor) || other.descriptionColor == descriptionColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,backgroundColor,borderRadius,elevation,padding,showHeader,headerBackgroundColor,borderColor,borderWidth);
+int get hashCode => Object.hash(runtimeType,backgroundColor,borderRadius,elevation,padding,showHeader,headerBackgroundColor,titleColor,descriptionColor,borderColor,borderWidth);
 
 @override
 String toString() {
-  return 'SectionStyle(backgroundColor: $backgroundColor, borderRadius: $borderRadius, elevation: $elevation, padding: $padding, showHeader: $showHeader, headerBackgroundColor: $headerBackgroundColor, borderColor: $borderColor, borderWidth: $borderWidth)';
+  return 'SectionStyle(backgroundColor: $backgroundColor, borderRadius: $borderRadius, elevation: $elevation, padding: $padding, showHeader: $showHeader, headerBackgroundColor: $headerBackgroundColor, titleColor: $titleColor, descriptionColor: $descriptionColor, borderColor: $borderColor, borderWidth: $borderWidth)';
 }
 
 
@@ -414,7 +414,7 @@ abstract mixin class $SectionStyleCopyWith<$Res>  {
   factory $SectionStyleCopyWith(SectionStyle value, $Res Function(SectionStyle) _then) = _$SectionStyleCopyWithImpl;
 @useResult
 $Res call({
- String backgroundColor, double borderRadius, double elevation, double padding, bool showHeader, String headerBackgroundColor, String borderColor, double borderWidth
+ String backgroundColor, double borderRadius, double elevation, double padding, bool showHeader, String headerBackgroundColor, String titleColor, String descriptionColor, String borderColor, double borderWidth
 });
 
 
@@ -431,7 +431,7 @@ class _$SectionStyleCopyWithImpl<$Res>
 
 /// Create a copy of SectionStyle
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? backgroundColor = null,Object? borderRadius = null,Object? elevation = null,Object? padding = null,Object? showHeader = null,Object? headerBackgroundColor = null,Object? borderColor = null,Object? borderWidth = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? backgroundColor = null,Object? borderRadius = null,Object? elevation = null,Object? padding = null,Object? showHeader = null,Object? headerBackgroundColor = null,Object? titleColor = null,Object? descriptionColor = null,Object? borderColor = null,Object? borderWidth = null,}) {
   return _then(_self.copyWith(
 backgroundColor: null == backgroundColor ? _self.backgroundColor : backgroundColor // ignore: cast_nullable_to_non_nullable
 as String,borderRadius: null == borderRadius ? _self.borderRadius : borderRadius // ignore: cast_nullable_to_non_nullable
@@ -439,6 +439,8 @@ as double,elevation: null == elevation ? _self.elevation : elevation // ignore: 
 as double,padding: null == padding ? _self.padding : padding // ignore: cast_nullable_to_non_nullable
 as double,showHeader: null == showHeader ? _self.showHeader : showHeader // ignore: cast_nullable_to_non_nullable
 as bool,headerBackgroundColor: null == headerBackgroundColor ? _self.headerBackgroundColor : headerBackgroundColor // ignore: cast_nullable_to_non_nullable
+as String,titleColor: null == titleColor ? _self.titleColor : titleColor // ignore: cast_nullable_to_non_nullable
+as String,descriptionColor: null == descriptionColor ? _self.descriptionColor : descriptionColor // ignore: cast_nullable_to_non_nullable
 as String,borderColor: null == borderColor ? _self.borderColor : borderColor // ignore: cast_nullable_to_non_nullable
 as String,borderWidth: null == borderWidth ? _self.borderWidth : borderWidth // ignore: cast_nullable_to_non_nullable
 as double,
@@ -526,10 +528,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String borderColor,  double borderWidth)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String titleColor,  String descriptionColor,  String borderColor,  double borderWidth)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SectionStyle() when $default != null:
-return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.borderColor,_that.borderWidth);case _:
+return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.titleColor,_that.descriptionColor,_that.borderColor,_that.borderWidth);case _:
   return orElse();
 
 }
@@ -547,10 +549,10 @@ return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String borderColor,  double borderWidth)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String titleColor,  String descriptionColor,  String borderColor,  double borderWidth)  $default,) {final _that = this;
 switch (_that) {
 case _SectionStyle():
-return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.borderColor,_that.borderWidth);case _:
+return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.titleColor,_that.descriptionColor,_that.borderColor,_that.borderWidth);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -567,10 +569,10 @@ return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String borderColor,  double borderWidth)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String backgroundColor,  double borderRadius,  double elevation,  double padding,  bool showHeader,  String headerBackgroundColor,  String titleColor,  String descriptionColor,  String borderColor,  double borderWidth)?  $default,) {final _that = this;
 switch (_that) {
 case _SectionStyle() when $default != null:
-return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.borderColor,_that.borderWidth);case _:
+return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.padding,_that.showHeader,_that.headerBackgroundColor,_that.titleColor,_that.descriptionColor,_that.borderColor,_that.borderWidth);case _:
   return null;
 
 }
@@ -582,7 +584,7 @@ return $default(_that.backgroundColor,_that.borderRadius,_that.elevation,_that.p
 @JsonSerializable()
 
 class _SectionStyle implements SectionStyle {
-  const _SectionStyle({this.backgroundColor = '#FFFFFF', this.borderRadius = 12.0, this.elevation = 2.0, this.padding = 16.0, this.showHeader = true, this.headerBackgroundColor = '#F8FAFC', this.borderColor = '#E2E8F0', this.borderWidth = 1.0});
+  const _SectionStyle({this.backgroundColor = '#FFFFFF', this.borderRadius = 12.0, this.elevation = 2.0, this.padding = 16.0, this.showHeader = true, this.headerBackgroundColor = '#F8FAFC', this.titleColor = '#1E293B', this.descriptionColor = '#64748B', this.borderColor = '#E2E8F0', this.borderWidth = 1.0});
   factory _SectionStyle.fromJson(Map<String, dynamic> json) => _$SectionStyleFromJson(json);
 
 @override@JsonKey() final  String backgroundColor;
@@ -591,6 +593,8 @@ class _SectionStyle implements SectionStyle {
 @override@JsonKey() final  double padding;
 @override@JsonKey() final  bool showHeader;
 @override@JsonKey() final  String headerBackgroundColor;
+@override@JsonKey() final  String titleColor;
+@override@JsonKey() final  String descriptionColor;
 @override@JsonKey() final  String borderColor;
 @override@JsonKey() final  double borderWidth;
 
@@ -607,16 +611,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SectionStyle&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.elevation, elevation) || other.elevation == elevation)&&(identical(other.padding, padding) || other.padding == padding)&&(identical(other.showHeader, showHeader) || other.showHeader == showHeader)&&(identical(other.headerBackgroundColor, headerBackgroundColor) || other.headerBackgroundColor == headerBackgroundColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SectionStyle&&(identical(other.backgroundColor, backgroundColor) || other.backgroundColor == backgroundColor)&&(identical(other.borderRadius, borderRadius) || other.borderRadius == borderRadius)&&(identical(other.elevation, elevation) || other.elevation == elevation)&&(identical(other.padding, padding) || other.padding == padding)&&(identical(other.showHeader, showHeader) || other.showHeader == showHeader)&&(identical(other.headerBackgroundColor, headerBackgroundColor) || other.headerBackgroundColor == headerBackgroundColor)&&(identical(other.titleColor, titleColor) || other.titleColor == titleColor)&&(identical(other.descriptionColor, descriptionColor) || other.descriptionColor == descriptionColor)&&(identical(other.borderColor, borderColor) || other.borderColor == borderColor)&&(identical(other.borderWidth, borderWidth) || other.borderWidth == borderWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,backgroundColor,borderRadius,elevation,padding,showHeader,headerBackgroundColor,borderColor,borderWidth);
+int get hashCode => Object.hash(runtimeType,backgroundColor,borderRadius,elevation,padding,showHeader,headerBackgroundColor,titleColor,descriptionColor,borderColor,borderWidth);
 
 @override
 String toString() {
-  return 'SectionStyle(backgroundColor: $backgroundColor, borderRadius: $borderRadius, elevation: $elevation, padding: $padding, showHeader: $showHeader, headerBackgroundColor: $headerBackgroundColor, borderColor: $borderColor, borderWidth: $borderWidth)';
+  return 'SectionStyle(backgroundColor: $backgroundColor, borderRadius: $borderRadius, elevation: $elevation, padding: $padding, showHeader: $showHeader, headerBackgroundColor: $headerBackgroundColor, titleColor: $titleColor, descriptionColor: $descriptionColor, borderColor: $borderColor, borderWidth: $borderWidth)';
 }
 
 
@@ -627,7 +631,7 @@ abstract mixin class _$SectionStyleCopyWith<$Res> implements $SectionStyleCopyWi
   factory _$SectionStyleCopyWith(_SectionStyle value, $Res Function(_SectionStyle) _then) = __$SectionStyleCopyWithImpl;
 @override @useResult
 $Res call({
- String backgroundColor, double borderRadius, double elevation, double padding, bool showHeader, String headerBackgroundColor, String borderColor, double borderWidth
+ String backgroundColor, double borderRadius, double elevation, double padding, bool showHeader, String headerBackgroundColor, String titleColor, String descriptionColor, String borderColor, double borderWidth
 });
 
 
@@ -644,7 +648,7 @@ class __$SectionStyleCopyWithImpl<$Res>
 
 /// Create a copy of SectionStyle
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? backgroundColor = null,Object? borderRadius = null,Object? elevation = null,Object? padding = null,Object? showHeader = null,Object? headerBackgroundColor = null,Object? borderColor = null,Object? borderWidth = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? backgroundColor = null,Object? borderRadius = null,Object? elevation = null,Object? padding = null,Object? showHeader = null,Object? headerBackgroundColor = null,Object? titleColor = null,Object? descriptionColor = null,Object? borderColor = null,Object? borderWidth = null,}) {
   return _then(_SectionStyle(
 backgroundColor: null == backgroundColor ? _self.backgroundColor : backgroundColor // ignore: cast_nullable_to_non_nullable
 as String,borderRadius: null == borderRadius ? _self.borderRadius : borderRadius // ignore: cast_nullable_to_non_nullable
@@ -652,6 +656,8 @@ as double,elevation: null == elevation ? _self.elevation : elevation // ignore: 
 as double,padding: null == padding ? _self.padding : padding // ignore: cast_nullable_to_non_nullable
 as double,showHeader: null == showHeader ? _self.showHeader : showHeader // ignore: cast_nullable_to_non_nullable
 as bool,headerBackgroundColor: null == headerBackgroundColor ? _self.headerBackgroundColor : headerBackgroundColor // ignore: cast_nullable_to_non_nullable
+as String,titleColor: null == titleColor ? _self.titleColor : titleColor // ignore: cast_nullable_to_non_nullable
+as String,descriptionColor: null == descriptionColor ? _self.descriptionColor : descriptionColor // ignore: cast_nullable_to_non_nullable
 as String,borderColor: null == borderColor ? _self.borderColor : borderColor // ignore: cast_nullable_to_non_nullable
 as String,borderWidth: null == borderWidth ? _self.borderWidth : borderWidth // ignore: cast_nullable_to_non_nullable
 as double,

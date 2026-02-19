@@ -79,6 +79,8 @@ _SectionStyle _$SectionStyleFromJson(Map<String, dynamic> json) =>
       showHeader: json['showHeader'] as bool? ?? true,
       headerBackgroundColor:
           json['headerBackgroundColor'] as String? ?? '#F8FAFC',
+      titleColor: json['titleColor'] as String? ?? '#1E293B',
+      descriptionColor: json['descriptionColor'] as String? ?? '#64748B',
       borderColor: json['borderColor'] as String? ?? '#E2E8F0',
       borderWidth: (json['borderWidth'] as num?)?.toDouble() ?? 1.0,
     );
@@ -91,6 +93,8 @@ Map<String, dynamic> _$SectionStyleToJson(_SectionStyle instance) =>
       'padding': instance.padding,
       'showHeader': instance.showHeader,
       'headerBackgroundColor': instance.headerBackgroundColor,
+      'titleColor': instance.titleColor,
+      'descriptionColor': instance.descriptionColor,
       'borderColor': instance.borderColor,
       'borderWidth': instance.borderWidth,
     };

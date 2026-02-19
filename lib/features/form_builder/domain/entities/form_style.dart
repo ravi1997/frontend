@@ -62,6 +62,8 @@ abstract class SectionStyle with _$SectionStyle {
     @Default(16.0) double padding,
     @Default(true) bool showHeader,
     @Default('#F8FAFC') String headerBackgroundColor,
+    @Default('#1E293B') String titleColor,
+    @Default('#64748B') String descriptionColor,
     @Default('#E2E8F0') String borderColor,
     @Default(1.0) double borderWidth,
   }) = _SectionStyle;

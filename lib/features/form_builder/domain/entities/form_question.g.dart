@@ -47,6 +47,7 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       disableFutureDates: json['disableFutureDates'] as bool?,
       disableWeekends: json['disableWeekends'] as bool?,
       conditionalLogic: json['conditionalLogic'] as Map<String, dynamic>?,
+      actionConfig: json['actionConfig'] as Map<String, dynamic>?,
       metadata: json['metadata'] as Map<String, dynamic>?,
       style: json['style'] == null
           ? const QuestionStyle()
@@ -86,6 +87,7 @@ Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
       'disableFutureDates': instance.disableFutureDates,
       'disableWeekends': instance.disableWeekends,
       'conditionalLogic': instance.conditionalLogic,
+      'actionConfig': instance.actionConfig,
       'metadata': instance.metadata,
       'style': instance.style,
     };

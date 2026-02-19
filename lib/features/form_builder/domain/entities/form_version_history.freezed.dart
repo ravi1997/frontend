@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormVersionHistory {
 
- String get version;@JsonKey(fromJson: _dateTimeFromJson) DateTime get createdAt; String? get authorId; String? get changeLog;
+ String get version;@JsonKey(fromJson: _dateTimeFromJson) DateTime get created_at; String? get authorId; String? get changeLog;
 /// Create a copy of FormVersionHistory
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FormVersionHistoryCopyWith<FormVersionHistory> get copyWith => _$FormVersionHis
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormVersionHistory&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.changeLog, changeLog) || other.changeLog == changeLog));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormVersionHistory&&(identical(other.version, version) || other.version == version)&&(identical(other.created_at, created_at) || other.created_at == created_at)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.changeLog, changeLog) || other.changeLog == changeLog));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,version,createdAt,authorId,changeLog);
+int get hashCode => Object.hash(runtimeType,version,created_at,authorId,changeLog);
 
 @override
 String toString() {
-  return 'FormVersionHistory(version: $version, createdAt: $createdAt, authorId: $authorId, changeLog: $changeLog)';
+  return 'FormVersionHistory(version: $version, created_at: $created_at, authorId: $authorId, changeLog: $changeLog)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FormVersionHistoryCopyWith<$Res>  {
   factory $FormVersionHistoryCopyWith(FormVersionHistory value, $Res Function(FormVersionHistory) _then) = _$FormVersionHistoryCopyWithImpl;
 @useResult
 $Res call({
- String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt, String? authorId, String? changeLog
+ String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime created_at, String? authorId, String? changeLog
 });
 
 
@@ -65,10 +65,10 @@ class _$FormVersionHistoryCopyWithImpl<$Res>
 
 /// Create a copy of FormVersionHistory
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? createdAt = null,Object? authorId = freezed,Object? changeLog = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? created_at = null,Object? authorId = freezed,Object? changeLog = freezed,}) {
   return _then(_self.copyWith(
 version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,created_at: null == created_at ? _self.created_at : created_at // ignore: cast_nullable_to_non_nullable
 as DateTime,authorId: freezed == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String?,changeLog: freezed == changeLog ? _self.changeLog : changeLog // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -156,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime createdAt,  String? authorId,  String? changeLog)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormVersionHistory() when $default != null:
-return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);case _:
+return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
   return orElse();
 
 }
@@ -177,10 +177,10 @@ return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime createdAt,  String? authorId,  String? changeLog)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionHistory():
-return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);case _:
+return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +197,10 @@ return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime createdAt,  String? authorId,  String? changeLog)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionHistory() when $default != null:
-return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);case _:
+return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
   return null;
 
 }
@@ -212,11 +212,11 @@ return $default(_that.version,_that.createdAt,_that.authorId,_that.changeLog);ca
 @JsonSerializable()
 
 class _FormVersionHistory implements FormVersionHistory {
-  const _FormVersionHistory({required this.version, @JsonKey(fromJson: _dateTimeFromJson) required this.createdAt, this.authorId, this.changeLog});
+  const _FormVersionHistory({required this.version, @JsonKey(fromJson: _dateTimeFromJson) required this.created_at, this.authorId, this.changeLog});
   factory _FormVersionHistory.fromJson(Map<String, dynamic> json) => _$FormVersionHistoryFromJson(json);
 
 @override final  String version;
-@override@JsonKey(fromJson: _dateTimeFromJson) final  DateTime createdAt;
+@override@JsonKey(fromJson: _dateTimeFromJson) final  DateTime created_at;
 @override final  String? authorId;
 @override final  String? changeLog;
 
@@ -233,16 +233,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormVersionHistory&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.changeLog, changeLog) || other.changeLog == changeLog));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormVersionHistory&&(identical(other.version, version) || other.version == version)&&(identical(other.created_at, created_at) || other.created_at == created_at)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.changeLog, changeLog) || other.changeLog == changeLog));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,version,createdAt,authorId,changeLog);
+int get hashCode => Object.hash(runtimeType,version,created_at,authorId,changeLog);
 
 @override
 String toString() {
-  return 'FormVersionHistory(version: $version, createdAt: $createdAt, authorId: $authorId, changeLog: $changeLog)';
+  return 'FormVersionHistory(version: $version, created_at: $created_at, authorId: $authorId, changeLog: $changeLog)';
 }
 
 
@@ -253,7 +253,7 @@ abstract mixin class _$FormVersionHistoryCopyWith<$Res> implements $FormVersionH
   factory _$FormVersionHistoryCopyWith(_FormVersionHistory value, $Res Function(_FormVersionHistory) _then) = __$FormVersionHistoryCopyWithImpl;
 @override @useResult
 $Res call({
- String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime createdAt, String? authorId, String? changeLog
+ String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime created_at, String? authorId, String? changeLog
 });
 
 
@@ -270,10 +270,10 @@ class __$FormVersionHistoryCopyWithImpl<$Res>
 
 /// Create a copy of FormVersionHistory
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? createdAt = null,Object? authorId = freezed,Object? changeLog = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? created_at = null,Object? authorId = freezed,Object? changeLog = freezed,}) {
   return _then(_FormVersionHistory(
 version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,created_at: null == created_at ? _self.created_at : created_at // ignore: cast_nullable_to_non_nullable
 as DateTime,authorId: freezed == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String?,changeLog: freezed == changeLog ? _self.changeLog : changeLog // ignore: cast_nullable_to_non_nullable
 as String?,
