@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:js_interop';
+import 'package:web/web.dart' as web;
 import '../widgets/signature_pad_widget.dart';
+import '../widgets/camera_capture_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -19,6 +22,8 @@ import '../../../responses/presentation/controllers/form_submission_controller.d
 import '../../../../core/localization/locale_controller.dart';
 import '../utils/preview_utils.dart';
 import '../utils/form_logic_engine.dart';
+import '../../domain/entities/form_question_option.dart';
+import '../../../../core/network/api_client_wrapper.dart';
 
 final previewFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
@@ -38,15 +43,16 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   bool _showSubmitted = false;
   bool _isReviewing = false;
   final _formKey = GlobalKey<FormState>();
+  LogicEvaluationResult? _logicResult;
+  final Set<String> _processedWebhookHashes = {};
+  final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
 
   @override
   Widget build(BuildContext context) {
     final locale = ref.watch(localeControllerProvider).languageCode;
     final formData = ref.watch(previewFormDataProvider);
-    final visibilityMap = FormLogicEngine.evaluateVisibility(
-      widget.form,
-      formData,
-    );
+    _logicResult = FormLogicEngine.evaluate(widget.form, formData);
+    final visibilityMap = _logicResult!.visibility;
 
     final formStyle = widget.form.style;
     final canvasColor = PreviewUtils.parseColor(
@@ -56,6 +62,11 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     final primaryColor = PreviewUtils.parseColor(
       formStyle.primaryColor,
       AppColors.primary,
+    );
+
+    ref.listen<Map<String, dynamic>>(
+      previewFormDataProvider,
+      (previous, next) => _handleDataChange(next),
     );
 
     return Theme(
@@ -100,6 +111,8 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   _currentStep = 0;
                   _showSubmitted = false;
                   _isReviewing = false;
+                  _dynamicOptions.clear();
+                  _processedWebhookHashes.clear();
                 });
               },
               icon: const Icon(
@@ -135,6 +148,133 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         body: Form(key: _formKey, child: _buildBody(locale, visibilityMap)),
       ),
     );
+  }
+
+  void _handleDataChange(Map<String, dynamic> formData) {
+    final result = FormLogicEngine.evaluate(widget.form, formData);
+
+    // 1. Handle value overrides (autofill)
+    if (result.valueOverrides.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        bool changed = false;
+        final currentData = ref.read(previewFormDataProvider);
+        final newData = Map<String, dynamic>.from(currentData);
+
+        result.valueOverrides.forEach((key, value) {
+          if (currentData[key] != value) {
+            newData[key] = value;
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          ref.read(previewFormDataProvider.notifier).state = newData;
+        }
+      });
+    }
+
+    // 2. Handle option overrides (cascading)
+    if (result.optionOverrides.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _dynamicOptions.addAll(result.optionOverrides);
+        });
+      });
+    }
+
+    // 3. Handle automation webhooks
+    for (final wh in result.pendingWebhooks) {
+      final hash = "${wh['url']}_${jsonEncode(wh['mappings'])}";
+      if (!_processedWebhookHashes.contains(hash)) {
+        _processedWebhookHashes.add(hash);
+        _triggerWebhook(wh);
+      }
+    }
+  }
+
+  Future<void> _triggerWebhook(Map<String, dynamic> config) async {
+    final url = config['url'] as String?;
+    if (url == null || url.isEmpty) return;
+
+    final mappings = config['mappings'] as List?;
+    final formData = ref.read(previewFormDataProvider);
+
+    try {
+      debugPrint("Triggering logic webhook: $url");
+
+      var finalUrl = url;
+      formData.forEach((key, value) {
+        finalUrl = finalUrl.replaceAll('{$key}', value?.toString() ?? '');
+      });
+
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.get(finalUrl);
+      final responseData = response.data;
+
+      if (mappings != null && responseData is Map<String, dynamic>) {
+        final updates = <String, dynamic>{};
+        final optUpdates = <String, List<FormQuestionOption>>{};
+
+        for (final m in mappings) {
+          final key = m['responseKey'] as String?;
+          final targetId = m['targetFieldId'] as String?;
+          if (key != null && targetId != null) {
+            final value = _getNestedValue(responseData, key);
+            if (value != null) {
+              if (value is List) {
+                // If it's a list, treat as options update
+                optUpdates[targetId] = value
+                    .map(
+                      (o) => FormQuestionOption(
+                        id: (o is Map ? (o['v'] ?? o['value'] ?? o['id']) : o)
+                            .toString(),
+                        label:
+                            (o is Map ? (o['l'] ?? o['label'] ?? o['name']) : o)
+                                .toString(),
+                        value:
+                            (o is Map ? (o['v'] ?? o['value'] ?? o['id']) : o)
+                                .toString(),
+                        order: 0,
+                      ),
+                    )
+                    .toList();
+              } else {
+                updates[targetId] = value;
+              }
+            }
+          }
+        }
+
+        if (updates.isNotEmpty) {
+          ref
+              .read(previewFormDataProvider.notifier)
+              .update((s) => {...s, ...updates});
+        }
+        if (optUpdates.isNotEmpty) {
+          setState(() {
+            _dynamicOptions.addAll(optUpdates);
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("Webhook failed: $e");
+    }
+  }
+
+  dynamic _getNestedValue(Map<String, dynamic> data, String path) {
+    if (path.isEmpty) return data;
+    final keys = path.split('.');
+    dynamic current = data;
+    for (final k in keys) {
+      if (current is Map && current.containsKey(k)) {
+        current = current[k];
+      } else {
+        return null;
+      }
+    }
+    return current;
   }
 
   Widget _buildBody(String locale, Map<String, bool> visibilityMap) {
@@ -407,6 +547,8 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 section: section,
                 questionSpacing: widget.form.style.questionSpacing,
                 visibilityMap: visibilityMap,
+                dynamicOptions: _dynamicOptions,
+                onTriggerAction: (config) => _triggerWebhook(config),
               ),
             );
           }).toList(),
@@ -471,6 +613,8 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       section: currentSection,
                       questionSpacing: widget.form.style.questionSpacing,
                       visibilityMap: visibilityMap,
+                      dynamicOptions: _dynamicOptions,
+                      onTriggerAction: (config) => _triggerWebhook(config),
                     ),
                     const SizedBox(height: 32),
                     Row(
@@ -656,87 +800,79 @@ class _PreviewSectionWidget extends ConsumerWidget {
   final FormSection section;
   final double questionSpacing;
   final Map<String, bool> visibilityMap;
+  final Map<String, List<FormQuestionOption>> dynamicOptions;
+  final Future<void> Function(Map<String, dynamic>) onTriggerAction;
 
   const _PreviewSectionWidget({
     required this.section,
     required this.questionSpacing,
     required this.visibilityMap,
+    required this.dynamicOptions,
+    required this.onTriggerAction,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeControllerProvider).languageCode;
     final style = section.style;
-    final sectionBg = PreviewUtils.parseColor(
-      style.backgroundColor,
-      Colors.white,
-    );
-    final headerBg = PreviewUtils.parseColor(
-      style.headerBackgroundColor,
-      AppColors.builderElement.withValues(alpha: 0.5),
-    );
+    final locale = ref.watch(localeControllerProvider).languageCode;
 
-    return Material(
-      elevation: style.elevation,
-      borderRadius: BorderRadius.circular(style.borderRadius),
-      color: sectionBg,
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(style.borderRadius),
+        side: BorderSide(
+          color: PreviewUtils.parseColor(
+            style.borderColor,
+            AppColors.borderLight,
+          ),
+          width: style.borderWidth,
+        ),
+      ),
       child: Container(
+        padding: EdgeInsets.all(style.padding),
         decoration: BoxDecoration(
+          color: PreviewUtils.parseColor(style.backgroundColor, Colors.white),
           borderRadius: BorderRadius.circular(style.borderRadius),
-          border: Border.all(color: AppColors.borderLight),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (style.showHeader)
-              Container(
-                padding: const EdgeInsets.all(20),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: const Border(
-                    bottom: BorderSide(color: AppColors.borderLight),
+            if (section.title.translate(locale).isNotEmpty) ...[
+              Text(
+                section.title.translate(locale),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: PreviewUtils.parseColor(
+                    style.titleColor,
+                    AppColors.textDark,
                   ),
-                  color: headerBg,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(style.borderRadius),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      section.title.translate(locale),
-                      style: const TextStyle(
-                        color: AppColors.textDark,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                    if (section.description.translate(locale).isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6.0),
-                        child: Text(
-                          section.description.translate(locale),
-                          style: const TextStyle(
-                            color: AppColors.textGrey,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                  ],
                 ),
               ),
-            Padding(
-              padding: EdgeInsets.all(style.padding),
-              child: _buildQuestionsGrid(visibilityMap),
-            ),
+              const SizedBox(height: 8),
+            ],
+            if (section.description.translate(locale).isNotEmpty) ...[
+              Text(
+                section.description.translate(locale),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: PreviewUtils.parseColor(
+                    style.descriptionColor,
+                    AppColors.textGrey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            _buildQuestionsGrid(visibilityMap, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuestionsGrid(Map<String, bool> visibilityMap) {
+  Widget _buildQuestionsGrid(Map<String, bool> visibilityMap, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
@@ -776,7 +912,7 @@ class _PreviewSectionWidget extends ConsumerWidget {
                   width = 600.0;
                   break;
                 default:
-                  width = 400.0;
+                  width = 200.0;
               }
             } else {
               int span = q.style.columnSpan;
@@ -791,7 +927,11 @@ class _PreviewSectionWidget extends ConsumerWidget {
               curve: Curves.easeInOut,
               child: SizedBox(
                 width: width,
-                child: _PreviewFieldWidget(question: q),
+                child: _PreviewFieldWidget(
+                  question: q,
+                  dynamicOptions: dynamicOptions[q.id],
+                  onTriggerAction: (config) => onTriggerAction(config),
+                ),
               ),
             );
           }).toList(),
@@ -803,7 +943,14 @@ class _PreviewSectionWidget extends ConsumerWidget {
 
 class _PreviewFieldWidget extends ConsumerStatefulWidget {
   final FormQuestion question;
-  const _PreviewFieldWidget({required this.question});
+  final List<FormQuestionOption>? dynamicOptions;
+  final Future<void> Function(Map<String, dynamic>)? onTriggerAction;
+
+  const _PreviewFieldWidget({
+    required this.question,
+    this.dynamicOptions,
+    this.onTriggerAction,
+  });
 
   @override
   ConsumerState<_PreviewFieldWidget> createState() =>
@@ -812,12 +959,22 @@ class _PreviewFieldWidget extends ConsumerStatefulWidget {
 
 class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   late TextEditingController _controller;
+  bool _isActionRunning = false;
 
   @override
   void initState() {
     super.initState();
     final initialValue = ref.read(previewFormDataProvider)[widget.question.id];
     _controller = TextEditingController(text: initialValue?.toString() ?? '');
+  }
+
+  @override
+  void didUpdateWidget(_PreviewFieldWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final val = ref.read(previewFormDataProvider)[widget.question.id];
+    if (val?.toString() != _controller.text) {
+      _controller.text = val?.toString() ?? '';
+    }
   }
 
   @override
@@ -874,6 +1031,20 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           )
         : null;
 
+    final isActionField = q.actionConfig != null;
+
+    final fillColor = PreviewUtils.parseColor(
+      style.backgroundColor,
+      isActionField ? const Color(0xFFF0F7FF) : const Color(0xFFF8FAFC),
+    );
+
+    final borderColor = PreviewUtils.parseColor(
+      style.borderColor,
+      isActionField
+          ? const Color(0xFF3B82F6).withValues(alpha: 0.5)
+          : const Color(0xFFCBD5E1),
+    );
+
     return Container(
       margin: EdgeInsets.only(bottom: style.verticalMargin),
       padding: EdgeInsets.all(style.containerPadding ?? 0),
@@ -899,7 +1070,16 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildInput(context, ref, locale)),
+                  Expanded(
+                    child: _buildInput(
+                      context,
+                      ref,
+                      locale,
+                      fillColor,
+                      borderColor,
+                      isActionField,
+                    ),
+                  ),
                 ],
               )
             else ...[
@@ -909,10 +1089,24 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                 helperWidget,
               ],
               const SizedBox(height: 8),
-              _buildInput(context, ref, locale),
+              _buildInput(
+                context,
+                ref,
+                locale,
+                fillColor,
+                borderColor,
+                isActionField,
+              ),
             ],
           ] else ...[
-            _buildInput(context, ref, locale),
+            _buildInput(
+              context,
+              ref,
+              locale,
+              fillColor,
+              borderColor,
+              isActionField,
+            ),
             if (helperWidget != null) ...[
               const SizedBox(height: 4),
               helperWidget,
@@ -923,7 +1117,14 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     );
   }
 
-  Widget _buildInput(BuildContext context, WidgetRef ref, String locale) {
+  Widget _buildInput(
+    BuildContext context,
+    WidgetRef ref,
+    String locale,
+    Color fillColor,
+    Color borderColor,
+    bool isActionField,
+  ) {
     final q = widget.question;
     final style = q.style;
 
@@ -937,14 +1138,6 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
       fontWeight: PreviewUtils.parseFontWeight(style.inputFontWeight),
     );
 
-    final fillColor = PreviewUtils.parseColor(
-      style.backgroundColor,
-      AppColors.fieldBackground,
-    );
-    final borderColor = PreviewUtils.parseColor(
-      style.borderColor,
-      AppColors.borderLight,
-    );
     final radius = style.borderRadius;
 
     OutlineInputBorder getBorder(Color color, {bool focused = false}) {
@@ -977,15 +1170,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
               ),
             )
           : null,
-      suffixIcon: (style.suffixIcon != null && style.suffixIcon!.isNotEmpty)
-          ? Center(
-              widthFactor: 1,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 12, left: 8),
-                child: Text(style.suffixIcon!, style: textStyle),
-              ),
-            )
-          : null,
+      suffixIcon: _buildSuffix(context, q, textStyle),
     );
 
     final validator = (String? val) => PreviewUtils.validateField(
@@ -1009,7 +1194,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           controller: _controller,
           style: textStyle,
           decoration: inputDecoration.copyWith(
-            suffixText: q.maxLength != null
+            suffixText: (q.maxLength != null && !hasActionButton)
                 ? '${_controller.text.length}/${q.maxLength}'
                 : null,
           ),
@@ -1034,11 +1219,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         return TextFormField(
           controller: _controller,
           style: textStyle,
-          decoration: inputDecoration.copyWith(
-            suffixText: q.maxLength != null
-                ? '${_controller.text.length}/${q.maxLength}'
-                : null,
-          ),
+          decoration: inputDecoration,
           maxLines: 5,
           minLines: 3,
           validator: validator,
@@ -1052,7 +1233,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         );
 
       case QuestionType.dropdown:
-        final options = q.options ?? [];
+        final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(previewFormDataProvider);
         return DropdownButtonFormField<String>(
           value: formData[q.id]?.toString(),
@@ -1376,10 +1557,17 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         return _buildFileUploadStub(q, inputDecoration, ref);
 
       case QuestionType.signature:
-        return _buildSignatureField(q, ref);
+        return _buildSignatureField(q, ref, fillColor, borderColor);
 
       case QuestionType.matrixChoice:
-        return _buildMatrixField(q, textStyle, ref);
+        return _buildMatrixField(
+          q,
+          textStyle,
+          ref,
+          fillColor,
+          borderColor,
+          isActionField,
+        );
 
       case QuestionType.divider:
         return const Divider(height: 32, thickness: 1);
@@ -1394,17 +1582,74 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     }
   }
 
+  bool get hasActionButton =>
+      widget.question.actionConfig?['hasButton'] ?? false;
+
+  Widget? _buildSuffix(BuildContext context, FormQuestion q, TextStyle style) {
+    final actionConfig = q.actionConfig;
+    if (actionConfig != null && (actionConfig['hasButton'] ?? false)) {
+      return Container(
+        margin: const EdgeInsets.only(right: 8),
+        child: ElevatedButton(
+          onPressed: _isActionRunning
+              ? null
+              : () async {
+                  setState(() => _isActionRunning = true);
+                  if (widget.onTriggerAction != null) {
+                    await widget.onTriggerAction!(actionConfig);
+                  }
+                  setState(() => _isActionRunning = false);
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            visualDensity: VisualDensity.compact,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          child: _isActionRunning
+              ? const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  actionConfig['buttonLabel'] ?? 'Search',
+                  style: const TextStyle(fontSize: 12),
+                ),
+        ),
+      );
+    }
+
+    if (q.style.suffixIcon != null && q.style.suffixIcon!.isNotEmpty) {
+      return Center(
+        widthFactor: 1,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12, left: 8),
+          child: Text(q.style.suffixIcon!, style: style),
+        ),
+      );
+    }
+    return null;
+  }
+
   Widget _buildImageUploadField(FormQuestion q, WidgetRef ref) {
     final formData = ref.watch(previewFormDataProvider);
     // Store image bytes as Uint8List in form data
     final imageBytes = formData[q.id];
     final hasImage = imageBytes is List && imageBytes.isNotEmpty;
 
-    Future<void> pickImage(ImageSource source) async {
+    // ── Gallery picker (file browser) ─────────────────────────────
+    Future<void> pickFromGallery() async {
       try {
         final picker = ImagePicker();
         final picked = await picker.pickImage(
-          source: source,
+          source: ImageSource.gallery,
           imageQuality: 85,
           maxWidth: 1200,
         );
@@ -1415,14 +1660,23 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
               .update((s) => {...s, q.id: bytes});
         }
       } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Could not pick image: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not pick image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
+    // ── Camera picker (browser getUserMedia) ──────────────────────
+    Future<void> pickFromCamera() async {
+      final bytes = await CameraCaptureDialog.show(context);
+      if (bytes != null) {
+        ref
+            .read(previewFormDataProvider.notifier)
+            .update((s) => {...s, q.id: bytes});
       }
     }
 
@@ -1432,7 +1686,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        builder: (_) => SafeArea(
+        builder: (sheetCtx) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
@@ -1458,10 +1712,12 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                     child: Icon(Icons.camera_alt, color: Color(0xFF3B82F6)),
                   ),
                   title: const Text('Camera'),
-                  subtitle: const Text('Take a new photo'),
+                  subtitle: const Text(
+                    'Use browser camera — permission required',
+                  ),
                   onTap: () {
-                    Navigator.pop(context);
-                    pickImage(ImageSource.camera);
+                    Navigator.pop(sheetCtx);
+                    pickFromCamera();
                   },
                 ),
                 ListTile(
@@ -1470,10 +1726,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                     child: Icon(Icons.photo_library, color: Color(0xFF22C55E)),
                   ),
                   title: const Text('Gallery'),
-                  subtitle: const Text('Choose from your photos'),
+                  subtitle: const Text('Choose from your files'),
                   onTap: () {
-                    Navigator.pop(context);
-                    pickImage(ImageSource.gallery);
+                    Navigator.pop(sheetCtx);
+                    pickFromGallery();
                   },
                 ),
                 const SizedBox(height: 8),
@@ -1576,62 +1832,211 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     WidgetRef ref,
   ) {
     final formData = ref.watch(previewFormDataProvider);
-    final fileName = formData[q.id]?.toString() ?? '';
+    final fileEntry = formData[q.id];
+    final fileName = fileEntry is Map
+        ? fileEntry['name']?.toString() ?? ''
+        : '';
+    final fileSize = fileEntry is Map ? fileEntry['size'] as int? : null;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        border: Border.all(color: AppColors.borderLight),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            fileName.isEmpty
-                ? Icons.cloud_upload_outlined
-                : Icons.insert_drive_file,
+    // Determine allowed extensions from field validation config
+    final allowedTypes = q.allowedFileTypes ?? [];
+    final List<String>? extensions = allowedTypes.isNotEmpty
+        ? _extensionsForTypes(allowedTypes)
+        : null;
+
+    void pickFile() {
+      // Build the MIME/extension accept string, e.g. '.pdf,.jpg'
+      final accept = extensions != null
+          ? extensions.map((e) => '.$e').join(',')
+          : '';
+
+      // Create a hidden <input type="file"> using package:web
+      final input = web.HTMLInputElement()
+        ..type = 'file'
+        ..accept = accept;
+
+      // Listen for the change event, then read the file bytes
+      input.addEventListener(
+        'change',
+        (web.Event _) {
+          final files = input.files;
+          if (files == null || files.length == 0) return;
+          final file = files.item(0)!;
+
+          final reader = web.FileReader();
+          reader.addEventListener(
+            'load',
+            (web.Event __) {
+              // result is a JS ArrayBuffer; convert to Uint8List
+              final jsBuffer = reader.result;
+              Uint8List? bytes;
+              try {
+                bytes = (jsBuffer as JSArrayBuffer).toDart.asUint8List();
+              } catch (_) {
+                bytes = null;
+              }
+              if (mounted) {
+                ref
+                    .read(previewFormDataProvider.notifier)
+                    .update(
+                      (s) => {
+                        ...s,
+                        q.id: {
+                          'name': file.name,
+                          'size': file.size,
+                          'bytes': bytes,
+                        },
+                      },
+                    );
+              }
+            }.toJS,
+          );
+          reader.readAsArrayBuffer(file);
+        }.toJS,
+      );
+
+      input.click();
+    }
+
+    String formatBytes(int bytes) {
+      if (bytes < 1024) return '$bytes B';
+      if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+
+    return InkWell(
+      onTap: fileName.isEmpty ? pickFile : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: fileName.isEmpty
+              ? Colors.grey.shade50
+              : Theme.of(context).primaryColor.withValues(alpha: 0.05),
+          border: Border.all(
             color: fileName.isEmpty
-                ? AppColors.textGrey
-                : Theme.of(context).primaryColor,
-            size: 32,
+                ? AppColors.borderLight
+                : Theme.of(context).primaryColor.withValues(alpha: 0.4),
+            style: fileName.isEmpty ? BorderStyle.solid : BorderStyle.solid,
           ),
-          const SizedBox(height: 8),
-          Text(
-            fileName.isEmpty ? 'Simulate File Upload' : fileName,
-            style: TextStyle(
-              color: fileName.isEmpty ? AppColors.textGrey : AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (fileName.isEmpty)
-            TextButton(
-              onPressed: () {
-                ref
-                    .read(previewFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: 'mock_document_v1.pdf'});
-              },
-              child: const Text('Simulate Selection'),
-            )
-          else
-            TextButton(
-              onPressed: () {
-                ref
-                    .read(previewFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: ''});
-              },
-              child: const Text(
-                'Remove File',
-                style: TextStyle(color: Colors.red),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: fileName.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 40,
+                    color: AppColors.textGrey,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Tap to select a file',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    extensions != null
+                        ? "Allowed: .${extensions.join(', .')}"
+                        : 'All file types accepted',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.insert_drive_file,
+                      color: Theme.of(context).primaryColor,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          fileName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (fileSize != null)
+                          Text(
+                            formatBytes(fileSize),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                    tooltip: 'Remove file',
+                    onPressed: () {
+                      ref
+                          .read(previewFormDataProvider.notifier)
+                          .update((s) => {...s, q.id: null});
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.swap_horiz,
+                      color: Theme.of(context).primaryColor,
+                      size: 20,
+                    ),
+                    tooltip: 'Change file',
+                    onPressed: pickFile,
+                  ),
+                ],
               ),
-            ),
-        ],
       ),
     );
   }
 
-  Widget _buildSignatureField(FormQuestion q, WidgetRef ref) {
+  List<String> _extensionsForTypes(List<String> types) {
+    final map = <String, List<String>>{
+      'image': ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'],
+      'document': ['doc', 'docx', 'odt', 'txt', 'rtf'],
+      'pdf': ['pdf'],
+      'spreadsheet': ['xls', 'xlsx', 'ods', 'csv'],
+      'video': ['mp4', 'mov', 'avi', 'mkv'],
+      'audio': ['mp3', 'wav', 'aac', 'm4a'],
+    };
+    final result = <String>{};
+    for (final t in types) {
+      result.addAll(map[t.toLowerCase()] ?? [t.toLowerCase()]);
+    }
+    return result.toList();
+  }
+
+  Widget _buildSignatureField(
+    FormQuestion q,
+    WidgetRef ref,
+    Color fillColor,
+    Color borderColor,
+  ) {
     final formData = ref.watch(previewFormDataProvider);
     final signatureData = formData[q.id]?.toString();
     final isSigned = signatureData != null && signatureData.isNotEmpty;
@@ -1643,8 +2048,8 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           Container(
             height: 150,
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.borderLight),
+              color: fillColor,
+              border: Border.all(color: borderColor),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Stack(
@@ -1686,7 +2091,14 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     );
   }
 
-  Widget _buildMatrixField(FormQuestion q, TextStyle textStyle, WidgetRef ref) {
+  Widget _buildMatrixField(
+    FormQuestion q,
+    TextStyle textStyle,
+    WidgetRef ref,
+    Color fillColor,
+    Color borderColor,
+    bool isActionField,
+  ) {
     final formData = ref.watch(previewFormDataProvider);
     final matrixData = (formData[q.id] as Map<String, dynamic>?) ?? {};
 
@@ -1699,15 +2111,19 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: AppColors.borderLight),
+        color: fillColor,
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          headingRowColor: WidgetStateProperty.all(Colors.grey.shade50),
+          headingRowColor: WidgetStateProperty.all(
+            isActionField
+                ? const Color(0xFFDBEAFE) // Light blue header for action fields
+                : Colors.grey.shade100,
+          ),
           columnSpacing: 24,
           horizontalMargin: 16,
           columns: [

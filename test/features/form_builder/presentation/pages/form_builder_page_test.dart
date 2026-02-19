@@ -26,7 +26,7 @@ class FakeFormBuilderController extends FormBuilderController {
   }
 
   @override
-  Future<bool> saveForm() async {
+  Future<bool> saveForm({String versionType = 'patch'}) async {
     return true;
   }
 

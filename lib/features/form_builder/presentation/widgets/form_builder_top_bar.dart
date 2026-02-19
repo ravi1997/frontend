@@ -296,6 +296,44 @@ class _SaveButton extends ConsumerWidget {
 
   const _SaveButton({required this.formId, required this.isSaving});
 
+  Future<void> _handleSave(
+    BuildContext context,
+    WidgetRef ref, {
+    String type = 'patch',
+  }) async {
+    final success = await ref
+        .read(formBuilderControllerProvider(formId).notifier)
+        .saveForm(versionType: type);
+
+    if (!context.mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Form saved successfully (${type == 'patch'
+                ? 'Patch'
+                : type == 'minor'
+                ? 'Minor'
+                : 'Major'} Version)',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      final error = ref
+          .read(formBuilderControllerProvider(formId))
+          .value
+          ?.error;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save form: ${error ?? "Unknown error"}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
@@ -306,54 +344,72 @@ class _SaveButton extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: TextButton.icon(
-        onPressed: isSaving
-            ? null
-            : () async {
-                final success = await ref
-                    .read(formBuilderControllerProvider(formId).notifier)
-                    .saveForm();
-
-                if (!context.mounted) return;
-
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Form saved successfully'),
-                      backgroundColor: Colors.green,
+      child: IntrinsicHeight(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton.icon(
+              onPressed: isSaving
+                  ? null
+                  : () => _handleSave(context, ref, type: 'patch'),
+              icon: isSaving
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(
+                      Icons.save_outlined,
+                      size: 16,
+                      color: AppColors.primary,
                     ),
-                  );
-                } else {
-                  final error = ref
-                      .read(formBuilderControllerProvider(formId))
-                      .value
-                      ?.error;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Failed to save form: ${error ?? "Unknown error"}',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-        icon: isSaving
-            ? const SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(
-                Icons.save_outlined,
-                size: 16,
-                color: AppColors.primary,
+              label: Text(
+                'Save',
+                style: TextStyle(
+                  color: isSaving ? AppColors.textGrey : AppColors.primary,
+                ),
               ),
-        label: Text(
-          'Save Changes',
-          style: TextStyle(
-            color: isSaving ? AppColors.textGrey : AppColors.primary,
-          ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.horizontal(
+                    left: Radius.circular(7),
+                  ),
+                ),
+              ),
+            ),
+            VerticalDivider(
+              width: 1,
+              color: isSaving ? AppColors.textGrey : AppColors.primary,
+            ),
+            PopupMenuButton<String>(
+              tooltip: 'Save Options',
+              enabled: !isSaving,
+              onSelected: (type) => _handleSave(context, ref, type: type),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'patch',
+                  child: Text('Save Patch (x.y.z+1)'),
+                ),
+                const PopupMenuItem(
+                  value: 'minor',
+                  child: Text('Save Minor (x.y+1.0)'),
+                ),
+                const PopupMenuItem(
+                  value: 'major',
+                  child: Text('Save Major (x+1.0.0)'),
+                ),
+              ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  color: isSaving ? AppColors.textGrey : AppColors.primary,
+                  size: 20,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

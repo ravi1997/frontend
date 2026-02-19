@@ -438,6 +438,12 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
       case ConditionAction.setValue:
         color = Colors.amber;
         break;
+      case ConditionAction.webhook:
+        color = Colors.indigo;
+        break;
+      case ConditionAction.updateOptions:
+        color = Colors.cyan;
+        break;
     }
 
     return Chip(
