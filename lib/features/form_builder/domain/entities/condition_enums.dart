@@ -25,6 +25,8 @@ enum ConditionAction {
   disable,
   enable,
   setValue,
+  webhook,
+  updateOptions,
 }
 
 /// Logical operators for combining multiple conditions.

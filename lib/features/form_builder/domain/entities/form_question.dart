@@ -59,6 +59,7 @@ abstract class FormQuestion with _$FormQuestion {
     bool? disableWeekends,
 
     Map<String, dynamic>? conditionalLogic,
+    Map<String, dynamic>? actionConfig,
     Map<String, dynamic>? metadata,
     @Default(QuestionStyle()) QuestionStyle style,
   }) = _FormQuestion;
