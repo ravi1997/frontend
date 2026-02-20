@@ -9,10 +9,12 @@ part of 'form_question.dart';
 _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
     _FormQuestion(
       id: _readId(json, 'id') as String,
+      variableName: json['variableName'] as String?,
       label: json['label'],
       type: $enumDecode(_$QuestionTypeEnumMap, json['field_type']),
       helperText: json['helperText'],
       placeholder: json['placeholder'],
+      defaultValue: json['defaultValue'],
       isRequired: json['isRequired'] as bool? ?? false,
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => FormQuestionOption.fromJson(e as Map<String, dynamic>))
@@ -57,10 +59,12 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'variableName': instance.variableName,
       'label': instance.label,
       'field_type': _$QuestionTypeEnumMap[instance.type]!,
       'helperText': instance.helperText,
       'placeholder': instance.placeholder,
+      'defaultValue': instance.defaultValue,
       'isRequired': instance.isRequired,
       'options': instance.options,
       'isReadOnly': instance.isReadOnly,

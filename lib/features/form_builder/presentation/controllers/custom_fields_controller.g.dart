@@ -41,7 +41,7 @@ final class CustomFieldsProvider
   }
 }
 
-String _$customFieldsHash() => r'98def5606a4dd542990f2010aa918b2f7d587865';
+String _$customFieldsHash() => r'8c0c1edd9e5f9166a3dafb02618f6583a6dcf589';
 
 abstract class _$CustomFields extends $Notifier<List<CustomFieldTemplate>> {
   List<CustomFieldTemplate> build();

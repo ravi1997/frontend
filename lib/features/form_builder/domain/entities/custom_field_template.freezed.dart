@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CustomFieldTemplate {
 
- String get id; String get name; String get category; FormQuestion get question;
+ String get id; String get name; String get category;/// Type of template: 'question', 'section', 'workflow', etc.
+ String get template_type;/// Raw JSON representing the template
+ Map<String, dynamic> get data;
 /// Create a copy of CustomFieldTemplate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $CustomFieldTemplateCopyWith<CustomFieldTemplate> get copyWith => _$CustomFieldT
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomFieldTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.question, question) || other.question == question));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomFieldTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.template_type, template_type) || other.template_type == template_type)&&const DeepCollectionEquality().equals(other.data, data));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,category,question);
+int get hashCode => Object.hash(runtimeType,id,name,category,template_type,const DeepCollectionEquality().hash(data));
 
 @override
 String toString() {
-  return 'CustomFieldTemplate(id: $id, name: $name, category: $category, question: $question)';
+  return 'CustomFieldTemplate(id: $id, name: $name, category: $category, template_type: $template_type, data: $data)';
 }
 
 
@@ -48,11 +50,11 @@ abstract mixin class $CustomFieldTemplateCopyWith<$Res>  {
   factory $CustomFieldTemplateCopyWith(CustomFieldTemplate value, $Res Function(CustomFieldTemplate) _then) = _$CustomFieldTemplateCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String category, FormQuestion question
+ String id, String name, String category, String template_type, Map<String, dynamic> data
 });
 
 
-$FormQuestionCopyWith<$Res> get question;
+
 
 }
 /// @nodoc
@@ -65,25 +67,17 @@ class _$CustomFieldTemplateCopyWithImpl<$Res>
 
 /// Create a copy of CustomFieldTemplate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? category = null,Object? question = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? category = null,Object? template_type = null,Object? data = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as String,question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
-as FormQuestion,
+as String,template_type: null == template_type ? _self.template_type : template_type // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
-/// Create a copy of CustomFieldTemplate
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$FormQuestionCopyWith<$Res> get question {
-  
-  return $FormQuestionCopyWith<$Res>(_self.question, (value) {
-    return _then(_self.copyWith(question: value));
-  });
-}
+
 }
 
 
@@ -165,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String category,  FormQuestion question)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String category,  String template_type,  Map<String, dynamic> data)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CustomFieldTemplate() when $default != null:
-return $default(_that.id,_that.name,_that.category,_that.question);case _:
+return $default(_that.id,_that.name,_that.category,_that.template_type,_that.data);case _:
   return orElse();
 
 }
@@ -186,10 +180,10 @@ return $default(_that.id,_that.name,_that.category,_that.question);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String category,  FormQuestion question)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String category,  String template_type,  Map<String, dynamic> data)  $default,) {final _that = this;
 switch (_that) {
 case _CustomFieldTemplate():
-return $default(_that.id,_that.name,_that.category,_that.question);case _:
+return $default(_that.id,_that.name,_that.category,_that.template_type,_that.data);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +200,10 @@ return $default(_that.id,_that.name,_that.category,_that.question);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String category,  FormQuestion question)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String category,  String template_type,  Map<String, dynamic> data)?  $default,) {final _that = this;
 switch (_that) {
 case _CustomFieldTemplate() when $default != null:
-return $default(_that.id,_that.name,_that.category,_that.question);case _:
+return $default(_that.id,_that.name,_that.category,_that.template_type,_that.data);case _:
   return null;
 
 }
@@ -221,13 +215,23 @@ return $default(_that.id,_that.name,_that.category,_that.question);case _:
 @JsonSerializable()
 
 class _CustomFieldTemplate implements CustomFieldTemplate {
-  const _CustomFieldTemplate({required this.id, required this.name, required this.category, required this.question});
+  const _CustomFieldTemplate({required this.id, required this.name, required this.category, this.template_type = 'question', final  Map<String, dynamic> data = const {}}): _data = data;
   factory _CustomFieldTemplate.fromJson(Map<String, dynamic> json) => _$CustomFieldTemplateFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String category;
-@override final  FormQuestion question;
+/// Type of template: 'question', 'section', 'workflow', etc.
+@override@JsonKey() final  String template_type;
+/// Raw JSON representing the template
+ final  Map<String, dynamic> _data;
+/// Raw JSON representing the template
+@override@JsonKey() Map<String, dynamic> get data {
+  if (_data is EqualUnmodifiableMapView) return _data;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_data);
+}
+
 
 /// Create a copy of CustomFieldTemplate
 /// with the given fields replaced by the non-null parameter values.
@@ -242,16 +246,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomFieldTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.question, question) || other.question == question));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomFieldTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.template_type, template_type) || other.template_type == template_type)&&const DeepCollectionEquality().equals(other._data, _data));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,category,question);
+int get hashCode => Object.hash(runtimeType,id,name,category,template_type,const DeepCollectionEquality().hash(_data));
 
 @override
 String toString() {
-  return 'CustomFieldTemplate(id: $id, name: $name, category: $category, question: $question)';
+  return 'CustomFieldTemplate(id: $id, name: $name, category: $category, template_type: $template_type, data: $data)';
 }
 
 
@@ -262,11 +266,11 @@ abstract mixin class _$CustomFieldTemplateCopyWith<$Res> implements $CustomField
   factory _$CustomFieldTemplateCopyWith(_CustomFieldTemplate value, $Res Function(_CustomFieldTemplate) _then) = __$CustomFieldTemplateCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String category, FormQuestion question
+ String id, String name, String category, String template_type, Map<String, dynamic> data
 });
 
 
-@override $FormQuestionCopyWith<$Res> get question;
+
 
 }
 /// @nodoc
@@ -279,26 +283,18 @@ class __$CustomFieldTemplateCopyWithImpl<$Res>
 
 /// Create a copy of CustomFieldTemplate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? category = null,Object? question = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? category = null,Object? template_type = null,Object? data = null,}) {
   return _then(_CustomFieldTemplate(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
-as String,question: null == question ? _self.question : question // ignore: cast_nullable_to_non_nullable
-as FormQuestion,
+as String,template_type: null == template_type ? _self.template_type : template_type // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
-/// Create a copy of CustomFieldTemplate
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$FormQuestionCopyWith<$Res> get question {
-  
-  return $FormQuestionCopyWith<$Res>(_self.question, (value) {
-    return _then(_self.copyWith(question: value));
-  });
-}
+
 }
 
 // dart format on

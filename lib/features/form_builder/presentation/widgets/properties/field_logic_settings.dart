@@ -214,7 +214,12 @@ class FieldLogicSettings extends ConsumerWidget {
   String _getFieldLabel(String id, String locale) {
     for (final s in sections) {
       for (final q in s.questions) {
-        if (q.id == id) return q.label.translate(locale);
+        if (q.id == id) {
+          final varName = q.variableName?.isNotEmpty == true
+              ? q.variableName
+              : q.id;
+          return '${q.label.translate(locale)} ($varName)';
+        }
       }
     }
     return id;

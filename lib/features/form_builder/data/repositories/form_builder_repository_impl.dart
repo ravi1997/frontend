@@ -2,6 +2,7 @@ import 'package:logger/logger.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/repositories/form_builder_repository.dart';
+import '../../domain/entities/custom_field_template.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -230,6 +231,34 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         ],
         'suggestions': [],
       };
+    }
+  }
+
+  @override
+  Future<List<CustomFieldTemplate>> getTemplates() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.listFieldTemplates);
+      if (response.data is List) {
+        return (response.data as List)
+            .map((e) => CustomFieldTemplate.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e, s) {
+      _logger.e('Failed to get templates', error: e, stackTrace: s);
+      return [];
+    }
+  }
+
+  @override
+  Future<void> saveTemplate(CustomFieldTemplate template) async {
+    try {
+      await _apiClient.post(
+        ApiEndpoints.listFieldTemplates,
+        data: template.toJson(),
+      );
+    } catch (e, s) {
+      _logger.e('Failed to save template', error: e, stackTrace: s);
     }
   }
 }

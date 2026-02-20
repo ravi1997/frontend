@@ -30,6 +30,7 @@ class FieldPropertiesWidget extends ConsumerStatefulWidget {
 
 class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   late TextEditingController _labelController;
+  late TextEditingController _variableNameController;
   late TextEditingController _helperTextController;
   late TextEditingController _placeholderController;
   late TextEditingController _regexController;
@@ -46,6 +47,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   void initState() {
     super.initState();
     _labelController = TextEditingController();
+    _variableNameController = TextEditingController();
     _helperTextController = TextEditingController();
     _placeholderController = TextEditingController();
     _regexController = TextEditingController();
@@ -62,6 +64,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   @override
   void dispose() {
     _labelController.dispose();
+    _variableNameController.dispose();
     _helperTextController.dispose();
     _placeholderController.dispose();
     _regexController.dispose();
@@ -83,6 +86,9 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
         text: translatedLabel,
         selection: TextSelection.collapsed(offset: translatedLabel.length),
       );
+    }
+    if (_variableNameController.text != (question.variableName ?? '')) {
+      _variableNameController.text = question.variableName ?? '';
     }
     final translatedHelperText = question.helperText.translate(locale);
     if (_helperTextController.text != translatedHelperText) {
@@ -251,6 +257,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                           formId: widget.formId,
                           question: question,
                           labelController: _labelController,
+                          variableNameController: _variableNameController,
                           helperTextController: _helperTextController,
                           placeholderController: _placeholderController,
                         ),

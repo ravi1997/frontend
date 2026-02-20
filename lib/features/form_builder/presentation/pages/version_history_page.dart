@@ -466,9 +466,22 @@ class _VersionTimelineItem extends ConsumerWidget {
         _ModernActionButton(
           icon: Icons.visibility_outlined,
           label: 'View',
-          onPressed: () => ref
-              .read(versionHistoryControllerProvider(formId).notifier)
-              .viewVersion(version),
+          onPressed: () async {
+            final notifier = ref.read(
+              versionHistoryControllerProvider(formId).notifier,
+            );
+            await notifier.viewVersion(version);
+            final currentState = ref.read(
+              versionHistoryControllerProvider(formId),
+            );
+            if (currentState.selectedForm != null && context.mounted) {
+              context.push('/form-preview', extra: currentState.selectedForm!);
+            } else if (currentState.error != null && context.mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(currentState.error!)));
+            }
+          },
         ),
         if (!isCurrentVersion) ...[
           const SizedBox(width: 8),

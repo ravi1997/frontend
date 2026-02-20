@@ -75,8 +75,14 @@ class VersionHistoryController extends _$VersionHistoryController {
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
       final versions = await repository.getVersionHistory(formId);
+      final sortedVersions = List<FormVersionHistory>.from(versions)
+        ..sort((a, b) => b.created_at.compareTo(a.created_at));
 
-      state = state.copyWith(versions: versions, isLoading: false, error: null);
+      state = state.copyWith(
+        versions: sortedVersions,
+        isLoading: false,
+        error: null,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -89,9 +95,11 @@ class VersionHistoryController extends _$VersionHistoryController {
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
       final versions = await repository.getVersionHistory(formId);
+      final sortedVersions = List<FormVersionHistory>.from(versions)
+        ..sort((a, b) => b.created_at.compareTo(a.created_at));
 
       state = state.copyWith(
-        versions: versions,
+        versions: sortedVersions,
         isRefreshing: false,
         error: null,
       );
@@ -151,13 +159,15 @@ class VersionHistoryController extends _$VersionHistoryController {
 
       // Refresh the version history
       final versions = await repository.getVersionHistory(formId);
+      final sortedVersions = List<FormVersionHistory>.from(versions)
+        ..sort((a, b) => b.created_at.compareTo(a.created_at));
 
       state = state.copyWith(
-        versions: versions,
+        versions: sortedVersions,
         isRestoring: false,
         selectedVersion: null,
         selectedForm: null,
-        currentVersion: versions.first.version,
+        currentVersion: sortedVersions.first.version,
         error: null,
       );
 

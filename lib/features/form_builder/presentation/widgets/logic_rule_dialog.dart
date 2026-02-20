@@ -560,7 +560,11 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                           .map(
                             (q) => DropdownMenuItem(
                               value: q.id,
-                              child: Text(q.label.translate(widget.locale)),
+                              child: Text(
+                                '${q.label.translate(widget.locale)} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12),
+                              ),
                             ),
                           )
                           .toList(),
@@ -688,8 +692,9 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                         (q) => DropdownMenuItem(
                           value: q.id,
                           child: Text(
-                            q.label.translate(widget.locale),
+                            '${q.label.translate(widget.locale)} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
                             overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ),
                       )

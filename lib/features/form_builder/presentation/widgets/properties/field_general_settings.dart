@@ -12,6 +12,7 @@ class FieldGeneralSettings extends ConsumerStatefulWidget {
   final String formId;
   final FormQuestion question;
   final TextEditingController labelController;
+  final TextEditingController variableNameController;
   final TextEditingController helperTextController;
   final TextEditingController placeholderController;
 
@@ -20,6 +21,7 @@ class FieldGeneralSettings extends ConsumerStatefulWidget {
     required this.formId,
     required this.question,
     required this.labelController,
+    required this.variableNameController,
     required this.helperTextController,
     required this.placeholderController,
   });
@@ -178,6 +180,19 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                       )
                       .updateQuestionLabel(widget.question.id, val);
                 }
+              },
+            ),
+            const SizedBox(height: 20),
+            PropertyBuilderUtils.buildTextField(
+              label: 'Field Variable Name (API Key/ID)',
+              controller: widget.variableNameController,
+              placeholder: 'my_custom_field',
+              onChanged: (val) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateQuestion(
+                      widget.question.copyWith(variableName: val),
+                    );
               },
             ),
             const SizedBox(height: 20),
@@ -367,7 +382,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     Expanded(
                       flex: 2,
                       child: DropdownButtonFormField<String>(
-                        value: webhookMethod,
+                        initialValue: webhookMethod,
                         decoration: const InputDecoration(
                           labelText: 'Method',
                           isDense: true,
@@ -565,7 +580,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         .toList();
 
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       isExpanded: true,
       decoration: const InputDecoration(
         hintText: 'Target Field',
@@ -576,9 +591,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         return DropdownMenuItem(
           value: q.id,
           child: Text(
-            q.label is String
-                ? q.label as String
-                : (q.label as Map?)?['en'] ?? 'Untitled',
+            '${q.label is String ? q.label as String : (q.label as Map?)?['en'] ?? 'Untitled'} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12),
           ),
@@ -679,9 +692,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               if (picked != null) {
                 ref
                     .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestionMetadata(widget.question.id, {
-                      'defaultValue': picked.toIso8601String(),
-                    });
+                    .updateQuestionDefaultValue(
+                      widget.question.id,
+                      picked.toIso8601String().split('T').first,
+                    );
               }
             },
             child: Container(
@@ -695,14 +709,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.question.metadata?['defaultValue'] != null
-                        ? widget.question.metadata!['defaultValue']
-                              .toString()
-                              .split('T')
-                              .first
+                    widget.question.defaultValue != null
+                        ? widget.question.defaultValue.toString()
                         : 'Select Date',
                     style: TextStyle(
-                      color: widget.question.metadata?['defaultValue'] != null
+                      color: widget.question.defaultValue != null
                           ? AppColors.textDark
                           : AppColors.textGrey,
                     ),
@@ -744,9 +755,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
                 ref
                     .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestionMetadata(widget.question.id, {
-                      'defaultValue': formatted,
-                    });
+                    .updateQuestionDefaultValue(widget.question.id, formatted);
               }
             },
             child: Container(
@@ -760,9 +769,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.question.metadata?['defaultValue'] ?? 'Select Time',
+                    widget.question.defaultValue?.toString() ?? 'Select Time',
                     style: TextStyle(
-                      color: widget.question.metadata?['defaultValue'] != null
+                      color: widget.question.defaultValue != null
                           ? AppColors.textDark
                           : AppColors.textGrey,
                     ),
@@ -796,7 +805,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            initialValue: widget.question.metadata?['defaultValue'],
+            initialValue: widget.question.defaultValue?.toString(),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
@@ -819,9 +828,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             onChanged: (val) {
               ref
                   .read(formBuilderControllerProvider(widget.formId).notifier)
-                  .updateQuestionMetadata(widget.question.id, {
-                    'defaultValue': val,
-                  });
+                  .updateQuestionDefaultValue(widget.question.id, val);
             },
           ),
         ],
@@ -835,7 +842,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
       onChanged: (val) {
         ref
             .read(formBuilderControllerProvider(widget.formId).notifier)
-            .updateQuestionMetadata(widget.question.id, {'defaultValue': val});
+            .updateQuestionDefaultValue(widget.question.id, val);
       },
     );
   }

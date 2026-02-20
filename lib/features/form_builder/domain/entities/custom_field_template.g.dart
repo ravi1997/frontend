@@ -11,7 +11,8 @@ _CustomFieldTemplate _$CustomFieldTemplateFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       category: json['category'] as String,
-      question: FormQuestion.fromJson(json['question'] as Map<String, dynamic>),
+      template_type: json['template_type'] as String? ?? 'question',
+      data: json['data'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$CustomFieldTemplateToJson(
@@ -20,5 +21,6 @@ Map<String, dynamic> _$CustomFieldTemplateToJson(
   'id': instance.id,
   'name': instance.name,
   'category': instance.category,
-  'question': instance.question,
+  'template_type': instance.template_type,
+  'data': instance.data,
 };

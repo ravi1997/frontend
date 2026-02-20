@@ -17,6 +17,7 @@ class SectionWidget extends ConsumerWidget {
   final String? selectedQuestionId;
   final String? selectedSectionId;
   final String locale;
+  final String? mode;
 
   const SectionWidget({
     super.key,
@@ -26,6 +27,7 @@ class SectionWidget extends ConsumerWidget {
     required this.selectedQuestionId,
     required this.selectedSectionId,
     required this.locale,
+    this.mode,
   });
 
   @override
@@ -61,7 +63,7 @@ class SectionWidget extends ConsumerWidget {
         if (details.data is QuestionType) {
           notifier.addQuestion(section.id, details.data as QuestionType);
         } else if (details.data is CustomFieldTemplate) {
-          notifier.addQuestionFromTemplate(
+          notifier.addFromTemplate(
             section.id,
             details.data as CustomFieldTemplate,
           );
@@ -106,7 +108,7 @@ class SectionWidget extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Section Header
-                  if (sectionStyle.showHeader)
+                  if (sectionStyle.showHeader && mode != 'question')
                     InkWell(
                       onTap: () => ref
                           .read(formBuilderControllerProvider(formId).notifier)

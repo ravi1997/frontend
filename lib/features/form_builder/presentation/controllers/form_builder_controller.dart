@@ -266,25 +266,53 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  void addQuestionFromTemplate(String sectionId, CustomFieldTemplate template) {
+  void addFromTemplate(String? sectionId, CustomFieldTemplate template) {
     if (state.value == null) return;
-    final newQuestion = template.question.copyWith(id: _uuid.v4());
 
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        return s.copyWith(questions: [...s.questions, newQuestion]);
-      }
-      return s;
-    }).toList();
+    if (template.template_type == 'question' && sectionId != null) {
+      final question = FormQuestion.fromJson(template.data);
+      final newQuestion = question.copyWith(id: _uuid.v4());
 
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
-        selectedQuestionId: newQuestion.id,
-        selectedSectionId: sectionId,
-        isFormSelected: false,
-      ),
-    );
+      final sections = state.value!.form.sections.map((s) {
+        if (s.id == sectionId) {
+          return s.copyWith(questions: [...s.questions, newQuestion]);
+        }
+        return s;
+      }).toList();
+
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(sections: sections),
+          selectedQuestionId: newQuestion.id,
+          selectedSectionId: sectionId,
+          isFormSelected: false,
+        ),
+      );
+    } else if (template.template_type == 'section') {
+      final section = FormSection.fromJson(template.data);
+      final newSection = section.copyWith(id: _uuid.v4());
+
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(
+            sections: [...state.value!.form.sections, newSection],
+          ),
+          selectedSectionId: newSection.id,
+          selectedQuestionId: null,
+          isFormSelected: false,
+        ),
+      );
+    } else if (template.template_type == 'workflow') {
+      final currentWorkflows = Map<String, dynamic>.from(
+        state.value!.form.workflows,
+      );
+      currentWorkflows.addAll(template.data);
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(workflows: currentWorkflows),
+        ),
+      );
+    }
   }
 
   void updateQuestionMetadata(
@@ -430,6 +458,27 @@ class FormBuilderController extends _$FormBuilderController {
             placeholder,
             locale,
           ),
+        );
+        return s.copyWith(questions: newQuestions);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+  }
+
+  void updateQuestionDefaultValue(String questionId, dynamic defaultValue) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections.map((s) {
+      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (qIndex != -1) {
+        final newQuestions = [...s.questions];
+        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
+          defaultValue: defaultValue,
         );
         return s.copyWith(questions: newQuestions);
       }

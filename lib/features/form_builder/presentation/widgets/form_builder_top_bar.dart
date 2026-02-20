@@ -12,8 +12,9 @@ import 'publish_success_dialog.dart';
 
 class FormBuilderTopBar extends ConsumerWidget {
   final String formId;
+  final String? mode;
 
-  const FormBuilderTopBar({super.key, required this.formId});
+  const FormBuilderTopBar({super.key, required this.formId, this.mode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,6 +45,11 @@ class FormBuilderTopBar extends ConsumerWidget {
         formId,
       ).select((state) => state.value?.form.workflows ?? {}),
     );
+    final sections = ref.watch(
+      formBuilderControllerProvider(
+        formId,
+      ).select((state) => state.value?.form.sections ?? []),
+    );
 
     return Container(
       height: 64,
@@ -58,7 +64,13 @@ class FormBuilderTopBar extends ConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: AppColors.textGrey),
-            onPressed: () => context.go('/'),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -123,10 +135,11 @@ class FormBuilderTopBar extends ConsumerWidget {
           _TopBarActionButton(
             icon: FontAwesomeIcons.clockRotateLeft,
             label: 'History',
-            onTap: () {
-              context.push(
+            onTap: () async {
+              await context.push(
                 '/forms/$formId/versions?title=${formTitle.translate('en')}',
               );
+              ref.invalidate(formBuilderControllerProvider(formId));
             },
           ),
           const SizedBox(width: 8),
@@ -146,6 +159,8 @@ class FormBuilderTopBar extends ConsumerWidget {
                 context: context,
                 builder: (context) => WorkflowConfigurationDialog(
                   initialWorkflows: workflows,
+                  sections: sections,
+                  locale: editingLocale,
                   onSave: (config) {
                     ref
                         .read(formBuilderControllerProvider(formId).notifier)
@@ -158,7 +173,7 @@ class FormBuilderTopBar extends ConsumerWidget {
           const SizedBox(width: 16),
           _SaveButton(formId: formId, isSaving: isSaving),
           const SizedBox(width: 12),
-          _PublishButton(formId: formId),
+          _PublishButton(formId: formId, mode: mode),
         ],
       ),
     );
@@ -301,6 +316,8 @@ class _SaveButton extends ConsumerWidget {
     WidgetRef ref, {
     String type = 'patch',
   }) async {
+    final wasNew = formId == 'new';
+
     final success = await ref
         .read(formBuilderControllerProvider(formId).notifier)
         .saveForm(versionType: type);
@@ -308,6 +325,23 @@ class _SaveButton extends ConsumerWidget {
     if (!context.mounted) return;
 
     if (success) {
+      // If this was a new form, navigate to the actual form URL using the
+      // real ID returned by the API so the controller and URL stay in sync.
+      if (wasNew) {
+        final savedFormId = ref
+            .read(formBuilderControllerProvider(formId))
+            .value
+            ?.form
+            .id;
+        if (savedFormId != null &&
+            savedFormId.isNotEmpty &&
+            savedFormId != 'new') {
+          context.pushReplacement('/builder/$savedFormId');
+          // Skip the snackbar — the page rebuild handles the transition.
+          return;
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -418,8 +452,9 @@ class _SaveButton extends ConsumerWidget {
 
 class _PublishButton extends ConsumerWidget {
   final String formId;
+  final String? mode;
 
-  const _PublishButton({required this.formId});
+  const _PublishButton({required this.formId, this.mode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -455,7 +490,9 @@ class _PublishButton extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
-      child: const Text('Publish'),
+      child: Text(
+        mode != null && mode != 'form' ? 'Publish Template' : 'Publish',
+      ),
     );
   }
 }

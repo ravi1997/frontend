@@ -9,11 +9,13 @@ import '../widgets/form_properties_widget.dart';
 import '../widgets/section_properties_widget.dart';
 import '../widgets/form_builder_top_bar.dart';
 import '../widgets/form_canvas_widget.dart';
+import '../../domain/entities/question_type.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
   final String formId;
+  final String? mode;
 
-  const FormBuilderPage({super.key, required this.formId});
+  const FormBuilderPage({super.key, required this.formId, this.mode});
 
   @override
   ConsumerState<FormBuilderPage> createState() => _FormBuilderPageState();
@@ -29,6 +31,23 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     final builderStateAsync = ref.watch(
       formBuilderControllerProvider(widget.formId),
     );
+
+    ref.listen(formBuilderControllerProvider(widget.formId), (previous, next) {
+      if (next.hasValue) {
+        final state = next.value!;
+        // Auto-initialize first question if in question mode and empty
+        if (widget.mode == 'question' &&
+            state.form.sections.isNotEmpty &&
+            state.form.sections[0].questions.isEmpty &&
+            state.selectedQuestionId == null) {
+          Future.microtask(() {
+            ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .addQuestion(state.form.sections[0].id, QuestionType.shortText);
+          });
+        }
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.builderBackground,
@@ -73,7 +92,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     ),
 
                     // Center: Form Canvas
-                    Expanded(child: FormCanvasWidget(formId: widget.formId)),
+                    Expanded(
+                      child: FormCanvasWidget(
+                        formId: widget.formId,
+                        mode: widget.mode,
+                      ),
+                    ),
 
                     // Right Resize Handle & Sidebar
                     if (isRightPanelVisible) ...[
@@ -151,6 +175,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   }
 
   Widget _buildTopBar(BuildContext context) {
-    return FormBuilderTopBar(formId: widget.formId);
+    return FormBuilderTopBar(formId: widget.formId, mode: widget.mode);
   }
 }

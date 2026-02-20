@@ -15,7 +15,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
   @override
   Future<List<CustomFieldTemplate>> getCustomFields() async {
     try {
-      final response = await _apiClient.get('/custom-fields');
+      final response = await _apiClient.get('/custom-fields/');
       final data = response.data as List<dynamic>;
 
       final templates = data.map((item) {
@@ -36,7 +36,7 @@ class FieldLibraryRepositoryImpl implements FieldLibraryRepository {
   ) async {
     try {
       final response = await _apiClient.post(
-        '/custom-fields',
+        '/custom-fields/',
         data: template.toJson(),
       );
 

@@ -20,10 +20,12 @@ abstract class FormQuestion with _$FormQuestion {
   const FormQuestion._();
   const factory FormQuestion({
     @JsonKey(readValue: _readId) required String id,
+    String? variableName,
     required Object? label,
     @JsonKey(name: 'field_type') required QuestionType type,
     Object? helperText,
     Object? placeholder,
+    Object? defaultValue,
     @Default(false) bool isRequired,
     List<FormQuestionOption>? options,
     @Default(false) bool isReadOnly,
@@ -60,7 +62,7 @@ abstract class FormQuestion with _$FormQuestion {
 
     Map<String, dynamic>? conditionalLogic,
     Map<String, dynamic>? actionConfig,
-    Map<String, dynamic>? metadata,
+    @JsonKey(name: 'metadata') Map<String, dynamic>? metadata,
     @Default(QuestionStyle()) QuestionStyle style,
   }) = _FormQuestion;
 
