@@ -446,6 +446,29 @@ class _ActionButtons extends ConsumerWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
+        if (user.isAdmin)
+          ElevatedButton.icon(
+            onPressed: () => context.push('/templates/create'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(
+                0xFF10B981,
+              ), // Green for admin action
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            icon: const Icon(Icons.post_add, size: 20),
+            label: Text(
+              'Create Template',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ElevatedButton.icon(
           onPressed: () {},
           style: ElevatedButton.styleFrom(
