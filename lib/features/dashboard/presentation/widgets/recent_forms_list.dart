@@ -153,6 +153,27 @@ class _RecentFormItem extends ConsumerWidget {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         TextButton(
+          onPressed: () => context.push('/f/${form.id}'),
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF10B981), // Green for Submit
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Send Response',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.send_outlined, size: 14),
+            ],
+          ),
+        ),
+        TextButton(
           onPressed: () => context.push('/forms/${form.id}/responses'),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFF2563EB),

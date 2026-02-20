@@ -446,6 +446,23 @@ class _ActionButtons extends ConsumerWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
+        ElevatedButton.icon(
+          onPressed: () => context.push('/scan-qr'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFF59E0B), // Amber for Scan
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          icon: const Icon(Icons.qr_code_scanner, size: 20),
+          label: Text(
+            'Scan QR Invite',
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ),
         if (user.isAdmin)
           ElevatedButton.icon(
             onPressed: () => context.push('/templates/create'),
