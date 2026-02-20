@@ -16,7 +16,7 @@ void showUserDetailPanel(BuildContext context, User user) {
     barrierLabel: 'User Detail',
     barrierColor: Colors.black.withValues(alpha: 0.35),
     transitionDuration: const Duration(milliseconds: 280),
-    pageBuilder: (_, __, ___) => _UserDetailPanel(user: user),
+    pageBuilder: (_, _, _) => _UserDetailPanel(user: user),
     transitionBuilder: (ctx, anim, _, child) {
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
