@@ -6,6 +6,59 @@ class ApiEndpoints {
   // Base configuration
   // static const String baseUrl = 'http://localhost:5000/form/api/v1';
   static const String baseUrl = 'http://192.168.1.91:5000/form/api/v1';
+
+  /// Base URL for the server root (without the /form/api/v1 prefix).
+  /// Use this for endpoints that live outside the /form/api/v1 path, e.g. admin endpoints.
+  // static const String serverBaseUrl = 'http://localhost:5000';
+  static const String serverBaseUrl = 'http://192.168.1.91:5000';
+
+  // ============================================================================
+  // Admin User Management Endpoints  (prefix: /api/v1/admin/users)
+  // ============================================================================
+
+  /// GET - List all users (admin only)
+  static const String adminListUsers = '$serverBaseUrl/api/v1/admin/users/';
+
+  /// GET - List all unique departments
+  static const String adminListDepartments =
+      '$serverBaseUrl/api/v1/admin/users/departments';
+
+  /// GET - Get a single user's full profile (admin)
+  static String adminGetUser(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId';
+
+  /// PATCH - Update a user's department
+  static String adminUpdateUserDepartment(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/department';
+
+  /// PATCH - Update a user's roles
+  static String adminUpdateUserRoles(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/roles';
+
+  /// POST - Admin force-reset a user's password
+  static String adminResetUserPassword(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/reset-password';
+
+  /// POST - Lock a user account (admin)
+  static String adminLockUser(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/lock';
+
+  /// POST - Unlock a user account (admin)
+  static String adminUnlockUser(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/unlock';
+
+  /// PATCH - Set is_active status for a user (admin)
+  static String adminSetUserStatus(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/status';
+
+  /// DELETE - Permanently delete a user (admin)
+  static String adminDeleteUser(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId';
+
+  /// GET - Get user activity / security timeline (admin)
+  static String adminGetUserActivity(String userId) =>
+      '$serverBaseUrl/api/v1/admin/users/$userId/activity';
+
   // ============================================================================
   // Authentication Endpoints
   // ============================================================================
@@ -204,13 +257,13 @@ class ApiEndpoints {
   /// GET - List field templates
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "id": string, "name": string, "type": string, ... }]
-  static const String listFieldTemplates = '/custom-fields';
+  static const String listFieldTemplates = '/custom-fields/';
 
   /// POST - Create field template
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "name": string, "type": string, "config": {...} }
   /// Returns: { "id": string, "name": string, ... }
-  static const String createFieldTemplate = '/custom-fields';
+  static const String createFieldTemplate = '/custom-fields/';
 
   // ============================================================================
   // Template Library Endpoints

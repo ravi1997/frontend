@@ -20,7 +20,7 @@ class AgentOSApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'Agent OS',
+      title: 'MahaSamgrah Setu',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       routerConfig: router,

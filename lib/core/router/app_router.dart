@@ -16,8 +16,10 @@ import '../../features/form_builder/presentation/pages/translator_page.dart';
 import '../../features/form_builder/presentation/pages/version_history_page.dart';
 import '../../features/form_builder/presentation/pages/workflow_builder_page.dart';
 import '../../features/form_builder/presentation/pages/template_library_page.dart';
+import '../../features/form_builder/presentation/pages/create_template_page.dart';
 import '../../features/analytics/presentation/pages/advanced_analytics_page.dart';
 import '../../features/integrations/presentation/pages/integrations_page.dart';
+import '../../features/user_management/presentation/pages/user_management_page.dart';
 
 part 'app_router.g.dart';
 
@@ -51,6 +53,15 @@ Raw<GoRouter> appRouter(Ref ref) {
         return '/';
       }
 
+      // Admin only routes
+      if (isAuth) {
+        final user = authState.value!;
+        final isAdminOnly = state.matchedLocation == '/user-management';
+        if (isAdminOnly && !user.isAdmin) {
+          return '/';
+        }
+      }
+
       return null;
     },
     routes: [
@@ -75,7 +86,8 @@ Raw<GoRouter> appRouter(Ref ref) {
         path: '/builder/:formId',
         builder: (context, state) {
           final formId = state.pathParameters['formId'] ?? 'new';
-          return FormBuilderPage(formId: formId);
+          final mode = state.uri.queryParameters['mode'];
+          return FormBuilderPage(formId: formId, mode: mode);
         },
       ),
       GoRoute(
@@ -134,12 +146,20 @@ Raw<GoRouter> appRouter(Ref ref) {
         builder: (context, state) => const TemplateLibraryPage(),
       ),
       GoRoute(
+        path: '/templates/create',
+        builder: (context, state) => const CreateTemplatePage(),
+      ),
+      GoRoute(
         path: '/analytics/advanced',
         builder: (context, state) => const AdvancedAnalyticsPage(),
       ),
       GoRoute(
         path: '/integrations',
         builder: (context, state) => const IntegrationsPage(),
+      ),
+      GoRoute(
+        path: '/user-management',
+        builder: (context, state) => const UserManagementPage(),
       ),
     ],
   );
