@@ -50,7 +50,7 @@ class DashboardPage extends ConsumerWidget {
                           children: [
                             _GreetingSection(user: user),
                             const SizedBox(height: 32),
-                            _ActionButtons(),
+                            _ActionButtons(user: user),
                             const SizedBox(height: 32),
                             dashboardState.when(
                               data: (data) => _DashboardContent(data: data),
@@ -110,15 +110,18 @@ class _TopBar extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Text(
-            'Form Management System',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF111827),
+          Expanded(
+            child: Text(
+              'MahaSamgrah Setu',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF111827),
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 16),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -377,7 +380,9 @@ class _StatsGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const double spacing = 24;
-        final double cardWidth = (constraints.maxWidth - (spacing * 2)) / 3;
+        int columns = constraints.maxWidth < 600 ? 1 : 3;
+        final double cardWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
         return Wrap(
           spacing: spacing,
@@ -411,13 +416,21 @@ class _StatsGrid extends StatelessWidget {
   }
 }
 
-class _ActionButtons extends StatelessWidget {
+class _ActionButtons extends ConsumerWidget {
+  final dynamic user;
+  const _ActionButtons({required this.user});
+
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: [
         ElevatedButton.icon(
-          onPressed: () => context.go('/builder/new'),
+          onPressed: () async {
+            await context.push('/builder/new');
+            ref.read(dashboardControllerProvider.notifier).refresh();
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF2563EB),
             foregroundColor: Colors.white,
@@ -433,7 +446,29 @@ class _ActionButtons extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 12),
+        if (user.isAdmin)
+          ElevatedButton.icon(
+            onPressed: () => context.push('/templates/create'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(
+                0xFF10B981,
+              ), // Green for admin action
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            icon: const Icon(Icons.post_add, size: 20),
+            label: Text(
+              'Create Template',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ElevatedButton.icon(
           onPressed: () {},
           style: ElevatedButton.styleFrom(
@@ -451,7 +486,6 @@ class _ActionButtons extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 12),
         OutlinedButton.icon(
           onPressed: () => context.go('/templates'),
           style: OutlinedButton.styleFrom(
@@ -469,7 +503,6 @@ class _ActionButtons extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 12),
         OutlinedButton.icon(
           onPressed: () => context.go('/analytics/advanced'),
           style: OutlinedButton.styleFrom(
@@ -487,7 +520,27 @@ class _ActionButtons extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 12),
+        if (user.isAdmin)
+          OutlinedButton.icon(
+            onPressed: () => context.go('/user-management'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFFEFF6FF),
+              side: const BorderSide(color: Color(0xFFBFDBFE)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            icon: const Icon(Icons.people_alt_outlined, size: 20),
+            label: Text(
+              'User Management',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         OutlinedButton.icon(
           onPressed: () => context.go('/integrations'),
           style: OutlinedButton.styleFrom(
@@ -505,7 +558,6 @@ class _ActionButtons extends StatelessWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 12),
         OutlinedButton.icon(
           onPressed: () {},
           style: OutlinedButton.styleFrom(
@@ -559,7 +611,7 @@ class _GettingStartedSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Learn how to make the most of Form Management System',
+                  'Learn how to make the most of MahaSamgrah Setu',
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: const Color(0xFF4B5563),
@@ -582,6 +634,10 @@ class _DashboardSkeleton extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         const double spacing = 24;
+        int columns = constraints.maxWidth < 600 ? 1 : 3;
+        double childWidth =
+            (constraints.maxWidth - (spacing * (columns - 1))) / columns;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -591,7 +647,7 @@ class _DashboardSkeleton extends StatelessWidget {
               children: List.generate(
                 3,
                 (_) => SizedBox(
-                  width: (constraints.maxWidth - (spacing * 2)) / 3,
+                  width: childWidth,
                   child: const StatsCardSkeleton(),
                 ),
               ),

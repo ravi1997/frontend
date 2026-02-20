@@ -105,7 +105,10 @@ class _RecentFormItem extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -119,28 +122,25 @@ class _RecentFormItem extends ConsumerWidget {
               size: 20,
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  form.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                form.title,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111827),
                 ),
-                Text(
-                  '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: const Color(0xFF6B7280),
-                  ),
+              ),
+              Text(
+                '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: const Color(0xFF6B7280),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           _buildActions(context, ref),
         ],
@@ -149,8 +149,8 @@ class _RecentFormItem extends ConsumerWidget {
   }
 
   Widget _buildActions(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         TextButton(
           onPressed: () => context.push('/forms/${form.id}/responses'),
@@ -197,9 +197,10 @@ class _RecentFormItem extends ConsumerWidget {
         PopupMenuButton<String>(
           key: Key('form_menu_btn_${form.id}'),
           icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF6B7280)),
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == 'edit') {
-              context.go('/builder/${form.id}');
+              await context.push('/builder/${form.id}');
+              ref.read(dashboardControllerProvider.notifier).refresh();
             } else if (value == 'delete') {
               _showDeleteDialog(context, ref);
             } else if (value == 'duplicate') {

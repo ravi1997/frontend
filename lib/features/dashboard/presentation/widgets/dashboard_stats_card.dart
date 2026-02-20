@@ -40,12 +40,15 @@ class DashboardStatsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF374151),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF374151),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Icon(icon, color: const Color(0xFF9CA3AF), size: 20),
