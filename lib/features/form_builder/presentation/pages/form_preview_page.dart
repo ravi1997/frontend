@@ -186,7 +186,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
 
     // 3. Handle automation webhooks
     for (final wh in result.pendingWebhooks) {
-      final hash = "${wh['url']}_${jsonEncode(wh['mappings'])}";
+      final hash = '${wh['url']}_${jsonEncode(wh['mappings'])}';
       if (!_processedWebhookHashes.contains(hash)) {
         _processedWebhookHashes.add(hash);
         _triggerWebhook(wh);
@@ -202,7 +202,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     final formData = ref.read(previewFormDataProvider);
 
     try {
-      debugPrint("Triggering logic webhook: $url");
+      debugPrint('Triggering logic webhook: $url');
 
       var finalUrl = url;
       formData.forEach((key, value) {
@@ -259,7 +259,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         }
       }
     } catch (e) {
-      debugPrint("Webhook failed: $e");
+      debugPrint('Webhook failed: $e');
     }
   }
 
@@ -1942,7 +1942,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                   const SizedBox(height: 4),
                   Text(
                     extensions != null
-                        ? "Allowed: .${extensions.join(', .')}"
+                        ? 'Allowed: .${extensions.join(', .')}'
                         : 'All file types accepted',
                     style: const TextStyle(
                       fontSize: 12,
@@ -2155,8 +2155,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                 ...columns.map((col) {
                   return DataCell(
                     Center(
-                      child: Radio<String>(
-                        value: col,
+                      child: RadioGroup<String>(
                         groupValue: matrixData[row]?.toString(),
                         onChanged: (val) {
                           if (val != null) {
@@ -2169,7 +2168,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                                 .update((s) => {...s, q.id: newData});
                           }
                         },
-                        activeColor: Theme.of(context).primaryColor,
+                        child: Radio<String>(
+                          value: col,
+                          activeColor: Theme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                   );

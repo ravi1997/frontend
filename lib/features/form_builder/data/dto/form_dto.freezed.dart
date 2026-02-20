@@ -16,14 +16,12 @@ T _$identity<T>(T value) => value;
 mixin _$FormDto {
 
 // Handle both 'id' and '_id' from backend
-// ignore: invalid_annotation_target
-@JsonKey(name: 'id', readValue: _readId) String get id; String get title; String get status;// ignore: invalid_annotation_target
+@JsonKey(name: 'id', readValue: _readId) String get id; String get title; String get status;
 @JsonKey(name: 'active_version') String? get activeVersion;// The backend returns a list of version objects under 'versions'
- List<FormVersionDto> get versions;// ignore: invalid_annotation_target
-@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get createdAt;// ignore: invalid_annotation_target
+ List<FormVersionDto> get versions;
+@JsonKey(name: 'created_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get createdAt;
 @JsonKey(name: 'updated_at', fromJson: _dateTimeFromJson, toJson: _dateTimeToJson) DateTime? get updatedAt;// Workflows might be a Map or dynamic
  Map<String, dynamic> get workflows;// Access Policy
-// ignore: invalid_annotation_target
 @JsonKey(name: 'accessPolicy') Map<String, dynamic>? get accessPolicy;
 /// Create a copy of FormDto
 /// with the given fields replaced by the non-null parameter values.

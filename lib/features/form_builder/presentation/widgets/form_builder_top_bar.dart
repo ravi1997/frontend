@@ -114,7 +114,14 @@ class FormBuilderTopBar extends ConsumerWidget {
               );
             },
           ),
-
+          const SizedBox(width: 8),
+          _TopBarActionButton(
+            icon: FontAwesomeIcons.users,
+            label: 'Access',
+            onTap: () {
+              context.push('/forms/$formId/access');
+            },
+          ),
           const SizedBox(width: 8),
           _TopBarActionButton(
             icon: FontAwesomeIcons.eye,

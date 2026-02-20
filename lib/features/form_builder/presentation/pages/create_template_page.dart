@@ -330,7 +330,7 @@ class _CreateTemplatePageState extends ConsumerState<CreateTemplatePage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -349,52 +349,49 @@ class _CreateTemplatePageState extends ConsumerState<CreateTemplatePage> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFE5E7EB)),
                           ),
-                          child: Column(
-                            children: [
-                              RadioListTile<bool>(
-                                title: const Text(
-                                  'Convert from Existing Form',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF111827),
+                          child: RadioGroup<bool>(
+                            groupValue: _buildFromScratch,
+                            onChanged: (val) {
+                              if (val != null)
+                                setState(() => _buildFromScratch = val);
+                            },
+                            child: Column(
+                              children: [
+                                RadioListTile<bool>(
+                                  title: const Text(
+                                    'Convert from Existing Form',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF111827),
+                                    ),
                                   ),
-                                ),
-                                subtitle: const Text(
-                                  'Clone an existing form structure into a new template',
-                                ),
-                                value: false,
-                                groupValue: _buildFromScratch,
-                                activeColor: const Color(0xFF2563EB),
-                                onChanged: (val) {
-                                  if (val != null)
-                                    setState(() => _buildFromScratch = val);
-                                },
-                              ),
-                              const Divider(
-                                height: 1,
-                                indent: 16,
-                                endIndent: 16,
-                              ),
-                              RadioListTile<bool>(
-                                title: const Text(
-                                  'Build Template from Scratch',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF111827),
+                                  subtitle: const Text(
+                                    'Clone an existing form structure into a new template',
                                   ),
+                                  value: false,
+                                  activeColor: const Color(0xFF2563EB),
                                 ),
-                                subtitle: const Text(
-                                  'Start with a blank canvas and create a new master template',
+                                const Divider(
+                                  height: 1,
+                                  indent: 16,
+                                  endIndent: 16,
                                 ),
-                                value: true,
-                                groupValue: _buildFromScratch,
-                                activeColor: const Color(0xFF2563EB),
-                                onChanged: (val) {
-                                  if (val != null)
-                                    setState(() => _buildFromScratch = val);
-                                },
-                              ),
-                            ],
+                                RadioListTile<bool>(
+                                  title: const Text(
+                                    'Build Template from Scratch',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF111827),
+                                    ),
+                                  ),
+                                  subtitle: const Text(
+                                    'Start with a blank canvas and create a new master template',
+                                  ),
+                                  value: true,
+                                  activeColor: const Color(0xFF2563EB),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -423,7 +420,7 @@ class _CreateTemplatePageState extends ConsumerState<CreateTemplatePage> {
                                   color: isSelected
                                       ? const Color(
                                           0xFF2563EB,
-                                        ).withOpacity(0.05)
+                                        ).withValues(alpha: 0.05)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
