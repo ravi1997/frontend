@@ -271,9 +271,8 @@ class ApiService {
     Map<String, dynamic>? metadata,
   }) async {
     final response = await _client.post(
-      ApiEndpoints.submitResponse,
+      ApiEndpoints.submitResponse(formId),
       data: {
-        'form_id': formId,
         'responses': responses,
         if (submittedBy != null) 'submitted_by': submittedBy,
         if (metadata != null) 'metadata': metadata,
@@ -290,9 +289,8 @@ class ApiService {
     String? status,
   }) async {
     final response = await _client.get(
-      ApiEndpoints.listResponses,
+      ApiEndpoints.listResponses(formId!),
       queryParameters: {
-        if (formId != null) 'form_id': formId,
         if (page != null) 'page': page,
         if (limit != null) 'limit': limit,
         if (status != null) 'status': status,
@@ -302,8 +300,13 @@ class ApiService {
   }
 
   /// Get single response by ID
-  Future<Map<String, dynamic>> getResponse(String responseId) async {
-    final response = await _client.get(ApiEndpoints.getResponse(responseId));
+  Future<Map<String, dynamic>> getResponse(
+    String formId,
+    String responseId,
+  ) async {
+    final response = await _client.get(
+      ApiEndpoints.getResponse(formId, responseId),
+    );
     return response.data as Map<String, dynamic>;
   }
 
@@ -316,9 +319,8 @@ class ApiService {
     Map<String, dynamic>? metadata,
   }) async {
     final response = await _client.put(
-      ApiEndpoints.updateResponse(responseId),
+      ApiEndpoints.updateResponse(formId, responseId),
       data: {
-        'form_id': formId,
         'responses': responses,
         if (submittedBy != null) 'submitted_by': submittedBy,
         if (metadata != null) 'metadata': metadata,
@@ -328,8 +330,8 @@ class ApiService {
   }
 
   /// Delete response
-  Future<void> deleteResponse(String responseId) async {
-    await _client.delete(ApiEndpoints.deleteResponse(responseId));
+  Future<void> deleteResponse(String formId, String responseId) async {
+    await _client.delete(ApiEndpoints.deleteResponse(formId, responseId));
   }
 
   /// Export responses
@@ -338,8 +340,7 @@ class ApiService {
     String format = 'json',
   }) async {
     final response = await _client.get(
-      ApiEndpoints.exportResponses,
-      queryParameters: {'form_id': formId, 'format': format},
+      ApiEndpoints.exportResponses(formId, format: format),
     );
     return response.data;
   }
@@ -355,9 +356,8 @@ class ApiService {
     String? endDate,
   }) async {
     final response = await _client.get(
-      ApiEndpoints.getAnalytics,
+      ApiEndpoints.getAnalytics(formId!),
       queryParameters: {
-        if (formId != null) 'form_id': formId,
         if (startDate != null) 'start_date': startDate,
         if (endDate != null) 'end_date': endDate,
       },

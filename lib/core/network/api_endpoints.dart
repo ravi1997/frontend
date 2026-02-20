@@ -4,13 +4,13 @@
 /// organized by feature area for easy maintenance and updates.
 class ApiEndpoints {
   // Base configuration
-  // static const String baseUrl = 'http://localhost:5000/form/api/v1';
-  static const String baseUrl = 'http://192.168.1.91:5000/form/api/v1';
+  // Note: Replace this IP with 10.0.2.2 if testing on Android Emulator,
+  // or use the current host IP '192.168.156.10' for physical devices.
+  static const String baseUrl = 'http://192.168.156.10:5000/form/api/v1';
 
   /// Base URL for the server root (without the /form/api/v1 prefix).
   /// Use this for endpoints that live outside the /form/api/v1 path, e.g. admin endpoints.
-  // static const String serverBaseUrl = 'http://localhost:5000';
-  static const String serverBaseUrl = 'http://192.168.1.91:5000';
+  static const String serverBaseUrl = 'http://192.168.156.10:5000';
 
   // ============================================================================
   // Admin User Management Endpoints  (prefix: /api/v1/admin/users)
@@ -214,37 +214,41 @@ class ApiEndpoints {
   ///   "metadata": {...}
   /// }
   /// Returns: { "id": string, "submission_id": string, ... }
-  static const String submitResponse = '/responses';
+  static String submitResponse(String formId) => '/forms/$formId/responses';
 
   /// GET - List responses for a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?form_id=string&page=int&limit=int&status=string
   /// Returns: [{ "id": string, "form_id": string, "responses": {...}, ... }]
-  static const String listResponses = '/responses';
+  static String listResponses(String formId) => '/forms/$formId/responses';
 
   /// GET - Get single response by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "form_id": string, "responses": {...}, ... }
-  static String getResponse(String responseId) => '/responses/$responseId';
-  static String getResponseHistory(String responseId) =>
-      '/responses/$responseId/history';
+  static String getResponse(String formId, String responseId) =>
+      '/forms/$formId/responses/$responseId';
+  static String getResponseHistory(String formId, String responseId) =>
+      '/forms/$formId/responses/$responseId/history';
 
   /// PUT - Update response
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: Same as submitResponse
   /// Returns: { "id": string, "message": string, ... }
-  static String updateResponse(String responseId) => '/responses/$responseId';
+  static String updateResponse(String formId, String responseId) =>
+      '/forms/$formId/responses/$responseId';
 
   /// DELETE - Delete response
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
-  static String deleteResponse(String responseId) => '/responses/$responseId';
+  static String deleteResponse(String formId, String responseId) =>
+      '/forms/$formId/responses/$responseId';
 
   /// GET - Export responses
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?form_id=string&format=csv|json|excel
   /// Returns: File download or JSON data
-  static const String exportResponses = '/responses/export';
+  static String exportResponses(String formId, {String format = 'csv'}) =>
+      '/forms/$formId/export/$format';
 
   // ============================================================================
   // Analytics Endpoints
@@ -254,7 +258,7 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?form_id=string&start_date=string&end_date=string
   /// Returns: { "total_responses": int, "completion_rate": float, ... }
-  static const String getAnalytics = '/analytics';
+  static String getAnalytics(String formId) => '/forms/$formId/analytics';
 
   /// GET - Get dashboard statistics
   /// Headers: { "Authorization": "Bearer {token}" }
