@@ -186,7 +186,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -313,9 +313,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               icon: Icons.lock_outline,
               obscureText: _obscurePassword,
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Password is required';
-                if (value.length < 8) return 'Min 8 characters';
+                }
+                if (value.length < 8) {
+                  return 'Min 8 characters';
+                }
                 return null;
               },
               suffixIcon: IconButton(
@@ -336,8 +339,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               icon: Icons.lock_outline,
               obscureText: _obscureConfirmPassword,
               validator: (value) {
-                if (value != _passwordController.text)
+                if (value != _passwordController.text) {
                   return 'Passwords do not match';
+                }
                 return null;
               },
               suffixIcon: IconButton(

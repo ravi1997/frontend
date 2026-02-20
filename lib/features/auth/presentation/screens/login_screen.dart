@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../controllers/auth_controller.dart';
 import '../../../../core/widgets/snackbar_service.dart';
 import '../widgets/auth_background.dart';
@@ -94,6 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   void initState() {
     super.initState();
+    _loadCredentials();
     _tabAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 220),
@@ -111,6 +113,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _phoneController.dispose();
     _tabAnimController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadCredentials() async {
+    final box = await Hive.openBox('credentials_box');
+    final rememberMe = box.get('remember_me', defaultValue: false);
+    if (rememberMe) {
+      if (mounted) {
+        setState(() {
+          _emailController.text = box.get('email', defaultValue: '');
+          _passwordController.text = box.get('password', defaultValue: '');
+          _rememberMe = rememberMe;
+        });
+      }
+    }
   }
 
   void _switchTab(bool toEmail) {
@@ -230,6 +246,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
+      final box = await Hive.openBox('credentials_box');
+      if (_rememberMe) {
+        await box.put('email', _emailController.text);
+        await box.put('password', _passwordController.text);
+        await box.put('remember_me', true);
+      } else {
+        await box.delete('email');
+        await box.delete('password');
+        await box.put('remember_me', false);
+      }
+
       final notifier = ref.read(authControllerProvider.notifier);
       if (_isEmailTab) {
         notifier.login(_emailController.text, _passwordController.text);
@@ -639,12 +666,14 @@ class _LoginCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(
                           _AuthTokens.radiusSm,
                         ),
-                        child: Padding(
+                        child: Container(
+                          color: Colors.transparent,
                           padding: const EdgeInsets.symmetric(
                             vertical: 4,
                             horizontal: 2,
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
@@ -750,16 +779,8 @@ class _LoginCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _SocialButton(
-                        icon: FontAwesomeIcons.google,
-                        label: 'Google',
-                        onTap: () {},
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _SocialButton(
-                        icon: FontAwesomeIcons.apple,
-                        label: 'Apple',
+                        icon: FontAwesomeIcons.building,
+                        label: 'Login with AIIMS SSO',
                         onTap: () {},
                       ),
                     ),
