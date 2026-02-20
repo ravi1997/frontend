@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/features/auth/domain/entities/user.dart';
 import '../controllers/user_management_controller.dart';
+import '../../data/repositories/user_management_repository_impl.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public helper to open the panel
@@ -822,7 +823,7 @@ class _TimelineEvent extends StatelessWidget {
       ];
       return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
-      return iso ?? '';
+      return iso;
     }
   }
 
@@ -1323,8 +1324,7 @@ class _Row extends StatelessWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: valueColor ?? const Color(0xFF111827),
-                      fontFamily: 'monospace',
-                    ),
+                    ).copyWith(fontFamily: 'monospace'),
                   )
                 : Text(
                     value,

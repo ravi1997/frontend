@@ -15,11 +15,8 @@ import '../../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../../features/form_builder/presentation/pages/translator_page.dart';
 import '../../features/form_builder/presentation/pages/version_history_page.dart';
 import '../../features/form_builder/presentation/pages/workflow_builder_page.dart';
-import '../../features/form_builder/presentation/pages/template_library_page.dart';
-import '../../features/form_builder/presentation/pages/create_template_page.dart';
-import '../../features/analytics/presentation/pages/advanced_analytics_page.dart';
-import '../../features/integrations/presentation/pages/integrations_page.dart';
 import '../../features/user_management/presentation/pages/user_management_page.dart';
+import '../../features/backend_settings/presentation/pages/backend_settings_page.dart';
 
 part 'app_router.g.dart';
 
@@ -57,7 +54,11 @@ Raw<GoRouter> appRouter(Ref ref) {
       if (isAuth) {
         final user = authState.value!;
         final isAdminOnly = state.matchedLocation == '/user-management';
+        final isSuperAdminOnly = state.matchedLocation == '/backend-settings';
         if (isAdminOnly && !user.isAdmin) {
+          return '/';
+        }
+        if (isSuperAdminOnly && !user.roles.contains('superadmin')) {
           return '/';
         }
       }
@@ -142,24 +143,12 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        path: '/templates',
-        builder: (context, state) => const TemplateLibraryPage(),
-      ),
-      GoRoute(
-        path: '/templates/create',
-        builder: (context, state) => const CreateTemplatePage(),
-      ),
-      GoRoute(
-        path: '/analytics/advanced',
-        builder: (context, state) => const AdvancedAnalyticsPage(),
-      ),
-      GoRoute(
-        path: '/integrations',
-        builder: (context, state) => const IntegrationsPage(),
-      ),
-      GoRoute(
         path: '/user-management',
         builder: (context, state) => const UserManagementPage(),
+      ),
+      GoRoute(
+        path: '/backend-settings',
+        builder: (context, state) => const BackendSettingsPage(),
       ),
     ],
   );

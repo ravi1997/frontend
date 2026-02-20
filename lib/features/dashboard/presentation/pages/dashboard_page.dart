@@ -446,29 +446,6 @@ class _ActionButtons extends ConsumerWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        if (user.isAdmin)
-          ElevatedButton.icon(
-            onPressed: () => context.push('/templates/create'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(
-                0xFF10B981,
-              ), // Green for admin action
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-            icon: const Icon(Icons.post_add, size: 20),
-            label: Text(
-              'Create Template',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ElevatedButton.icon(
           onPressed: () {},
           style: ElevatedButton.styleFrom(
@@ -486,40 +463,7 @@ class _ActionButtons extends ConsumerWidget {
             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
-        OutlinedButton.icon(
-          onPressed: () => context.go('/templates'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF374151),
-            backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFD1D5DB)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          icon: const Icon(Icons.dashboard_outlined, size: 20),
-          label: Text(
-            'Template Library',
-            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-        ),
-        OutlinedButton.icon(
-          onPressed: () => context.go('/analytics/advanced'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF374151),
-            backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFD1D5DB)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          icon: const Icon(Icons.analytics_outlined, size: 20),
-          label: Text(
-            'Advanced Analytics',
-            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-        ),
+
         if (user.isAdmin)
           OutlinedButton.icon(
             onPressed: () => context.go('/user-management'),
@@ -541,23 +485,28 @@ class _ActionButtons extends ConsumerWidget {
               ),
             ),
           ),
-        OutlinedButton.icon(
-          onPressed: () => context.go('/integrations'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF374151),
-            backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFD1D5DB)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        if (user.roles.contains('superadmin'))
+          ElevatedButton.icon(
+            onPressed: () => context.go('/backend-settings'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            icon: const Icon(Icons.tune, size: 20),
+            label: Text(
+              'Backend Settings',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          icon: const Icon(Icons.integration_instructions_outlined, size: 20),
-          label: Text(
-            'Integrations',
-            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-        ),
+
         OutlinedButton.icon(
           onPressed: () {},
           style: OutlinedButton.styleFrom(

@@ -60,6 +60,22 @@ class ApiEndpoints {
       '$serverBaseUrl/api/v1/admin/users/$userId/activity';
 
   // ============================================================================
+  // System Settings Endpoints  (prefix: /api/v1/admin/system-settings)
+  // ============================================================================
+
+  /// GET - Get current system settings (superadmin only)
+  static const String systemSettingsGet =
+      '$serverBaseUrl/api/v1/admin/system-settings/';
+
+  /// PATCH - Update system settings (superadmin only)
+  static const String systemSettingsPatch =
+      '$serverBaseUrl/api/v1/admin/system-settings/';
+
+  /// POST - Reset settings to factory defaults (superadmin only)
+  static const String systemSettingsReset =
+      '$serverBaseUrl/api/v1/admin/system-settings/reset';
+
+  // ============================================================================
   // Authentication Endpoints
   // ============================================================================
 

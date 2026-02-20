@@ -838,229 +838,260 @@ class _UserRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      child: Row(
-        children: [
-          // ── Avatar + Name + Email ──────────────────────────────────
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: _avatarColor.withValues(alpha: 0.12),
-                      child: Text(
-                        user.username[0].toUpperCase(),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: _avatarColor,
-                        ),
-                      ),
-                    ),
-                    if (user.isAdmin)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.verified,
-                            size: 12,
-                            color: Color(0xFF2563EB),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      onTap: () => showUserDetailPanel(context, user),
+      hoverColor: const Color(0xFFF9FAFB),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        child: Row(
+          children: [
+            // ── Avatar + Name + Email ──────────────────────────────────
+            Expanded(
+              flex: 3,
+              child: Row(
+                children: [
+                  Stack(
                     children: [
-                      Text(
-                        user.username,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: _avatarColor.withValues(alpha: 0.12),
+                        child: Text(
+                          user.username[0].toUpperCase(),
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: _avatarColor,
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      Text(
-                        user.email,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: const Color(0xFF6B7280),
+                      if (user.isAdmin)
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.verified,
+                              size: 12,
+                              color: Color(0xFF2563EB),
+                            ),
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Department ───────────────────────────────────────────────
-          Expanded(
-            flex: 2,
-            child: Text(
-              user.department?.isNotEmpty == true ? user.department! : '—',
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: user.department?.isNotEmpty == true
-                    ? const Color(0xFF374151)
-                    : const Color(0xFF9CA3AF),
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-          // ── Roles ────────────────────────────────────────────────────
-          Expanded(
-            flex: 2,
-            child: Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: user.roles.take(2).map((role) {
-                final isHighRole = role == 'admin' || role == 'superadmin';
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isHighRole
-                        ? const Color(0xFFEFF6FF)
-                        : const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    role,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: isHighRole
-                          ? const Color(0xFF2563EB)
-                          : const Color(0xFF374151),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          // ── Status Badge ─────────────────────────────────────────────
-          SizedBox(
-            width: 100,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: user.isActive
-                    ? const Color(0xFFD1FAE5)
-                    : const Color(0xFFFEE2E2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: user.isActive
-                          ? const Color(0xFF059669)
-                          : const Color(0xFFDC2626),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    user.isActive ? 'Active' : 'Inactive',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: user.isActive
-                          ? const Color(0xFF065F46)
-                          : const Color(0xFF991B1B),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.username,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          user.email,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF6B7280),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // ── Action Buttons ───────────────────────────────────────────
-          SizedBox(
-            width: 120,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Edit Department
-                Tooltip(
-                  message: 'Update Department',
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => _showDepartmentDialog(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: const Icon(
-                        Icons.business_outlined,
-                        size: 16,
-                        color: Color(0xFF6B7280),
+            // ── Department ───────────────────────────────────────────────
+            Expanded(
+              flex: 2,
+              child: Text(
+                user.department?.isNotEmpty == true ? user.department! : '—',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: user.department?.isNotEmpty == true
+                      ? const Color(0xFF374151)
+                      : const Color(0xFF9CA3AF),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // ── Roles ────────────────────────────────────────────────────
+            Expanded(
+              flex: 2,
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: user.roles.take(2).map((role) {
+                  final isHighRole = role == 'admin' || role == 'superadmin';
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isHighRole
+                          ? const Color(0xFFEFF6FF)
+                          : const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      role,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isHighRole
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFF374151),
                       ),
                     ),
-                  ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+            // ── Status Badge ─────────────────────────────────────────────
+            SizedBox(
+              width: 100,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
                 ),
-                const SizedBox(width: 8),
-                // Toggle Status
-                Tooltip(
-                  message: user.isActive ? 'Deactivate User' : 'Activate User',
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => onToggleStatus(user.id, user.isActive),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: user.isActive
+                      ? const Color(0xFFD1FAE5)
+                      : const Color(0xFFFEE2E2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
                       decoration: BoxDecoration(
                         color: user.isActive
-                            ? const Color(0xFFFEF2F2)
-                            : const Color(0xFFF0FDF4),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: user.isActive
-                              ? const Color(0xFFFECACA)
-                              : const Color(0xFFBBF7D0),
+                            ? const Color(0xFF059669)
+                            : const Color(0xFFDC2626),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      user.isActive ? 'Active' : 'Inactive',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: user.isActive
+                            ? const Color(0xFF065F46)
+                            : const Color(0xFF991B1B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Action Buttons ───────────────────────────────────────────
+            SizedBox(
+              width: 160,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // View Details
+                  Tooltip(
+                    message: 'View Full Profile',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => showUserDetailPanel(context, user),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: const Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color: Color(0xFF2563EB),
                         ),
                       ),
-                      child: Icon(
-                        user.isActive
-                            ? Icons.block
-                            : Icons.check_circle_outline,
-                        size: 16,
-                        color: user.isActive
-                            ? const Color(0xFFDC2626)
-                            : const Color(0xFF059669),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Edit Department
+                  Tooltip(
+                    message: 'Update Department',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => _showDepartmentDialog(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: const Icon(
+                          Icons.business_outlined,
+                          size: 16,
+                          color: Color(0xFF6B7280),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  // Toggle Status
+                  Tooltip(
+                    message: user.isActive
+                        ? 'Deactivate User'
+                        : 'Activate User',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => onToggleStatus(user.id, user.isActive),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: user.isActive
+                              ? const Color(0xFFFEF2F2)
+                              : const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: user.isActive
+                                ? const Color(0xFFFECACA)
+                                : const Color(0xFFBBF7D0),
+                          ),
+                        ),
+                        child: Icon(
+                          user.isActive
+                              ? Icons.block
+                              : Icons.check_circle_outline,
+                          size: 16,
+                          color: user.isActive
+                              ? const Color(0xFFDC2626)
+                              : const Color(0xFF059669),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
