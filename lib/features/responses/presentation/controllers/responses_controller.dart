@@ -19,13 +19,17 @@ Future<List<FormResponse>> formResponses(
 }
 
 @riverpod
-Future<FormResponse> responseDetail(Ref ref, String responseId) {
+Future<FormResponse> responseDetail(Ref ref, String formId, String responseId) {
   final repository = ref.watch(responseRepositoryProvider);
-  return repository.getResponseDetail(responseId);
+  return repository.getResponseDetail(formId, responseId);
 }
 
 @riverpod
-Future<List<ResponseHistory>> responseHistory(Ref ref, String responseId) {
+Future<List<ResponseHistory>> responseHistory(
+  Ref ref,
+  String formId,
+  String responseId,
+) {
   final repository = ref.watch(responseRepositoryProvider);
-  return repository.getResponseHistory(responseId);
+  return repository.getResponseHistory(formId, responseId);
 }

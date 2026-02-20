@@ -179,7 +179,8 @@ class ResponseListPage extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
             trailing: const Icon(Icons.chevron_right, color: AppColors.primary),
-            onTap: () => context.push('/responses/${response.id}'),
+            onTap: () =>
+                context.push('/forms/$formId/responses/${response.id}'),
           ),
         );
       },

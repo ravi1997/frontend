@@ -12,13 +12,18 @@ import 'package:frontend/features/responses/domain/entities/response_history.dar
 import 'package:google_fonts/google_fonts.dart';
 
 class ResponseDetailPage extends ConsumerWidget {
+  final String formId;
   final String responseId;
 
-  const ResponseDetailPage({super.key, required this.responseId});
+  const ResponseDetailPage({
+    super.key,
+    required this.formId,
+    required this.responseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final responseAsync = ref.watch(responseDetailProvider(responseId));
+    final responseAsync = ref.watch(responseDetailProvider(formId, responseId));
 
     return DefaultTabController(
       length: 2,
@@ -49,7 +54,7 @@ class ResponseDetailPage extends ConsumerWidget {
           data: (response) => TabBarView(
             children: [
               _buildDetailContent(context, ref, response),
-              _buildHistoryContent(context, ref, response.id),
+              _buildHistoryContent(context, ref, response.formId, response.id),
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -260,7 +265,9 @@ class ResponseDetailPage extends ConsumerWidget {
                   await ref
                       .read(aIControllerProvider.notifier)
                       .analyzeResponse(response.formId, response.id);
-                  ref.invalidate(responseDetailProvider(response.id));
+                  ref.invalidate(
+                    responseDetailProvider(response.formId, response.id),
+                  );
                 } catch (e) {
                   // Error handled by interceptor
                 }
@@ -419,9 +426,10 @@ class ResponseDetailPage extends ConsumerWidget {
   Widget _buildHistoryContent(
     BuildContext context,
     WidgetRef ref,
+    String formId,
     String responseId,
   ) {
-    final historyAsync = ref.watch(responseHistoryProvider(responseId));
+    final historyAsync = ref.watch(responseHistoryProvider(formId, responseId));
 
     return historyAsync.when(
       data: (List<ResponseHistory> historyList) {

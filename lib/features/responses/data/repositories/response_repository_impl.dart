@@ -15,23 +15,28 @@ class ResponseRepositoryImpl implements ResponseRepository {
 
   @override
   Future<List<FormResponse>> getResponsesForForm(String formId) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.listResponses,
-      queryParameters: {'form_id': formId},
-    );
+    final response = await _apiClient.get(ApiEndpoints.listResponses(formId));
     final List<dynamic> data = response.data as List<dynamic>;
     return data.map((json) => FormResponse.fromJson(json)).toList();
   }
 
   @override
-  Future<FormResponse> getResponseDetail(String responseId) async {
-    final response = await _apiClient.get(ApiEndpoints.getResponse(responseId));
+  Future<FormResponse> getResponseDetail(
+    String formId,
+    String responseId,
+  ) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.getResponse(formId, responseId),
+    );
     return FormResponse.fromJson(response.data as Map<String, dynamic>);
   }
 
   @override
   Future<void> submitResponse(FormResponse response) async {
-    await _apiClient.post(ApiEndpoints.submitResponse, data: response.toJson());
+    await _apiClient.post(
+      ApiEndpoints.submitResponse(response.formId),
+      data: response.toJson(),
+    );
   }
 
   @override
@@ -45,9 +50,12 @@ class ResponseRepositoryImpl implements ResponseRepository {
   }
 
   @override
-  Future<List<ResponseHistory>> getResponseHistory(String responseId) async {
+  Future<List<ResponseHistory>> getResponseHistory(
+    String formId,
+    String responseId,
+  ) async {
     final response = await _apiClient.get(
-      ApiEndpoints.getResponseHistory(responseId),
+      ApiEndpoints.getResponseHistory(formId, responseId),
     );
     final List<dynamic> data = response.data as List<dynamic>;
     return data.map((json) => ResponseHistory.fromJson(json)).toList();
