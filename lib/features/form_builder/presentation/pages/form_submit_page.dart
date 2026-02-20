@@ -1264,7 +1264,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(submitFormDataProvider);
         return DropdownButtonFormField<String>(
-          value: formData[q.id]?.toString(),
+          initialValue: formData[q.id]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {

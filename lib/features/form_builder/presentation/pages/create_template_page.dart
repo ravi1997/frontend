@@ -99,7 +99,9 @@ class _CreateTemplatePageState extends ConsumerState<CreateTemplatePage> {
   }
 
   Future<void> _saveTemplate() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     if (!_buildFromScratch && _selectedForm == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

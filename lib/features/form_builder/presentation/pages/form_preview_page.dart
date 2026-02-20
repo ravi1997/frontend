@@ -156,7 +156,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     // 1. Handle value overrides (autofill)
     if (result.valueOverrides.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         bool changed = false;
         final currentData = ref.read(previewFormDataProvider);
         final newData = Map<String, dynamic>.from(currentData);
@@ -177,7 +179,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     // 2. Handle option overrides (cascading)
     if (result.optionOverrides.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setState(() {
           _dynamicOptions.addAll(result.optionOverrides);
         });
@@ -404,7 +408,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 final visibleQuestions = section.questions
                     .where((q) => visibilityMap[q.id] ?? true)
                     .toList();
-                if (visibleQuestions.isEmpty) return const SizedBox.shrink();
+                if (visibleQuestions.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,7 +428,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     ...visibleQuestions.map((q) {
                       final val = formData[q.id];
                       String displayVal = val?.toString() ?? '—';
-                      if (val is List) displayVal = val.join(', ');
+                      if (val is List) {
+                        displayVal = val.join(', ');
+                      }
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
@@ -523,7 +531,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         int crossAxisCount = 1;
-        if (widget.form.layout == FormLayoutType.twoColumns) crossAxisCount = 2;
+        if (widget.form.layout == FormLayoutType.twoColumns) {
+          crossAxisCount = 2;
+        }
         if (widget.form.layout == FormLayoutType.threeColumns) {
           crossAxisCount = 3;
         }
@@ -566,7 +576,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     if (_currentStep >= visibleSections.length) {
       _currentStep = visibleSections.length - 1;
     }
-    if (_currentStep < 0) _currentStep = 0;
+    if (_currentStep < 0) {
+      _currentStep = 0;
+    }
 
     final currentSection = visibleSections.isEmpty
         ? null
@@ -576,7 +588,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
       AppColors.primary,
     );
 
-    if (currentSection == null) return _buildEmptyState();
+    if (currentSection == null) {
+      return _buildEmptyState();
+    }
 
     return Column(
       children: [
@@ -916,11 +930,17 @@ class _PreviewSectionWidget extends ConsumerWidget {
               }
             } else {
               int span = q.style.columnSpan;
-              if (span > crossAxisCount) span = crossAxisCount;
-              if (span < 1) span = 1;
+              if (span > crossAxisCount) {
+                span = crossAxisCount;
+              }
+              if (span < 1) {
+                span = 1;
+              }
               width = (itemWidth * span) + (questionSpacing * (span - 1));
             }
-            if (width > availableWidth) width = availableWidth;
+            if (width > availableWidth) {
+              width = availableWidth;
+            }
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 300),
@@ -1173,16 +1193,18 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
       suffixIcon: _buildSuffix(context, q, textStyle),
     );
 
-    final validator = (String? val) => PreviewUtils.validateField(
-      val,
-      isRequired: q.isRequired,
-      regex: q.validationRegex,
-      minLength: q.minLength,
-      maxLength: q.maxLength,
-      minValue: q.minValue?.toDouble(),
-      maxValue: q.maxValue?.toDouble(),
-      customError: q.customErrorMessage,
-    );
+    String? validator(String? val) {
+      return PreviewUtils.validateField(
+        val,
+        isRequired: q.isRequired,
+        regex: q.validationRegex,
+        minLength: q.minLength,
+        maxLength: q.maxLength,
+        minValue: q.minValue?.toDouble(),
+        maxValue: q.maxValue?.toDouble(),
+        customError: q.customErrorMessage,
+      );
+    }
 
     switch (q.type) {
       case QuestionType.shortText:
@@ -1236,7 +1258,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(previewFormDataProvider);
         return DropdownButtonFormField<String>(
-          value: formData[q.id]?.toString(),
+          initialValue: formData[q.id]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {
@@ -1288,8 +1310,9 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                           : (currentValue as List?)?.contains(opt.value) ??
                                 false;
                       final imageUrl = opt.description ?? '';
-                      if (!imageUrl.startsWith('http'))
+                      if (!imageUrl.startsWith('http')) {
                         return const SizedBox.shrink();
+                      }
 
                       return GestureDetector(
                         onTap: () {
