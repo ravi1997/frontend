@@ -18,6 +18,9 @@ import '../../features/form_builder/presentation/pages/workflow_builder_page.dar
 import '../../features/form_builder/presentation/pages/create_template_page.dart';
 import '../../features/user_management/presentation/pages/user_management_page.dart';
 import '../../features/backend_settings/presentation/pages/backend_settings_page.dart';
+import '../../features/form_builder/presentation/pages/form_submit_page.dart';
+import '../../features/form_builder/presentation/pages/form_access_page.dart';
+import '../../features/qr_scanner/presentation/pages/qr_scanner_page.dart';
 
 part 'app_router.g.dart';
 
@@ -40,9 +43,10 @@ Raw<GoRouter> appRouter(Ref ref) {
       final isVerifyingOtp = state.matchedLocation == '/verify-otp';
       final isAuthPath =
           isLoggingIn || isRegistering || isForgotPassword || isVerifyingOtp;
+      final isPublicPath = state.matchedLocation.startsWith('/f/');
 
       // If not authenticated and trying to access protected route, redirect to login
-      if (!isAuth && !isAuthPath) {
+      if (!isAuth && !isAuthPath && !isPublicPath) {
         return '/login';
       }
 
@@ -100,10 +104,11 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        path: '/responses/:responseId',
+        path: '/forms/:formId/responses/:responseId',
         builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
           final responseId = state.pathParameters['responseId']!;
-          return ResponseDetailPage(responseId: responseId);
+          return ResponseDetailPage(formId: formId, responseId: responseId);
         },
       ),
       GoRoute(
@@ -111,6 +116,13 @@ Raw<GoRouter> appRouter(Ref ref) {
         builder: (context, state) {
           final form = state.extra as BuilderForm;
           return FormPreviewPage(form: form);
+        },
+      ),
+      GoRoute(
+        path: '/f/:formId',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          return FormSubmitPage(formId: formId);
         },
       ),
       GoRoute(
@@ -136,6 +148,13 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
+        path: '/forms/:formId/access',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          return FormAccessPage(formId: formId);
+        },
+      ),
+      GoRoute(
         path: '/forms/:formId/workflows',
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
@@ -150,6 +169,10 @@ Raw<GoRouter> appRouter(Ref ref) {
       GoRoute(
         path: '/user-management',
         builder: (context, state) => const UserManagementPage(),
+      ),
+      GoRoute(
+        path: '/scan-qr',
+        builder: (context, state) => const QrScannerPage(),
       ),
       GoRoute(
         path: '/backend-settings',
