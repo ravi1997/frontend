@@ -1201,7 +1201,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
       suffixIcon: _buildSuffix(context, q, textStyle),
     );
 
-    final validator = (String? val) => PreviewUtils.validateField(
+    String? validator(String? val) => PreviewUtils.validateField(
       val,
       isRequired: q.isRequired,
       regex: q.validationRegex,

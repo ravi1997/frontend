@@ -352,8 +352,9 @@ class _CreateTemplatePageState extends ConsumerState<CreateTemplatePage> {
                           child: RadioGroup<bool>(
                             groupValue: _buildFromScratch,
                             onChanged: (val) {
-                              if (val != null)
+                              if (val != null) {
                                 setState(() => _buildFromScratch = val);
+                              }
                             },
                             child: Column(
                               children: [
