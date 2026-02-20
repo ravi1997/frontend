@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id; String get username; String get email; List<String> get roles;@JsonKey(name: 'user_type') String get userType;@JsonKey(name: 'employee_id') String? get employeeId;@JsonKey(name: 'mobile') String? get mobile;
+ String get id; String get username; String get email; List<String> get roles;@JsonKey(name: 'user_type') String get userType;@JsonKey(name: 'employee_id') String? get employeeId;@JsonKey(name: 'mobile') String? get mobile; String? get department;@JsonKey(name: 'is_active') bool get isActive;// Extra fields returned by the admin detail endpoint
+@JsonKey(name: 'is_admin') bool get isAdminFlag;@JsonKey(name: 'is_email_verified') bool get isEmailVerified;@JsonKey(name: 'failed_login_attempts') int get failedLoginAttempts;@JsonKey(name: 'otp_resend_count') int get otpResendCount;@JsonKey(name: 'lock_until') String? get lockUntil;@JsonKey(name: 'last_login') String? get lastLogin;@JsonKey(name: 'created_at') String? get createdAt;@JsonKey(name: 'updated_at') String? get updatedAt;@JsonKey(name: 'password_expiration') String? get passwordExpiration;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&const DeepCollectionEquality().equals(other.roles, roles)&&(identical(other.userType, userType) || other.userType == userType)&&(identical(other.employeeId, employeeId) || other.employeeId == employeeId)&&(identical(other.mobile, mobile) || other.mobile == mobile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&const DeepCollectionEquality().equals(other.roles, roles)&&(identical(other.userType, userType) || other.userType == userType)&&(identical(other.employeeId, employeeId) || other.employeeId == employeeId)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.department, department) || other.department == department)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isAdminFlag, isAdminFlag) || other.isAdminFlag == isAdminFlag)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.failedLoginAttempts, failedLoginAttempts) || other.failedLoginAttempts == failedLoginAttempts)&&(identical(other.otpResendCount, otpResendCount) || other.otpResendCount == otpResendCount)&&(identical(other.lockUntil, lockUntil) || other.lockUntil == lockUntil)&&(identical(other.lastLogin, lastLogin) || other.lastLogin == lastLogin)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.passwordExpiration, passwordExpiration) || other.passwordExpiration == passwordExpiration));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,email,const DeepCollectionEquality().hash(roles),userType,employeeId,mobile);
+int get hashCode => Object.hash(runtimeType,id,username,email,const DeepCollectionEquality().hash(roles),userType,employeeId,mobile,department,isActive,isAdminFlag,isEmailVerified,failedLoginAttempts,otpResendCount,lockUntil,lastLogin,createdAt,updatedAt,passwordExpiration);
 
 @override
 String toString() {
-  return 'User(id: $id, username: $username, email: $email, roles: $roles, userType: $userType, employeeId: $employeeId, mobile: $mobile)';
+  return 'User(id: $id, username: $username, email: $email, roles: $roles, userType: $userType, employeeId: $employeeId, mobile: $mobile, department: $department, isActive: $isActive, isAdminFlag: $isAdminFlag, isEmailVerified: $isEmailVerified, failedLoginAttempts: $failedLoginAttempts, otpResendCount: $otpResendCount, lockUntil: $lockUntil, lastLogin: $lastLogin, createdAt: $createdAt, updatedAt: $updatedAt, passwordExpiration: $passwordExpiration)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile
+ String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile, String? department,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'is_admin') bool isAdminFlag,@JsonKey(name: 'is_email_verified') bool isEmailVerified,@JsonKey(name: 'failed_login_attempts') int failedLoginAttempts,@JsonKey(name: 'otp_resend_count') int otpResendCount,@JsonKey(name: 'lock_until') String? lockUntil,@JsonKey(name: 'last_login') String? lastLogin,@JsonKey(name: 'created_at') String? createdAt,@JsonKey(name: 'updated_at') String? updatedAt,@JsonKey(name: 'password_expiration') String? passwordExpiration
 });
 
 
@@ -65,7 +66,7 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? email = null,Object? roles = null,Object? userType = null,Object? employeeId = freezed,Object? mobile = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? email = null,Object? roles = null,Object? userType = null,Object? employeeId = freezed,Object? mobile = freezed,Object? department = freezed,Object? isActive = null,Object? isAdminFlag = null,Object? isEmailVerified = null,Object? failedLoginAttempts = null,Object? otpResendCount = null,Object? lockUntil = freezed,Object? lastLogin = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? passwordExpiration = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -74,6 +75,17 @@ as String,roles: null == roles ? _self.roles : roles // ignore: cast_nullable_to
 as List<String>,userType: null == userType ? _self.userType : userType // ignore: cast_nullable_to_non_nullable
 as String,employeeId: freezed == employeeId ? _self.employeeId : employeeId // ignore: cast_nullable_to_non_nullable
 as String?,mobile: freezed == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
+as String?,department: freezed == department ? _self.department : department // ignore: cast_nullable_to_non_nullable
+as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,isAdminFlag: null == isAdminFlag ? _self.isAdminFlag : isAdminFlag // ignore: cast_nullable_to_non_nullable
+as bool,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,failedLoginAttempts: null == failedLoginAttempts ? _self.failedLoginAttempts : failedLoginAttempts // ignore: cast_nullable_to_non_nullable
+as int,otpResendCount: null == otpResendCount ? _self.otpResendCount : otpResendCount // ignore: cast_nullable_to_non_nullable
+as int,lockUntil: freezed == lockUntil ? _self.lockUntil : lockUntil // ignore: cast_nullable_to_non_nullable
+as String?,lastLogin: freezed == lastLogin ? _self.lastLogin : lastLogin // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as String?,passwordExpiration: freezed == passwordExpiration ? _self.passwordExpiration : passwordExpiration // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -159,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile,  String? department, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'is_admin')  bool isAdminFlag, @JsonKey(name: 'is_email_verified')  bool isEmailVerified, @JsonKey(name: 'failed_login_attempts')  int failedLoginAttempts, @JsonKey(name: 'otp_resend_count')  int otpResendCount, @JsonKey(name: 'lock_until')  String? lockUntil, @JsonKey(name: 'last_login')  String? lastLogin, @JsonKey(name: 'created_at')  String? createdAt, @JsonKey(name: 'updated_at')  String? updatedAt, @JsonKey(name: 'password_expiration')  String? passwordExpiration)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
+return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile,_that.department,_that.isActive,_that.isAdminFlag,_that.isEmailVerified,_that.failedLoginAttempts,_that.otpResendCount,_that.lockUntil,_that.lastLogin,_that.createdAt,_that.updatedAt,_that.passwordExpiration);case _:
   return orElse();
 
 }
@@ -180,10 +192,10 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile,  String? department, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'is_admin')  bool isAdminFlag, @JsonKey(name: 'is_email_verified')  bool isEmailVerified, @JsonKey(name: 'failed_login_attempts')  int failedLoginAttempts, @JsonKey(name: 'otp_resend_count')  int otpResendCount, @JsonKey(name: 'lock_until')  String? lockUntil, @JsonKey(name: 'last_login')  String? lastLogin, @JsonKey(name: 'created_at')  String? createdAt, @JsonKey(name: 'updated_at')  String? updatedAt, @JsonKey(name: 'password_expiration')  String? passwordExpiration)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
+return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile,_that.department,_that.isActive,_that.isAdminFlag,_that.isEmailVerified,_that.failedLoginAttempts,_that.otpResendCount,_that.lockUntil,_that.lastLogin,_that.createdAt,_that.updatedAt,_that.passwordExpiration);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +212,10 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String username,  String email,  List<String> roles, @JsonKey(name: 'user_type')  String userType, @JsonKey(name: 'employee_id')  String? employeeId, @JsonKey(name: 'mobile')  String? mobile,  String? department, @JsonKey(name: 'is_active')  bool isActive, @JsonKey(name: 'is_admin')  bool isAdminFlag, @JsonKey(name: 'is_email_verified')  bool isEmailVerified, @JsonKey(name: 'failed_login_attempts')  int failedLoginAttempts, @JsonKey(name: 'otp_resend_count')  int otpResendCount, @JsonKey(name: 'lock_until')  String? lockUntil, @JsonKey(name: 'last_login')  String? lastLogin, @JsonKey(name: 'created_at')  String? createdAt, @JsonKey(name: 'updated_at')  String? updatedAt, @JsonKey(name: 'password_expiration')  String? passwordExpiration)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile);case _:
+return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_that.employeeId,_that.mobile,_that.department,_that.isActive,_that.isAdminFlag,_that.isEmailVerified,_that.failedLoginAttempts,_that.otpResendCount,_that.lockUntil,_that.lastLogin,_that.createdAt,_that.updatedAt,_that.passwordExpiration);case _:
   return null;
 
 }
@@ -215,7 +227,7 @@ return $default(_that.id,_that.username,_that.email,_that.roles,_that.userType,_
 @JsonSerializable()
 
 class _User extends User {
-  const _User({required this.id, required this.username, required this.email, final  List<String> roles = const [], @JsonKey(name: 'user_type') required this.userType, @JsonKey(name: 'employee_id') this.employeeId, @JsonKey(name: 'mobile') this.mobile}): _roles = roles,super._();
+  const _User({required this.id, required this.username, required this.email, final  List<String> roles = const [], @JsonKey(name: 'user_type') required this.userType, @JsonKey(name: 'employee_id') this.employeeId, @JsonKey(name: 'mobile') this.mobile, this.department, @JsonKey(name: 'is_active') this.isActive = true, @JsonKey(name: 'is_admin') this.isAdminFlag = false, @JsonKey(name: 'is_email_verified') this.isEmailVerified = false, @JsonKey(name: 'failed_login_attempts') this.failedLoginAttempts = 0, @JsonKey(name: 'otp_resend_count') this.otpResendCount = 0, @JsonKey(name: 'lock_until') this.lockUntil, @JsonKey(name: 'last_login') this.lastLogin, @JsonKey(name: 'created_at') this.createdAt, @JsonKey(name: 'updated_at') this.updatedAt, @JsonKey(name: 'password_expiration') this.passwordExpiration}): _roles = roles,super._();
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -231,6 +243,18 @@ class _User extends User {
 @override@JsonKey(name: 'user_type') final  String userType;
 @override@JsonKey(name: 'employee_id') final  String? employeeId;
 @override@JsonKey(name: 'mobile') final  String? mobile;
+@override final  String? department;
+@override@JsonKey(name: 'is_active') final  bool isActive;
+// Extra fields returned by the admin detail endpoint
+@override@JsonKey(name: 'is_admin') final  bool isAdminFlag;
+@override@JsonKey(name: 'is_email_verified') final  bool isEmailVerified;
+@override@JsonKey(name: 'failed_login_attempts') final  int failedLoginAttempts;
+@override@JsonKey(name: 'otp_resend_count') final  int otpResendCount;
+@override@JsonKey(name: 'lock_until') final  String? lockUntil;
+@override@JsonKey(name: 'last_login') final  String? lastLogin;
+@override@JsonKey(name: 'created_at') final  String? createdAt;
+@override@JsonKey(name: 'updated_at') final  String? updatedAt;
+@override@JsonKey(name: 'password_expiration') final  String? passwordExpiration;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +269,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&const DeepCollectionEquality().equals(other._roles, _roles)&&(identical(other.userType, userType) || other.userType == userType)&&(identical(other.employeeId, employeeId) || other.employeeId == employeeId)&&(identical(other.mobile, mobile) || other.mobile == mobile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.email, email) || other.email == email)&&const DeepCollectionEquality().equals(other._roles, _roles)&&(identical(other.userType, userType) || other.userType == userType)&&(identical(other.employeeId, employeeId) || other.employeeId == employeeId)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.department, department) || other.department == department)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isAdminFlag, isAdminFlag) || other.isAdminFlag == isAdminFlag)&&(identical(other.isEmailVerified, isEmailVerified) || other.isEmailVerified == isEmailVerified)&&(identical(other.failedLoginAttempts, failedLoginAttempts) || other.failedLoginAttempts == failedLoginAttempts)&&(identical(other.otpResendCount, otpResendCount) || other.otpResendCount == otpResendCount)&&(identical(other.lockUntil, lockUntil) || other.lockUntil == lockUntil)&&(identical(other.lastLogin, lastLogin) || other.lastLogin == lastLogin)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.passwordExpiration, passwordExpiration) || other.passwordExpiration == passwordExpiration));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,username,email,const DeepCollectionEquality().hash(_roles),userType,employeeId,mobile);
+int get hashCode => Object.hash(runtimeType,id,username,email,const DeepCollectionEquality().hash(_roles),userType,employeeId,mobile,department,isActive,isAdminFlag,isEmailVerified,failedLoginAttempts,otpResendCount,lockUntil,lastLogin,createdAt,updatedAt,passwordExpiration);
 
 @override
 String toString() {
-  return 'User(id: $id, username: $username, email: $email, roles: $roles, userType: $userType, employeeId: $employeeId, mobile: $mobile)';
+  return 'User(id: $id, username: $username, email: $email, roles: $roles, userType: $userType, employeeId: $employeeId, mobile: $mobile, department: $department, isActive: $isActive, isAdminFlag: $isAdminFlag, isEmailVerified: $isEmailVerified, failedLoginAttempts: $failedLoginAttempts, otpResendCount: $otpResendCount, lockUntil: $lockUntil, lastLogin: $lastLogin, createdAt: $createdAt, updatedAt: $updatedAt, passwordExpiration: $passwordExpiration)';
 }
 
 
@@ -265,7 +289,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile
+ String id, String username, String email, List<String> roles,@JsonKey(name: 'user_type') String userType,@JsonKey(name: 'employee_id') String? employeeId,@JsonKey(name: 'mobile') String? mobile, String? department,@JsonKey(name: 'is_active') bool isActive,@JsonKey(name: 'is_admin') bool isAdminFlag,@JsonKey(name: 'is_email_verified') bool isEmailVerified,@JsonKey(name: 'failed_login_attempts') int failedLoginAttempts,@JsonKey(name: 'otp_resend_count') int otpResendCount,@JsonKey(name: 'lock_until') String? lockUntil,@JsonKey(name: 'last_login') String? lastLogin,@JsonKey(name: 'created_at') String? createdAt,@JsonKey(name: 'updated_at') String? updatedAt,@JsonKey(name: 'password_expiration') String? passwordExpiration
 });
 
 
@@ -282,7 +306,7 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? email = null,Object? roles = null,Object? userType = null,Object? employeeId = freezed,Object? mobile = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? email = null,Object? roles = null,Object? userType = null,Object? employeeId = freezed,Object? mobile = freezed,Object? department = freezed,Object? isActive = null,Object? isAdminFlag = null,Object? isEmailVerified = null,Object? failedLoginAttempts = null,Object? otpResendCount = null,Object? lockUntil = freezed,Object? lastLogin = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? passwordExpiration = freezed,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -291,6 +315,17 @@ as String,roles: null == roles ? _self._roles : roles // ignore: cast_nullable_t
 as List<String>,userType: null == userType ? _self.userType : userType // ignore: cast_nullable_to_non_nullable
 as String,employeeId: freezed == employeeId ? _self.employeeId : employeeId // ignore: cast_nullable_to_non_nullable
 as String?,mobile: freezed == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
+as String?,department: freezed == department ? _self.department : department // ignore: cast_nullable_to_non_nullable
+as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,isAdminFlag: null == isAdminFlag ? _self.isAdminFlag : isAdminFlag // ignore: cast_nullable_to_non_nullable
+as bool,isEmailVerified: null == isEmailVerified ? _self.isEmailVerified : isEmailVerified // ignore: cast_nullable_to_non_nullable
+as bool,failedLoginAttempts: null == failedLoginAttempts ? _self.failedLoginAttempts : failedLoginAttempts // ignore: cast_nullable_to_non_nullable
+as int,otpResendCount: null == otpResendCount ? _self.otpResendCount : otpResendCount // ignore: cast_nullable_to_non_nullable
+as int,lockUntil: freezed == lockUntil ? _self.lockUntil : lockUntil // ignore: cast_nullable_to_non_nullable
+as String?,lastLogin: freezed == lastLogin ? _self.lastLogin : lastLogin // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as String?,passwordExpiration: freezed == passwordExpiration ? _self.passwordExpiration : passwordExpiration // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

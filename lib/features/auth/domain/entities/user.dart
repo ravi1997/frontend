@@ -15,8 +15,47 @@ abstract class User with _$User {
     @JsonKey(name: 'user_type') required String userType,
     @JsonKey(name: 'employee_id') String? employeeId,
     @JsonKey(name: 'mobile') String? mobile,
+    String? department,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    // Extra fields returned by the admin detail endpoint
+    @JsonKey(name: 'is_admin') @Default(false) bool isAdminFlag,
+    @JsonKey(name: 'is_email_verified') @Default(false) bool isEmailVerified,
+    @JsonKey(name: 'failed_login_attempts') @Default(0) int failedLoginAttempts,
+    @JsonKey(name: 'otp_resend_count') @Default(0) int otpResendCount,
+    @JsonKey(name: 'lock_until') String? lockUntil,
+    @JsonKey(name: 'last_login') String? lastLogin,
+    @JsonKey(name: 'created_at') String? createdAt,
+    @JsonKey(name: 'updated_at') String? updatedAt,
+    @JsonKey(name: 'password_expiration') String? passwordExpiration,
   }) = _User;
 
   const User._();
+
+  bool get isAdmin =>
+      roles.contains('admin') ||
+      roles.contains('superadmin') ||
+      isAdminFlag ||
+      userType.toLowerCase() == 'admin';
+
+  bool get isLocked {
+    if (lockUntil == null) return false;
+    try {
+      return DateTime.parse(lockUntil!).isAfter(DateTime.now().toUtc());
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isPasswordExpired {
+    if (passwordExpiration == null) return false;
+    try {
+      return DateTime.parse(
+        passwordExpiration!,
+      ).isBefore(DateTime.now().toUtc());
+    } catch (_) {
+      return false;
+    }
+  }
+
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
