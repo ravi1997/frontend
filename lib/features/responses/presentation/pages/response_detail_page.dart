@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:frontend/core/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/features/responses/presentation/controllers/responses_controller.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
 import 'package:frontend/features/responses/presentation/controllers/ai_controller.dart';
 import 'package:frontend/features/responses/domain/entities/response_history.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 
 class ResponseDetailPage extends ConsumerWidget {
   final String formId;
@@ -24,312 +24,381 @@ class ResponseDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final responseAsync = ref.watch(responseDetailProvider(formId, responseId));
+    final authState = ref.watch(authControllerProvider);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text(
-            'Response Detail',
-            style: TextStyle(color: AppColors.textPrimary),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => context.pop(),
-          ),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Answers'),
-              Tab(text: 'History'),
-            ],
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            indicatorColor: AppColors.primary,
-          ),
-        ),
-        body: responseAsync.when(
-          data: (response) => TabBarView(
-            children: [
-              _buildDetailContent(context, ref, response),
-              _buildHistoryContent(context, ref, response.formId, response.id),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      body: authState.when(
+        data: (user) => responseAsync.when(
+          data: (response) =>
+              _ResponseDetailView(formId: formId, response: response),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Text(
-              'Error: $err',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
+          error: (err, stack) => _ErrorSection(error: err.toString()),
         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
   }
+}
 
-  Widget _buildDetailContent(
-    BuildContext context,
-    WidgetRef ref,
-    FormResponse response,
-  ) {
-    final formAsync = ref.watch(formBuilderControllerProvider(response.formId));
+class _ResponseDetailView extends ConsumerWidget {
+  final String formId;
+  final FormResponse response;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+  const _ResponseDetailView({required this.formId, required this.response});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DefaultTabController(
+      length: 2,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSummaryCard(response),
-          const SizedBox(height: 24),
-          _buildAIInsightsSection(context, ref, response),
-          const SizedBox(height: 24),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.0),
-            child: Text(
-              'Answers',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          _TopBar(formId: formId, responseId: response.id),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 48),
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: TabBar(
+                  isScrollable: true,
+                  labelColor: const Color(0xFF2563EB),
+                  unselectedLabelColor: const Color(0xFF6B7280),
+                  indicatorColor: const Color(0xFF2563EB),
+                  indicatorWeight: 3,
+                  labelStyle: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  tabs: const [
+                    Tab(text: 'Response Answers'),
+                    Tab(text: 'Action History'),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          formAsync.when(
-            data: (formState) {
-              final questions = formState.form.sections
-                  .expand((s) => s.questions)
-                  .toList();
-              return _buildAnswersList(questions, response.answers);
-            },
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20.0),
-                child: CircularProgressIndicator(),
-              ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _AnswersTab(formId: formId, response: response),
+                _HistoryTab(formId: formId, responseId: response.id),
+              ],
             ),
-            error: (err, stack) => _buildAnswersListFromMap(response.answers),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildSummaryCard(FormResponse response) {
-    final dateStr = DateFormat(
-      'MMMM dd, yyyy HH:mm:ss',
-    ).format(response.submittedAt);
-    return Card(
-      color: AppColors.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.assignment_turned_in,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+class _AnswersTab extends StatelessWidget {
+  final String formId;
+  final FormResponse response;
+
+  const _AnswersTab({required this.formId, required this.response});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SubmissionHeader(response: response),
+              const SizedBox(height: 32),
+              _AIInsightsSection(response: response),
+              const SizedBox(height: 32),
+              Text(
+                'Submitted Data',
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF111827),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Submission ID',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        response.id,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(
-              color: AppColors.textSecondary,
-              height: 1,
-              thickness: 0.1,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  color: AppColors.textSecondary,
-                  size: 16,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Submitted on $dateStr',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 16),
+              _AnswersList(formId: formId, answers: response.answers),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildAnswersList(
-    List<FormQuestion> questions,
-    Map<String, dynamic> answers,
-  ) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: questions.length,
-      itemBuilder: (context, index) {
-        final question = questions[index];
-        final answer = answers[question.id] ?? 'Not answered';
+class _TopBar extends StatelessWidget {
+  final String formId;
+  final String responseId;
+  const _TopBar({required this.formId, required this.responseId});
 
-        return _buildAnswerItem(question.label.toString(), answer.toString());
-      },
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 48),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back,
+              color: const Color(0xFF374151),
+              size: 20,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'MahaSamgrah Setu / Form Responses / $responseId',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF6B7280),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildAnswersListFromMap(Map<String, dynamic> answers) {
-    final entries = answers.entries.toList();
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        final entry = entries[index];
-        return _buildAnswerItem(
-          'Question ${entry.key}',
-          entry.value.toString(),
-        );
-      },
+class _SubmissionHeader extends StatelessWidget {
+  final FormResponse response;
+  const _SubmissionHeader({required this.response});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = response.submittedAt != null
+        ? DateFormat('MMMM dd, yyyy • HH:mm:ss').format(response.submittedAt!)
+        : 'Unknown Date';
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.assignment_turned_in_outlined,
+              color: Color(0xFF6B7280),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Submission Detail',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF6B7280),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  response.id,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF111827),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Received on $dateStr',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _StatusBadge(status: response.status),
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildAIInsightsSection(
-    BuildContext context,
-    WidgetRef ref,
-    FormResponse response,
-  ) {
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    Color bgColor;
+
+    switch (status.toLowerCase()) {
+      case 'completed':
+        color = const Color(0xFF059669);
+        bgColor = const Color(0xFFECFDF5);
+        break;
+      case 'pending':
+        color = const Color(0xFFD97706);
+        bgColor = const Color(0xFFFFFBEB);
+        break;
+      case 'rejected':
+        color = const Color(0xFFDC2626);
+        bgColor = const Color(0xFFFEF2F2);
+        break;
+      default:
+        color = const Color(0xFF2563EB);
+        bgColor = const Color(0xFFEFF6FF);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+class _AIInsightsSection extends ConsumerWidget {
+  final FormResponse response;
+  const _AIInsightsSection({required this.response});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final aiResults = response.aiResults;
     final sentiment = aiResults['sentiment'];
     final moderation = aiResults['moderation'];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.bolt, color: Colors.amber, size: 24),
-            const SizedBox(width: 8),
-            const Text(
-              'AI Insights',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                FontAwesomeIcons.wandMagicSparkles,
+                color: Color(0xFF2563EB),
+                size: 18,
               ),
-            ),
-            const Spacer(),
-            ElevatedButton.icon(
-              onPressed: () async {
-                try {
+              const SizedBox(width: 12),
+              Text(
+                'AI Analysis Hub',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: () async {
                   await ref
                       .read(aIControllerProvider.notifier)
                       .analyzeResponse(response.formId, response.id);
                   ref.invalidate(
                     responseDetailProvider(response.formId, response.id),
                   );
-                } catch (e) {
-                  // Error handled by interceptor
-                }
-              },
-              icon: const Icon(Icons.psychology, size: 18),
-              label: const Text('Analyze'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                },
+                icon: const Icon(Icons.psychology_outlined, size: 18),
+                label: const Text('Run Analysis'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF374151),
+                  elevation: 0,
+                  side: const BorderSide(color: Color(0xFFD1D5DB)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (sentiment != null || moderation != null)
-          Row(
-            children: [
-              if (sentiment != null)
-                Expanded(
-                  child: _buildInsightCard(
-                    title: 'Sentiment',
-                    value: sentiment['label'].toString().toUpperCase(),
-                    subtitle: 'Score: ${sentiment['score']}',
-                    color: _getSentimentColor(sentiment['label']),
-                  ),
-                ),
-              if (sentiment != null && moderation != null)
-                const SizedBox(width: 12),
-              if (moderation != null)
-                Expanded(
-                  child: _buildInsightCard(
-                    title: 'Safety',
-                    value: moderation['is_safe'] == true ? 'SAFE' : 'RISK',
-                    subtitle: '${moderation['flags']?.length ?? 0} flags',
-                    color: moderation['is_safe'] == true
-                        ? Colors.green
-                        : Colors.red,
-                  ),
-                ),
             ],
-          )
-        else
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.1),
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                'No AI analysis performed yet.',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
           ),
-      ],
+          const SizedBox(height: 20),
+          if (sentiment != null || moderation != null)
+            Row(
+              children: [
+                if (sentiment != null)
+                  Expanded(
+                    child: _InsightCard(
+                      title: 'Sentiment',
+                      value: sentiment['label'].toString().toUpperCase(),
+                      subtitle:
+                          'Confidence: ${(sentiment['score'] * 100).toStringAsFixed(1)}%',
+                      icon: Icons.face_outlined,
+                      color: _getSentimentColor(sentiment['label']),
+                    ),
+                  ),
+                const SizedBox(width: 16),
+                if (moderation != null)
+                  Expanded(
+                    child: _InsightCard(
+                      title: 'Safety Check',
+                      value: moderation['is_safe'] == true
+                          ? 'PASSED'
+                          : 'FLAGGED',
+                      subtitle:
+                          '${moderation['flags']?.length ?? 0} security issues',
+                      icon: Icons.security_outlined,
+                      color: moderation['is_safe'] == true
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+              ],
+            )
+          else
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  'No intelligence data synchronized for this transmission.',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -345,76 +414,149 @@ class ResponseDetailPage extends ConsumerWidget {
         return Colors.grey;
     }
   }
+}
 
-  Widget _buildInsightCard({
-    required String title,
-    required String value,
-    required String subtitle,
-    required Color color,
-  }) {
+class _InsightCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+
+  const _InsightCard({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: const Color(0xFF6B7280),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Text(
-            subtitle,
-            style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 12),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildAnswerItem(String label, String answer) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.05)),
-      ),
+class _AnswersList extends ConsumerWidget {
+  final String formId;
+  final Map<String, dynamic> answers;
+
+  const _AnswersList({required this.formId, required this.answers});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formAsync = ref.watch(formBuilderControllerProvider(formId));
+
+    return formAsync.when(
+      data: (formState) {
+        final questions = formState.form.sections
+            .expand((s) => s.questions)
+            .toList();
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: questions.length,
+            separatorBuilder: (context, index) =>
+                const Divider(height: 1, color: Color(0xFFF3F4F6)),
+            itemBuilder: (context, index) {
+              final question = questions[index];
+              final answer = answers[question.id] ?? '—';
+              return _AnswerEntry(
+                label: question.label.toString(),
+                value: answer.toString(),
+              );
+            },
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => _AnswersFallback(answers: answers),
+    );
+  }
+}
+
+class _AnswerEntry extends StatelessWidget {
+  final String label;
+  final String value;
+  const _AnswerEntry({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontSize: 12,
+            style: GoogleFonts.inter(
+              fontSize: 13,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+              color: const Color(0xFF374151),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            answer,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              color: const Color(0xFF6B7280),
               height: 1.5,
             ),
           ),
@@ -422,97 +564,95 @@ class ResponseDetailPage extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildHistoryContent(
-    BuildContext context,
-    WidgetRef ref,
-    String formId,
-    String responseId,
-  ) {
-    final historyAsync = ref.watch(responseHistoryProvider(formId, responseId));
+class _AnswersFallback extends StatelessWidget {
+  final Map<String, dynamic> answers;
+  const _AnswersFallback({required this.answers});
 
-    return historyAsync.when(
-      data: (List<ResponseHistory> historyList) {
-        if (historyList.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.history,
-                  size: 64,
-                  color: AppColors.textSecondary.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No history records found',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textSecondary,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          itemCount: historyList.length,
-          itemBuilder: (context, index) {
-            final entry = historyList[index];
-            final isLast = index == historyList.length - 1;
-            return _HistoryTimelineItem(entry: entry, isLast: isLast);
-          },
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Column(
+        children: answers.entries
+            .map(
+              (e) => _AnswerEntry(
+                label: 'Question ${e.key}',
+                value: e.value.toString(),
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 }
 
-class _HistoryTimelineItem extends StatelessWidget {
+class _HistoryTab extends ConsumerWidget {
+  final String formId;
+  final String responseId;
+  const _HistoryTab({required this.formId, required this.responseId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final historyAsync = ref.watch(responseHistoryProvider(formId, responseId));
+
+    return historyAsync.when(
+      data: (historyList) => historyList.isEmpty
+          ? _EmptyHistory()
+          : SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+              child: Center(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Column(
+                    children: historyList.asMap().entries.map((e) {
+                      return _HistoryItem(
+                        entry: e.value,
+                        isLast: e.key == historyList.length - 1,
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => _ErrorSection(error: err.toString()),
+    );
+  }
+}
+
+class _HistoryItem extends StatelessWidget {
   final ResponseHistory entry;
   final bool isLast;
-
-  const _HistoryTimelineItem({required this.entry, required this.isLast});
+  const _HistoryItem({required this.entry, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
     return IntrinsicHeight(
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Timeline indicator
           Column(
             children: [
               Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2563EB),
                   shape: BoxShape.circle,
-                  color: AppColors.primary,
-                  border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                    ),
-                  ],
                 ),
               ),
               if (!isLast)
                 Expanded(
-                  child: Container(
-                    width: 2,
-                    color: AppColors.borderLight,
-                    margin: const EdgeInsets.symmetric(vertical: 2),
-                  ),
+                  child: Container(width: 2, color: const Color(0xFFE5E7EB)),
                 ),
             ],
           ),
-          const SizedBox(width: 20),
-          // Content
+          const SizedBox(width: 24),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 32),
@@ -524,10 +664,10 @@ class _HistoryTimelineItem extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
-                          vertical: 4,
+                          vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: const Color(0xFFEFF6FF),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -535,80 +675,31 @@ class _HistoryTimelineItem extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: const Color(0xFF2563EB),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Text(
                         DateFormat(
-                          'MMM dd, yyyy HH:mm',
+                          'MMM dd, yyyy • HH:mm',
                         ).format(entry.changedAt),
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: AppColors.textGrey,
+                          color: const Color(0xFF9CA3AF),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Action by ',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                        TextSpan(
-                          text: entry.changedBy,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Modified by ${entry.changedBy}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF111827),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  if (_hasChanges(entry.dataBefore, entry.dataAfter))
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppColors.borderLight.withValues(alpha: 0.6),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Changes',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textGrey,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ..._buildDiff(entry.dataBefore, entry.dataAfter),
-                        ],
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -617,118 +708,45 @@ class _HistoryTimelineItem extends StatelessWidget {
       ),
     );
   }
+}
 
-  bool _hasChanges(Map<String, dynamic> before, Map<String, dynamic> after) {
-    if (before.isEmpty && after.isEmpty) return false;
-    // Check if any keys are different
-    final allKeys = {...before.keys, ...after.keys};
-    for (final key in allKeys) {
-      if (before[key] != after[key]) return true;
-    }
-    return false;
+class _EmptyHistory extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.history, size: 48, color: Color(0xFFD1D5DB)),
+          const SizedBox(height: 16),
+          Text(
+            'No historical synchronization records found.',
+            style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
+          ),
+        ],
+      ),
+    );
   }
+}
 
-  List<Widget> _buildDiff(
-    Map<String, dynamic> before,
-    Map<String, dynamic> after,
-  ) {
-    final List<Widget> widgets = [];
-    final allKeys = {...before.keys, ...after.keys};
+class _ErrorSection extends StatelessWidget {
+  final String error;
+  const _ErrorSection({required this.error});
 
-    for (final key in allKeys) {
-      final valBefore = before[key];
-      final valAfter = after[key];
-
-      if (valBefore != valAfter) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  key,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (valBefore != null)
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: Colors.red.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: Text(
-                            valBefore.toString(),
-                            style: GoogleFonts.robotoMono(
-                              color: Colors.red[700],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (valBefore != null && valAfter != null)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          size: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    if (valAfter != null)
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: Colors.green.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: Text(
-                            valAfter.toString(),
-                            style: GoogleFonts.robotoMono(
-                              color: Colors.green[700],
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+          const SizedBox(height: 16),
+          Text(
+            'System Synchronization Error: $error',
+            style: GoogleFonts.inter(color: const Color(0xFF374151)),
           ),
-        );
-      }
-    }
-
-    if (widgets.isEmpty) {
-      widgets.add(
-        Text(
-          'No significant data changes detected.',
-          style: GoogleFonts.inter(
-            fontStyle: FontStyle.italic,
-            color: AppColors.textGrey,
-            fontSize: 13,
-          ),
-        ),
-      );
-    }
-
-    return widgets;
+        ],
+      ),
+    );
   }
 }

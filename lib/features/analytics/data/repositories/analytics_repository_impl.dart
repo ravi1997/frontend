@@ -107,12 +107,12 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       final response = await _apiClient.get('/forms/$formId/analytics/summary');
       final data = response.data as Map<String, dynamic>;
 
-      final totalSubmissions = data['total_responses'] as int? ?? 0;
-      final statusBreakdown =
+      final totalSubmissions = (data['total_responses'] as num? ?? 0).toInt();
+      final statusBreakdownRaw =
           data['status_breakdown'] as Map<String, dynamic>? ?? {};
       final completedCount =
-          (statusBreakdown['approved'] as int? ?? 0) +
-          (statusBreakdown['submitted'] as int? ?? 0);
+          (statusBreakdownRaw['approved'] as num? ?? 0).toInt() +
+          (statusBreakdownRaw['submitted'] as num? ?? 0).toInt();
       final completionRate = totalSubmissions > 0
           ? completedCount / totalSubmissions
           : 0.0;
@@ -121,8 +121,8 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         formId: formId,
         totalSubmissions: totalSubmissions,
         completionRate: completionRate,
-        statusBreakdown: statusBreakdown.map(
-          (key, value) => MapEntry(key, value as int),
+        statusBreakdown: statusBreakdownRaw.map(
+          (key, value) => MapEntry(key, (value as num).toInt()),
         ),
       );
     } catch (e, stack) {
@@ -149,12 +149,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
 
       final timelineList = data['timeline'] as List<dynamic>? ?? [];
       final dataPoints = timelineList.map((item) {
+        final itemMap = item as Map<String, dynamic>;
         return TimelineDataPoint(
-          date: DateTime.parse(item['date'] as String),
-          count: item['count'] as int,
-          submissions: item['submissions'] as int?,
-          completions: item['completions'] as int?,
-          rate: item['rate'] as double?,
+          date: DateTime.parse(itemMap['date'] as String),
+          count: (itemMap['count'] as num? ?? 0).toInt(),
+          submissions: (itemMap['submissions'] as num?)?.toInt(),
+          completions: (itemMap['completions'] as num?)?.toInt(),
+          rate: (itemMap['rate'] as num?)?.toDouble(),
         );
       }).toList();
 
@@ -187,22 +188,27 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       );
       final data = response.data as Map<String, dynamic>;
 
-      final distributionList = data['distribution'] as List<dynamic>? ?? [];
+      final distributionData = data['distribution'];
+      final List<dynamic> distributionList = distributionData is List
+          ? distributionData
+          : [];
+
       final fieldDistributions = <FieldDistribution>[];
 
       for (var item in distributionList) {
-        final label = item['label'] as String;
-        final fieldId = item['field_id'] as String? ?? label;
-        final counts = item['counts'] as Map<String, dynamic>;
+        final itemMap = item as Map<String, dynamic>;
+        final label = itemMap['label'] as String? ?? 'Unknown Field';
+        final fieldId = itemMap['field_id'] as String? ?? label;
+        final counts = itemMap['counts'] as Map<String, dynamic>? ?? {};
 
         // Calculate total for percentages
         final total = counts.values.fold<int>(
           0,
-          (sum, count) => sum + (count as int),
+          (sum, count) => sum + (count as num).toInt(),
         );
 
         final options = counts.entries.map((entry) {
-          final count = entry.value as int;
+          final count = (entry.value as num).toInt();
           final percentage = total > 0 ? (count / total) * 100 : 0.0;
 
           return DistributionOption(

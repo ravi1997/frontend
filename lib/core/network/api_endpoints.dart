@@ -6,11 +6,13 @@ class ApiEndpoints {
   // Base configuration
   // Note: Replace this IP with 10.0.2.2 if testing on Android Emulator,
   // or use the current host IP '192.168.156.10' for physical devices.
-  static const String baseUrl = 'http://192.168.156.10:5000/form/api/v1';
+  static const String baseUrl = 'http://localhost:5000/form/api/v1';
+  // static const String baseUrl =
+  //     'https://325cbd2b50a9d4c9-59-177-107-51.serveousercontent.com/form/api/v1';
 
   /// Base URL for the server root (without the /form/api/v1 prefix).
   /// Use this for endpoints that live outside the /form/api/v1 path, e.g. admin endpoints.
-  static const String serverBaseUrl = 'http://192.168.156.10:5000';
+  static const String serverBaseUrl = 'http://localhost:5000';
 
   // ============================================================================
   // Admin User Management Endpoints  (prefix: /api/v1/admin/users)

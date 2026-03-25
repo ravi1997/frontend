@@ -28,9 +28,19 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = _getTokens()?.accessToken;
-    if (token != null) {
-      options.headers['Authorization'] = 'Bearer $token';
+    // Don't add token to auth-related endpoints as they might fail or confuse the backend
+    final isAuthPath =
+        options.path.contains('/auth/') ||
+        options.path.contains('/login') ||
+        options.path.contains('/register') ||
+        options.path.contains('/generate-otp') ||
+        options.path.contains('/request-password-reset');
+
+    if (!isAuthPath) {
+      final token = _getTokens()?.accessToken;
+      if (token != null) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
     }
     handler.next(options);
   }
@@ -40,7 +50,14 @@ class AuthInterceptor extends QueuedInterceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (err.response?.statusCode == 401) {
+    final isAuthPath =
+        err.requestOptions.path.contains('/auth/') ||
+        err.requestOptions.path.contains('/login') ||
+        err.requestOptions.path.contains('/register') ||
+        err.requestOptions.path.contains('/generate-otp') ||
+        err.requestOptions.path.contains('/request-password-reset');
+
+    if (err.response?.statusCode == 401 && !isAuthPath) {
       // If the request was already retried, it means refresh failed or token is still invalid.
       if (err.requestOptions.extra['_retried'] == true) {
         await _clearTokens();

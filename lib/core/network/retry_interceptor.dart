@@ -32,8 +32,8 @@ class RetryInterceptor extends Interceptor {
       Duration(seconds: 2),
       Duration(seconds: 4),
     ],
-  })  : _dio = dio,
-        _logger = logger;
+  }) : _dio = dio,
+       _logger = logger;
 
   @override
   Future<void> onError(
@@ -74,10 +74,7 @@ class RetryInterceptor extends Interceptor {
     final options = Options(
       method: err.requestOptions.method,
       headers: err.requestOptions.headers,
-      extra: {
-        ...err.requestOptions.extra,
-        '_retryCount': retryCount + 1,
-      },
+      extra: {...err.requestOptions.extra, '_retryCount': retryCount + 1},
     );
 
     try {
@@ -89,15 +86,11 @@ class RetryInterceptor extends Interceptor {
         options: options,
       );
 
-      _logger.i(
-        'Retry successful for ${err.requestOptions.path}',
-      );
+      _logger.i('Retry successful for ${err.requestOptions.path}');
 
       return handler.resolve(response);
     } catch (e) {
-      _logger.w(
-        'Retry failed for ${err.requestOptions.path}: ${e.toString()}',
-      );
+      _logger.w('Retry failed for ${err.requestOptions.path}: ${e.toString()}');
 
       // If the retry also fails, pass the error to the next interceptor
       if (e is DioException) {
@@ -116,6 +109,11 @@ class RetryInterceptor extends Interceptor {
 
   /// Determine if the request should be retried based on error type
   bool _shouldRetry(DioException err) {
+    // Don't retry login requests as per requirement
+    if (err.requestOptions.path.contains('/login')) {
+      return false;
+    }
+
     // Don't retry if already marked as retried by AuthInterceptor
     if (err.requestOptions.extra['_retried'] == true) {
       return false;

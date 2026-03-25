@@ -10,14 +10,30 @@ import '../../domain/entities/analytics_timeline.dart';
 import '../../domain/entities/analytics_distribution.dart';
 import '../../domain/entities/form_analytics.dart';
 
-class AnalyticsPage extends ConsumerWidget {
+class AnalyticsPage extends ConsumerStatefulWidget {
   final String formId;
 
   const AnalyticsPage({super.key, required this.formId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final analyticsState = ref.watch(analyticsControllerProvider(formId));
+  ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
+}
+
+class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Schedule the initial load after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(analyticsControllerProvider(widget.formId).notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final analyticsState = ref.watch(
+      analyticsControllerProvider(widget.formId),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.builderBackground,
@@ -34,7 +50,7 @@ class AnalyticsPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref
-                .read(analyticsControllerProvider(formId).notifier)
+                .read(analyticsControllerProvider(widget.formId).notifier)
                 .refresh(),
           ),
         ],
@@ -49,7 +65,35 @@ class AnalyticsPage extends ConsumerWidget {
     }
 
     if (state.hasError) {
-      return Center(child: Text('Error: ${state.error}'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, color: Colors.red[700], size: 60),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading analytics',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                state.error ?? 'Unknown error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textGrey),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => ref
+                  .read(analyticsControllerProvider(widget.formId).notifier)
+                  .refresh(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
     }
 
     final summary = state.summary;
@@ -78,33 +122,44 @@ class AnalyticsPage extends ConsumerWidget {
           const SizedBox(height: 32),
           _buildSectionTitle('Field Distributions'),
           const SizedBox(height: 16),
-          ...distribution.fieldDistributions.map((fieldDist) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    fieldDist.fieldLabel,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildChartCard(
-                    child: ResponseDistributionChart(
-                      distribution: _convertToDistributionData(
-                        fieldDist.options,
+          if (distribution.fieldDistributions.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Text(
+                  'No field distribution data available.',
+                  style: TextStyle(color: AppColors.textGrey),
+                ),
+              ),
+            )
+          else
+            ...distribution.fieldDistributions.map((fieldDist) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fieldDist.fieldLabel,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
                       ),
                     ),
-                    height: 250,
-                  ),
-                ],
-              ),
-            );
-          }),
+                    const SizedBox(height: 12),
+                    _buildChartCard(
+                      child: ResponseDistributionChart(
+                        distribution: _convertToDistributionData(
+                          fieldDist.options,
+                        ),
+                      ),
+                      height: 250,
+                    ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
     );

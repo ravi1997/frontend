@@ -26,7 +26,11 @@ class CsvExporter {
     // 3. Add Rows: Map each response to the columns
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
     for (var response in responses) {
-      final row = <dynamic>[dateFormat.format(response.submittedAt)];
+      final row = <dynamic>[
+        response.submittedAt != null
+            ? dateFormat.format(response.submittedAt!)
+            : 'Unknown',
+      ];
 
       // For each question header, find the corresponding answer in the response.
       // If no answer exists, use an empty string.

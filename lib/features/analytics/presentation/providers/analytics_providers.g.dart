@@ -8,29 +8,62 @@ part of 'analytics_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provider for accessing the analytics state.
-///
-/// This provider watches the analytics controller and provides
-/// access to the current analytics state including summary,
-/// timeline, and distribution data.
+
+@ProviderFor(analysisDashboardRepository)
+final analysisDashboardRepositoryProvider =
+    AnalysisDashboardRepositoryProvider._();
+
+final class AnalysisDashboardRepositoryProvider
+    extends
+        $FunctionalProvider<
+          AnalysisDashboardRepository,
+          AnalysisDashboardRepository,
+          AnalysisDashboardRepository
+        >
+    with $Provider<AnalysisDashboardRepository> {
+  AnalysisDashboardRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'analysisDashboardRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$analysisDashboardRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<AnalysisDashboardRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AnalysisDashboardRepository create(Ref ref) {
+    return analysisDashboardRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AnalysisDashboardRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AnalysisDashboardRepository>(value),
+    );
+  }
+}
+
+String _$analysisDashboardRepositoryHash() =>
+    r'd7a08f094b2a7f27b8a442095fa4d431e8a0f12e';
 
 @ProviderFor(analyticsState)
 final analyticsStateProvider = AnalyticsStateFamily._();
 
-/// Provider for accessing the analytics state.
-///
-/// This provider watches the analytics controller and provides
-/// access to the current analytics state including summary,
-/// timeline, and distribution data.
-
 final class AnalyticsStateProvider
     extends $FunctionalProvider<AnalyticsState, AnalyticsState, AnalyticsState>
     with $Provider<AnalyticsState> {
-  /// Provider for accessing the analytics state.
-  ///
-  /// This provider watches the analytics controller and provides
-  /// access to the current analytics state including summary,
-  /// timeline, and distribution data.
   AnalyticsStateProvider._({
     required AnalyticsStateFamily super.from,
     required String super.argument,
@@ -84,12 +117,6 @@ final class AnalyticsStateProvider
 
 String _$analyticsStateHash() => r'da2f41c3b12d718522936f3e19816023bb6feaab';
 
-/// Provider for accessing the analytics state.
-///
-/// This provider watches the analytics controller and provides
-/// access to the current analytics state including summary,
-/// timeline, and distribution data.
-
 final class AnalyticsStateFamily extends $Family
     with $FunctionalFamilyOverride<AnalyticsState, String> {
   AnalyticsStateFamily._()
@@ -101,12 +128,6 @@ final class AnalyticsStateFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the analytics state.
-  ///
-  /// This provider watches the analytics controller and provides
-  /// access to the current analytics state including summary,
-  /// timeline, and distribution data.
-
   AnalyticsStateProvider call(String formId) =>
       AnalyticsStateProvider._(argument: formId, from: this);
 
@@ -114,18 +135,8 @@ final class AnalyticsStateFamily extends $Family
   String toString() => r'analyticsStateProvider';
 }
 
-/// Provider for accessing the summary analytics data.
-///
-/// This provider provides access to the summary statistics
-/// for a specific form.
-
 @ProviderFor(analyticsSummary)
 final analyticsSummaryProvider = AnalyticsSummaryFamily._();
-
-/// Provider for accessing the summary analytics data.
-///
-/// This provider provides access to the summary statistics
-/// for a specific form.
 
 final class AnalyticsSummaryProvider
     extends
@@ -135,10 +146,6 @@ final class AnalyticsSummaryProvider
           AnalyticsSummary?
         >
     with $Provider<AnalyticsSummary?> {
-  /// Provider for accessing the summary analytics data.
-  ///
-  /// This provider provides access to the summary statistics
-  /// for a specific form.
   AnalyticsSummaryProvider._({
     required AnalyticsSummaryFamily super.from,
     required String super.argument,
@@ -193,11 +200,6 @@ final class AnalyticsSummaryProvider
 
 String _$analyticsSummaryHash() => r'2c35467bb0f3ce679a995e98550a213352b239f9';
 
-/// Provider for accessing the summary analytics data.
-///
-/// This provider provides access to the summary statistics
-/// for a specific form.
-
 final class AnalyticsSummaryFamily extends $Family
     with $FunctionalFamilyOverride<AnalyticsSummary?, String> {
   AnalyticsSummaryFamily._()
@@ -209,11 +211,6 @@ final class AnalyticsSummaryFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the summary analytics data.
-  ///
-  /// This provider provides access to the summary statistics
-  /// for a specific form.
-
   AnalyticsSummaryProvider call(String formId) =>
       AnalyticsSummaryProvider._(argument: formId, from: this);
 
@@ -221,18 +218,8 @@ final class AnalyticsSummaryFamily extends $Family
   String toString() => r'analyticsSummaryProvider';
 }
 
-/// Provider for accessing the timeline analytics data.
-///
-/// This provider provides access to the timeline data
-/// for a specific form.
-
 @ProviderFor(analyticsTimeline)
 final analyticsTimelineProvider = AnalyticsTimelineFamily._();
-
-/// Provider for accessing the timeline analytics data.
-///
-/// This provider provides access to the timeline data
-/// for a specific form.
 
 final class AnalyticsTimelineProvider
     extends
@@ -242,10 +229,6 @@ final class AnalyticsTimelineProvider
           AnalyticsTimeline?
         >
     with $Provider<AnalyticsTimeline?> {
-  /// Provider for accessing the timeline analytics data.
-  ///
-  /// This provider provides access to the timeline data
-  /// for a specific form.
   AnalyticsTimelineProvider._({
     required AnalyticsTimelineFamily super.from,
     required String super.argument,
@@ -300,11 +283,6 @@ final class AnalyticsTimelineProvider
 
 String _$analyticsTimelineHash() => r'5fa5dad2cc8dd9f03f154bc82fb720e5089e0614';
 
-/// Provider for accessing the timeline analytics data.
-///
-/// This provider provides access to the timeline data
-/// for a specific form.
-
 final class AnalyticsTimelineFamily extends $Family
     with $FunctionalFamilyOverride<AnalyticsTimeline?, String> {
   AnalyticsTimelineFamily._()
@@ -316,11 +294,6 @@ final class AnalyticsTimelineFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the timeline analytics data.
-  ///
-  /// This provider provides access to the timeline data
-  /// for a specific form.
-
   AnalyticsTimelineProvider call(String formId) =>
       AnalyticsTimelineProvider._(argument: formId, from: this);
 
@@ -328,18 +301,8 @@ final class AnalyticsTimelineFamily extends $Family
   String toString() => r'analyticsTimelineProvider';
 }
 
-/// Provider for accessing the distribution analytics data.
-///
-/// This provider provides access to the distribution data
-/// for a specific form.
-
 @ProviderFor(analyticsDistribution)
 final analyticsDistributionProvider = AnalyticsDistributionFamily._();
-
-/// Provider for accessing the distribution analytics data.
-///
-/// This provider provides access to the distribution data
-/// for a specific form.
 
 final class AnalyticsDistributionProvider
     extends
@@ -349,10 +312,6 @@ final class AnalyticsDistributionProvider
           AnalyticsDistribution?
         >
     with $Provider<AnalyticsDistribution?> {
-  /// Provider for accessing the distribution analytics data.
-  ///
-  /// This provider provides access to the distribution data
-  /// for a specific form.
   AnalyticsDistributionProvider._({
     required AnalyticsDistributionFamily super.from,
     required String super.argument,
@@ -408,11 +367,6 @@ final class AnalyticsDistributionProvider
 String _$analyticsDistributionHash() =>
     r'cb25fffc19a955b467f0219053896beac2c52072';
 
-/// Provider for accessing the distribution analytics data.
-///
-/// This provider provides access to the distribution data
-/// for a specific form.
-
 final class AnalyticsDistributionFamily extends $Family
     with $FunctionalFamilyOverride<AnalyticsDistribution?, String> {
   AnalyticsDistributionFamily._()
@@ -424,11 +378,6 @@ final class AnalyticsDistributionFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the distribution analytics data.
-  ///
-  /// This provider provides access to the distribution data
-  /// for a specific form.
-
   AnalyticsDistributionProvider call(String formId) =>
       AnalyticsDistributionProvider._(argument: formId, from: this);
 
@@ -436,26 +385,12 @@ final class AnalyticsDistributionFamily extends $Family
   String toString() => r'analyticsDistributionProvider';
 }
 
-/// Provider for accessing the loading state.
-///
-/// This provider provides access to the loading state
-/// for analytics data.
-
 @ProviderFor(analyticsIsLoading)
 final analyticsIsLoadingProvider = AnalyticsIsLoadingFamily._();
-
-/// Provider for accessing the loading state.
-///
-/// This provider provides access to the loading state
-/// for analytics data.
 
 final class AnalyticsIsLoadingProvider
     extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
-  /// Provider for accessing the loading state.
-  ///
-  /// This provider provides access to the loading state
-  /// for analytics data.
   AnalyticsIsLoadingProvider._({
     required AnalyticsIsLoadingFamily super.from,
     required String super.argument,
@@ -510,11 +445,6 @@ final class AnalyticsIsLoadingProvider
 String _$analyticsIsLoadingHash() =>
     r'c4e2a3a569ed4497678e314dae4912dcb8425b3c';
 
-/// Provider for accessing the loading state.
-///
-/// This provider provides access to the loading state
-/// for analytics data.
-
 final class AnalyticsIsLoadingFamily extends $Family
     with $FunctionalFamilyOverride<bool, String> {
   AnalyticsIsLoadingFamily._()
@@ -526,11 +456,6 @@ final class AnalyticsIsLoadingFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the loading state.
-  ///
-  /// This provider provides access to the loading state
-  /// for analytics data.
-
   AnalyticsIsLoadingProvider call(String formId) =>
       AnalyticsIsLoadingProvider._(argument: formId, from: this);
 
@@ -538,26 +463,12 @@ final class AnalyticsIsLoadingFamily extends $Family
   String toString() => r'analyticsIsLoadingProvider';
 }
 
-/// Provider for accessing the error state.
-///
-/// This provider provides access to any error that occurred
-/// while loading analytics data.
-
 @ProviderFor(analyticsError)
 final analyticsErrorProvider = AnalyticsErrorFamily._();
-
-/// Provider for accessing the error state.
-///
-/// This provider provides access to any error that occurred
-/// while loading analytics data.
 
 final class AnalyticsErrorProvider
     extends $FunctionalProvider<String?, String?, String?>
     with $Provider<String?> {
-  /// Provider for accessing the error state.
-  ///
-  /// This provider provides access to any error that occurred
-  /// while loading analytics data.
   AnalyticsErrorProvider._({
     required AnalyticsErrorFamily super.from,
     required String super.argument,
@@ -611,11 +522,6 @@ final class AnalyticsErrorProvider
 
 String _$analyticsErrorHash() => r'df7285dc4da2e93f88a730b47280319928adc689';
 
-/// Provider for accessing the error state.
-///
-/// This provider provides access to any error that occurred
-/// while loading analytics data.
-
 final class AnalyticsErrorFamily extends $Family
     with $FunctionalFamilyOverride<String?, String> {
   AnalyticsErrorFamily._()
@@ -627,11 +533,6 @@ final class AnalyticsErrorFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provider for accessing the error state.
-  ///
-  /// This provider provides access to any error that occurred
-  /// while loading analytics data.
-
   AnalyticsErrorProvider call(String formId) =>
       AnalyticsErrorProvider._(argument: formId, from: this);
 
@@ -639,23 +540,12 @@ final class AnalyticsErrorFamily extends $Family
   String toString() => r'analyticsErrorProvider';
 }
 
-/// Provider for checking if there is an error.
-///
-/// This provider returns true if there is an error state.
-
 @ProviderFor(analyticsHasError)
 final analyticsHasErrorProvider = AnalyticsHasErrorFamily._();
-
-/// Provider for checking if there is an error.
-///
-/// This provider returns true if there is an error state.
 
 final class AnalyticsHasErrorProvider
     extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
-  /// Provider for checking if there is an error.
-  ///
-  /// This provider returns true if there is an error state.
   AnalyticsHasErrorProvider._({
     required AnalyticsHasErrorFamily super.from,
     required String super.argument,
@@ -709,10 +599,6 @@ final class AnalyticsHasErrorProvider
 
 String _$analyticsHasErrorHash() => r'f7fe088dd9e86cd7a80f08245d8de16b2ae07714';
 
-/// Provider for checking if there is an error.
-///
-/// This provider returns true if there is an error state.
-
 final class AnalyticsHasErrorFamily extends $Family
     with $FunctionalFamilyOverride<bool, String> {
   AnalyticsHasErrorFamily._()
@@ -723,10 +609,6 @@ final class AnalyticsHasErrorFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
-
-  /// Provider for checking if there is an error.
-  ///
-  /// This provider returns true if there is an error state.
 
   AnalyticsHasErrorProvider call(String formId) =>
       AnalyticsHasErrorProvider._(argument: formId, from: this);

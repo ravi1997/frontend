@@ -7,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../controllers/auth_controller.dart';
 import '../../../../core/widgets/snackbar_service.dart';
 import '../widgets/auth_background.dart';
+import '../../../../core/network/token_service.dart';
 
 // ─── Auth Design Tokens ───────────────────────────────────────────────────────
 abstract class _AuthTokens {
@@ -116,6 +117,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Future<void> _loadCredentials() async {
+    // Check and clear tokens if expired
+    await ref.read(tokenServiceProvider.notifier).checkAndClearIfExpired();
+
     final box = await Hive.openBox('credentials_box');
     final rememberMe = box.get('remember_me', defaultValue: false);
     if (rememberMe) {

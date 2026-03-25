@@ -140,6 +140,14 @@ class FormBuilderTopBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           _TopBarActionButton(
+            icon: FontAwesomeIcons.chartLine,
+            label: 'Analytics',
+            onTap: () {
+              context.push('/forms/$formId/analysis-builder');
+            },
+          ),
+          const SizedBox(width: 8),
+          _TopBarActionButton(
             icon: FontAwesomeIcons.clockRotateLeft,
             label: 'History',
             onTap: () async {

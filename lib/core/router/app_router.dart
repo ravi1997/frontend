@@ -21,6 +21,7 @@ import '../../features/backend_settings/presentation/pages/backend_settings_page
 import '../../features/form_builder/presentation/pages/form_submit_page.dart';
 import '../../features/form_builder/presentation/pages/form_access_page.dart';
 import '../../features/qr_scanner/presentation/pages/qr_scanner_page.dart';
+import '../../features/analytics/presentation/pages/analysis_builder_page.dart';
 
 part 'app_router.g.dart';
 
@@ -130,6 +131,14 @@ Raw<GoRouter> appRouter(Ref ref) {
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
           return AnalyticsPage(formId: formId);
+        },
+      ),
+      GoRoute(
+        path: '/forms/:formId/analysis-builder',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          final dashboardId = state.uri.queryParameters['dashboardId'];
+          return AnalysisBuilderPage(formId: formId, dashboardId: dashboardId);
         },
       ),
       GoRoute(
