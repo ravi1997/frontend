@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../exceptions/app_exception.dart';
 import '../widgets/snackbar_service.dart';
 
 class ErrorInterceptor extends Interceptor {
@@ -10,7 +11,11 @@ class ErrorInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     String? message;
 
-    if (err.response?.data is Map<String, dynamic>) {
+    if (err.error is ApiException) {
+      final apiException = err.error as ApiException;
+      message = apiException.message;
+      // potentially log or process details here
+    } else if (err.response?.data is Map<String, dynamic>) {
       final data = err.response?.data as Map<String, dynamic>;
       message = (data['error'] ?? data['message'])?.toString();
     }

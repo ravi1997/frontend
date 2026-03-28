@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/translation_controller.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/entities/translation_job.dart';
-import '../controllers/form_builder_controller.dart'; // Added import for FormBuilderController
-import 'package:file_saver/file_saver.dart'; // Added import for FileSaver
-import 'dart:convert'; // Added for jsonEncode
-import 'dart:typed_data'; // Added for Uint8List
-import '../../domain/entities/builder_form.dart'; // Add import for BuilderForm
+import '../controllers/form_builder_controller.dart'; 
+import 'package:file_saver/file_saver.dart'; 
+import 'dart:convert'; 
+import 'dart:typed_data'; 
+import '../../domain/entities/builder_form.dart';
+import '../../../../core/theme/app_colors.dart';
 
 /// Bulk Translator Page.
 ///
@@ -21,19 +22,63 @@ class TranslatorPage extends ConsumerStatefulWidget {
   ConsumerState<TranslatorPage> createState() => _TranslatorPageState();
 }
 
-class _TranslatorPageState extends ConsumerState<TranslatorPage> {
+class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTickerProviderStateMixin {
   List<TranslationLanguage> _languages = [];
   final List<String> _selectedTargetLanguages = [];
   String _sourceLanguage = 'en';
   bool _isLoading = false;
   final _previewTextController = TextEditingController();
   String _previewResult = '';
+  
+  late TabController _tabController;
+  String? _manualTargetLanguage;
+  Map<String, dynamic> _manualTranslations = {};
+  bool _isManualLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadLanguages();
     _loadTranslationJobs();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _previewTextController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadManualTranslations() async {
+    if (_manualTargetLanguage == null) return;
+    setState(() => _isManualLoading = true);
+    try {
+      final translations = await ref
+          .read(translationControllerProvider.notifier)
+          .getManualTranslations(widget.formId);
+      setState(() {
+        _manualTranslations = translations;
+      });
+    } catch (e) {
+      _showError('Failed to load manual translations: $e');
+    } finally {
+      setState(() => _isManualLoading = false);
+    }
+  }
+
+  Future<void> _saveManualTranslations() async {
+    setState(() => _isLoading = true);
+    try {
+      await ref
+          .read(translationControllerProvider.notifier)
+          .saveManualTranslations(widget.formId, _manualTranslations);
+      _showSuccess('Translations saved successfully!');
+    } catch (e) {
+      _showError('Failed to save translations: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   int _countTranslatableFields(BuilderForm form) {
@@ -117,7 +162,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
             targetLanguages: _selectedTargetLanguages,
             totalFields: _countTranslatableFields(
               form,
-            ), // Get actual field count
+            ), 
           );
       _showSuccess('Translation started!');
       await _loadTranslationJobs();
@@ -172,16 +217,14 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
   }
 
   Future<void> _downloadTranslations(String jobId) async {
-    // Added download function
     try {
       final translatedContent = await ref
           .read(translationControllerProvider.notifier)
           .getTranslatedContent(
             jobId,
-          ); // Assuming this method exists in the controller
+          ); 
 
       if (translatedContent != null) {
-        // Format the content as JSON
         final String fileName =
             'form_${widget.formId}_translations_$jobId.json';
         final String fileContent = jsonEncode(translatedContent);
@@ -233,33 +276,187 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bulk Translator'),
+        title: const Text('Form Translator'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'AI Jobs'),
+            Tab(text: 'Manual / Partial'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
               _loadLanguages();
               _loadTranslationJobs();
+              _loadManualTranslations();
             },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildLanguageSelector(),
-            const SizedBox(height: 24),
-            _buildPreviewCard(),
-            const SizedBox(height: 24),
-            _buildTranslationActions(),
-            const SizedBox(height: 24),
-            _buildActiveJobs(activeJobs),
-            const SizedBox(height: 24),
-            _buildJobHistory(completedJobs),
-          ],
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildAIJobsTab(activeJobs, completedJobs),
+          _buildManualTab(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAIJobsTab(List<TranslationJob> activeJobs, List<TranslationJob> completedJobs) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLanguageSelector(),
+          const SizedBox(height: 24),
+          _buildPreviewCard(),
+          const SizedBox(height: 24),
+          _buildTranslationActions(),
+          const SizedBox(height: 24),
+          _buildActiveJobs(activeJobs),
+          const SizedBox(height: 24),
+          _buildJobHistory(completedJobs),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManualTab() {
+    final formState = ref.watch(formBuilderControllerProvider(widget.formId));
+    
+    return formState.when(
+      data: (state) => _buildManualEditor(state.form),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Center(child: Text('Error: $e')),
+    );
+  }
+
+  Widget _buildManualEditor(BuilderForm form) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _manualTargetLanguage,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Language',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _languages.map((lang) {
+                    return DropdownMenuItem(
+                      value: lang.code,
+                      child: Text('${lang.name} (${lang.nativeName ?? lang.name})'),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() => _manualTargetLanguage = value);
+                    _loadManualTranslations();
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: _manualTargetLanguage == null || _isLoading ? null : _saveManualTranslations,
+                icon: const Icon(Icons.save),
+                label: const Text('Save All'),
+              ),
+            ],
+          ),
         ),
+        if (_isManualLoading)
+          const Expanded(child: Center(child: CircularProgressIndicator()))
+        else if (_manualTargetLanguage == null)
+          const Expanded(child: Center(child: Text('Select a target language to begin manual translation')))
+        else
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildManualField('Form Title', 'form', 'title', form.title),
+                const Divider(height: 32),
+                ...form.sections.expand((section) => [
+                  _buildManualField('Section: ${section.title?.translate('en') ?? ''}', 'section', section.id, section.title, field: 'title'),
+                  ...section.questions.map((q) => _buildManualField('Field: ${q.label?.translate('en') ?? ''}', 'question', q.id, q.label, field: 'label')),
+                  const Divider(height: 24),
+                ]),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _updateManualTranslation(String type, String id, String value, {String? field}) {
+    final lang = _manualTargetLanguage!;
+    final newTranslations = Map<String, dynamic>.from(_manualTranslations);
+    
+    if (!newTranslations.containsKey(lang)) {
+      newTranslations[lang] = {};
+    }
+    
+    final langData = Map<String, dynamic>.from(newTranslations[lang]);
+    
+    if (type == 'form') {
+      langData['title'] = value;
+    } else {
+      if (!langData.containsKey(type)) {
+        langData[type] = {};
+      }
+      final typeData = Map<String, dynamic>.from(langData[type]);
+      if (!typeData.containsKey(id)) {
+        typeData[id] = {};
+      }
+      final idData = Map<String, dynamic>.from(typeData[id]);
+      idData[field ?? 'text'] = value;
+      typeData[id] = idData;
+      langData[type] = typeData;
+    }
+    
+    newTranslations[lang] = langData;
+    setState(() {
+      _manualTranslations = newTranslations;
+    });
+  }
+
+  Widget _buildManualField(String label, String type, String id, Object? source, {String? field}) {
+    final lang = _manualTargetLanguage!;
+    final sourceEn = source is Map ? (source['en'] ?? '') : source?.toString() ?? '';
+    
+    String currentVal = '';
+    try {
+      if (type == 'form') {
+        currentVal = _manualTranslations[lang]?['title'] ?? '';
+      } else {
+        currentVal = _manualTranslations[lang]?[type]?[id]?[field ?? 'text'] ?? '';
+      }
+    } catch (_) {}
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 4),
+          Text('Source (EN): $sourceEn', style: const TextStyle(color: AppColors.textGrey, fontSize: 13)),
+          const SizedBox(height: 8),
+          TextField(
+            controller: TextEditingController(text: currentVal)..selection = TextSelection.fromPosition(TextPosition(offset: currentVal.length)),
+            decoration: const InputDecoration(
+              isDense: true,
+              border: OutlineInputBorder(),
+              hintText: 'Enter translation...',
+            ),
+            onChanged: (val) => _updateManualTranslation(type, id, val, field: field),
+          ),
+        ],
       ),
     );
   }
@@ -280,7 +477,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    initialValue: _sourceLanguage,
+                    value: _sourceLanguage,
                     decoration: const InputDecoration(
                       labelText: 'Source Language',
                       border: OutlineInputBorder(),
@@ -503,7 +700,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
                     icon: const Icon(Icons.download),
                     onPressed: () => _downloadTranslations(
                       jobItem.id,
-                    ), // Call download function
+                    ), 
                   ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -548,15 +745,9 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> {
     }
 
     return Chip(
-      label: Text(text, style: TextStyle(color: Colors.white, fontSize: 12)),
+      label: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
       backgroundColor: color,
       padding: EdgeInsets.zero,
     );
-  }
-
-  @override
-  void dispose() {
-    _previewTextController.dispose();
-    super.dispose();
   }
 }

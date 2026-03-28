@@ -3,6 +3,7 @@ import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../../../core/utils/error_handler.dart';
+import '../../../responses/data/services/sync_service.dart';
 
 part 'auth_controller.g.dart';
 
@@ -63,6 +64,8 @@ class AuthController extends _$AuthController {
     try {
       final repo = ref.read(authRepositoryImplProvider);
       await repo.logout();
+      // Clear offline data on logout
+      await ref.read(syncServiceProvider.notifier).clearData();
     } finally {
       state = const AsyncValue.data(null);
     }

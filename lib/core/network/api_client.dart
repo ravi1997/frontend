@@ -8,6 +8,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../widgets/snackbar_service.dart';
 import '../router/app_router.dart';
 import 'error_interceptor.dart';
+import 'envelope_interceptor.dart';
 import 'api_endpoints.dart';
 
 part 'api_client.g.dart';
@@ -89,6 +90,9 @@ Dio dio(Ref ref) {
       dio: dio,
     ),
   );
+
+  // Add envelope unwrapping interceptor
+  dio.interceptors.add(EnvelopeInterceptor());
 
   // Add error interceptor for user-friendly error messages
   dio.interceptors.add(ErrorInterceptor(snackbarService));

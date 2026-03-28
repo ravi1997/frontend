@@ -18,6 +18,9 @@ _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
       SectionLayoutType.standard,
   gridColumns: (json['gridColumns'] as num?)?.toInt() ?? 2,
   isHidden: json['isHidden'] as bool? ?? false,
+  isRepeatable: json['isRepeatable'] as bool? ?? false,
+  repeatMin: (json['repeatMin'] as num?)?.toInt(),
+  repeatMax: (json['repeatMax'] as num?)?.toInt(),
   conditionalLogic: json['conditionalLogic'] as Map<String, dynamic>?,
   style: json['style'] == null
       ? const SectionStyle()
@@ -34,6 +37,9 @@ Map<String, dynamic> _$FormSectionToJson(_FormSection instance) =>
       'layout': _$SectionLayoutTypeEnumMap[instance.layout]!,
       'gridColumns': instance.gridColumns,
       'isHidden': instance.isHidden,
+      'isRepeatable': instance.isRepeatable,
+      'repeatMin': instance.repeatMin,
+      'repeatMax': instance.repeatMax,
       'conditionalLogic': instance.conditionalLogic,
       'style': instance.style,
       'metadata': instance.metadata,

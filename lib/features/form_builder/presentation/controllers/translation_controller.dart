@@ -3,6 +3,7 @@ import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../domain/entities/translation_job.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/repositories/translation_repository.dart';
+import '../../domain/repositories/form_builder_repository.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../data/repositories/translation_repository_impl.dart';
 
@@ -110,5 +111,17 @@ class TranslationController extends _$TranslationController {
   Future<Map<String, dynamic>?> getTranslatedContent(String jobId) async {
     final repository = ref.read(translationRepositoryProvider);
     return repository.getTranslatedContent(jobId);
+  }
+
+  /// Gets manual translations for a form.
+  Future<Map<String, dynamic>> getManualTranslations(String formId) async {
+    final repository = ref.read(formBuilderRepositoryProvider);
+    return repository.getTranslations(formId);
+  }
+
+  /// Saves manual translations for a form.
+  Future<void> saveManualTranslations(String formId, Map<String, dynamic> translations) async {
+    final repository = ref.read(formBuilderRepositoryProvider);
+    await repository.saveTranslations(formId, translations);
   }
 }

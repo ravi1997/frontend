@@ -261,4 +261,71 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       _logger.e('Failed to save template', error: e, stackTrace: s);
     }
   }
+
+  @override
+  Future<FormSection> createSection(String formId, FormSection section) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.createSection(formId),
+        data: section.toJson(),
+      );
+      return FormSection.fromJson(response.data as Map<String, dynamic>);
+    } catch (e, s) {
+      _logger.e('Failed to create section', error: e, stackTrace: s);
+      throw NetworkException('Failed to create section: $e');
+    }
+  }
+
+  @override
+  Future<FormSection> updateSection(String formId, FormSection section) async {
+    try {
+      final response = await _apiClient.patch(
+        ApiEndpoints.updateSection(section.id),
+        data: section.toJson(),
+      );
+      return FormSection.fromJson(response.data as Map<String, dynamic>);
+    } catch (e, s) {
+      _logger.e('Failed to update section', error: e, stackTrace: s);
+      throw NetworkException('Failed to update section: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteSection(String formId, String sectionId) async {
+    try {
+      await _apiClient.delete(ApiEndpoints.deleteSection(sectionId));
+    } catch (e, s) {
+      _logger.e('Failed to delete section', error: e, stackTrace: s);
+      throw NetworkException('Failed to delete section: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getTranslations(String formId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.getFormTranslations(formId),
+      );
+      return response.data as Map<String, dynamic>;
+    } catch (e, s) {
+      _logger.e('Failed to get form translations', error: e, stackTrace: s);
+      return {};
+    }
+  }
+
+  @override
+  Future<void> saveTranslations(
+    String formId,
+    Map<String, dynamic> translations,
+  ) async {
+    try {
+      await _apiClient.post(
+        ApiEndpoints.saveFormTranslations(formId),
+        data: translations,
+      );
+    } catch (e, s) {
+      _logger.e('Failed to save form translations', error: e, stackTrace: s);
+      throw NetworkException('Failed to save form translations: $e');
+    }
+  }
 }

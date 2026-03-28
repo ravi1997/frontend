@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -35,6 +36,10 @@ final submitFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
 );
 
+final repeatInstancesProvider = StateProvider.autoDispose<Map<String, int>>(
+  (ref) => {},
+);
+
 class FormSubmitPage extends ConsumerStatefulWidget {
   final String formId;
 
@@ -52,6 +57,23 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   LogicEvaluationResult? _logicResult;
   final Set<String> _processedWebhookHashes = {};
   final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
+  final Map<String, bool> _loadingFields = {};
+  final Map<String, String?> _fieldErrors = {};
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  String _interpolateUrl(String url, Map<String, dynamic> formData) {
+    var finalUrl = url;
+    formData.forEach((key, value) {
+      finalUrl = finalUrl.replaceAll('{$key}', Uri.encodeComponent(value?.toString() ?? ''));
+    });
+    return finalUrl;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +152,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   _isReviewing = false;
                   _dynamicOptions.clear();
                   _processedWebhookHashes.clear();
+                  _loadingFields.clear();
+                  _fieldErrors.clear();
                 });
               },
               icon: const Icon(
@@ -164,7 +188,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         ),
         body: Form(
           key: _formKey,
-          child: _buildBody(form, locale, visibilityMap),
+          child: _buildBody(form, locale, visibilityMap, _logicResult!.requiredStatus),
         ),
       ),
     );
@@ -200,37 +224,64 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         if (!mounted) return;
         setState(() {
           _dynamicOptions.addAll(result.optionOverrides);
+          
+          // Reset invalid selections
+          final currentData = ref.read(submitFormDataProvider);
+          final updates = <String, dynamic>{};
+          
+          result.optionOverrides.forEach((fieldId, options) {
+            final val = currentData[fieldId];
+            if (val != null) {
+              final exists = options.any((o) => o.value == val.toString());
+              if (!exists) {
+                updates[fieldId] = null;
+              }
+            }
+          });
+          
+          if (updates.isNotEmpty) {
+            ref.read(submitFormDataProvider.notifier).update((s) => {...s, ...updates});
+          }
         });
       });
     }
 
     // 3. Handle automation webhooks
-    for (final wh in result.pendingWebhooks) {
-      final hash = '${wh['url']}_${jsonEncode(wh['mappings'])}';
-      if (!_processedWebhookHashes.contains(hash)) {
-        _processedWebhookHashes.add(hash);
-        _triggerWebhook(wh);
-      }
+    if (result.pendingWebhooks.isNotEmpty) {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        final currentData = ref.read(submitFormDataProvider);
+        for (final wh in result.pendingWebhooks) {
+          final resolvedUrl = _interpolateUrl(wh['url'], currentData);
+          final hash = '${resolvedUrl}_${jsonEncode(wh['mappings'])}';
+          if (!_processedWebhookHashes.contains(hash)) {
+            _processedWebhookHashes.add(hash);
+            _triggerWebhook(wh, resolvedUrl);
+          }
+        }
+      });
     }
   }
 
-  Future<void> _triggerWebhook(Map<String, dynamic> config) async {
-    final url = config['url'] as String?;
-    if (url == null || url.isEmpty) return;
-
+  Future<void> _triggerWebhook(Map<String, dynamic> config, String resolvedUrl) async {
     final mappings = config['mappings'] as List?;
-    final formData = ref.read(submitFormDataProvider);
+    
+    // Identify target fields for loading state
+    final targetFieldIds = mappings?.map((m) => m['targetFieldId'] as String?).whereType<String>().toList() ?? [];
 
     try {
-      debugPrint('Triggering logic webhook: $url');
-
-      var finalUrl = url;
-      formData.forEach((key, value) {
-        finalUrl = finalUrl.replaceAll('{$key}', value?.toString() ?? '');
+      setState(() {
+        for (final id in targetFieldIds) {
+          _loadingFields[id] = true;
+          _fieldErrors[id] = null;
+        }
       });
 
+      debugPrint('Triggering logic webhook: $resolvedUrl');
+
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.get(finalUrl);
+      final response = await apiClient.get(resolvedUrl);
       final responseData = response.data;
 
       if (mappings != null && responseData is Map<String, dynamic>) {
@@ -245,7 +296,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             if (value != null) {
               if (value is List) {
                 // If it's a list, treat as options update
-                optUpdates[targetId] = value
+                final newOptions = value
                     .map(
                       (o) => FormQuestionOption(
                         id: (o is Map ? (o['v'] ?? o['value'] ?? o['id']) : o)
@@ -260,6 +311,17 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                       ),
                     )
                     .toList();
+                optUpdates[targetId] = newOptions;
+                
+                // Clear current value if not in new options
+                final currentData = ref.read(submitFormDataProvider);
+                final currentVal = currentData[targetId];
+                if (currentVal != null) {
+                  final exists = newOptions.any((o) => o.value == currentVal.toString());
+                  if (!exists) {
+                    updates[targetId] = null;
+                  }
+                }
               } else {
                 updates[targetId] = value;
               }
@@ -267,19 +329,33 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
           }
         }
 
+        if (!mounted) return;
+
         if (updates.isNotEmpty) {
           ref
               .read(submitFormDataProvider.notifier)
               .update((s) => {...s, ...updates});
         }
-        if (optUpdates.isNotEmpty) {
-          setState(() {
+        
+        setState(() {
+          if (optUpdates.isNotEmpty) {
             _dynamicOptions.addAll(optUpdates);
-          });
-        }
+          }
+          for (final id in targetFieldIds) {
+            _loadingFields[id] = false;
+          }
+        });
       }
     } catch (e) {
       debugPrint('Webhook failed: $e');
+      if (mounted) {
+        setState(() {
+          for (final id in targetFieldIds) {
+            _loadingFields[id] = false;
+            _fieldErrors[id] = 'Failed to load options';
+          }
+        });
+      }
     }
   }
 
@@ -301,6 +377,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     BuilderForm form,
     String locale,
     Map<String, bool> visibilityMap,
+    Map<String, bool> requiredMap,
   ) {
     if (_showSubmitted) {
       return _buildSuccessScreen(locale);
@@ -318,7 +395,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
 
     Widget content;
     if (formStyle.layoutType == 'step') {
-      content = _buildStepLayout(form, locale, visibilityMap);
+      content = _buildStepLayout(form, locale, visibilityMap, requiredMap);
     } else {
       content = SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
@@ -330,7 +407,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               children: [
                 _buildFormHeader(form, locale),
                 SizedBox(height: formStyle.sectionSpacing),
-                _buildSectionsList(form, locale, visibilityMap),
+                _buildSectionsList(form, locale, visibilityMap, requiredMap),
                 const SizedBox(height: 32),
                 _buildSubmitButton(form),
                 const SizedBox(height: 16),
@@ -428,54 +505,69 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 style: TextStyle(color: AppColors.textGrey),
               ),
               const SizedBox(height: 32),
-              ...visibleSections.map((section) {
+              ...visibleSections.expand((section) {
                 final visibleQuestions = section.questions
                     .where((q) => visibilityMap[q.id] ?? true)
                     .toList();
-                if (visibleQuestions.isEmpty) return const SizedBox.shrink();
+                if (visibleQuestions.isEmpty) return [const SizedBox.shrink()];
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      section.title.translate(locale).toUpperCase(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: AppColors.textGrey,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const Divider(height: 24),
-                    ...visibleQuestions.map((q) {
-                      final val = formData[q.id];
-                      String displayVal = val?.toString() ?? '—';
-                      if (val is List) displayVal = val.join(', ');
+                final repeatCount = section.isRepeatable
+                    ? (ref.watch(repeatInstancesProvider)[section.id] ?? 1)
+                    : 1;
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              q.label.translate(locale),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              displayVal,
-                              style: const TextStyle(color: AppColors.textGrey),
-                            ),
-                          ],
+                final widgets = <Widget>[];
+
+                for (int i = 0; i < repeatCount; i++) {
+                  widgets.add(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          section.title.translate(locale).toUpperCase() +
+                              (section.isRepeatable ? ' (${i + 1})' : ''),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: AppColors.textGrey,
+                            letterSpacing: 1,
+                          ),
                         ),
-                      );
-                    }),
-                    const SizedBox(height: 24),
-                  ],
-                );
+                        const Divider(height: 24),
+                        ...visibleQuestions.map((q) {
+                          final fieldId = section.isRepeatable
+                              ? '${section.id}[$i].${q.id}'
+                              : q.id;
+                          final val = formData[fieldId];
+                          String displayVal = val?.toString() ?? '—';
+                          if (val is List) displayVal = val.join(', ');
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  q.label.translate(locale),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  displayVal,
+                                  style: const TextStyle(color: AppColors.textGrey),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  );
+                }
+                return widgets;
               }),
               const SizedBox(height: 32),
               Row(
@@ -545,6 +637,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     BuilderForm form,
     String locale,
     Map<String, bool> visibilityMap,
+    Map<String, bool> requiredMap,
   ) {
     final spacing = form.style.sectionSpacing;
     final visibleSections = form.sections
@@ -572,17 +665,55 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         return Wrap(
           spacing: 24,
           runSpacing: spacing,
-          children: visibleSections.map((section) {
-            return SizedBox(
-              width: itemWidth,
-              child: _SubmitSectionWidget(
-                section: section,
-                questionSpacing: form.style.questionSpacing,
-                visibilityMap: visibilityMap,
-                dynamicOptions: _dynamicOptions,
-                onTriggerAction: (config) => _triggerWebhook(config),
-              ),
-            );
+          children: visibleSections.expand((section) {
+            final repeatCount = section.isRepeatable
+                ? (ref.watch(repeatInstancesProvider)[section.id] ?? 1)
+                : 1;
+
+            final widgets = <Widget>[];
+
+            for (int i = 0; i < repeatCount; i++) {
+              widgets.add(
+                SizedBox(
+                  width: itemWidth,
+                  child: _SubmitSectionWidget(
+                    section: section,
+                    questionSpacing: form.style.questionSpacing,
+                    visibilityMap: visibilityMap,
+                    requiredMap: requiredMap,
+                    dynamicOptions: _dynamicOptions,
+                    loadingFields: _loadingFields,
+                    fieldErrors: _fieldErrors,
+                    onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(submitFormDataProvider))),
+                    instanceIndex: section.isRepeatable ? i : null,
+                  ),
+                ),
+              );
+            }
+
+            if (section.isRepeatable &&
+                (section.repeatMax == null || repeatCount < section.repeatMax!)) {
+              widgets.add(
+                SizedBox(
+                  width: itemWidth,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        ref.read(repeatInstancesProvider.notifier).update((state) {
+                          final current = state[section.id] ?? 1;
+                          return {...state, section.id: current + 1};
+                        });
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text('Add another ${section.title.translate(locale)}'),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return widgets;
           }).toList(),
         );
       },
@@ -593,6 +724,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     BuilderForm form,
     String locale,
     Map<String, bool> visibilityMap,
+    Map<String, bool> requiredMap,
   ) {
     final sections = form.sections;
     final visibleSections = sections
@@ -643,12 +775,57 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _SubmitSectionWidget(
-                      section: currentSection,
-                      questionSpacing: form.style.questionSpacing,
-                      visibilityMap: visibilityMap,
-                      dynamicOptions: _dynamicOptions,
-                      onTriggerAction: (config) => _triggerWebhook(config),
+                    Builder(
+                      builder: (context) {
+                        final repeatCount = currentSection.isRepeatable
+                            ? (ref.watch(repeatInstancesProvider)[currentSection.id] ?? 1)
+                            : 1;
+
+                        final widgets = <Widget>[];
+                        for (int i = 0; i < repeatCount; i++) {
+                          widgets.add(
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: _SubmitSectionWidget(
+                                section: currentSection,
+                                questionSpacing: form.style.questionSpacing,
+                                visibilityMap: visibilityMap,
+                                requiredMap: requiredMap,
+                                dynamicOptions: _dynamicOptions,
+                                loadingFields: _loadingFields,
+                                fieldErrors: _fieldErrors,
+                                onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(submitFormDataProvider))),
+                                instanceIndex: currentSection.isRepeatable ? i : null,
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (currentSection.isRepeatable &&
+                            (currentSection.repeatMax == null ||
+                                repeatCount < currentSection.repeatMax!)) {
+                          widgets.add(
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  ref.read(repeatInstancesProvider.notifier).update((state) {
+                                    final current = state[currentSection.id] ?? 1;
+                                    return {...state, currentSection.id: current + 1};
+                                  });
+                                },
+                                icon: const Icon(Icons.add),
+                                label: Text('Add another ${currentSection.title.translate(locale)}'),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: widgets,
+                        );
+                      }
                     ),
                     const SizedBox(height: 32),
                     Row(
@@ -745,7 +922,11 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 };
                 final success = await ref
                     .read(formSubmissionControllerProvider.notifier)
-                    .submit(form.id, Map<String, dynamic>.from(submissionData));
+                    .submit(
+                      formId: form.id,
+                      answers: Map<String, dynamic>.from(formData),
+                      visibilityMap: _logicResult!.visibility,
+                    );
 
                 if (success) {
                   setState(() {
@@ -829,15 +1010,23 @@ class _SubmitSectionWidget extends ConsumerWidget {
   final FormSection section;
   final double questionSpacing;
   final Map<String, bool> visibilityMap;
+  final Map<String, bool> requiredMap;
   final Map<String, List<FormQuestionOption>> dynamicOptions;
+  final Map<String, bool> loadingFields;
+  final Map<String, String?> fieldErrors;
   final Future<void> Function(Map<String, dynamic>) onTriggerAction;
+  final int? instanceIndex;
 
   const _SubmitSectionWidget({
     required this.section,
     required this.questionSpacing,
     required this.visibilityMap,
+    required this.requiredMap,
     required this.dynamicOptions,
+    required this.loadingFields,
+    required this.fieldErrors,
     required this.onTriggerAction,
+    this.instanceIndex,
   });
 
   @override
@@ -869,7 +1058,7 @@ class _SubmitSectionWidget extends ConsumerWidget {
           children: [
             if (section.title.translate(locale).isNotEmpty) ...[
               Text(
-                section.title.translate(locale),
+                section.title.translate(locale) + (instanceIndex != null ? ' (${instanceIndex! + 1})' : ''),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -959,7 +1148,12 @@ class _SubmitSectionWidget extends ConsumerWidget {
                 child: _SubmitFieldWidget(
                   question: q,
                   dynamicOptions: dynamicOptions[q.id],
+                  isLoading: loadingFields[q.id] ?? false,
+                  error: fieldErrors[q.id],
                   onTriggerAction: (config) => onTriggerAction(config),
+                  instanceIndex: instanceIndex,
+                  sectionId: section.id,
+                  isRequired: requiredMap[q.id] ?? q.isRequired,
                 ),
               ),
             );
@@ -973,12 +1167,22 @@ class _SubmitSectionWidget extends ConsumerWidget {
 class _SubmitFieldWidget extends ConsumerStatefulWidget {
   final FormQuestion question;
   final List<FormQuestionOption>? dynamicOptions;
+  final bool isLoading;
+  final String? error;
   final Future<void> Function(Map<String, dynamic>)? onTriggerAction;
+  final int? instanceIndex;
+  final String? sectionId;
+  final bool isRequired;
 
   const _SubmitFieldWidget({
     required this.question,
     this.dynamicOptions,
+    this.isLoading = false,
+    this.error,
     this.onTriggerAction,
+    this.instanceIndex,
+    this.sectionId,
+    this.isRequired = false,
   });
 
   @override
@@ -989,17 +1193,24 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
   late TextEditingController _controller;
   bool _isActionRunning = false;
 
+  String get _fieldId {
+    if (widget.instanceIndex != null && widget.sectionId != null) {
+      return '${widget.sectionId}[${widget.instanceIndex}].${widget.question.id}';
+    }
+    return widget.question.id;
+  }
+
   @override
   void initState() {
     super.initState();
-    final initialValue = ref.read(submitFormDataProvider)[widget.question.id];
+    final initialValue = ref.read(submitFormDataProvider)[_fieldId];
     _controller = TextEditingController(text: initialValue?.toString() ?? '');
   }
 
   @override
   void didUpdateWidget(_SubmitFieldWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final val = ref.read(submitFormDataProvider)[widget.question.id];
+    final val = ref.read(submitFormDataProvider)[_fieldId];
     if (val?.toString() != _controller.text) {
       _controller.text = val?.toString() ?? '';
     }
@@ -1040,7 +1251,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
             ),
           ),
         ),
-        if (q.isRequired)
+        if (widget.isRequired)
           const Padding(
             padding: EdgeInsets.only(left: 4),
             child: Text('*', style: TextStyle(color: Colors.red)),
@@ -1189,6 +1400,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
       focusedBorder: getBorder(Theme.of(context).primaryColor, focused: true),
       errorBorder: getBorder(Colors.red),
       focusedErrorBorder: getBorder(Colors.red, focused: true),
+      errorText: widget.error,
       prefixIcon: (style.prefixIcon != null && style.prefixIcon!.isNotEmpty)
           ? Center(
               widthFactor: 1,
@@ -1198,12 +1410,19 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               ),
             )
           : null,
-      suffixIcon: _buildSuffix(context, q, textStyle),
+      suffixIcon: widget.isLoading 
+          ? Container(
+              padding: const EdgeInsets.all(12),
+              width: 20,
+              height: 20,
+              child: const CircularProgressIndicator(strokeWidth: 2),
+            )
+          : _buildSuffix(context, q, textStyle),
     );
 
     String? validator(String? val) => PreviewUtils.validateField(
       val,
-      isRequired: q.isRequired,
+      isRequired: widget.isRequired,
       regex: q.validationRegex,
       minLength: q.minLength,
       maxLength: q.maxLength,
@@ -1238,7 +1457,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           onChanged: (val) {
             ref
                 .read(submitFormDataProvider.notifier)
-                .update((state) => {...state, q.id: val});
+                .update((state) => {...state, _fieldId: val});
             setState(() {});
           },
         );
@@ -1255,7 +1474,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           onChanged: (val) {
             ref
                 .read(submitFormDataProvider.notifier)
-                .update((state) => {...state, q.id: val});
+                .update((state) => {...state, _fieldId: val});
             setState(() {});
           },
         );
@@ -1264,7 +1483,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(submitFormDataProvider);
         return DropdownButtonFormField<String>(
-          initialValue: formData[q.id]?.toString(),
+          value: formData[_fieldId]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {
@@ -1273,12 +1492,12 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               child: Text(opt.label, style: textStyle),
             );
           }).toList(),
-          validator: (val) => q.isRequired && val == null ? 'Required' : null,
+          validator: (val) => widget.isRequired && val == null ? 'Required' : null,
           onChanged: (val) {
             if (val != null) {
               ref
                   .read(submitFormDataProvider.notifier)
-                  .update((state) => {...state, q.id: val});
+                  .update((state) => {...state, _fieldId: val});
             }
           },
         );
@@ -1288,7 +1507,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         final options = q.options ?? [];
         final isRadio = q.type == QuestionType.multipleChoice;
         final formData = ref.watch(submitFormDataProvider);
-        final currentValue = formData[q.id];
+        final currentValue = formData[_fieldId];
 
         // Check if these are image choices (enhanced UI)
         final isImageChoice = options.any(
@@ -1299,7 +1518,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         return FormField<dynamic>(
           initialValue: currentValue,
           validator: (val) =>
-              q.isRequired && (val == null || (val is List && val.isEmpty))
+              widget.isRequired && (val == null || (val is List && val.isEmpty))
               ? 'Required'
               : null,
           builder: (state) {
@@ -1325,7 +1544,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                           if (isRadio) {
                             ref
                                 .read(submitFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: opt.value});
+                                .update((s) => {...s, _fieldId: opt.value});
                             state.didChange(opt.value);
                           } else {
                             final currentList = List<String>.from(
@@ -1338,7 +1557,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                             }
                             ref
                                 .read(submitFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: currentList});
+                                .update((s) => {...s, _fieldId: currentList});
                             state.didChange(currentList);
                           }
                         },
@@ -1447,7 +1666,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                           }
                           ref
                               .read(submitFormDataProvider.notifier)
-                              .update((s) => {...s, q.id: newValue});
+                              .update((s) => {...s, _fieldId: newValue});
                           state.didChange(newValue);
                         },
                       );
@@ -1469,7 +1688,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.date:
         final formData = ref.watch(submitFormDataProvider);
-        final dateStr = formData[q.id]?.toString() ?? '';
+        final dateStr = formData[_fieldId]?.toString() ?? '';
         return _buildPicker(
           text: dateStr.isEmpty ? 'Select Date' : dateStr,
           icon: Icons.calendar_today,
@@ -1485,7 +1704,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               final val = DateFormat('yyyy-MM-dd').format(date);
               ref
                   .read(submitFormDataProvider.notifier)
-                  .update((s) => {...s, q.id: val});
+                  .update((s) => {...s, _fieldId: val});
               _controller.text = val;
             }
           },
@@ -1493,7 +1712,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.time:
         final formData = ref.watch(submitFormDataProvider);
-        final timeStr = formData[q.id]?.toString() ?? '';
+        final timeStr = formData[_fieldId]?.toString() ?? '';
         return _buildPicker(
           text: timeStr.isEmpty ? 'Select Time' : timeStr,
           icon: Icons.access_time,
@@ -1508,7 +1727,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                   '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
               ref
                   .read(submitFormDataProvider.notifier)
-                  .update((s) => {...s, q.id: val});
+                  .update((s) => {...s, _fieldId: val});
               _controller.text = val;
             }
           },
@@ -1516,7 +1735,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.rating:
         final formData = ref.watch(submitFormDataProvider);
-        final rating = double.tryParse(formData[q.id]?.toString() ?? '0') ?? 0;
+        final rating = double.tryParse(formData[_fieldId]?.toString() ?? '0') ?? 0;
         return Row(
           children: List.generate(5, (index) {
             final isSelected = index < rating;
@@ -1529,7 +1748,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               onPressed: () {
                 ref
                     .read(submitFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: index + 1});
+                    .update((s) => {...s, _fieldId: index + 1});
               },
             );
           }),
@@ -1539,7 +1758,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         final formData = ref.watch(submitFormDataProvider);
         final val =
             double.tryParse(
-              formData[q.id]?.toString() ?? (q.minValue?.toString() ?? '0'),
+              formData[_fieldId]?.toString() ?? (q.minValue?.toString() ?? '0'),
             ) ??
             0.0;
         return Column(
@@ -1557,7 +1776,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               onChanged: (newVal) {
                 ref
                     .read(submitFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: newVal});
+                    .update((s) => {...s, _fieldId: newVal});
               },
             ),
             Row(
@@ -1670,7 +1889,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
   Widget _buildImageUploadField(FormQuestion q, WidgetRef ref) {
     final formData = ref.watch(submitFormDataProvider);
     // Store image bytes as Uint8List in form data
-    final imageBytes = formData[q.id];
+    final imageBytes = formData[_fieldId];
     final hasImage = imageBytes is List && imageBytes.isNotEmpty;
 
     // ── Gallery picker (file browser) ─────────────────────────────
@@ -1686,7 +1905,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           final bytes = await picked.readAsBytes();
           ref
               .read(submitFormDataProvider.notifier)
-              .update((s) => {...s, q.id: bytes});
+              .update((s) => {...s, _fieldId: bytes});
         }
       } catch (e) {
         if (!mounted) return;
@@ -1705,7 +1924,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
       if (bytes != null) {
         ref
             .read(submitFormDataProvider.notifier)
-            .update((s) => {...s, q.id: bytes});
+            .update((s) => {...s, _fieldId: bytes});
       }
     }
 
@@ -1816,7 +2035,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                           ),
                           onPressed: () => ref
                               .read(submitFormDataProvider.notifier)
-                              .update((s) => {...s, q.id: null}),
+                              .update((s) => {...s, _fieldId: null}),
                           tooltip: 'Remove image',
                         ),
                       ),
@@ -1861,7 +2080,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     WidgetRef ref,
   ) {
     final formData = ref.watch(submitFormDataProvider);
-    final fileEntry = formData[q.id];
+    final fileEntry = formData[_fieldId];
     final fileName = fileEntry is Map
         ? fileEntry['name']?.toString() ?? ''
         : '';
@@ -2026,7 +2245,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                     onPressed: () {
                       ref
                           .read(submitFormDataProvider.notifier)
-                          .update((s) => {...s, q.id: null});
+                          .update((s) => {...s, _fieldId: null});
                     },
                   ),
                   IconButton(
@@ -2067,7 +2286,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     Color borderColor,
   ) {
     final formData = ref.watch(submitFormDataProvider);
-    final signatureData = formData[q.id]?.toString();
+    final signatureData = formData[_fieldId]?.toString();
     final isSigned = signatureData != null && signatureData.isNotEmpty;
 
     return Column(
@@ -2098,7 +2317,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                     onPressed: () {
                       ref
                           .read(submitFormDataProvider.notifier)
-                          .update((s) => {...s, q.id: ''});
+                          .update((s) => {...s, _fieldId: ''});
                     },
                   ),
                 ),
@@ -2112,7 +2331,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               if (data.isNotEmpty) {
                 ref
                     .read(submitFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: data});
+                    .update((s) => {...s, _fieldId: data});
               }
             },
           ),
@@ -2129,7 +2348,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     bool isActionField,
   ) {
     final formData = ref.watch(submitFormDataProvider);
-    final matrixData = (formData[q.id] as Map<String, dynamic>?) ?? {};
+    final matrixData = (formData[_fieldId] as Map<String, dynamic>?) ?? {};
 
     final rows =
         (q.metadata?['rows'] as List?)?.map((e) => e.toString()).toList() ??
@@ -2194,7 +2413,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                             newData[row] = val;
                             ref
                                 .read(submitFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: newData});
+                                .update((s) => {...s, _fieldId: newData});
                           }
                         },
                         child: Radio<String>(

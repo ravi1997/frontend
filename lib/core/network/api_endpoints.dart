@@ -4,15 +4,10 @@
 /// organized by feature area for easy maintenance and updates.
 class ApiEndpoints {
   // Base configuration
-  // Note: Replace this IP with 10.0.2.2 if testing on Android Emulator,
-  // or use the current host IP '192.168.156.10' for physical devices.
-  static const String baseUrl = 'http://localhost:5000/form/api/v1';
-  // static const String baseUrl =
-  //     'https://325cbd2b50a9d4c9-59-177-107-51.serveousercontent.com/form/api/v1';
+  // static const String serverBaseUrl = 'http://localhost:5000';
+  static const String serverBaseUrl = 'http://192.168.1.50:8051';
 
-  /// Base URL for the server root (without the /form/api/v1 prefix).
-  /// Use this for endpoints that live outside the /form/api/v1 path, e.g. admin endpoints.
-  static const String serverBaseUrl = 'http://localhost:5000';
+  static const String baseUrl = '$serverBaseUrl/form/api/v1';
 
   // ============================================================================
   // Admin User Management Endpoints  (prefix: /api/v1/admin/users)
@@ -204,6 +199,13 @@ class ApiEndpoints {
       '/forms/$formId/versions/$version';
 
   // ============================================================================
+  // Section Management Endpoints
+  // ============================================================================
+  static String createSection(String formId) => '/forms/$formId/sections';
+  static String updateSection(String sectionId) => '/sections/$sectionId';
+  static String deleteSection(String sectionId) => '/sections/$sectionId';
+
+  // ============================================================================
   // Response Submission Endpoints
   // ============================================================================
 
@@ -375,16 +377,12 @@ class ApiEndpoints {
   // ============================================================================
 
   /// GET - Get translations for form
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?form_id=string&language=string
-  /// Returns: { "language": string, "translations": {...} }
-  static const String getTranslations = '/forms/translations';
+  static String getFormTranslations(String formId) =>
+      '/forms/$formId/translations';
 
-  /// POST - Save translations
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "form_id": string, "language": string, "translations": {...} }
-  /// Returns: { "message": string }
-  static const String saveTranslations = '/forms/translations';
+  /// POST/PATCH - Save translations
+  static String saveFormTranslations(String formId) =>
+      '/forms/$formId/translations';
 
   /// GET - Get translation job details
   /// Headers: { "Authorization": "Bearer {token}" }

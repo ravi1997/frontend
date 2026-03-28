@@ -4,6 +4,7 @@ import '../../data/services/sync_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/repositories/response_repository_impl.dart';
+import '../../data/mappers/response_mapper.dart';
 
 part 'form_submission_controller.g.dart';
 
@@ -14,14 +15,21 @@ class FormSubmissionController extends _$FormSubmissionController {
     return const AsyncValue.data(null);
   }
 
-  Future<bool> submit(String formId, Map<String, dynamic> answers) async {
+  Future<bool> submit({
+    required String formId,
+    required Map<String, dynamic> answers,
+    required Map<String, bool> visibilityMap,
+  }) async {
     state = const AsyncValue.loading();
+
+    // Prune hidden fields and transform to nested structure
+    final prunedAnswers = ResponseMapper.toBackendPayload(answers, visibilityMap);
 
     final response = FormResponse(
       id: const Uuid().v4(),
       formId: formId,
       submittedAt: DateTime.now(),
-      answers: answers,
+      answers: prunedAnswers,
     );
 
     final isOnline =

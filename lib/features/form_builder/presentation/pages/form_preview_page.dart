@@ -723,11 +723,13 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     "E, d MMM y HH:mm:ss 'GMT'",
                   ).format(DateTime.now().toUtc()),
                 };
+                final result = FormLogicEngine.evaluate(widget.form, formData);
                 final success = await ref
                     .read(formSubmissionControllerProvider.notifier)
                     .submit(
-                      widget.form.id,
-                      Map<String, dynamic>.from(submissionData),
+                      formId: widget.form.id,
+                      answers: Map<String, dynamic>.from(formData),
+                      visibilityMap: result.visibility,
                     );
 
                 if (success) {

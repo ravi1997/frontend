@@ -38,6 +38,15 @@ abstract class FormBuilderRepository {
   // Templates
   Future<List<CustomFieldTemplate>> getTemplates();
   Future<void> saveTemplate(CustomFieldTemplate template);
+
+  // Section CRUD
+  Future<FormSection> createSection(String formId, FormSection section);
+  Future<FormSection> updateSection(String formId, FormSection section);
+  Future<void> deleteSection(String formId, String sectionId);
+
+  // Translations
+  Future<Map<String, dynamic>> getTranslations(String formId);
+  Future<void> saveTranslations(String formId, Map<String, dynamic> translations);
 }
 
 @riverpod

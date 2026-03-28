@@ -78,3 +78,17 @@ final class NetworkException extends AppException {
     super.stackTrace,
   });
 }
+
+/// Detailed API exceptions for structured error responses
+final class ApiException extends AppException {
+  final int? statusCode;
+  final dynamic details;
+
+  const ApiException(
+    super.message, {
+    this.statusCode,
+    this.details,
+    super.originalError,
+    super.stackTrace,
+  });
+}
