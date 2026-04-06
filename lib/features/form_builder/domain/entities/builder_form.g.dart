@@ -19,7 +19,7 @@ _BuilderForm _$BuilderFormFromJson(Map<String, dynamic> json) => _BuilderForm(
   layout:
       $enumDecodeNullable(_$FormLayoutTypeEnumMap, json['layout']) ??
       FormLayoutType.singleColumn,
-  updatedAt: _parseDateTime(json['updatedAt']),
+  updatedAt: DateUtils.parse(json['updatedAt']),
   style: json['style'] == null
       ? const FormStyle()
       : FormStyle.fromJson(json['style'] as Map<String, dynamic>),

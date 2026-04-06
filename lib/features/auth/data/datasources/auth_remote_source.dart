@@ -8,7 +8,7 @@ part 'auth_remote_source.g.dart';
 abstract class AuthRemoteSource {
   Future<Map<String, dynamic>> login(String identifier, String password);
   Future<Map<String, dynamic>> loginWithOtp(String mobile, String otp);
-  Future<void> generateOtp(String mobile);
+  Future<void> requestOtp(String mobile);
   Future<void> logout();
   Future<User?> getCurrentUser();
   Future<Map<String, dynamic>> refreshToken(String refreshToken);
@@ -21,6 +21,8 @@ abstract class AuthRemoteSource {
     String? mobile,
   });
   Future<void> requestPasswordReset(String email);
+  Future<void> revokeAll();
+  Future<void> changePassword(String currentPassword, String newPassword);
 }
 
 class AuthRemoteSourceImpl implements AuthRemoteSource {
@@ -31,7 +33,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<Map<String, dynamic>> login(String identifier, String password) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,
-      data: {'identifier': identifier, 'password': password},
+      data: {'email': identifier, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -46,8 +48,8 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   }
 
   @override
-  Future<void> generateOtp(String mobile) async {
-    await _apiClient.post(ApiEndpoints.generateOtp, data: {'mobile': mobile});
+  Future<void> requestOtp(String mobile) async {
+    await _apiClient.post(ApiEndpoints.requestOtp, data: {'mobile': mobile});
   }
 
   @override
@@ -59,8 +61,16 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<User?> getCurrentUser() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.userStatus);
-      if (response.data != null && response.data['user'] != null) {
-        return User.fromJson(response.data['user'] as Map<String, dynamic>);
+      final data = response.data;
+
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey('user')) {
+          return User.fromJson(data['user'] as Map<String, dynamic>);
+        }
+        // If the entire data object is the user (unwrapped from {success: true, data: {user_fields...}})
+        if (data.containsKey('id') && data.containsKey('username')) {
+          return User.fromJson(data);
+        }
       }
     } catch (e) {
       return null;
@@ -114,6 +124,22 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
     await _apiClient.post(
       ApiEndpoints.requestPasswordReset,
       data: {'email': email},
+    );
+  }
+
+  @override
+  Future<void> revokeAll() async {
+    await _apiClient.post(ApiEndpoints.revokeAll);
+  }
+
+  @override
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    await _apiClient.post(
+      ApiEndpoints.changePassword,
+      data: {'current_password': currentPassword, 'new_password': newPassword},
     );
   }
 }

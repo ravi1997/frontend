@@ -14,6 +14,9 @@ import '../mappers/form_mapper.dart';
 ///
 /// Handles form retrieval, saving, publishing, and version history through
 /// the API client with proper error handling and data transformation.
+///
+/// EnvelopeInterceptor in the Dio pipeline already unwraps
+/// { "success": true, "data": ... } responses, so response.data is the unwrapped data.
 class FormBuilderRepositoryImpl implements FormBuilderRepository {
   final ApiClient _apiClient;
   final Logger _logger = Logger();
@@ -24,7 +27,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   Future<BuilderForm> getForm(String id) async {
     try {
       final response = await _apiClient.get(ApiEndpoints.getForm(id));
-      final dto = FormDto.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      final dto = FormDto.fromJson(data as Map<String, dynamic>);
 
       return FormMapper.fromDto(dto);
     } catch (e, s) {
@@ -39,44 +43,53 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     String versionType = 'patch',
   }) async {
     try {
-      dynamic responseData;
-      // If form exists update, otherwise create
-      if (form.id.isEmpty || form.id == 'new' || form.updatedAt == null) {
-        // New form: Use legacy full payload which initializes versions
-        final backendData = FormMapper.toBackendJson(form);
+      final bool isNewForm =
+          form.id.isEmpty || form.id == 'new' || form.updatedAt == null;
+
+      if (isNewForm) {
+        // ── Create new form ──────────────────────────────────────────────
+        // Backend: POST /forms/ → 201 { "form_id": "uuid" }
+        final payload = FormMapper.toCreatePayload(form);
         final response = await _apiClient.post(
           ApiEndpoints.createForm,
-          data: backendData,
+          data: payload,
         );
-        responseData = response.data['form'];
-        final dto = FormDto.fromJson(responseData as Map<String, dynamic>);
-        return FormMapper.fromDto(dto);
+        final data = response.data;
+        final newFormId = _extractFormId(data);
+        return getForm(newFormId);
       } else {
-        // Existing form: Split into metadata and content update to preserve history
-
-        // 1. Update metadata (excluding versions list)
-        final metadata = FormMapper.toFormMetadataJson(form);
+        // ── Update existing form ─────────────────────────────────────────
+        // Backend: PUT /forms/<id> for metadata
+        final metadata = FormMapper.toUpdatePayload(form);
         await _apiClient.put(ApiEndpoints.updateForm(form.id), data: metadata);
 
-        // 2. Update current version content
-        // This ensures other versions in history are not overwritten
-        final versionData = FormMapper.toVersionJson(form);
-        versionData.remove('version'); // Let backend auto-generate
-
-        await createFormVersion(
-          form.id,
-          versionData,
-          type: versionType,
-          activate: true,
-        );
-
-        // Return updated form by fetching it to ensure state consistency
+        // Fetch the updated form to return consistent state
         return getForm(form.id);
       }
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
       throw FormSaveException(form.id, originalError: e);
     }
+  }
+
+  /// Extract form_id from various backend response shapes.
+  String _extractFormId(dynamic data) {
+    if (data is Map) {
+      // { "form_id": "uuid" } or { "id": "uuid" }
+      final id = data['form_id'] ?? data['id'];
+      if (id is String && id.isNotEmpty) return id;
+
+      // Nested: { "form": { "form_id": "uuid" } }
+      if (data['form'] is Map) {
+        final nested = data['form'] as Map;
+        final nestedId = nested['form_id'] ?? nested['id'];
+        if (nestedId is String && nestedId.isNotEmpty) return nestedId;
+      }
+    }
+    throw FormSaveException(
+      '',
+      originalError: Exception('Invalid response: missing form_id. Got: $data'),
+    );
   }
 
   @override
@@ -125,11 +138,13 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<Map<String, dynamic>> publishForm(String formId) async {
     try {
+      // Backend: POST /forms/<id>/publish → 202 { "task_id": "..." }
+      // Body: { "major": bool, "minor": bool }
       final response = await _apiClient.post(
         ApiEndpoints.publishForm(formId),
-        data: {},
+        data: {'major': false, 'minor': true},
       );
-      return response.data;
+      return response.data as Map<String, dynamic>;
     } catch (e, s) {
       _logger.e('Failed to publish form', error: e, stackTrace: s);
       throw FormLoadException(formId, originalError: e);
@@ -142,9 +157,11 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final response = await _apiClient.get(
         ApiEndpoints.getFormVersions(formId),
       );
-      return (response.data as List)
-          .map((e) => FormVersionHistory.fromJson(e))
-          .toList();
+      final data = response.data;
+      if (data is List) {
+        return data.map((e) => FormVersionHistory.fromJson(e)).toList();
+      }
+      return [];
     } catch (e, s) {
       _logger.w(
         'Failed to get version history for form $formId',
@@ -161,8 +178,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final response = await _apiClient.get(
         ApiEndpoints.getFormVersion(formId, version),
       );
-
-      final dto = FormDto.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      final dto = FormDto.fromJson(data as Map<String, dynamic>);
       return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to load form version', error: e, stackTrace: s);
@@ -238,8 +255,9 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   Future<List<CustomFieldTemplate>> getTemplates() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.listFieldTemplates);
-      if (response.data is List) {
-        return (response.data as List)
+      final data = response.data;
+      if (data is List) {
+        return data
             .map((e) => CustomFieldTemplate.fromJson(e as Map<String, dynamic>))
             .toList();
       }
@@ -265,11 +283,20 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<FormSection> createSection(String formId, FormSection section) async {
     try {
+      // Backend: POST /forms/<form_id>/sections → 201 returns the created section
       final response = await _apiClient.post(
         ApiEndpoints.createSection(formId),
         data: section.toJson(),
       );
-      return FormSection.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        // Some backends wrap the section in a key
+        if (data.containsKey('section')) {
+          return FormSection.fromJson(data['section'] as Map<String, dynamic>);
+        }
+        return FormSection.fromJson(data);
+      }
+      throw NetworkException('Unexpected create section response');
     } catch (e, s) {
       _logger.e('Failed to create section', error: e, stackTrace: s);
       throw NetworkException('Failed to create section: $e');
@@ -279,11 +306,19 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<FormSection> updateSection(String formId, FormSection section) async {
     try {
-      final response = await _apiClient.patch(
-        ApiEndpoints.updateSection(section.id),
+      // Backend: PUT /forms/<form_id>/sections/<section_id>
+      final response = await _apiClient.put(
+        ApiEndpoints.updateSection(formId, section.id),
         data: section.toJson(),
       );
-      return FormSection.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        if (data.containsKey('section')) {
+          return FormSection.fromJson(data['section'] as Map<String, dynamic>);
+        }
+        return FormSection.fromJson(data);
+      }
+      throw NetworkException('Unexpected update section response');
     } catch (e, s) {
       _logger.e('Failed to update section', error: e, stackTrace: s);
       throw NetworkException('Failed to update section: $e');
@@ -293,7 +328,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<void> deleteSection(String formId, String sectionId) async {
     try {
-      await _apiClient.delete(ApiEndpoints.deleteSection(sectionId));
+      // Backend: DELETE /forms/<form_id>/sections/<section_id>
+      await _apiClient.delete(ApiEndpoints.deleteSection(formId, sectionId));
     } catch (e, s) {
       _logger.e('Failed to delete section', error: e, stackTrace: s);
       throw NetworkException('Failed to delete section: $e');
@@ -301,10 +337,25 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
+  Future<void> reorderSections(String formId, List<String> sectionIds) async {
+    try {
+      // Backend: PUT /forms/<form_id>/sections/reorder
+      // Body: { "section_ids": [...] }
+      await _apiClient.put(
+        ApiEndpoints.reorderSections(formId),
+        data: {'section_ids': sectionIds},
+      );
+    } catch (e, s) {
+      _logger.e('Failed to reorder sections', error: e, stackTrace: s);
+      throw NetworkException('Failed to reorder sections: $e');
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> getTranslations(String formId) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.getFormTranslations(formId),
+        ApiEndpoints.getFormTranslations(formId: formId),
       );
       return response.data as Map<String, dynamic>;
     } catch (e, s) {
@@ -319,13 +370,54 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     Map<String, dynamic> translations,
   ) async {
     try {
-      await _apiClient.post(
-        ApiEndpoints.saveFormTranslations(formId),
-        data: translations,
-      );
+      // Backend: POST /forms/translations
+      // Body: { "form_id": "...", "language": "...", "translations": {...} }
+      final payload = Map<String, dynamic>.from(translations);
+      payload['form_id'] = formId;
+
+      await _apiClient.post(ApiEndpoints.saveFormTranslations, data: payload);
     } catch (e, s) {
       _logger.e('Failed to save form translations', error: e, stackTrace: s);
       throw NetworkException('Failed to save form translations: $e');
+    }
+  }
+
+  @override
+  Future<BuilderForm> cloneForm(
+    String formId, {
+    String? title,
+    String? slug,
+  }) async {
+    try {
+      // Backend: POST /forms/<id>/clone → 202 { "task_id": "..." }
+      // We poll the original form until the clone appears, or return as-is.
+      final payload = <String, dynamic>{};
+      if (title != null) payload['title'] = title;
+      if (slug != null) payload['slug'] = slug;
+
+      final response = await _apiClient.post(
+        ApiEndpoints.cloneForm(formId),
+        data: payload,
+      );
+      final data = response.data;
+
+      // Clone is async (202). The response contains task_id.
+      // Return the original form as fallback — caller should navigate to forms list.
+      if (data is Map && data.containsKey('task_id')) {
+        _logger.i('Clone accepted with task_id: ${data['task_id']}');
+        // Return current form as a fallback since clone is async
+        return getForm(formId);
+      }
+
+      // If backend returns the cloned form directly
+      if (data is Map && (data['form_id'] != null || data['id'] != null)) {
+        return getForm(_extractFormId(data));
+      }
+
+      return getForm(formId);
+    } catch (e, s) {
+      _logger.e('Failed to clone form', error: e, stackTrace: s);
+      throw FormSaveException(formId, originalError: e);
     }
   }
 }

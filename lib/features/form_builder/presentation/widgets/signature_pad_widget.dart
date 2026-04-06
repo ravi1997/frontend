@@ -254,3 +254,69 @@ class _SignaturePainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth;
   }
 }
+
+/// A dialog that embeds a [SignaturePadWidget] and returns the captured 
+/// signature as [Uint8List] bytes, or [null] if cancelled.
+class SignaturePadDialog extends StatelessWidget {
+  const SignaturePadDialog({super.key});
+
+  static Future<Uint8List?> show(BuildContext context) {
+    return showDialog<Uint8List>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const SignaturePadDialog(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        width: 520,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+              child: Row(
+                children: [
+                  const Icon(Icons.draw, color: Colors.white, size: 20),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Sign Here',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(null),
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SignaturePadWidget(
+                onSigned: (base64String) {
+                  if (base64String.isNotEmpty) {
+                    Navigator.of(context).pop(base64Decode(base64String));
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

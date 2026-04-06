@@ -42,7 +42,7 @@ class ErrorHandler {
       // 1. Check for backend provided message first
       if (error.response?.data is Map<String, dynamic>) {
         final data = error.response?.data as Map<String, dynamic>;
-        final backendMessage = (data['error'] ?? data['message'])?.toString();
+        final backendMessage = (data['error'] ?? data['msg'] ?? data['message'])?.toString();
         if (backendMessage != null && backendMessage.isNotEmpty) {
           return backendMessage;
         }

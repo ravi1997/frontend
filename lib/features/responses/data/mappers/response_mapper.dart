@@ -3,8 +3,9 @@ class ResponseMapper {
   /// and prunes hidden fields based on the visibility map.
   static Map<String, dynamic> toBackendPayload(
     Map<String, dynamic> flatAnswers,
-    Map<String, bool> visibilityMap,
-  ) {
+    Map<String, bool> visibilityMap, {
+    Map<String, int>? repeatInstances,
+  }) {
     final Map<String, dynamic> nested = {};
 
     flatAnswers.forEach((key, value) {
@@ -22,6 +23,12 @@ class ResponseMapper {
         final rest = parts[1].split('].');
         final index = int.parse(rest[0]);
         final fieldId = rest[1];
+
+        // Prune deleted repeat instances
+        if (repeatInstances != null) {
+          final maxInstances = repeatInstances[sectionId] ?? 1;
+          if (index >= maxInstances) return; // Discard data for removed instances
+        }
 
         // Skip if the specific field is hidden
         // Note: Logic engine currently uses fieldId for visibility, 

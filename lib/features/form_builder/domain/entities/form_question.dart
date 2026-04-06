@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/utils/id_reader.dart';
 import 'question_type.dart';
 import 'form_style.dart';
 import 'form_question_option.dart';
@@ -8,18 +9,11 @@ import 'form_question_option.dart';
 part 'form_question.freezed.dart';
 part 'form_question.g.dart';
 
-Object? _readId(Map map, String key) {
-  if (key == 'id') {
-    return map['id'] ?? map['_id'];
-  }
-  return map[key];
-}
-
 @freezed
 abstract class FormQuestion with _$FormQuestion {
   const FormQuestion._();
   const factory FormQuestion({
-    @JsonKey(readValue: _readId) required String id,
+    @JsonKey(readValue: IdReader.readIdCallback) required String id,
     String? variableName,
     required Object? label,
     @JsonKey(name: 'field_type') required QuestionType type,

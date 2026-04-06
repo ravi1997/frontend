@@ -157,41 +157,7 @@ Manages JWT token storage using Hive (existing implementation).
 - Thread-safe operations
 - Riverpod integration
 
-### 7. `token_storage_service.dart` (NEW)
-Enhanced token storage service with additional security features.
-
-**Features:**
-- Secure persistent storage using Hive
-- Token expiry checking
-- User ID storage
-- Last login timestamp tracking
-- Token validation methods
-- Comprehensive logging
-- Thread-safe operations
-
-**Usage:**
-```dart
-final tokenStorage = ref.watch(tokenStorageServiceProvider);
-
-// Save tokens
-await tokenStorage.saveTokens(
-  accessToken: 'access_token_here',
-  refreshToken: 'refresh_token_here',
-  expiresIn: 3600, // 1 hour
-  userId: 'user_id_123',
-);
-
-// Check if valid tokens exist
-final hasValidTokens = await tokenStorage.hasValidTokens();
-
-// Get access token (returns null if expired)
-final accessToken = await tokenStorage.getAccessToken();
-
-// Clear all tokens on logout
-await tokenStorage.clearTokens();
-```
-
-### 8. `api_client_wrapper.dart`
+### 7. `api_client_wrapper.dart`
 Wrapper around Dio providing clean HTTP method abstractions (existing implementation).
 
 **Features:**

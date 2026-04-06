@@ -99,7 +99,7 @@ This checklist documents all requirements and their completion status for the AP
 - [x] Comprehensive error handling
 - [x] Logging for debugging
 
-**Status:** ✅ **COMPLETE** - `token_service.dart`, `token_storage_service.dart`
+**Status:** ✅ **COMPLETE** - `token_service.dart`
 
 ### 6. Request/Response Logging for Debugging
 - [x] Configure Logger package
@@ -176,7 +176,7 @@ lib/core/
 │   └── IMPLEMENTATION_CHECKLIST.md        ✅ NEW (This file)
 │
 └── services/
-    └── token_storage_service.dart         ✅ NEW (Enhanced storage)
+    └── connectivity_service.dart          ✅ Existing
 ```
 
 ---

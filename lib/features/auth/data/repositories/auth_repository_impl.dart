@@ -16,7 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> login(String identifier, String password) async {
     final response = await _remoteSource.login(identifier, password);
     final accessToken = response['access_token'] as String;
-    // Backend doesn't return refresh_token, tokens are managed via HTTP-only cookies
+    // Backend returns refresh_token in response.data as per contract
     final refreshToken = response['refresh_token'] as String?;
     await _tokenService.setTokens(
       accessToken: accessToken,
@@ -34,7 +34,6 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> loginWithOtp(String mobile, String otp) async {
     final response = await _remoteSource.loginWithOtp(mobile, otp);
     final accessToken = response['access_token'] as String;
-    // Backend doesn't return refresh_token
     final refreshToken = response['refresh_token'] as String?;
     await _tokenService.setTokens(
       accessToken: accessToken,
@@ -49,8 +48,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> generateOtp(String mobile) async {
-    await _remoteSource.generateOtp(mobile);
+  Future<void> requestOtp(String mobile) async {
+    await _remoteSource.requestOtp(mobile);
   }
 
   @override
@@ -103,6 +102,19 @@ class AuthRepositoryImpl implements AuthRepository {
     );
 
     return newAccessToken;
+  }
+
+  @override
+  Future<void> revokeAll() async {
+    await _remoteSource.revokeAll();
+  }
+
+  @override
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    await _remoteSource.changePassword(currentPassword, newPassword);
   }
 }
 

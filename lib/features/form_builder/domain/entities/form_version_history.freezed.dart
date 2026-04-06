@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormVersionHistory {
 
- String get version;@JsonKey(fromJson: _dateTimeFromJson) DateTime get created_at; String? get authorId; String? get changeLog;
+ String get version;@JsonKey(fromJson: DateUtils.parse) DateTime get created_at; String? get authorId; String? get changeLog;
 /// Create a copy of FormVersionHistory
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FormVersionHistoryCopyWith<$Res>  {
   factory $FormVersionHistoryCopyWith(FormVersionHistory value, $Res Function(FormVersionHistory) _then) = _$FormVersionHistoryCopyWithImpl;
 @useResult
 $Res call({
- String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime created_at, String? authorId, String? changeLog
+ String version,@JsonKey(fromJson: DateUtils.parse) DateTime created_at, String? authorId, String? changeLog
 });
 
 
@@ -156,7 +156,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: DateUtils.parse)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormVersionHistory() when $default != null:
 return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
@@ -177,7 +177,7 @@ return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: DateUtils.parse)  DateTime created_at,  String? authorId,  String? changeLog)  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionHistory():
 return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
@@ -197,7 +197,7 @@ return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version, @JsonKey(fromJson: _dateTimeFromJson)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version, @JsonKey(fromJson: DateUtils.parse)  DateTime created_at,  String? authorId,  String? changeLog)?  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionHistory() when $default != null:
 return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);case _:
@@ -212,11 +212,11 @@ return $default(_that.version,_that.created_at,_that.authorId,_that.changeLog);c
 @JsonSerializable()
 
 class _FormVersionHistory implements FormVersionHistory {
-  const _FormVersionHistory({required this.version, @JsonKey(fromJson: _dateTimeFromJson) required this.created_at, this.authorId, this.changeLog});
+  const _FormVersionHistory({required this.version, @JsonKey(fromJson: DateUtils.parse) required this.created_at, this.authorId, this.changeLog});
   factory _FormVersionHistory.fromJson(Map<String, dynamic> json) => _$FormVersionHistoryFromJson(json);
 
 @override final  String version;
-@override@JsonKey(fromJson: _dateTimeFromJson) final  DateTime created_at;
+@override@JsonKey(fromJson: DateUtils.parse) final  DateTime created_at;
 @override final  String? authorId;
 @override final  String? changeLog;
 
@@ -253,7 +253,7 @@ abstract mixin class _$FormVersionHistoryCopyWith<$Res> implements $FormVersionH
   factory _$FormVersionHistoryCopyWith(_FormVersionHistory value, $Res Function(_FormVersionHistory) _then) = __$FormVersionHistoryCopyWithImpl;
 @override @useResult
 $Res call({
- String version,@JsonKey(fromJson: _dateTimeFromJson) DateTime created_at, String? authorId, String? changeLog
+ String version,@JsonKey(fromJson: DateUtils.parse) DateTime created_at, String? authorId, String? changeLog
 });
 
 

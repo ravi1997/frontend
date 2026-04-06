@@ -98,7 +98,7 @@ final class TranslationControllerProvider
 }
 
 String _$translationControllerHash() =>
-    r'5f3e4bf7592105471dc33028bcb314dc739fa283';
+    r'a4a89703c249b4069b4f95b6432efed4d70335d8';
 
 /// Controller for managing bulk translation operations.
 

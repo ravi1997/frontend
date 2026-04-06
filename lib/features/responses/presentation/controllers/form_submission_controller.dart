@@ -19,11 +19,16 @@ class FormSubmissionController extends _$FormSubmissionController {
     required String formId,
     required Map<String, dynamic> answers,
     required Map<String, bool> visibilityMap,
+    Map<String, int>? repeatInstances,
   }) async {
     state = const AsyncValue.loading();
 
     // Prune hidden fields and transform to nested structure
-    final prunedAnswers = ResponseMapper.toBackendPayload(answers, visibilityMap);
+    final prunedAnswers = ResponseMapper.toBackendPayload(
+      answers, 
+      visibilityMap,
+      repeatInstances: repeatInstances,
+    );
 
     final response = FormResponse(
       id: const Uuid().v4(),

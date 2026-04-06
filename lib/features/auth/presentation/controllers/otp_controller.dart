@@ -29,7 +29,7 @@ class OtpController extends _$OtpController {
   Future<void> resendOtp(String mobile) async {
     if (state > 0) return;
 
-    await ref.read(authControllerProvider.notifier).generateOtp(mobile);
+    await ref.read(authControllerProvider.notifier).requestOtp(mobile);
     startTimer();
   }
 

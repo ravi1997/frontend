@@ -19,7 +19,7 @@ This document provides practical examples of using the API client service in you
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_service.dart';
 import 'package:frontend/core/network/api_endpoints.dart';
-import 'package:frontend/core/services/token_storage_service.dart';
+import 'package:frontend/core/network/token_service.dart';
 ```
 
 ### Access the API Service
@@ -48,7 +48,7 @@ Future<void> loginWithEmail(
   String password,
 ) async {
   final apiService = ref.read(apiServiceProvider);
-  final tokenStorage = ref.read(tokenStorageServiceProvider);
+  final tokenService = ref.read(tokenServiceProvider.notifier);
 
   try {
     // Call login API
@@ -63,11 +63,9 @@ Future<void> loginWithEmail(
     final user = result['user'] as Map<String, dynamic>;
 
     // Save tokens securely
-    await tokenStorage.saveTokens(
+    await tokenService.setTokens(
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: 3600, // 1 hour
-      userId: user['id'] as String,
     );
 
     print('Login successful! User: ${user['username']}');
@@ -100,7 +98,7 @@ Future<void> loginWithOtp(
   String otp,
 ) async {
   final apiService = ref.read(apiServiceProvider);
-  final tokenStorage = ref.read(tokenStorageServiceProvider);
+  final tokenService = ref.read(tokenServiceProvider.notifier);
 
   try {
     final result = await apiService.loginWithOtp(
@@ -111,10 +109,9 @@ Future<void> loginWithOtp(
     final accessToken = result['access_token'] as String;
     final refreshToken = result['refresh_token'] as String?;
 
-    await tokenStorage.saveTokens(
+    await tokenService.setTokens(
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: 3600,
     );
 
     print('OTP login successful!');
@@ -134,7 +131,7 @@ Future<void> registerUser(WidgetRef ref, {
   required String mobile,
 }) async {
   final apiService = ref.read(apiServiceProvider);
-  final tokenStorage = ref.read(tokenStorageServiceProvider);
+  final tokenService = ref.read(tokenServiceProvider.notifier);
 
   try {
     final result = await apiService.register(
@@ -150,10 +147,9 @@ Future<void> registerUser(WidgetRef ref, {
     final accessToken = result['access_token'] as String;
     final refreshToken = result['refresh_token'] as String?;
 
-    await tokenStorage.saveTokens(
+    await tokenService.setTokens(
       accessToken: accessToken,
       refreshToken: refreshToken,
-      expiresIn: 3600,
     );
 
     print('Registration successful!');
@@ -167,10 +163,10 @@ Future<void> registerUser(WidgetRef ref, {
 
 ```dart
 Future<bool> isUserLoggedIn(WidgetRef ref) async {
-  final tokenStorage = ref.read(tokenStorageServiceProvider);
+  final tokenState = ref.read(tokenServiceProvider);
 
   // Check if valid tokens exist
-  final hasValidTokens = await tokenStorage.hasValidTokens();
+  final hasValidTokens = tokenState.value?.accessToken != null;
 
   if (hasValidTokens) {
     // Optionally verify with backend
@@ -180,7 +176,7 @@ Future<bool> isUserLoggedIn(WidgetRef ref) async {
       return true;
     } catch (e) {
       // Token might be invalid, clear it
-      await tokenStorage.clearTokens();
+      await ref.read(tokenServiceProvider.notifier).clearTokens();
       return false;
     }
   }
@@ -194,7 +190,7 @@ Future<bool> isUserLoggedIn(WidgetRef ref) async {
 ```dart
 Future<void> logout(WidgetRef ref) async {
   final apiService = ref.read(apiServiceProvider);
-  final tokenStorage = ref.read(tokenStorageServiceProvider);
+  final tokenService = ref.read(tokenServiceProvider.notifier);
 
   try {
     // Call logout API
@@ -205,7 +201,7 @@ Future<void> logout(WidgetRef ref) async {
   }
 
   // Clear tokens locally
-  await tokenStorage.clearTokens();
+  await tokenService.clearTokens();
 
   print('Logged out successfully');
 }

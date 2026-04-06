@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/utils/date_utils.dart';
 
 part 'form_response.freezed.dart';
 part 'form_response.g.dart';
@@ -12,8 +12,8 @@ abstract class FormResponse with _$FormResponse {
 
     @JsonKey(
       name: 'submitted_at',
-      fromJson: _dateTimeFromJson,
-      toJson: _dateTimeToJson,
+      fromJson: DateUtils.parse,
+      toJson: DateUtils.toIso8601,
     )
     required DateTime? submittedAt,
     @JsonKey(name: 'data') required Map<String, dynamic> answers,
@@ -23,18 +23,4 @@ abstract class FormResponse with _$FormResponse {
 
   factory FormResponse.fromJson(Map<String, dynamic> json) =>
       _$FormResponseFromJson(json);
-}
-
-DateTime? _dateTimeFromJson(String? date) {
-  if (date == null) return null;
-  try {
-    return DateFormat("E, d MMM y HH:mm:ss 'GMT'").parse(date);
-  } catch (_) {
-    return DateTime.tryParse(date);
-  }
-}
-
-String? _dateTimeToJson(DateTime? date) {
-  if (date == null) return null;
-  return DateFormat("E, d MMM y HH:mm:ss 'GMT'").format(date);
 }

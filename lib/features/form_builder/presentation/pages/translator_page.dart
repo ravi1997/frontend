@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/translation_controller.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/entities/translation_job.dart';
-import '../controllers/form_builder_controller.dart'; 
-import 'package:file_saver/file_saver.dart'; 
-import 'dart:convert'; 
-import 'dart:typed_data'; 
+import '../controllers/form_builder_controller.dart';
+import 'package:file_saver/file_saver.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import '../../domain/entities/builder_form.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -22,14 +22,15 @@ class TranslatorPage extends ConsumerStatefulWidget {
   ConsumerState<TranslatorPage> createState() => _TranslatorPageState();
 }
 
-class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTickerProviderStateMixin {
+class _TranslatorPageState extends ConsumerState<TranslatorPage>
+    with SingleTickerProviderStateMixin {
   List<TranslationLanguage> _languages = [];
   final List<String> _selectedTargetLanguages = [];
   String _sourceLanguage = 'en';
   bool _isLoading = false;
   final _previewTextController = TextEditingController();
   String _previewResult = '';
-  
+
   late TabController _tabController;
   String? _manualTargetLanguage;
   Map<String, dynamic> _manualTranslations = {};
@@ -56,7 +57,10 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
     try {
       final translations = await ref
           .read(translationControllerProvider.notifier)
-          .getManualTranslations(widget.formId);
+          .getManualTranslations(
+            widget.formId,
+            language: _manualTargetLanguage,
+          );
       setState(() {
         _manualTranslations = translations;
       });
@@ -68,11 +72,16 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
   }
 
   Future<void> _saveManualTranslations() async {
+    if (_manualTargetLanguage == null) return;
     setState(() => _isLoading = true);
     try {
       await ref
           .read(translationControllerProvider.notifier)
-          .saveManualTranslations(widget.formId, _manualTranslations);
+          .saveManualTranslations(
+            widget.formId,
+            _manualTargetLanguage!,
+            _manualTranslations,
+          );
       _showSuccess('Translations saved successfully!');
     } catch (e) {
       _showError('Failed to save translations: $e');
@@ -160,9 +169,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
             formId: widget.formId,
             sourceLanguage: _sourceLanguage,
             targetLanguages: _selectedTargetLanguages,
-            totalFields: _countTranslatableFields(
-              form,
-            ), 
+            totalFields: _countTranslatableFields(form),
           );
       _showSuccess('Translation started!');
       await _loadTranslationJobs();
@@ -220,9 +227,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
     try {
       final translatedContent = await ref
           .read(translationControllerProvider.notifier)
-          .getTranslatedContent(
-            jobId,
-          ); 
+          .getTranslatedContent(jobId);
 
       if (translatedContent != null) {
         final String fileName =
@@ -305,7 +310,10 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
     );
   }
 
-  Widget _buildAIJobsTab(List<TranslationJob> activeJobs, List<TranslationJob> completedJobs) {
+  Widget _buildAIJobsTab(
+    List<TranslationJob> activeJobs,
+    List<TranslationJob> completedJobs,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -327,12 +335,17 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
 
   Widget _buildManualTab() {
     final formState = ref.watch(formBuilderControllerProvider(widget.formId));
-    
+
     return formState.when(
       data: (state) => _buildManualEditor(state.form),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, st) => Center(child: Text('Error: $e')),
     );
+  }
+
+  String _getEnText(Object? field) {
+    if (field is Map) return field['en']?.toString() ?? '';
+    return field?.toString() ?? '';
   }
 
   Widget _buildManualEditor(BuilderForm form) {
@@ -352,7 +365,9 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
                   items: _languages.map((lang) {
                     return DropdownMenuItem(
                       value: lang.code,
-                      child: Text('${lang.name} (${lang.nativeName ?? lang.name})'),
+                      child: Text(
+                        '${lang.name} (${lang.nativeName ?? lang.name})',
+                      ),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -363,7 +378,9 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
               ),
               const SizedBox(width: 16),
               ElevatedButton.icon(
-                onPressed: _manualTargetLanguage == null || _isLoading ? null : _saveManualTranslations,
+                onPressed: _manualTargetLanguage == null || _isLoading
+                    ? null
+                    : _saveManualTranslations,
                 icon: const Icon(Icons.save),
                 label: const Text('Save All'),
               ),
@@ -373,7 +390,13 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
         if (_isManualLoading)
           const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (_manualTargetLanguage == null)
-          const Expanded(child: Center(child: Text('Select a target language to begin manual translation')))
+          const Expanded(
+            child: Center(
+              child: Text(
+                'Select a target language to begin manual translation',
+              ),
+            ),
+          )
         else
           Expanded(
             child: ListView(
@@ -381,11 +404,27 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
               children: [
                 _buildManualField('Form Title', 'form', 'title', form.title),
                 const Divider(height: 32),
-                ...form.sections.expand((section) => [
-                  _buildManualField('Section: ${section.title?.translate('en') ?? ''}', 'section', section.id, section.title, field: 'title'),
-                  ...section.questions.map((q) => _buildManualField('Field: ${q.label?.translate('en') ?? ''}', 'question', q.id, q.label, field: 'label')),
-                  const Divider(height: 24),
-                ]),
+                ...form.sections.expand(
+                  (section) => [
+                    _buildManualField(
+                      'Section: ${_getEnText(section.title)}',
+                      'section',
+                      section.id,
+                      section.title,
+                      field: 'title',
+                    ),
+                    ...section.questions.map(
+                      (q) => _buildManualField(
+                        'Field: ${_getEnText(q.label)}',
+                        'question',
+                        q.id,
+                        q.label,
+                        field: 'label',
+                      ),
+                    ),
+                    const Divider(height: 24),
+                  ],
+                ),
               ],
             ),
           ),
@@ -393,16 +432,21 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
     );
   }
 
-  void _updateManualTranslation(String type, String id, String value, {String? field}) {
+  void _updateManualTranslation(
+    String type,
+    String id,
+    String value, {
+    String? field,
+  }) {
     final lang = _manualTargetLanguage!;
     final newTranslations = Map<String, dynamic>.from(_manualTranslations);
-    
+
     if (!newTranslations.containsKey(lang)) {
       newTranslations[lang] = {};
     }
-    
+
     final langData = Map<String, dynamic>.from(newTranslations[lang]);
-    
+
     if (type == 'form') {
       langData['title'] = value;
     } else {
@@ -418,23 +462,30 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
       typeData[id] = idData;
       langData[type] = typeData;
     }
-    
+
     newTranslations[lang] = langData;
     setState(() {
       _manualTranslations = newTranslations;
     });
   }
 
-  Widget _buildManualField(String label, String type, String id, Object? source, {String? field}) {
+  Widget _buildManualField(
+    String label,
+    String type,
+    String id,
+    Object? source, {
+    String? field,
+  }) {
     final lang = _manualTargetLanguage!;
-    final sourceEn = source is Map ? (source['en'] ?? '') : source?.toString() ?? '';
-    
+    final sourceEn = _getEnText(source);
+
     String currentVal = '';
     try {
       if (type == 'form') {
         currentVal = _manualTranslations[lang]?['title'] ?? '';
       } else {
-        currentVal = _manualTranslations[lang]?[type]?[id]?[field ?? 'text'] ?? '';
+        currentVal =
+            _manualTranslations[lang]?[type]?[id]?[field ?? 'text'] ?? '';
       }
     } catch (_) {}
 
@@ -443,18 +494,28 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
           const SizedBox(height: 4),
-          Text('Source (EN): $sourceEn', style: const TextStyle(color: AppColors.textGrey, fontSize: 13)),
+          Text(
+            'Source (EN): $sourceEn',
+            style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           TextField(
-            controller: TextEditingController(text: currentVal)..selection = TextSelection.fromPosition(TextPosition(offset: currentVal.length)),
+            controller: TextEditingController(text: currentVal)
+              ..selection = TextSelection.fromPosition(
+                TextPosition(offset: currentVal.length),
+              ),
             decoration: const InputDecoration(
               isDense: true,
               border: OutlineInputBorder(),
               hintText: 'Enter translation...',
             ),
-            onChanged: (val) => _updateManualTranslation(type, id, val, field: field),
+            onChanged: (val) =>
+                _updateManualTranslation(type, id, val, field: field),
           ),
         ],
       ),
@@ -698,9 +759,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
                 if (jobItem.status == TranslationJobStatus.completed)
                   IconButton(
                     icon: const Icon(Icons.download),
-                    onPressed: () => _downloadTranslations(
-                      jobItem.id,
-                    ), 
+                    onPressed: () => _downloadTranslations(jobItem.id),
                   ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -745,7 +804,10 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage> with SingleTick
     }
 
     return Chip(
-      label: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
+      label: Text(
+        text,
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
       backgroundColor: color,
       padding: EdgeInsets.zero,
     );

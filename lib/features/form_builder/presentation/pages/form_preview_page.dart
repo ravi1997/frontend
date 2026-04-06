@@ -44,7 +44,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   bool _isReviewing = false;
   final _formKey = GlobalKey<FormState>();
   LogicEvaluationResult? _logicResult;
-  final Set<String> _processedWebhookHashes = {};
+  final Map<String, String> _lastWebhookHashes = {};
   final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
 
   @override
@@ -112,7 +112,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   _showSubmitted = false;
                   _isReviewing = false;
                   _dynamicOptions.clear();
-                  _processedWebhookHashes.clear();
+                  _lastWebhookHashes.clear();
                 });
               },
               icon: const Icon(
@@ -150,6 +150,14 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
   }
 
+  String _interpolateUrl(String url, Map<String, dynamic> formData) {
+    var finalUrl = url;
+    formData.forEach((key, value) {
+      finalUrl = finalUrl.replaceAll('{$key}', Uri.encodeComponent(value?.toString() ?? ''));
+    });
+    return finalUrl;
+  }
+
   void _handleDataChange(Map<String, dynamic> formData) {
     final result = FormLogicEngine.evaluate(widget.form, formData);
 
@@ -184,37 +192,49 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         }
         setState(() {
           _dynamicOptions.addAll(result.optionOverrides);
+          
+          // Reset invalid selections
+          final currentData = ref.read(previewFormDataProvider);
+          final updates = <String, dynamic>{};
+          
+          result.optionOverrides.forEach((fieldId, options) {
+            final val = currentData[fieldId];
+            if (val != null) {
+              final exists = options.any((o) => o.value == val.toString());
+              if (!exists) {
+                updates[fieldId] = null;
+              }
+            }
+          });
+          
+          if (updates.isNotEmpty) {
+            ref.read(previewFormDataProvider.notifier).update((s) => {...s, ...updates});
+          }
         });
       });
     }
 
     // 3. Handle automation webhooks
     for (final wh in result.pendingWebhooks) {
-      final hash = '${wh['url']}_${jsonEncode(wh['mappings'])}';
-      if (!_processedWebhookHashes.contains(hash)) {
-        _processedWebhookHashes.add(hash);
-        _triggerWebhook(wh);
+      final resolvedUrl = _interpolateUrl(wh['url'] ?? '', formData);
+      final baseKey = '${wh['url'] ?? ''}_${jsonEncode(wh['mappings'])}';
+      if (_lastWebhookHashes[baseKey] != resolvedUrl) {
+        _lastWebhookHashes[baseKey] = resolvedUrl;
+        _triggerWebhook(wh, resolvedUrl);
       }
     }
   }
 
-  Future<void> _triggerWebhook(Map<String, dynamic> config) async {
-    final url = config['url'] as String?;
-    if (url == null || url.isEmpty) return;
+  Future<void> _triggerWebhook(Map<String, dynamic> config, String resolvedUrl) async {
+    if (resolvedUrl.isEmpty) return;
 
     final mappings = config['mappings'] as List?;
-    final formData = ref.read(previewFormDataProvider);
 
     try {
-      debugPrint('Triggering logic webhook: $url');
-
-      var finalUrl = url;
-      formData.forEach((key, value) {
-        finalUrl = finalUrl.replaceAll('{$key}', value?.toString() ?? '');
-      });
+      debugPrint('Triggering logic webhook: $resolvedUrl');
 
       final apiClient = ref.read(apiClientProvider);
-      final response = await apiClient.get(finalUrl);
+      final response = await apiClient.get(resolvedUrl);
       final responseData = response.data;
 
       if (mappings != null && responseData is Map<String, dynamic>) {
@@ -229,7 +249,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             if (value != null) {
               if (value is List) {
                 // If it's a list, treat as options update
-                optUpdates[targetId] = value
+                final newOptions = value
                     .map(
                       (o) => FormQuestionOption(
                         id: (o is Map ? (o['v'] ?? o['value'] ?? o['id']) : o)
@@ -244,6 +264,17 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       ),
                     )
                     .toList();
+                optUpdates[targetId] = newOptions;
+
+                // Clear current value if not in new options
+                final currentData = ref.read(previewFormDataProvider);
+                final currentVal = currentData[targetId];
+                if (currentVal != null) {
+                  final exists = newOptions.any((o) => o.value == currentVal.toString());
+                  if (!exists) {
+                    updates[targetId] = null;
+                  }
+                }
               } else {
                 updates[targetId] = value;
               }
@@ -558,7 +589,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 questionSpacing: widget.form.style.questionSpacing,
                 visibilityMap: visibilityMap,
                 dynamicOptions: _dynamicOptions,
-                onTriggerAction: (config) => _triggerWebhook(config),
+                onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(previewFormDataProvider))),
               ),
             );
           }).toList(),
@@ -628,7 +659,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       questionSpacing: widget.form.style.questionSpacing,
                       visibilityMap: visibilityMap,
                       dynamicOptions: _dynamicOptions,
-                      onTriggerAction: (config) => _triggerWebhook(config),
+                      onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(previewFormDataProvider))),
                     ),
                     const SizedBox(height: 32),
                     Row(
@@ -728,7 +759,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     .read(formSubmissionControllerProvider.notifier)
                     .submit(
                       formId: widget.form.id,
-                      answers: Map<String, dynamic>.from(formData),
+                      answers: Map<String, dynamic>.from(submissionData),
                       visibilityMap: result.visibility,
                     );
 
@@ -1260,7 +1291,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(previewFormDataProvider);
         return DropdownButtonFormField<String>(
-          initialValue: formData[q.id]?.toString(),
+          value: formData[q.id]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {
@@ -1999,17 +2030,18 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                       children: [
                         Text(
                           fileName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
                         ),
                         if (fileSize != null)
                           Text(
                             formatBytes(fileSize),
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: AppColors.textGrey,
                             ),
                           ),
@@ -2017,22 +2049,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                    tooltip: 'Remove file',
-                    onPressed: () {
-                      ref
-                          .read(previewFormDataProvider.notifier)
-                          .update((s) => {...s, q.id: null});
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.swap_horiz,
-                      color: Theme.of(context).primaryColor,
-                      size: 20,
-                    ),
-                    tooltip: 'Change file',
-                    onPressed: pickFile,
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => ref
+                        .read(previewFormDataProvider.notifier)
+                        .update((s) => {...s, q.id: null}),
                   ),
                 ],
               ),
@@ -2041,172 +2061,13 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   }
 
   List<String> _extensionsForTypes(List<String> types) {
-    final map = <String, List<String>>{
-      'image': ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'],
-      'document': ['doc', 'docx', 'odt', 'txt', 'rtf'],
-      'pdf': ['pdf'],
-      'spreadsheet': ['xls', 'xlsx', 'ods', 'csv'],
-      'video': ['mp4', 'mov', 'avi', 'mkv'],
-      'audio': ['mp3', 'wav', 'aac', 'm4a'],
-    };
-    final result = <String>{};
+    final res = <String>[];
     for (final t in types) {
-      result.addAll(map[t.toLowerCase()] ?? [t.toLowerCase()]);
+      if (t == 'images') res.addAll(['jpg', 'jpeg', 'png', 'webp']);
+      if (t == 'documents') res.addAll(['pdf', 'doc', 'docx', 'txt']);
+      if (t == 'spreadsheets') res.addAll(['xls', 'xlsx', 'csv']);
     }
-    return result.toList();
-  }
-
-  Widget _buildSignatureField(
-    FormQuestion q,
-    WidgetRef ref,
-    Color fillColor,
-    Color borderColor,
-  ) {
-    final formData = ref.watch(previewFormDataProvider);
-    final signatureData = formData[q.id]?.toString();
-    final isSigned = signatureData != null && signatureData.isNotEmpty;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (isSigned)
-          Container(
-            height: 150,
-            decoration: BoxDecoration(
-              color: fillColor,
-              border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              children: [
-                Center(
-                  child: Image.memory(
-                    base64Decode(signatureData),
-                    errorBuilder: (c, e, s) =>
-                        const Icon(Icons.error, color: Colors.red),
-                  ),
-                ),
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, color: AppColors.brandBlue),
-                    onPressed: () {
-                      ref
-                          .read(previewFormDataProvider.notifier)
-                          .update((s) => {...s, q.id: ''});
-                    },
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          SignaturePadWidget(
-            backgroundColor: Colors.grey.shade50,
-            onSigned: (data) {
-              if (data.isNotEmpty) {
-                ref
-                    .read(previewFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: data});
-              }
-            },
-          ),
-      ],
-    );
-  }
-
-  Widget _buildMatrixField(
-    FormQuestion q,
-    TextStyle textStyle,
-    WidgetRef ref,
-    Color fillColor,
-    Color borderColor,
-    bool isActionField,
-  ) {
-    final formData = ref.watch(previewFormDataProvider);
-    final matrixData = (formData[q.id] as Map<String, dynamic>?) ?? {};
-
-    final rows =
-        (q.metadata?['rows'] as List?)?.map((e) => e.toString()).toList() ??
-        ['Row 1', 'Row 2', 'Row 3'];
-    final columns =
-        (q.metadata?['columns'] as List?)?.map((e) => e.toString()).toList() ??
-        ['Poor', 'Average', 'Good', 'Excellent'];
-
-    return Container(
-      decoration: BoxDecoration(
-        color: fillColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          headingRowColor: WidgetStateProperty.all(
-            isActionField
-                ? const Color(0xFFDBEAFE) // Light blue header for action fields
-                : Colors.grey.shade100,
-          ),
-          columnSpacing: 24,
-          horizontalMargin: 16,
-          columns: [
-            const DataColumn(
-              label: Text('', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-            ...columns.map(
-              (col) => DataColumn(
-                label: Text(
-                  col,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          ],
-          rows: rows.map((row) {
-            return DataRow(
-              cells: [
-                DataCell(
-                  Text(
-                    row,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                ...columns.map((col) {
-                  return DataCell(
-                    Center(
-                      child: RadioGroup<String>(
-                        groupValue: matrixData[row]?.toString(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            final newData = Map<String, dynamic>.from(
-                              matrixData,
-                            );
-                            newData[row] = val;
-                            ref
-                                .read(previewFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: newData});
-                          }
-                        },
-                        child: Radio<String>(
-                          value: col,
-                          activeColor: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            );
-          }).toList(),
-        ),
-      ),
-    );
+    return res;
   }
 
   Widget _buildPicker({
@@ -2217,11 +2078,129 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   }) {
     return InkWell(
       onTap: onTap,
-      child: InputDecorator(
-        decoration: decoration.copyWith(
-          suffixIcon: Icon(icon, color: AppColors.textGrey),
+      borderRadius: decoration.border is OutlineInputBorder
+          ? (decoration.border as OutlineInputBorder).borderRadius
+          : decoration.border is UnderlineInputBorder
+              ? (decoration.border as UnderlineInputBorder).borderRadius
+              : BorderRadius.circular(8),
+      child: InputDecorator(decoration: decoration, child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(text),
+          Icon(icon, size: 20, color: AppColors.textGrey),
+        ],
+      )),
+    );
+  }
+
+  Widget _buildSignatureField(
+    FormQuestion q,
+    WidgetRef ref,
+    Color fill,
+    Color border,
+  ) {
+    final formData = ref.watch(previewFormDataProvider);
+    final signature = formData[q.id];
+
+    return Container(
+      height: 120,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: fill,
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: signature != null
+          ? Stack(
+              children: [
+                Center(child: Image.memory(signature as Uint8List)),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    onPressed: () => ref
+                        .read(previewFormDataProvider.notifier)
+                        .update((s) => {...s, q.id: null}),
+                  ),
+                ),
+              ],
+            )
+          : InkWell(
+              onTap: () async {
+                final bytes = await SignaturePadDialog.show(context);
+                if (bytes != null) {
+                  ref
+                      .read(previewFormDataProvider.notifier)
+                      .update((s) => {...s, q.id: bytes});
+                }
+              },
+              child: const Center(
+                child: Text(
+                  'Tap to sign',
+                  style: TextStyle(color: AppColors.textGrey),
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildMatrixField(
+    FormQuestion q,
+    TextStyle style,
+    WidgetRef ref,
+    Color fill,
+    Color border,
+    bool isAction,
+  ) {
+    final rows = (q.metadata?['matrixRows'] as List? ?? [])
+        .map((e) => e.toString())
+        .toList();
+    final cols = (q.metadata?['matrixCols'] as List? ?? [])
+        .map((e) => e.toString())
+        .toList();
+    final formData = ref.watch(previewFormDataProvider);
+    final matrixData = formData[q.id] as Map<String, dynamic>? ?? {};
+
+    return Container(
+      decoration: BoxDecoration(
+        color: fill,
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columnSpacing: 24,
+          headingRowHeight: 40,
+          dataRowMinHeight: 40,
+          columns: [
+            const DataColumn(label: Text('')),
+            ...cols.map((c) => DataColumn(label: Text(c, style: style))),
+          ],
+          rows: rows.map((r) {
+            return DataRow(
+              cells: [
+                DataCell(Text(r, style: style.copyWith(fontWeight: FontWeight.bold))),
+                ...cols.map((c) {
+                  return DataCell(
+                    RadioGroup<String>(
+                      groupValue: matrixData[r]?.toString(),
+                      onChanged: (val) {
+                        final newMatrix = Map<String, dynamic>.from(matrixData);
+                        newMatrix[r] = val;
+                        ref
+                            .read(previewFormDataProvider.notifier)
+                            .update((s) => {...s, q.id: newMatrix});
+                      },
+                      child: Radio<String>(value: c),
+                    ),
+                  );
+                }),
+              ],
+            );
+          }).toList(),
         ),
-        child: Text(text),
       ),
     );
   }

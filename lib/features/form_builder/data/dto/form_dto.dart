@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:intl/intl.dart';
+import '../../../../core/utils/date_utils.dart';
+import '../../../../core/utils/id_reader.dart';
 
 part 'form_dto.freezed.dart';
 part 'form_dto.g.dart';
@@ -12,7 +13,7 @@ abstract class FormDto with _$FormDto {
   const factory FormDto({
     // Handle both 'id' and '_id' from backend
     // ignore: invalid_annotation_target
-    @JsonKey(name: 'id', readValue: _readId) required String id,
+    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlug) required String id,
     @Default('Untitled Form') String title,
     @Default('draft') String status,
     // ignore: invalid_annotation_target
@@ -24,15 +25,15 @@ abstract class FormDto with _$FormDto {
     // ignore: invalid_annotation_target
     @JsonKey(
       name: 'created_at',
-      fromJson: _dateTimeFromJson,
-      toJson: _dateTimeToJson,
+      fromJson: DateUtils.parse,
+      toJson: DateUtils.toIso8601,
     )
     DateTime? createdAt,
     // ignore: invalid_annotation_target
     @JsonKey(
       name: 'updated_at',
-      fromJson: _dateTimeFromJson,
-      toJson: _dateTimeToJson,
+      fromJson: DateUtils.parse,
+      toJson: DateUtils.toIso8601,
     )
     DateTime? updatedAt,
 
@@ -45,7 +46,24 @@ abstract class FormDto with _$FormDto {
   }) = _FormDto;
 
   factory FormDto.fromJson(Map<String, dynamic> json) =>
-      _$FormDtoFromJson(json);
+      _$FormDtoFromJson(_normalizeJson(json));
+
+  static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
+    // If the backend returns sections at the top level (no versions array),
+    // wrap them into a virtual version so the DTO stays consistent.
+    if (!json.containsKey('versions') && json.containsKey('sections')) {
+      final normalized = Map<String, dynamic>.from(json);
+      normalized['versions'] = [
+        {
+          'version': normalized['active_version'] ?? '1.0.0',
+          'sections': normalized['sections'],
+          'created_at': normalized['created_at'],
+        },
+      ];
+      return normalized;
+    }
+    return json;
+  }
 
   List<Map<String, dynamic>> get sections {
     final active = activeVersion ?? '1.0';
@@ -59,10 +77,6 @@ abstract class FormDto with _$FormDto {
   }
 }
 
-Object? _readId(Map json, String key) {
-  return json['id'] ?? json['_id'];
-}
-
 @freezed
 abstract class FormVersionDto with _$FormVersionDto {
   const factory FormVersionDto({
@@ -71,26 +85,12 @@ abstract class FormVersionDto with _$FormVersionDto {
     // ignore: invalid_annotation_target
     @JsonKey(
       name: 'created_at',
-      fromJson: _dateTimeFromJson,
-      toJson: _dateTimeToJson,
+      fromJson: DateUtils.parse,
+      toJson: DateUtils.toIso8601,
     )
     DateTime? createdAt,
   }) = _FormVersionDto;
 
   factory FormVersionDto.fromJson(Map<String, dynamic> json) =>
       _$FormVersionDtoFromJson(json);
-}
-
-DateTime? _dateTimeFromJson(String? date) {
-  if (date == null) return null;
-  try {
-    return DateFormat("E, d MMM y HH:mm:ss 'GMT'").parse(date);
-  } catch (_) {
-    return DateTime.tryParse(date);
-  }
-}
-
-String? _dateTimeToJson(DateTime? date) {
-  if (date == null) return null;
-  return DateFormat("E, d MMM y HH:mm:ss 'GMT'").format(date);
 }

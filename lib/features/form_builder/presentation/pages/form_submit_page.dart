@@ -55,7 +55,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   bool _isReviewing = false;
   final _formKey = GlobalKey<FormState>();
   LogicEvaluationResult? _logicResult;
-  final Set<String> _processedWebhookHashes = {};
+  final Map<String, String> _lastWebhookHashes = {};
   final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
   final Map<String, bool> _loadingFields = {};
   final Map<String, String?> _fieldErrors = {};
@@ -151,7 +151,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   _showSubmitted = false;
                   _isReviewing = false;
                   _dynamicOptions.clear();
-                  _processedWebhookHashes.clear();
+                  _lastWebhookHashes.clear();
                   _loadingFields.clear();
                   _fieldErrors.clear();
                 });
@@ -254,9 +254,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         final currentData = ref.read(submitFormDataProvider);
         for (final wh in result.pendingWebhooks) {
           final resolvedUrl = _interpolateUrl(wh['url'], currentData);
-          final hash = '${resolvedUrl}_${jsonEncode(wh['mappings'])}';
-          if (!_processedWebhookHashes.contains(hash)) {
-            _processedWebhookHashes.add(hash);
+          final baseKey = '${wh['url']}_${jsonEncode(wh['mappings'])}';
+          if (_lastWebhookHashes[baseKey] != resolvedUrl) {
+            _lastWebhookHashes[baseKey] = resolvedUrl;
             _triggerWebhook(wh, resolvedUrl);
           }
         }
@@ -913,6 +913,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 }
 
                 final formData = ref.read(submitFormDataProvider);
+                final repeatInstances = ref.read(repeatInstancesProvider);
                 final submissionData = {
                   ...formData,
 
@@ -926,6 +927,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                       formId: form.id,
                       answers: Map<String, dynamic>.from(formData),
                       visibilityMap: _logicResult!.visibility,
+                      repeatInstances: repeatInstances,
                     );
 
                 if (success) {

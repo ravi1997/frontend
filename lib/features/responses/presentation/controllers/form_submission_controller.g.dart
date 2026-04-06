@@ -42,7 +42,7 @@ final class FormSubmissionControllerProvider
 }
 
 String _$formSubmissionControllerHash() =>
-    r'85a58ce5d03da450119774310d0a94ef2e093194';
+    r'70147408cf92a468197190e62cfc3ccefa9e9f88';
 
 abstract class _$FormSubmissionController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

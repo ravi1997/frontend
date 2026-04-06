@@ -286,30 +286,26 @@ Send Request
 │                         Token Management System                             │
 └────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐         ┌─────────────────────────┐
-│   TokenService          │         │  TokenStorageService    │
-│  (token_service.dart)   │         │ (token_storage_service) │
-│                         │         │                         │
-│  • Simple token storage │         │  • Enhanced features    │
-│  • Access token         │         │  • Token expiry check   │
-│  • Refresh token        │         │  • User ID storage      │
-│  • Hive integration     │         │  • Last login tracking  │
-│                         │         │  • Validation methods   │
-└───────────┬─────────────┘         └───────────┬─────────────┘
-            │                                   │
-            └───────────────┬───────────────────┘
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │   Hive Storage  │
-                   │  (Encrypted)    │
-                   │                 │
-                   │  • access_token │
-                   │  • refresh_token│
-                   │  • token_expiry │
-                   │  • user_id      │
-                   │  • last_login   │
-                   └─────────────────┘
+┌─────────────────────────┐
+│   TokenService          │
+│  (token_service.dart)   │
+│                         │
+│  • JWT token storage    │
+│  • Access token         │
+│  • Refresh token        │
+│  • Hive integration     │
+│  • Token expiry check   │
+│  • Riverpod notifier    │
+└───────────┬─────────────┘
+            │
+            ▼
+   ┌─────────────────┐
+   │   Hive Storage  │
+   │  (auth_box)     │
+   │                 │
+   │  • access_token │
+   │  • refresh_token│
+   └─────────────────┘
 ```
 
 ## API Endpoints Organization

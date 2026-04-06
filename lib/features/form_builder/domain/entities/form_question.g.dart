@@ -8,7 +8,7 @@ part of 'form_question.dart';
 
 _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
     _FormQuestion(
-      id: _readId(json, 'id') as String,
+      id: IdReader.readIdCallback(json, 'id') as String,
       variableName: json['variableName'] as String?,
       label: json['label'],
       type: $enumDecode(_$QuestionTypeEnumMap, json['field_type']),

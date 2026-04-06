@@ -20,7 +20,7 @@ final class SyncServiceProvider
         argument: null,
         retry: null,
         name: r'syncServiceProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,7 +33,7 @@ final class SyncServiceProvider
   SyncService create() => SyncService();
 }
 
-String _$syncServiceHash() => r'9eb2abb8df074eb8c66ca8847993b6891eb9d8c6';
+String _$syncServiceHash() => r'22a47ec494d67dc4319b83b92e8f05384eee2ac6';
 
 abstract class _$SyncService extends $AsyncNotifier<void> {
   FutureOr<void> build();

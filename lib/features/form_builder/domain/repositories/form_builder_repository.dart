@@ -43,10 +43,21 @@ abstract class FormBuilderRepository {
   Future<FormSection> createSection(String formId, FormSection section);
   Future<FormSection> updateSection(String formId, FormSection section);
   Future<void> deleteSection(String formId, String sectionId);
+  Future<void> reorderSections(String formId, List<String> sectionIds);
 
   // Translations
-  Future<Map<String, dynamic>> getTranslations(String formId);
-  Future<void> saveTranslations(String formId, Map<String, dynamic> translations);
+  Future<Map<String, dynamic>> getTranslations(
+    String formId, {
+    String? language,
+  });
+  Future<void> saveTranslations(
+    String formId,
+    String language,
+    Map<String, dynamic> translations,
+  );
+
+  // Clone
+  Future<BuilderForm> cloneForm(String formId, {String? title, String? slug});
 }
 
 @riverpod

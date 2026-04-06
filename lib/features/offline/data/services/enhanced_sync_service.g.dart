@@ -37,7 +37,7 @@ final class EnhancedSyncServiceProvider
 }
 
 String _$enhancedSyncServiceHash() =>
-    r'2dd9ec4f0142c3beeefd08a25e42819337e1e52c';
+    r'dc8e133c29eee70246c854f7f2113074fd6bc67c';
 
 /// Enhanced sync service with retry logic and conflict resolution
 

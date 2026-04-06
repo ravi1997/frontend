@@ -19,6 +19,7 @@ class SyncService extends _$SyncService {
 
     if (user == null) {
       if (_box != null) {
+        await _box!.clear();
         await _box!.close();
         _box = null;
         _currentUserId = null;
@@ -31,8 +32,8 @@ class SyncService extends _$SyncService {
         await _box!.close();
       }
       _currentUserId = user.id;
-      // Scoping box by userId to prevent data leakage between users
-      _box = await Hive.openBox('pending_submissions_${user.id}');
+      // Scoping box by tenantId and userId to prevent data leakage between users/orgs
+      _box = await Hive.openBox('pending_submissions_${user.tenantId}_${user.id}');
     }
 
     // Listen for connectivity changes

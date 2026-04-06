@@ -4,76 +4,15 @@
 /// organized by feature area for easy maintenance and updates.
 class ApiEndpoints {
   // Base configuration
-  // static const String serverBaseUrl = 'http://localhost:5000';
-  static const String serverBaseUrl = 'http://192.168.1.50:8051';
+  static const String serverBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:5000',
+  );
 
   static const String baseUrl = '$serverBaseUrl/form/api/v1';
 
   // ============================================================================
-  // Admin User Management Endpoints  (prefix: /api/v1/admin/users)
-  // ============================================================================
-
-  /// GET - List all users (admin only)
-  static const String adminListUsers = '$serverBaseUrl/api/v1/admin/users/';
-
-  /// GET - List all unique departments
-  static const String adminListDepartments =
-      '$serverBaseUrl/api/v1/admin/users/departments';
-
-  /// GET - Get a single user's full profile (admin)
-  static String adminGetUser(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId';
-
-  /// PATCH - Update a user's department
-  static String adminUpdateUserDepartment(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/department';
-
-  /// PATCH - Update a user's roles
-  static String adminUpdateUserRoles(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/roles';
-
-  /// POST - Admin force-reset a user's password
-  static String adminResetUserPassword(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/reset-password';
-
-  /// POST - Lock a user account (admin)
-  static String adminLockUser(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/lock';
-
-  /// POST - Unlock a user account (admin)
-  static String adminUnlockUser(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/unlock';
-
-  /// PATCH - Set is_active status for a user (admin)
-  static String adminSetUserStatus(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/status';
-
-  /// DELETE - Permanently delete a user (admin)
-  static String adminDeleteUser(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId';
-
-  /// GET - Get user activity / security timeline (admin)
-  static String adminGetUserActivity(String userId) =>
-      '$serverBaseUrl/api/v1/admin/users/$userId/activity';
-
-  // ============================================================================
-  // System Settings Endpoints  (prefix: /api/v1/admin/system-settings)
-  // ============================================================================
-
-  /// GET - Get current system settings (superadmin only)
-  static const String systemSettingsGet =
-      '$serverBaseUrl/api/v1/admin/system-settings/';
-
-  /// PATCH - Update system settings (superadmin only)
-  static const String systemSettingsPatch =
-      '$serverBaseUrl/api/v1/admin/system-settings/';
-
-  /// POST - Reset settings to factory defaults (superadmin only)
-  static const String systemSettingsReset =
-      '$serverBaseUrl/api/v1/admin/system-settings/reset';
-
-  // ============================================================================
-  // Authentication Endpoints
+  // Authentication Endpoints (§3)
   // ============================================================================
 
   /// POST - Login with email/username and password
@@ -86,10 +25,15 @@ class ApiEndpoints {
   /// Returns: { "access_token": string, "refresh_token": string, "user": {...} }
   static const String loginWithOtp = '/auth/login';
 
-  /// POST - Generate OTP for mobile number
+  /// POST - Request OTP for mobile number
   /// Body: { "mobile": string }
   /// Returns: { "message": string }
-  static const String generateOtp = '/auth/generate-otp';
+  static const String requestOtp = '/auth/request-otp';
+
+  /// POST - Revoke all sessions
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "message": string }
+  static const String revokeAll = '/auth/revoke-all';
 
   /// POST - Register new user
   /// Body: {
@@ -119,163 +63,510 @@ class ApiEndpoints {
   /// Returns: { "message": string }
   static const String requestPasswordReset = '/auth/request-password-reset';
 
-  /// GET - Get current user status
+  // ============================================================================
+  // User Endpoints (§4)
+  // ============================================================================
+
+  /// GET - Get current user status / profile
+  /// Also available at: /user/profile
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "user": {...} }
   static const String userStatus = '/user/status';
 
+  /// POST - Change password
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "current_password": string, "new_password": string }
+  /// Rate limited: 3 per hour
+  static const String changePassword = '/user/change-password';
+
+  /// GET - List users (admin only)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?page=int&page_size=int
+  /// Returns: [{ "id": string, "username": string, "email": string, ... }]
+  static const String listUsers = '/user/users';
+
+  /// GET - Get user by ID
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "id": string, "username": string, "email": string, ... }
+  static String getUser(String userId) => '/user/users/$userId';
+
+  /// PUT - Update user
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "roles": string[]? }
+  /// Returns: { "id": string, "message": string, ... }
+  static String updateUser(String userId) => '/user/users/$userId';
+
+  /// PUT - Update user roles
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "roles": string[] }
+  static String updateUserRoles(String userId) => '/user/users/$userId/roles';
+
+  /// POST - Lock user account
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String lockUser(String userId) => '/user/users/$userId/lock';
+
+  /// POST - Unlock user account
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String unlockUser(String userId) => '/user/users/$userId/unlock';
+
+  /// GET - Get lock status
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "is_locked": bool, "lock_until": string, "failed_login_attempts": int }
+  static String getLockStatus(String userId) =>
+      '/user/security/lock-status/$userId';
+
   // ============================================================================
-  // Form Management Endpoints
+  // Form Management Endpoints (§5-6)
   // ============================================================================
 
   /// GET - List all forms
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?page=int&limit=int&status=string&search=string
+  /// Query: ?page=int&page_size=int&is_template=bool
   /// Returns: [{ "id": string, "title": string, "status": string, ... }]
   static const String listForms = '/forms/';
 
   /// GET - Get form by ID
   /// Headers: { "Authorization": "Bearer {token}" }
+  /// Optional: ?lang=string
   /// Returns: { "id": string, "title": string, "sections": [...], ... }
   static String getForm(String formId) => '/forms/$formId';
 
   /// POST - Create new form
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: {
-  ///   "title": string,
-  ///   "slug": string,
-  ///   "status": string,
-  ///   "versions": [{
-  ///     "version": string,
-  ///     "sections": [...],
-  ///     "created_at": string
-  ///   }],
-  ///   "active_version": string
-  /// }
-  /// Returns: { "id": string, "title": string, ... }
+  /// Body: { "title": string, "slug": string?, "default_language": string, "supported_languages": string[] }
+  /// Returns: { "form_id": string }
   static const String createForm = '/forms/';
 
   /// PUT - Update existing form
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: Same as createForm
+  /// Body: { "title": string?, "description": string? }
   /// Returns: { "id": string, "title": string, ... }
   static String updateForm(String formId) => '/forms/$formId';
 
-  /// DELETE - Delete form
+  /// DELETE - Delete form (soft delete)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
   static String deleteForm(String formId) => '/forms/$formId';
 
-  /// POST - Publish form
+  /// POST - Publish form (async, returns 202)
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string, "form": {...} }
+  /// Body: { "major": bool, "minor": bool }
+  /// Returns: { "task_id": string }
   static String publishForm(String formId) => '/forms/$formId/publish';
 
-  /// POST - Clone/duplicate form
+  /// POST - Clone/duplicate form (async, returns 202)
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "title": string }
-  /// Returns: { "id": string, "title": string, ... }
+  /// Body: { "title": string, "slug": string? }
+  /// Returns: { "task_id": string }
   static String cloneForm(String formId) => '/forms/$formId/clone';
 
-  /// GET - Get form version history
+  /// GET - Check slug availability
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: [{ "version": string, "created_at": string, ... }]
-  /// GET - Get form version history
+  /// Query: ?slug=string
+  /// Returns: { "data": { "available": bool } }
+  static const String checkSlugAvailable = '/forms/slug-available';
+
+  /// POST - Import form
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: [{ "version": string, "created_at": string, ... }]
-  static String getFormVersions(String formId) => '/forms/$formId/versions';
+  /// Body: { "title": string, "slug": string, "sections": [...] }
+  static const String importForm = '/forms/import';
 
-  /// POST - Create new form version
-  static String createFormVersion(String formId) => '/forms/$formId/versions';
-
-  /// GET - Get specific form version
+  /// GET - List form templates
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "id": string, "version": string, "sections": [...], ... }
-  static String getFormVersion(String formId, String version) =>
-      '/forms/$formId/versions/$version';
-
-  /// PUT - Update specific form version
-  static String updateFormVersion(String formId, String version) =>
-      '/forms/$formId/versions/$version';
+  static const String formTemplates = '/forms/templates';
 
   // ============================================================================
-  // Section Management Endpoints
+  // Section Management Endpoints (§6)
   // ============================================================================
+
+  static String listSections(String formId) => '/forms/$formId/sections';
   static String createSection(String formId) => '/forms/$formId/sections';
-  static String updateSection(String sectionId) => '/sections/$sectionId';
-  static String deleteSection(String sectionId) => '/sections/$sectionId';
+  static String updateSection(String formId, String sectionId) =>
+      '/forms/$formId/sections/$sectionId';
+  static String deleteSection(String formId, String sectionId) =>
+      '/forms/$formId/sections/$sectionId';
+  static String reorderSections(String formId) =>
+      '/forms/$formId/sections/reorder';
 
   // ============================================================================
-  // Response Submission Endpoints
+  // Response Submission Endpoints (§8)
   // ============================================================================
 
-  /// POST - Submit form response
+  /// POST - Submit form response (authenticated)
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: {
-  ///   "form_id": string,
-  ///   "responses": { "field_id": value, ... },
-  ///   "submitted_by": string,
-  ///   "metadata": {...}
-  /// }
-  /// Returns: { "id": string, "submission_id": string, ... }
+  /// Body: { "data": { "field_id": value, ... } }
+  /// Returns: { "response_id": string }
   static String submitResponse(String formId) => '/forms/$formId/responses';
+
+  /// POST - Submit form response (anonymous/public)
+  /// No authentication required. Form must have is_public=true and status="published"
+  static String publicSubmit(String formId) => '/forms/$formId/public-submit';
 
   /// GET - List responses for a form
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?form_id=string&page=int&limit=int&status=string
-  /// Returns: [{ "id": string, "form_id": string, "responses": {...}, ... }]
+  /// Query: ?page=int&page_size=int
   static String listResponses(String formId) => '/forms/$formId/responses';
 
   /// GET - Get single response by ID
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "id": string, "form_id": string, "responses": {...}, ... }
   static String getResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
-  static String getResponseHistory(String formId, String responseId) =>
-      '/forms/$formId/responses/$responseId/history';
 
   /// PUT - Update response
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: Same as submitResponse
-  /// Returns: { "id": string, "message": string, ... }
   static String updateResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
 
   /// DELETE - Delete response
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string }
   static String deleteResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
 
-  /// GET - Export responses
+  /// GET - Count responses
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?form_id=string&format=csv|json|excel
-  /// Returns: File download or JSON data
+  static String responseCount(String formId) =>
+      '/forms/$formId/responses/count';
+
+  /// GET - Get last response
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String lastResponse(String formId) => '/forms/$formId/responses/last';
+
+  /// POST - Check duplicate submission
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "data": { "field": value } }
+  /// Returns: { "data": { "duplicate": bool } }
+  static String checkDuplicate(String formId) =>
+      '/forms/$formId/check-duplicate';
+
+  /// DELETE - Delete all responses (admin, irreversible)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String deleteAllResponses(String formId) => '/forms/$formId/responses';
+
+  // ============================================================================
+  // Form Admin Operations (§9)
+  // ============================================================================
+
+  /// PATCH - Archive form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String archiveForm(String formId) => '/forms/$formId/archive';
+
+  /// PATCH - Restore form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String restoreForm(String formId) => '/forms/$formId/restore';
+
+  /// PATCH - Toggle public access
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "data": { "is_public": bool } }
+  static String togglePublic(String formId) => '/forms/$formId/toggle-public';
+
+  /// POST - Share form (grant permissions)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "editors": string[], "viewers": string[], "submitters": string[] }
+  static String shareForm(String formId) => '/forms/$formId/share';
+
+  /// PATCH - Set form expiration
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "expires_at": string }
+  static String expireForm(String formId) => '/forms/$formId/expire';
+
+  /// GET - List expired forms
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static const String listExpiredForms = '/forms/expired';
+
+  // ============================================================================
+  // Access Control (§13)
+  // ============================================================================
+
+  /// GET - Get current user's permissions for a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String accessControl(String formId) => '/forms/$formId/access-control';
+
+  /// POST/PUT - Update access policy
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "form_visibility": string, "response_visibility": string, ... }
+  static String accessPolicy(String formId) => '/forms/$formId/access-policy';
+
+  // ============================================================================
+  // Workflow Integration (§12)
+  // ============================================================================
+
+  /// GET - List available workflows / next action for a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Optional: ?response_id=string
+  static String nextAction(String formId) => '/forms/$formId/next-action';
+
+  // ============================================================================
+  // Submission History (§11)
+  // ============================================================================
+
+  /// GET - Get submission history
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?question_id=string&primary_value=string
+  static String submissionHistory(String formId) => '/forms/$formId/history';
+
+  // ============================================================================
+  // Export API (§10)
+  // ============================================================================
+
+  /// GET - Export responses as CSV or JSON (streaming)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Optional: ?version_id=string
   static String exportResponses(String formId, {String format = 'csv'}) =>
       '/forms/$formId/export/$format';
 
+  /// POST - Start bulk export (async, returns 202)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "form_ids": string[] }
+  /// Returns: { "job_id": string, "status": string }
+  static const String bulkExport = '/forms/export/bulk';
+
+  /// GET - Check bulk export status
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String bulkExportStatus(String jobId) => '/forms/export/bulk/$jobId';
+
+  /// GET - Download completed bulk export (ZIP)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String bulkExportDownload(String jobId) =>
+      '/forms/export/bulk/$jobId/download';
+
   // ============================================================================
-  // Analytics Endpoints
+  // Advanced Response Queries (§14)
   // ============================================================================
 
-  /// GET - Get form analytics
+  /// GET - Cross-form data lookup
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?form_id=string&start_date=string&end_date=string
-  /// Returns: { "total_responses": int, "completion_rate": float, ... }
-  static String getAnalytics(String formId) => '/forms/$formId/analytics';
+  /// Query: ?form_id=string&question_id=string&value=string
+  static String crossFormLookup(
+    String formId,
+    String questionId,
+    String value,
+  ) =>
+      '/forms/fetch/external?form_id=$formId&question_id=$questionId&value=$value';
+
+  /// GET - Same-form data lookup
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?question_id=string&value=string
+  static String sameFormLookup(
+    String formId,
+    String questionId,
+    String value,
+  ) => '/forms/$formId/fetch/same?question_id=$questionId&value=$value';
+
+  // ============================================================================
+  // Summarization API (§15)
+  // ============================================================================
+
+  /// POST - Summarize form responses
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "response_ids": string[]? }
+  /// Returns: { "summary": string, "form_id": string }
+  static String summarizeFormResponses(String formId) =>
+      '/forms/$formId/summarize';
+
+  /// POST - Streaming summary (SSE)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "response_ids": string[] }
+  static String summarizeStream(String formId) =>
+      '/forms/$formId/summarize-stream';
+
+  // ============================================================================
+  // Translation API (§16)
+  // ============================================================================
+
+  /// GET - Get translations for form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?form_id=string&language=string
+  static String getFormTranslations({String? formId, String? language}) {
+    var url = '/forms/translations';
+    final params = <String>[];
+    if (formId != null) params.add('form_id=$formId');
+    if (language != null) params.add('language=$language');
+    return params.isNotEmpty ? '$url?${params.join('&')}' : url;
+  }
+
+  /// POST - Save translations
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "form_id": string, "language": string, "translations": {...} }
+  static const String saveFormTranslations = '/forms/translations';
+
+  /// POST - Start a new translation job (AI batch translation)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "form_id": string, "source_language": string, "target_languages": string[], "total_fields": int }
+  /// Returns: { "message": string, "job_id": string }
+  static const String startTranslationJob = '/forms/translations/jobs';
+
+  /// GET - List translation jobs for a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?form_id=string
+  static String listTranslationJobs(String formId) =>
+      '/forms/translations/jobs?form_id=$formId';
+
+  /// GET - Get translation job details
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "job_id": string, "status": string, "progress": int, ... }
+  static String getTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId';
+
+  /// PATCH - Cancel a translation job
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "message": string }
+  static String cancelTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId/cancel';
+
+  /// DELETE - Delete a translation job
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "message": string }
+  static String deleteTranslationJob(String jobId) =>
+      '/forms/translations/jobs/$jobId';
+
+  /// POST - Preview translation
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "text": string, "source_language": string, "target_language": string }
+  /// Returns: { "translated_text": string }
+  static const String previewTranslation = '/forms/translations/preview';
+
+  /// GET - List available languages for translation
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: [{ "code": string, "name": string, "native_name": string }]
+  static const String listTranslationLanguages =
+      '/forms/translations/languages';
+
+  /// GET - Get translated content for a job (completed jobs only)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "form_id": string, "language": string, "translations": {...} }
+  static String getTranslatedContent(String jobId) =>
+      '/forms/translations/jobs/$jobId/content';
+
+  // ============================================================================
+  // AI / NLP Search API (§17)
+  // ============================================================================
+
+  /// GET - AI service health check (public)
+  /// Returns: { "status": string, "ollama": {...}, "timestamp": string }
+  static const String aiHealthCheck = '/ai/health';
+
+  /// GET - NLP search
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Query: ?q=string
+  static String nlpSearch(String query) => '/ai/search/nlp-search?q=$query';
+
+  /// POST - Semantic search
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "query": string, "form_id": string }
+  /// Results cached in Redis for 1 hour
+  static const String semanticSearch = '/ai/search/semantic-search';
+
+  /// POST - Semantic search (streaming SSE)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "query": string }
+  static const String semanticSearchStream =
+      '/ai/search/semantic-search/stream';
+
+  // ============================================================================
+  // Dashboard API (§18)
+  // ============================================================================
+
+  /// POST - Create dashboard
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "title": string, "slug": string, "widgets": [...] }
+  static const String createDashboard = '/dashboards/';
+
+  /// GET - Get dashboard (with live widget data)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String getDashboard(String slug) => '/dashboards/$slug';
+
+  /// PUT - Update dashboard
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "title": string? }
+  static String updateDashboard(String dashboardId) =>
+      '/dashboards/$dashboardId';
+
+  /// Dashboard settings
+  static const String dashboardSettings = '/dashboard-settings';
+
+  // ============================================================================
+  // Analytics Endpoints (§19)
+  // ============================================================================
 
   /// GET - Get dashboard statistics
   /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: {
-  ///   "total_forms": int,
-  ///   "active_forms": int,
-  ///   "total_responses": int,
-  ///   "recent_activity": [...]
-  /// }
+  /// Requires role: admin, superadmin, or manager
+  /// Returns: { "total_forms": int, "active_forms": int, "total_responses": int, ... }
   static const String getDashboardStats = '/analytics/dashboard';
 
+  /// GET - Get analytics summary
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Requires role: admin or superadmin
+  static const String getSummary = '/analytics/summary';
+
+  /// GET - Get analytics trends
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static const String getTrends = '/analytics/trends';
+
   // ============================================================================
-  // Field Library Endpoints
+  // Webhook API (§20)
+  // ============================================================================
+
+  /// POST - Deliver webhook
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "url": string, "webhook_id": string, "form_id": string, "payload": {...}, ... }
+  static const String deliverWebhook = '/webhooks/deliver';
+
+  /// GET - Webhook status
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookStatus(String deliveryId) =>
+      '/webhooks/$deliveryId/status';
+
+  /// GET - Webhook history
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookHistory(String deliveryId) =>
+      '/webhooks/$deliveryId/history';
+
+  /// POST - Retry webhook
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookRetry(String deliveryId) =>
+      '/webhooks/$deliveryId/retry';
+
+  /// POST - Cancel webhook
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookCancel(String deliveryId) =>
+      '/webhooks/$deliveryId/cancel';
+
+  /// POST - Test webhook
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookTest(String webhookId) => '/webhooks/$webhookId/test';
+
+  /// GET - Webhook logs
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String webhookLogs(String webhookId) => '/webhooks/$webhookId/logs';
+
+  // ============================================================================
+  // SMS API (§21)
+  // ============================================================================
+
+  /// POST - Send SMS
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "mobile": string, "message": string }
+  /// Rate limited: 10 per minute
+  static const String sendSms = '/sms/single';
+
+  /// POST - Send OTP via SMS (admin only)
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "mobile": string, "otp": string }
+  /// Rate limited: 5 per minute
+  static const String sendOtpSms = '/sms/otp';
+
+  /// POST - Send notification
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "mobile": string, "title": string, "body": string }
+  static const String sendNotification = '/sms/notify';
+
+  /// GET - SMS health check
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static const String smsHealth = '/sms/health';
+
+  // ============================================================================
+  // Custom Field / Library API (§22)
   // ============================================================================
 
   /// GET - List field templates
@@ -288,268 +579,6 @@ class ApiEndpoints {
   /// Body: { "name": string, "type": string, "config": {...} }
   /// Returns: { "id": string, "name": string, ... }
   static const String createFieldTemplate = '/custom-fields/';
-
-  // ============================================================================
-  // Template Library Endpoints
-  // ============================================================================
-
-  /// GET - List form templates
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?category=string&search=string
-  /// Returns: [{ "id": string, "name": string, "category": string, ... }]
-  static const String listFormTemplates = '/templates';
-
-  /// GET - Get template by ID
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "id": string, "name": string, "sections": [...], ... }
-  static String getFormTemplate(String templateId) => '/templates/$templateId';
-
-  // ============================================================================
-  // Workflow Endpoints
-  // ============================================================================
-
-  /// GET - List workflows
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: [{ "id": string, "name": string, "type": string, ... }]
-  static const String listWorkflows = '/workflows';
-
-  /// POST - Create workflow
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "name": string, "type": string, "config": {...} }
-  /// Returns: { "id": string, "name": string, ... }
-  static const String createWorkflow = '/workflows';
-
-  /// PUT - Update workflow
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: Same as createWorkflow
-  /// Returns: { "id": string, "message": string, ... }
-  static String updateWorkflow(String workflowId) => '/workflows/$workflowId';
-
-  // ============================================================================
-  // User Management Endpoints
-  // ============================================================================
-
-  /// GET - List users (admin only)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?page=int&limit=int&role=string
-  /// Returns: [{ "id": string, "username": string, "email": string, ... }]
-  static const String listUsers = '/users';
-
-  /// GET - Get user by ID
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "id": string, "username": string, "email": string, ... }
-  static String getUser(String userId) => '/users/$userId';
-
-  /// PUT - Update user
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "username": string?, "email": string?, "roles": string[]? }
-  /// Returns: { "id": string, "message": string, ... }
-  static String updateUser(String userId) => '/users/$userId';
-
-  // ============================================================================
-  // File Upload Endpoints
-  // ============================================================================
-
-  /// POST - Upload file/image
-  /// Headers: { "Authorization": "Bearer {token}", "Content-Type": "multipart/form-data" }
-  /// Body: FormData with file
-  /// Returns: { "url": string, "filename": string, "size": int }
-  static const String uploadFile = '/upload';
-
-  /// POST - Upload signature
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "signature": string (base64), "form_id": string }
-  /// Returns: { "url": string, "signature_id": string }
-  static const String uploadSignature = '/signatures';
-
-  // ============================================================================
-  // Condition/Logic Endpoints
-  // ============================================================================
-
-  /// POST - Evaluate conditional logic
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "form_id": string, "conditions": [...], "responses": {...} }
-  /// Returns: { "visible_fields": string[], "required_fields": string[] }
-  static const String evaluateConditions = '/conditions/evaluate';
-
-  // ============================================================================
-  // Translation Endpoints
-  // ============================================================================
-
-  /// GET - Get translations for form
-  static String getFormTranslations(String formId) =>
-      '/forms/$formId/translations';
-
-  /// POST/PATCH - Save translations
-  static String saveFormTranslations(String formId) =>
-      '/forms/$formId/translations';
-
-  /// GET - Get translation job details
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "job_id": string, "status": string, "progress": int, ... }
-  static String getTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId'; // New
-
-  /// POST - Start a new translation job
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "form_id": string, "source_language": string, "target_languages": string[], "total_fields": int }
-  /// Returns: { "message": string, "job_id": string }
-  static const String startTranslationJob = '/forms/translations/jobs'; // New
-
-  /// PATCH - Cancel a translation job
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string }
-  static String cancelTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId/cancel'; // New
-
-  /// DELETE - Delete a translation job
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string }
-  static String deleteTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId'; // New
-
-  /// POST - Preview translation
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "text": string, "source_language": string, "target_language": string }
-  /// Returns: { "translated_text": string }
-  static const String previewTranslation = '/forms/translations/preview'; // New
-
-  /// GET - List available languages for translation
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: [{ "code": string, "name": string, "native_name": string }]
-  static const String listTranslationLanguages =
-      '/forms/translations/languages'; // New
-
-  /// GET - Get translated content for a job
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "language": string, "translations": {...} }
-  static String getTranslatedContent(String jobId) =>
-      '/forms/translations/jobs/$jobId/content'; // New
-
-  // ============================================================================
-  // AI Endpoints
-  // ============================================================================
-
-  /// GET - AI service health check
-  /// Returns: { "status": "healthy" | "degraded" | "unavailable", ... }
-  static const String aiHealthCheck = '/ai/health';
-
-  /// POST - Analyze response with AI (Sentiment, PII)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string, "results": {...} }
-  static String analyzeResponseAI(String formId, String responseId) =>
-      '/ai/$formId/responses/$responseId/analyze';
-
-  /// POST - Moderate response with AI (PII, PHI, Profanity, Injection)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "message": string, "moderation": {...} }
-  static String moderateResponseAI(String formId, String responseId) =>
-      '/ai/$formId/responses/$responseId/moderate';
-
-  /// POST - Generate form structure with AI
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "prompt": string, "current_form": {...} (optional) }
-  /// Returns: { "message": string, "suggestion": {...} }
-  static const String generateFormAI = '/ai/generate';
-
-  /// POST - AI Form Design Validation
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "form": {...} }
-  /// Returns: { "score": int, "issues": [...], "suggestions": [...] }
-  static String validateFormDesign(String formId) =>
-      '/ai/$formId/validate-design';
-
-  /// POST - Get AI field suggestions
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "theme": string }
-  /// Returns: { "theme": string, "suggestions": [...] }
-  static const String getFieldSuggestions = '/ai/suggestions';
-
-  /// GET - List AI form templates
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: [{ "id": string, "name": string, "category": string }]
-  static const String listAITemplates = '/ai/templates';
-
-  /// GET - Get specific AI form template structure
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "template": {...} }
-  static String getAITemplate(String templateId) => '/ai/templates/$templateId';
-
-  /// GET - Get form sentiment trends
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "distribution": {...}, "average_score": float }
-  static String getFormSentimentTrends(String formId) =>
-      '/ai/$formId/sentiment';
-
-  /// POST - AI-Powered Smart Search for form responses
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "query": string, "nocache": boolean (optional) }
-  /// Returns: { "query": string, "count": int, "results": [...] }
-  static String aiPoweredSearch(String formId) => '/ai/$formId/search';
-
-  /// POST - Detect form anomalies (duplicate content, outliers, gibberish)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "anomalies": [...] }
-  static String detectFormAnomalies(String formId) => '/ai/$formId/anomalies';
-
-  /// POST - Detect predictive anomalies (spam, statistical outliers, timing)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "flagged_responses": [...] }
-  static String detectPredictiveAnomalies(String formId) =>
-      '/ai/$formId/anomaly-detect';
-
-  /// POST - Automated Security Scanning for Form Definitions
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "security_score": int, "status": string, ... }
-  static String scanFormSecurityAI(String formId) =>
-      '/ai/$formId/security-scan';
-
-  /// POST - Compare multiple forms' performance and sentiment
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "form_ids": string[] }
-  /// Returns: { "summary": {...}, "details": [...] }
-  static const String compareFormsAI = '/ai/cross-analysis';
-
-  /// POST - NLP Summarization: Summarize form responses
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "response_ids": string[] (optional), "max_bullet_points": int, ... }
-  /// Returns: { "form_id": string, "summary": {...} }
-  static String summarizeFormResponses(String formId) =>
-      '/ai/$formId/summarize';
-
-  /// POST - Generate AI-powered export reports for form analytics
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "format": "pdf" | "excel" | "csv" | "json", "include_raw_data": boolean, ... }
-  /// Returns: { "message": string, "data": {...} }
-  static String exportFormAIReport(String formId) => '/ai/$formId/export';
-
-  /// POST - Manual cache invalidation for a specific form
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "pattern": "all" | "nlp_search" | "summarization" | "by_query", "query": string (optional) }
-  /// Returns: { "form_id": string, "keys_invalidated": int, ... }
-  static String invalidateFormCache(String formId) =>
-      '/ai/$formId/cache/invalidate';
-
-  /// DELETE - Clear all cache for a specific form
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Returns: { "form_id": string, "keys_invalidated": int, ... }
-  static String clearFormCache(String formId) => '/ai/$formId/cache';
-
-  // ============================================================================
-  // Offline Sync Endpoints
-  // ============================================================================
-
-  /// POST - Sync offline data
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "responses": [...], "last_sync": string }
-  /// Returns: { "synced": int, "failed": int, "conflicts": [...] }
-  static const String syncOfflineData = '/sync';
-
-  /// GET - Get changes since last sync
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?last_sync=string&types=forms,responses
-  /// Returns: { "forms": [...], "responses": [...], "deleted": [...] }
-  static const String getChanges = '/sync/changes';
 
   // ============================================================================
   // Health Check

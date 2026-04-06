@@ -266,7 +266,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         notifier.login(_emailController.text, _passwordController.text);
       } else {
         final mobile = _phoneController.text;
-        await notifier.generateOtp(mobile);
+        await notifier.requestOtp(mobile);
         if (!mounted) return;
         context.push('/verify-otp?mobile=$mobile');
       }

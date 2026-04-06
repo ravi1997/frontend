@@ -17,6 +17,7 @@ abstract class User with _$User {
     @JsonKey(name: 'mobile') String? mobile,
     String? department,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    @Default('default_tenant') @JsonKey(name: 'tenant_id') String tenantId,
     // Extra fields returned by the admin detail endpoint
     @JsonKey(name: 'is_admin') @Default(false) bool isAdminFlag,
     @JsonKey(name: 'is_email_verified') @Default(false) bool isEmailVerified,

@@ -210,13 +210,27 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  void addSection() {
+  Future<void> addSection() async {
     if (state.value == null) return;
-    final newSection = FormSection(
+    
+    FormSection newSection = FormSection(
       id: _uuid.v4(),
       title: 'Untitled Section',
       questions: [],
     );
+
+    // If form is persisted, call backend
+    if (formId != 'new') {
+      try {
+        final repository = ref.read(formBuilderRepositoryProvider);
+        newSection = await repository.createSection(formId, newSection);
+      } catch (e) {
+        final error = ErrorHandler.handle(e);
+        state = AsyncValue.data(state.value!.copyWith(error: error));
+        return;
+      }
+    }
+
     state = AsyncValue.data(
       state.value!.copyWith(
         form: state.value!.form.copyWith(
@@ -229,8 +243,21 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  void removeSection(String sectionId) {
+  Future<void> removeSection(String sectionId) async {
     if (state.value == null) return;
+
+    // If form is persisted, call backend
+    if (formId != 'new') {
+      try {
+        final repository = ref.read(formBuilderRepositoryProvider);
+        await repository.deleteSection(formId, sectionId);
+      } catch (e) {
+        final error = ErrorHandler.handle(e);
+        state = AsyncValue.data(state.value!.copyWith(error: error));
+        return;
+      }
+    }
+
     state = AsyncValue.data(
       state.value!.copyWith(
         form: state.value!.form.copyWith(
@@ -514,6 +541,7 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
+
   void updateSection(FormSection updatedSection) {
     if (state.value == null) return;
     final sections = state.value!.form.sections.map((s) {
@@ -588,7 +616,7 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-  void reorderSections(int oldIndex, int newIndex) {
+  Future<void> reorderSections(int oldIndex, int newIndex) async {
     if (state.value == null) return;
 
     final sections = [...state.value!.form.sections];
@@ -597,6 +625,22 @@ class FormBuilderController extends _$FormBuilderController {
     }
     final item = sections.removeAt(oldIndex);
     sections.insert(newIndex, item);
+
+    // If form is persisted, call backend
+    if (formId != 'new') {
+      try {
+        final repository = ref.read(formBuilderRepositoryProvider);
+        await repository.reorderSections(
+          formId,
+          sections.map((s) => s.id).toList(),
+        );
+      } catch (e) {
+        final error = ErrorHandler.handle(e);
+        state = AsyncValue.data(state.value!.copyWith(error: error));
+        // We might want to revert local state if it fails, 
+        // but for now we'll just keep local state and show error.
+      }
+    }
 
     state = AsyncValue.data(
       state.value!.copyWith(

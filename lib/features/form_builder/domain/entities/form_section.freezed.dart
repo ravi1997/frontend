@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormSection {
 
-@JsonKey(readValue: _readId) String get id; Object? get title; Object? get description; List<FormQuestion> get questions; SectionLayoutType get layout; int get gridColumns; bool get isHidden; bool get isRepeatable; int? get repeatMin; int? get repeatMax; Map<String, dynamic>? get conditionalLogic; SectionStyle get style; Map<String, dynamic> get metadata;
+@JsonKey(readValue: IdReader.readIdCallback) String get id; Object? get title; Object? get description; List<FormQuestion> get questions; SectionLayoutType get layout; int get gridColumns; bool get isHidden; bool get isRepeatable; int? get repeatMin; int? get repeatMax; Map<String, dynamic>? get conditionalLogic; SectionStyle get style; Map<String, dynamic> get metadata;
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FormSectionCopyWith<$Res>  {
   factory $FormSectionCopyWith(FormSection value, $Res Function(FormSection) _then) = _$FormSectionCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(readValue: _readId) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
+@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
 });
 
 
@@ -172,7 +172,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: _readId)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
@@ -193,7 +193,7 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: _readId)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)  $default,) {final _that = this;
 switch (_that) {
 case _FormSection():
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
@@ -213,7 +213,7 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: _readId)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
 return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
@@ -228,10 +228,10 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 @JsonSerializable()
 
 class _FormSection extends FormSection {
-  const _FormSection({@JsonKey(readValue: _readId) required this.id, required this.title, this.description, required final  List<FormQuestion> questions, this.layout = SectionLayoutType.standard, this.gridColumns = 2, this.isHidden = false, this.isRepeatable = false, this.repeatMin, this.repeatMax, final  Map<String, dynamic>? conditionalLogic, this.style = const SectionStyle(), final  Map<String, dynamic> metadata = const {}}): _questions = questions,_conditionalLogic = conditionalLogic,_metadata = metadata,super._();
+  const _FormSection({@JsonKey(readValue: IdReader.readIdCallback) required this.id, required this.title, this.description, required final  List<FormQuestion> questions, this.layout = SectionLayoutType.standard, this.gridColumns = 2, this.isHidden = false, this.isRepeatable = false, this.repeatMin, this.repeatMax, final  Map<String, dynamic>? conditionalLogic, this.style = const SectionStyle(), final  Map<String, dynamic> metadata = const {}}): _questions = questions,_conditionalLogic = conditionalLogic,_metadata = metadata,super._();
   factory _FormSection.fromJson(Map<String, dynamic> json) => _$FormSectionFromJson(json);
 
-@override@JsonKey(readValue: _readId) final  String id;
+@override@JsonKey(readValue: IdReader.readIdCallback) final  String id;
 @override final  Object? title;
 @override final  Object? description;
  final  List<FormQuestion> _questions;
@@ -298,7 +298,7 @@ abstract mixin class _$FormSectionCopyWith<$Res> implements $FormSectionCopyWith
   factory _$FormSectionCopyWith(_FormSection value, $Res Function(_FormSection) _then) = __$FormSectionCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(readValue: _readId) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
+@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
 });
 
 

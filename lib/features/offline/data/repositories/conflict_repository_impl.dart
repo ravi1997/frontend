@@ -5,20 +5,32 @@ import 'package:uuid/uuid.dart';
 
 /// Hive-based implementation of ConflictRepository
 class ConflictRepositoryImpl implements ConflictRepository {
-  static const String _boxName = 'sync_conflicts';
-  late Box _box;
+  String _boxName = 'sync_conflicts';
+  Box? _box;
   final Uuid _uuid = const Uuid();
 
   ConflictRepositoryImpl();
 
-  Future<void> init() async {
+  Future<void> init({String userId = 'default', String tenantId = 'default_tenant'}) async {
+    if (_box != null && _box!.isOpen) {
+      await _box!.close();
+    }
+    _boxName = 'sync_conflicts_${tenantId}_$userId';
     _box = await Hive.openBox(_boxName);
+  }
+
+  Future<void> clearData() async {
+    if (_box != null) {
+      await _box!.clear();
+      await _box!.close();
+      _box = null;
+    }
   }
 
   @override
   Future<List<SyncConflict>> getPendingConflicts() async {
-    await init();
-    return _box.values
+    if (_box == null) return [];
+    return _box!.values
         .map((json) => SyncConflict.fromJson(Map<String, dynamic>.from(json)))
         .where((conflict) => conflict.status == ConflictStatus.pending)
         .toList();
@@ -26,8 +38,8 @@ class ConflictRepositoryImpl implements ConflictRepository {
 
   @override
   Future<List<SyncConflict>> getConflictsByType(String entityType) async {
-    await init();
-    return _box.values
+    if (_box == null) return [];
+    return _box!.values
         .map((json) => SyncConflict.fromJson(Map<String, dynamic>.from(json)))
         .where(
           (conflict) =>
@@ -39,16 +51,16 @@ class ConflictRepositoryImpl implements ConflictRepository {
 
   @override
   Future<SyncConflict?> getConflict(String conflictId) async {
-    await init();
-    final json = _box.get(conflictId);
+    if (_box == null) return null;
+    final json = _box!.get(conflictId);
     if (json == null) return null;
     return SyncConflict.fromJson(Map<String, dynamic>.from(json));
   }
 
   @override
   Future<void> createConflict(SyncConflict conflict) async {
-    await init();
-    await _box.put(conflict.id, conflict.toJson());
+    if (_box == null) return;
+    await _box!.put(conflict.id, conflict.toJson());
   }
 
   @override
@@ -58,7 +70,7 @@ class ConflictRepositoryImpl implements ConflictRepository {
     Map<String, dynamic>? mergedData,
     String? resolutionNote,
   }) async {
-    await init();
+    if (_box == null) return;
     final conflict = await getConflict(conflictId);
     if (conflict == null) return;
 
@@ -67,19 +79,19 @@ class ConflictRepositoryImpl implements ConflictRepository {
       resolutionNote: resolutionNote,
     );
 
-    await _box.put(conflictId, resolved.toJson());
+    await _box!.put(conflictId, resolved.toJson());
   }
 
   @override
   Future<void> deleteConflict(String conflictId) async {
-    await init();
-    await _box.delete(conflictId);
+    if (_box == null) return;
+    await _box!.delete(conflictId);
   }
 
   @override
   Future<int> getPendingConflictCount() async {
-    await init();
-    return _box.values
+    if (_box == null) return 0;
+    return _box!.values
         .map((json) => SyncConflict.fromJson(Map<String, dynamic>.from(json)))
         .where((conflict) => conflict.status == ConflictStatus.pending)
         .length;
@@ -87,15 +99,15 @@ class ConflictRepositoryImpl implements ConflictRepository {
 
   @override
   Future<void> clearResolvedConflicts() async {
-    await init();
-    final keysToDelete = _box.values
+    if (_box == null) return;
+    final keysToDelete = _box!.values
         .map((json) => SyncConflict.fromJson(Map<String, dynamic>.from(json)))
         .where((conflict) => conflict.status != ConflictStatus.pending)
         .map((conflict) => conflict.id)
         .toList();
 
     for (final key in keysToDelete) {
-      await _box.delete(key);
+      await _box!.delete(key);
     }
   }
 

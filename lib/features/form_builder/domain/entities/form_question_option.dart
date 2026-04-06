@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../../../core/utils/id_reader.dart';
 
 part 'form_question_option.freezed.dart';
 part 'form_question_option.g.dart';
@@ -7,7 +8,7 @@ part 'form_question_option.g.dart';
 @freezed
 abstract class FormQuestionOption with _$FormQuestionOption {
   const factory FormQuestionOption({
-    @JsonKey(name: 'id', readValue: _readId) required String id,
+    @JsonKey(name: 'id', readValue: IdReader.readIdCallback) required String id,
     String? description,
     @JsonKey(name: 'is_default') @Default(false) bool isDefault,
     @JsonKey(name: 'is_disabled') @Default(false) bool isDisabled,
@@ -20,11 +21,4 @@ abstract class FormQuestionOption with _$FormQuestionOption {
 
   factory FormQuestionOption.fromJson(Map<String, dynamic> json) =>
       _$FormQuestionOptionFromJson(json);
-}
-
-Object? _readId(Map map, String key) {
-  if (key == 'id') {
-    return map['_id'] ?? map['id'];
-  }
-  return map[key];
 }

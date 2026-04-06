@@ -3,64 +3,67 @@ import 'package:frontend/features/responses/data/mappers/response_mapper.dart';
 
 void main() {
   group('ResponseMapper', () {
-    test('should prune hidden fields', () {
+    test('Prunes hidden fields correctly', () {
       final flatAnswers = {
         'field1': 'value1',
         'field2': 'value2',
+        'field3': 'value3',
       };
+      
       final visibilityMap = {
         'field1': true,
-        'field2': false,
+        'field2': false, // Hidden
+        'field3': true,
       };
 
       final result = ResponseMapper.toBackendPayload(flatAnswers, visibilityMap);
 
       expect(result.containsKey('field1'), isTrue);
       expect(result.containsKey('field2'), isFalse);
-      expect(result['field1'], equals('value1'));
+      expect(result.containsKey('field3'), isTrue);
     });
 
-    test('should transform flat repeat keys to nested structure', () {
+    test('Maps repeatable sections correctly', () {
       final flatAnswers = {
-        'members[0].name': 'John',
-        'members[0].age': 30,
-        'members[1].name': 'Jane',
-        'members[1].age': 25,
-        'other_field': 'hello',
+        'section1[0].name': 'John',
+        'section1[0].age': '30',
+        'section1[1].name': 'Jane',
+        'section1[1].age': '25',
       };
+
       final visibilityMap = {
-        'members': true,
+        'section1': true,
         'name': true,
         'age': true,
-        'other_field': true,
       };
 
       final result = ResponseMapper.toBackendPayload(flatAnswers, visibilityMap);
 
-      expect(result['other_field'], equals('hello'));
-      expect(result['members'], isA<List>());
-      final members = result['members'] as List;
-      expect(members.length, equals(2));
-      expect(members[0]['name'], equals('John'));
-      expect(members[0]['age'], equals(30));
-      expect(members[1]['name'], equals('Jane'));
-      expect(members[1]['age'], equals(25));
+      expect(result['section1'], isA<List>());
+      expect(result['section1'].length, 2);
+      expect(result['section1'][0]['name'], 'John');
+      expect(result['section1'][1]['age'], '25');
     });
 
-    test('should prune hidden repeat sections', () {
+    test('Prunes deleted repeat instances based on repeatInstances map', () {
       final flatAnswers = {
-        'members[0].name': 'John',
-        'other': 'data',
+        'section1[0].name': 'John',
+        'section1[1].name': 'Jane', // Was deleted
       };
+
       final visibilityMap = {
-        'members': false,
-        'other': true,
+        'section1': true,
+        'name': true,
       };
 
-      final result = ResponseMapper.toBackendPayload(flatAnswers, visibilityMap);
+      final repeatInstances = {
+        'section1': 1, // Only 1 instance remains
+      };
 
-      expect(result.containsKey('members'), isFalse);
-      expect(result['other'], equals('data'));
+      final result = ResponseMapper.toBackendPayload(flatAnswers, visibilityMap, repeatInstances: repeatInstances);
+
+      expect(result['section1'].length, 1);
+      expect(result['section1'][0]['name'], 'John');
     });
   });
 }

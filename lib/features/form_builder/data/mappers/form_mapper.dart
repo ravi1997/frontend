@@ -97,10 +97,38 @@ class FormMapper {
     return BuilderForm.fromJson(transformedData);
   }
 
-  static Map<String, dynamic> toBackendJson(BuilderForm form) {
-    // Legacy support or new creation (initial version)
+  // ── Create payload (POST /forms/) ────────────────────────────────────────
+  // Backend expects minimal fields for creation. Sections are optional on
+  // create — the backend initializes an empty version automatically.
+  static Map<String, dynamic> toCreatePayload(BuilderForm form) {
     return {
-      'title': form.title,
+      'title': form.title is Map
+          ? (form.title as Map)['en'] ?? 'Untitled Form'
+          : form.title?.toString() ?? 'Untitled Form',
+      'status': form.status,
+      'description': '',
+      'default_language': 'en',
+      'supported_languages': ['en'],
+    };
+  }
+
+  // ── Update payload (PUT /forms/<id>) ─────────────────────────────────────
+  // For metadata-only updates. Sections are NOT included here.
+  static Map<String, dynamic> toUpdatePayload(BuilderForm form) {
+    return {
+      'title': form.title is Map
+          ? (form.title as Map)['en'] ?? 'Untitled Form'
+          : form.title?.toString() ?? 'Untitled Form',
+      'status': form.status,
+    };
+  }
+
+  // ── Legacy full payload (used for backwards compat) ──────────────────────
+  static Map<String, dynamic> toBackendJson(BuilderForm form) {
+    return {
+      'title': form.title is Map
+          ? (form.title as Map)['en'] ?? 'Untitled Form'
+          : form.title?.toString() ?? 'Untitled Form',
       'status': form.status,
       'slug': form.id,
       'versions': [
@@ -118,7 +146,9 @@ class FormMapper {
 
   static Map<String, dynamic> toFormMetadataJson(BuilderForm form) {
     return {
-      'title': form.title,
+      'title': form.title is Map
+          ? (form.title as Map)['en'] ?? 'Untitled Form'
+          : form.title?.toString() ?? 'Untitled Form',
       'status': form.status,
       'slug': form.id,
       'active_version': form.version,

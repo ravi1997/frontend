@@ -1,5 +1,7 @@
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_question_option.dart';
+import '../../domain/entities/form_section.dart';
+import '../../domain/entities/form_question.dart';
 import 'package:expressions/expressions.dart';
 
 class LogicEvaluationResult {
@@ -32,72 +34,76 @@ class FormLogicEngine {
     final pendingWebhooks = <List<Map<String, dynamic>>>[];
 
     // Build dependency graph
+    // A node is an ID of either a question or a section
     final graph = <String, Set<String>>{};
-    final questions = <String, dynamic>{};
+    final nodeData = <String, dynamic>{};
+    final isSection = <String, bool>{};
     
-    // 1. Evaluate Section Visibility
+    // Initialize graph with all nodes
     for (final section in form.sections) {
-      final sectionLogic = _evaluateV3Logic(
-        section.conditionalLogic,
-        formData,
-        section.isHidden,
-        false,
-      );
-      visibilityMap[section.id] = sectionLogic.isVisible;
-
+      nodeData[section.id] = section;
+      isSection[section.id] = true;
+      graph[section.id] = _extractDependencies(section.conditionalLogic);
+      
       for (final question in section.questions) {
-        questions[question.id] = question;
-        requiredMap[question.id] = question.isRequired;
-
-        if (!visibilityMap[section.id]!) {
-          visibilityMap[question.id] = false;
-          continue;
-        }
-
-        final qLogic = _evaluateV3Logic(
-          question.conditionalLogic,
-          formData,
-          question.isHidden,
-          question.isRequired,
-        );
-        
-        visibilityMap[question.id] = qLogic.isVisible;
-        requiredMap[question.id] = qLogic.isRequired;
-
-        if (qLogic.isVisible) {
-          if (qLogic.optionsToSet != null) {
-            optionOverrides[question.id] = qLogic.optionsToSet!;
-          }
-          if (qLogic.webhooksToTrigger != null) {
-            pendingWebhooks.add(qLogic.webhooksToTrigger!);
-          }
-        }
-
-        // Detect dependencies for calculated values and visibility triggers
-        final deps = _extractDependencies(question.conditionalLogic);
-        graph[question.id] = deps;
+        nodeData[question.id] = question;
+        isSection[question.id] = false;
+        graph[question.id] = _extractDependencies(question.conditionalLogic);
       }
     }
 
     final sortedIds = _topologicalSort(graph);
 
-    // 2. Evaluate values in topologically sorted order
+    // Evaluate in topologically sorted order
     for (final id in sortedIds) {
-      final question = questions[id];
-      if (question == null) continue;
+      final data = nodeData[id];
+      if (data == null) continue;
 
-      // Ensure form data includes overrides from previous nodes in the chain
       final currentData = {...formData, ...valueOverrides};
 
-      final qLogic = _evaluateV3Logic(
-        question.conditionalLogic,
-        currentData,
-        question.isHidden,
-        question.isRequired,
-      );
-      
-      if (qLogic.isVisible && qLogic.valueToSet != null) {
-        valueOverrides[id] = qLogic.valueToSet;
+      if (isSection[id] == true) {
+        final section = data as FormSection;
+        final logic = _evaluateV3Logic(
+          section.conditionalLogic,
+          currentData,
+          section.isHidden,
+          false,
+        );
+        visibilityMap[id] = logic.isVisible;
+      } else {
+        final question = data as FormQuestion;
+        
+        // Find parent section visibility
+        final parentSectionId = form.sections.firstWhere((s) => s.questions.any((q) => q.id == id)).id;
+        final isParentVisible = visibilityMap[parentSectionId] ?? true;
+
+        if (!isParentVisible) {
+          visibilityMap[id] = false;
+          requiredMap[id] = false;
+          continue;
+        }
+
+        final qLogic = _evaluateV3Logic(
+          question.conditionalLogic,
+          currentData,
+          question.isHidden,
+          question.isRequired,
+        );
+        
+        visibilityMap[id] = qLogic.isVisible;
+        requiredMap[id] = qLogic.isRequired;
+
+        if (qLogic.isVisible) {
+          if (qLogic.optionsToSet != null) {
+            optionOverrides[id] = qLogic.optionsToSet!;
+          }
+          if (qLogic.webhooksToTrigger != null) {
+            pendingWebhooks.add(qLogic.webhooksToTrigger!);
+          }
+          if (qLogic.valueToSet != null) {
+            valueOverrides[id] = qLogic.valueToSet;
+          }
+        }
       }
     }
 
@@ -119,7 +125,7 @@ class FormLogicEngine {
       // Dependencies from conditions
       final conditionGroup = rule['conditionGroup'] as Map<String, dynamic>?;
       if (conditionGroup != null) {
-        final conditionRules = conditionGroup['rules'] as List? ?? [];
+        final conditionRules = (conditionGroup['rules'] as List? ?? []).cast<Map<String, dynamic>>();
         for (final r in conditionRules) {
           final triggerId = r['triggerId'];
           if (triggerId != null) deps.add(triggerId.toString());
@@ -127,7 +133,7 @@ class FormLogicEngine {
       }
       
       // Dependencies from calculation expressions
-      if (rule['action'] == 'calculate' || rule['action'] == 'set_value') {
+      if (rule['action'] == 'calculate') {
         final expr = rule['expression']?.toString() ?? '';
         if (expr.isNotEmpty) {
           final matches = RegExp(r'\{([a-zA-Z0-9_-]+)\}').allMatches(expr);
@@ -136,55 +142,53 @@ class FormLogicEngine {
           }
         }
       }
+
+      // Dependencies from set_value if it uses interpolation (optional feature)
+      if (rule['action'] == 'set_value' && rule['value'] is String) {
+        final val = rule['value'] as String;
+        final matches = RegExp(r'\{([a-zA-Z0-9_-]+)\}').allMatches(val);
+        for (final m in matches) {
+          deps.add(m.group(1)!);
+        }
+      }
     }
     return deps;
   }
 
   static List<String> _topologicalSort(Map<String, Set<String>> graph) {
-    final inDegree = <String, int>{};
-    for (final node in graph.keys) {
-      inDegree[node] = 0;
-    }
-    for (final deps in graph.values) {
-      for (final dep in deps) {
-        if (inDegree.containsKey(dep)) {
-          inDegree[dep] = inDegree[dep]! + 1;
-        }
-      }
-    }
-
-    final queue = <String>[];
-    for (final entry in inDegree.entries) {
-      if (entry.value == 0) {
-        queue.add(entry.key);
-      }
-    }
-
     final result = <String>[];
-    while (queue.isNotEmpty) {
-      final current = queue.removeAt(0);
-      result.add(current);
+    final visited = <String, bool>{}; // false = visiting, true = visited
+    
+    bool hasCycle = false;
 
-      if (graph.containsKey(current)) {
-        for (final dep in graph[current]!) {
-          if (inDegree.containsKey(dep)) {
-            inDegree[dep] = inDegree[dep]! - 1;
-            if (inDegree[dep] == 0) {
-              queue.add(dep);
-            }
-          }
+    void visit(String node) {
+      if (visited[node] == true) return;
+      if (visited[node] == false) {
+        hasCycle = true;
+        return;
+      }
+
+      visited[node] = false; // Mark as visiting
+
+      final deps = graph[node] ?? {};
+      for (final dep in deps) {
+        if (graph.containsKey(dep)) {
+          visit(dep);
         }
       }
+
+      visited[node] = true; // Mark as visited
+      result.add(node);
     }
 
-    // Cycle detection or remaining nodes
     for (final node in graph.keys) {
-      if (!result.contains(node)) {
-        result.add(node); // Append cycles to avoid losing fields
+      if (!visited.containsKey(node)) {
+        visit(node);
       }
     }
 
-    return result.reversed.toList();
+    // result now contains nodes such that dependencies come before dependents
+    return result;
   }
 
   static _V3EvaluationResult _evaluateV3Logic(

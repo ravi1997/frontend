@@ -38,7 +38,7 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.login,
-      data: {'identifier': identifier, 'password': password},
+      data: {'email': identifier, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -55,9 +55,9 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  /// Generate OTP for mobile number
-  Future<void> generateOtp(String mobile) async {
-    await _client.post(ApiEndpoints.generateOtp, data: {'mobile': mobile});
+  /// Request OTP for mobile number
+  Future<void> requestOtp(String mobile) async {
+    await _client.post(ApiEndpoints.requestOtp, data: {'mobile': mobile});
   }
 
   /// Register new user
@@ -79,17 +79,7 @@ class ApiService {
         'user_type': userType,
         if (employeeId != null) 'employee_id': employeeId,
         'mobile': mobile ?? '',
-        'roles':
-            roles ??
-            [
-              'user',
-              'creator',
-              'editor',
-              'publisher',
-              'deo',
-              'manager',
-              'general',
-            ],
+        'roles': roles ?? ['user'],
       },
     );
     return response.data as Map<String, dynamic>;
@@ -101,7 +91,12 @@ class ApiService {
       ApiEndpoints.refreshToken,
       data: {'refresh_token': refreshToken},
     );
-    return response.data as Map<String, dynamic>;
+    final data = response.data as Map<String, dynamic>;
+    return {
+      'access_token': data['access_token'],
+      'refresh_token': data['refresh_token'],
+      if (data['user'] != null) 'user': data['user'],
+    };
   }
 
   /// Logout user
@@ -123,11 +118,26 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  /// Revoke all sessions
+  Future<void> revokeAll() async {
+    await _client.post(ApiEndpoints.revokeAll);
+  }
+
+  /// Change password
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _client.post(
+      ApiEndpoints.changePassword,
+      data: {'current_password': currentPassword, 'new_password': newPassword},
+    );
+  }
+
   // ============================================================================
   // Form Management Methods
   // ============================================================================
 
-  /// List all forms with optional filters
   /// List all forms with optional filters
   Future<List<FormDto>> listForms({
     int? page,
@@ -139,12 +149,14 @@ class ApiService {
       ApiEndpoints.listForms,
       queryParameters: {
         if (page != null) 'page': page,
-        if (limit != null) 'limit': limit,
+        if (limit != null) 'page_size': limit,
         if (status != null) 'status': status,
         if (search != null) 'search': search,
       },
     );
-    return (response.data as List)
+    final data = response.data as Map<String, dynamic>;
+    final items = data['items'] as List? ?? (response.data as List? ?? []);
+    return (items)
         .map((e) => FormDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
@@ -181,8 +193,10 @@ class ApiService {
         if (workflows != null) 'workflows': workflows,
       },
     );
-    // Backend returns { "form": { ... } }
-    return FormDto.fromJson(response.data['form'] as Map<String, dynamic>);
+    // Backend returns { "form_id": "uuid" } after envelope unwrap
+    final formId =
+        response.data['form_id'] as String? ?? response.data['id'] as String?;
+    return getForm(formId!);
   }
 
   /// Update existing form
@@ -212,8 +226,7 @@ class ApiService {
         if (workflows != null) 'workflows': workflows,
       },
     );
-    // Backend returns { "form": { ... } }
-    return FormDto.fromJson(response.data['form'] as Map<String, dynamic>);
+    return getForm(formId);
   }
 
   /// Delete form
@@ -222,10 +235,14 @@ class ApiService {
   }
 
   /// Publish form
-  Future<Map<String, dynamic>> publishForm(String formId) async {
+  Future<Map<String, dynamic>> publishForm(
+    String formId, {
+    bool major = false,
+    bool minor = true,
+  }) async {
     final response = await _client.post(
       ApiEndpoints.publishForm(formId),
-      data: {},
+      data: {'major': major, 'minor': minor},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -234,10 +251,11 @@ class ApiService {
   Future<Map<String, dynamic>> cloneForm({
     required String formId,
     required String newTitle,
+    String? newSlug,
   }) async {
     final response = await _client.post(
       ApiEndpoints.cloneForm(formId),
-      data: {'title': newTitle},
+      data: {'title': newTitle, if (newSlug != null) 'slug': newSlug},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -273,7 +291,7 @@ class ApiService {
     final response = await _client.post(
       ApiEndpoints.submitResponse(formId),
       data: {
-        'responses': responses,
+        'data': responses,
         if (submittedBy != null) 'submitted_by': submittedBy,
         if (metadata != null) 'metadata': metadata,
       },
@@ -292,7 +310,7 @@ class ApiService {
       ApiEndpoints.listResponses(formId!),
       queryParameters: {
         if (page != null) 'page': page,
-        if (limit != null) 'limit': limit,
+        if (limit != null) 'page_size': limit,
         if (status != null) 'status': status,
       },
     );

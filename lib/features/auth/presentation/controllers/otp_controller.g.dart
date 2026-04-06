@@ -41,7 +41,7 @@ final class OtpControllerProvider
   }
 }
 
-String _$otpControllerHash() => r'e6af16857d484cfe650abdf5b8b449f5ecebadc5';
+String _$otpControllerHash() => r'23ae9515dabf18c9d591250dbf284ecc4b23fe44';
 
 abstract class _$OtpController extends $Notifier<int> {
   int build();

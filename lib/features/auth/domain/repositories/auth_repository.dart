@@ -6,7 +6,7 @@ part 'auth_repository.g.dart';
 abstract class AuthRepository {
   Future<User> login(String identifier, String password);
   Future<User> loginWithOtp(String mobile, String otp);
-  Future<void> generateOtp(String mobile);
+  Future<void> requestOtp(String mobile);
   Future<void> logout();
   Future<User?> getCurrentUser();
   Future<void> register({
@@ -19,6 +19,8 @@ abstract class AuthRepository {
   });
   Future<void> requestPasswordReset(String email);
   Future<String> refreshToken(String refreshToken);
+  Future<void> revokeAll();
+  Future<void> changePassword(String currentPassword, String newPassword);
 }
 
 @riverpod
