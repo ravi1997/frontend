@@ -33,7 +33,7 @@ final class SyncServiceProvider
   SyncService create() => SyncService();
 }
 
-String _$syncServiceHash() => r'22a47ec494d67dc4319b83b92e8f05384eee2ac6';
+String _$syncServiceHash() => r'44c4bf8c41cd5e8fbe242591d7dfedafebd3ced3';
 
 abstract class _$SyncService extends $AsyncNotifier<void> {
   FutureOr<void> build();

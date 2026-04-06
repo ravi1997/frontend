@@ -24,7 +24,7 @@ class AnalysisCanvas extends ConsumerWidget {
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -157,7 +157,7 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFFE5E7EB).withOpacity(0.5)
+      ..color = const Color(0xFFE5E7EB).withValues(alpha: 0.5)
       ..strokeWidth = 0.5;
 
     const double step = 40; // Size of each grid cell

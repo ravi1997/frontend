@@ -10,7 +10,7 @@ part 'form_version_history.g.dart';
 abstract class FormVersionHistory with _$FormVersionHistory {
   const factory FormVersionHistory({
     required String version,
-    @JsonKey(fromJson: DateUtils.parse) required DateTime created_at,
+    @JsonKey(fromJson: _parseDate) required DateTime created_at,
     String? authorId,
     String? changeLog,
   }) = _FormVersionHistory;
@@ -18,3 +18,5 @@ abstract class FormVersionHistory with _$FormVersionHistory {
   factory FormVersionHistory.fromJson(Map<String, dynamic> json) =>
       _$FormVersionHistoryFromJson(json);
 }
+
+DateTime _parseDate(dynamic date) => DateUtils.parse(date) ?? DateTime.now();

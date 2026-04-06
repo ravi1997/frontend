@@ -57,7 +57,9 @@ class FormLogicEngine {
     // Evaluate in topologically sorted order
     for (final id in sortedIds) {
       final data = nodeData[id];
-      if (data == null) continue;
+      if (data == null) {
+        continue;
+      }
 
       final currentData = {...formData, ...valueOverrides};
 
@@ -118,7 +120,9 @@ class FormLogicEngine {
 
   static Set<String> _extractDependencies(Map<String, dynamic>? logic) {
     final deps = <String>{};
-    if (logic == null || logic.isEmpty) return deps;
+    if (logic == null || logic.isEmpty) {
+      return deps;
+    }
 
     final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
     for (final rule in rules) {
@@ -158,18 +162,12 @@ class FormLogicEngine {
   static List<String> _topologicalSort(Map<String, Set<String>> graph) {
     final result = <String>[];
     final visited = <String, bool>{}; // false = visiting, true = visited
-    
-    bool hasCycle = false;
-
     void visit(String node) {
       if (visited[node] == true) return;
       if (visited[node] == false) {
-        hasCycle = true;
         return;
       }
-
       visited[node] = false; // Mark as visiting
-
       final deps = graph[node] ?? {};
       for (final dep in deps) {
         if (graph.containsKey(dep)) {
@@ -205,10 +203,12 @@ class FormLogicEngine {
     }
 
     final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
-    if (rules.isEmpty) return _V3EvaluationResult(
-      isVisible: !defaultIsHidden,
-      isRequired: defaultIsRequired
-    );
+    if (rules.isEmpty) {
+      return _V3EvaluationResult(
+        isVisible: !defaultIsHidden,
+        isRequired: defaultIsRequired,
+      );
+    }
 
     bool isVisible = !defaultIsHidden;
     bool isRequired = defaultIsRequired;
@@ -219,7 +219,9 @@ class FormLogicEngine {
     for (final rule in rules) {
       final action = rule['action'] ?? 'show';
       final conditionGroup = rule['conditionGroup'] as Map<String, dynamic>?;
-      if (conditionGroup == null) continue;
+      if (conditionGroup == null) {
+        continue;
+      }
 
       final matchType = conditionGroup['matchType'] ?? 'and';
       final conditionRules = conditionGroup['rules'] as List? ?? [];
@@ -287,7 +289,9 @@ class FormLogicEngine {
   }
 
   static dynamic _evaluateExpression(String expression, Map<String, dynamic> formData) {
-    if (expression.isEmpty) return null;
+    if (expression.isEmpty) {
+      return null;
+    }
     try {
       // Interpolate field references: {field_id} -> field_id
       // and prepare context
@@ -303,9 +307,10 @@ class FormLogicEngine {
         final varName = fieldId.replaceAll('-', '_');
         processedExpr = processedExpr.replaceAll(fullMatch, varName);
         
-        var val = formData[fieldId];
-        if (val == null) val = 0; // Default to 0 for arithmetic
-        if (val is String) val = double.tryParse(val) ?? val;
+        var val = formData[fieldId] ?? 0; // Default to 0 for arithmetic
+        if (val is String) {
+          val = double.tryParse(val) ?? val;
+        }
         
         context[varName] = val;
       }
@@ -322,7 +327,9 @@ class FormLogicEngine {
     Map<String, dynamic> formData,
   ) {
     final triggerId = rule['triggerId'];
-    if (triggerId == null) return false;
+    if (triggerId == null) {
+      return false;
+    }
 
     final operator = rule['operator'] ?? 'equals';
     final expectedValue = rule['value'];
@@ -351,10 +358,14 @@ class FormLogicEngine {
         }
         return !actualStr.contains(expectedStr);
       case 'is_empty':
-        if (actualValue is List) return actualValue.isEmpty;
+        if (actualValue is List) {
+          return actualValue.isEmpty;
+        }
         return actualStr.isEmpty;
       case 'is_not_empty':
-        if (actualValue is List) return actualValue.isNotEmpty;
+        if (actualValue is List) {
+          return actualValue.isNotEmpty;
+        }
         return actualStr.isNotEmpty;
       case 'greater_than':
         return (double.tryParse(actualStr) ?? 0) >

@@ -30,4 +30,7 @@ abstract class ConflictRepository {
 
   /// Clears all resolved conflicts
   Future<void> clearResolvedConflicts();
+
+  /// Closes the repository and any underlying storage
+  Future<void> close();
 }

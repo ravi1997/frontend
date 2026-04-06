@@ -7,8 +7,9 @@ part 'token_service.g.dart';
 class AuthTokens {
   final String? accessToken;
   final String? refreshToken;
+  final String? organizationId;
 
-  AuthTokens({this.accessToken, this.refreshToken});
+  AuthTokens({this.accessToken, this.refreshToken, this.organizationId});
 }
 
 @Riverpod(keepAlive: true)
@@ -16,12 +17,14 @@ class TokenService extends _$TokenService {
   static const String _boxName = 'auth_box';
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _organizationIdKey = 'organization_id';
 
   @override
   FutureOr<AuthTokens> build() async {
     final box = await Hive.openBox(_boxName);
     final accessToken = box.get(_accessTokenKey) as String?;
     final refreshToken = box.get(_refreshTokenKey) as String?;
+    final organizationId = box.get(_organizationIdKey) as String?;
 
     if (accessToken != null && isTokenExpired(accessToken)) {
       await box.delete(_accessTokenKey);
@@ -29,7 +32,11 @@ class TokenService extends _$TokenService {
       return AuthTokens();
     }
 
-    return AuthTokens(accessToken: accessToken, refreshToken: refreshToken);
+    return AuthTokens(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      organizationId: organizationId,
+    );
   }
 
   bool isTokenExpired(String token) {
@@ -60,24 +67,44 @@ class TokenService extends _$TokenService {
   Future<void> setTokens({
     required String accessToken,
     String? refreshToken,
+    String? organizationId,
   }) async {
     final box = await Hive.openBox(_boxName);
     await box.put(_accessTokenKey, accessToken);
     if (refreshToken != null) {
       await box.put(_refreshTokenKey, refreshToken);
     }
+    if (organizationId != null) {
+      await box.put(_organizationIdKey, organizationId);
+    }
     state = AsyncData(
       AuthTokens(
         accessToken: accessToken,
         refreshToken: refreshToken ?? state.value?.refreshToken,
+        organizationId: organizationId ?? state.value?.organizationId,
       ),
     );
   }
+
+  Future<void> setOrganizationId(String organizationId) async {
+    final box = await Hive.openBox(_boxName);
+    await box.put(_organizationIdKey, organizationId);
+    state = AsyncData(
+      AuthTokens(
+        accessToken: state.value?.accessToken,
+        refreshToken: state.value?.refreshToken,
+        organizationId: organizationId,
+      ),
+    );
+  }
+
+  String? get organizationId => state.value?.organizationId;
 
   Future<void> clearTokens() async {
     final box = await Hive.openBox(_boxName);
     await box.delete(_accessTokenKey);
     await box.delete(_refreshTokenKey);
+    await box.delete(_organizationIdKey);
     state = AsyncData(AuthTokens());
   }
 }

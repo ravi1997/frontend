@@ -94,8 +94,8 @@ class _AnalysisWidgetCardState extends State<AnalysisWidgetCard> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(
-                      widget.isSelected ? 0.12 : 0.05,
+                    color: Colors.black.withValues(
+                      alpha: widget.isSelected ? 0.12 : 0.05,
                     ),
                     blurRadius: widget.isSelected ? 12 : 6,
                     offset: const Offset(0, 4),

@@ -87,14 +87,16 @@ class EnhancedSyncService extends _$EnhancedSyncService {
     if (_currentUserId != user.id) {
       await _closeBoxes(clear: false);
       _currentUserId = user.id;
-      
-      final userId = user.id;
-      final tenantId = user.tenantId;
 
-      _pendingBox = await Hive.openBox('pending_submissions_${tenantId}_$userId');
-      _retryBox = await Hive.openBox('sync_retries_${tenantId}_$userId');
+      final userId = user.id;
+      final organizationId = user.organizationId ?? 'default';
+
+      _pendingBox = await Hive.openBox(
+        'pending_submissions_$organizationId\_$userId',
+      );
+      _retryBox = await Hive.openBox('sync_retries_$organizationId\_$userId');
       _conflictRepo = ConflictRepositoryImpl();
-      await _conflictRepo!.init(userId: userId, tenantId: tenantId);
+      await _conflictRepo!.init(userId: userId, tenantId: organizationId);
     }
 
     // Listen for connectivity changes
@@ -122,9 +124,12 @@ class EnhancedSyncService extends _$EnhancedSyncService {
       _retryBox = null;
     }
     if (_conflictRepo != null) {
-       if (clear) await _conflictRepo!.clearData();
-       else await _conflictRepo!.close();
-       _conflictRepo = null;
+      if (clear) {
+        await _conflictRepo!.clearData();
+      } else {
+        await _conflictRepo!.close();
+      }
+      _conflictRepo = null;
     }
   }
 

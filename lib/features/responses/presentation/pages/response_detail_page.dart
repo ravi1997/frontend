@@ -151,7 +151,7 @@ class _TopBar extends StatelessWidget {
           IconButton(
             icon: const Icon(
               Icons.arrow_back,
-              color: const Color(0xFF374151),
+              color: Color(0xFF374151),
               size: 20,
             ),
             onPressed: () => context.pop(),

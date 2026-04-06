@@ -113,7 +113,7 @@ class _AnalysisBuilderPageState extends ConsumerState<AnalysisBuilderPage> {
             const SizedBox(width: 8),
             Switch(
               value: _isPreviewMode,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               onChanged: (val) => setState(() => _isPreviewMode = val),
             ),
           ],
@@ -240,7 +240,7 @@ class _AnalysisBuilderPageState extends ConsumerState<AnalysisBuilderPage> {
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -275,12 +275,12 @@ class _AnalysisBuilderPageState extends ConsumerState<AnalysisBuilderPage> {
 
   Widget _buildCanvas() {
     return DragTarget<String>(
-      onAccept: (type) {
+      onAcceptWithDetails: (details) {
         ref
             .read(
               analysisBuilderControllerProvider(widget.dashboardId).notifier,
             )
-            .addWidget(type);
+            .addWidget(details.data);
       },
       builder: (context, candidateData, rejectedData) {
         return Stack(
@@ -291,7 +291,7 @@ class _AnalysisBuilderPageState extends ConsumerState<AnalysisBuilderPage> {
                 child: Container(
                   margin: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withOpacity(0.05),
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: const Color(0xFF2563EB),
@@ -310,7 +310,7 @@ class _AnalysisBuilderPageState extends ConsumerState<AnalysisBuilderPage> {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 10,
                           ),
                         ],

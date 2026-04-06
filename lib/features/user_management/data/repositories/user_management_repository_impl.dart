@@ -170,9 +170,22 @@ class UserManagementRepositoryImpl implements UserManagementRepository {
 
   @override
   Future<UserActivity> getUserActivity(String userId) async {
-    final response = await _client.get(
-      ApiEndpoints.adminGetUserActivity(userId),
+    // Backend only provides lock-status endpoint, not full activity
+    // Map the lock-status response to UserActivity
+    final response = await _client.get(ApiEndpoints.getLockStatus(userId));
+    final data = response.data as Map<String, dynamic>;
+
+    // Backend returns: { is_locked, lock_until, failed_login_attempts }
+    // Map to our UserActivity format with empty events (backend doesn't provide events)
+    return UserActivity(
+      userId: userId,
+      username: '',
+      failedLoginAttempts:
+          (data['failed_login_attempts'] as num?)?.toInt() ?? 0,
+      otpResendCount: 0,
+      isLocked: data['is_locked'] as bool? ?? false,
+      isPasswordExpired: false,
+      events: [],
     );
-    return UserActivity.fromJson(response.data as Map<String, dynamic>);
   }
 }

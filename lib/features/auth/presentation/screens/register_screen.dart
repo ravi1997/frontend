@@ -478,7 +478,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         username: _usernameController.text.trim(),
                         email: _emailController.text.trim(),
                         password: _passwordController.text,
-                        userType: 'general',
                         mobile: _mobileController.text.trim(),
                       );
                 }

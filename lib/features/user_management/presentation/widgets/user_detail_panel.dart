@@ -226,7 +226,7 @@ class _PanelHeader extends StatelessWidget {
                         icon: Icons.key_off,
                       ),
                     _Badge(
-                      label: user.userType,
+                      label: user.userType ?? 'user',
                       color: const Color(0xFF374151),
                       bg: const Color(0xFFF3F4F6),
                     ),
@@ -344,7 +344,7 @@ class _ProfileTab extends StatelessWidget {
         const SizedBox(height: 24),
         _SectionLabel('Organisation'),
         _Row('Department', user.department ?? '—'),
-        _Row('User Type', user.userType),
+        _Row('User Type', user.userType ?? 'user'),
         const SizedBox(height: 24),
         _SectionLabel('Timestamps'),
         _Row('Registered On', _fmt(user.createdAt)),

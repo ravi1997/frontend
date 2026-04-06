@@ -76,7 +76,6 @@ class AuthController extends _$AuthController {
     required String username,
     required String email,
     required String password,
-    required String userType,
     String? employeeId,
     String? mobile,
   }) async {
@@ -87,7 +86,6 @@ class AuthController extends _$AuthController {
         username: username,
         email: email,
         password: password,
-        userType: userType,
         employeeId: employeeId,
         mobile: mobile,
       );

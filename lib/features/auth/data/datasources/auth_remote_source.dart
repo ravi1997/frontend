@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_client_wrapper.dart';
@@ -16,7 +17,6 @@ abstract class AuthRemoteSource {
     required String username,
     required String email,
     required String password,
-    required String userType,
     String? employeeId,
     String? mobile,
   });
@@ -61,18 +61,27 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<User?> getCurrentUser() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.userStatus);
-      final data = response.data;
+      dynamic data = response.data;
 
-      if (data is Map<String, dynamic>) {
-        if (data.containsKey('user')) {
-          return User.fromJson(data['user'] as Map<String, dynamic>);
+      // Unpack string manually if DIO doesn't map it to JSON due to content-type issues
+      if (data is String) {
+        try {
+          data = jsonDecode(data);
+        } catch (_) {}
+      }
+
+      if (data is Map) {
+        final mapData = Map<String, dynamic>.from(data);
+        if (mapData.containsKey('user')) {
+          return User.fromJson(mapData['user'] as Map<String, dynamic>);
         }
-        // If the entire data object is the user (unwrapped from {success: true, data: {user_fields...}})
-        if (data.containsKey('id') && data.containsKey('username')) {
-          return User.fromJson(data);
+        // If the entire data object is the user
+        if (mapData.containsKey('id') && mapData.containsKey('username')) {
+          return User.fromJson(mapData);
         }
       }
-    } catch (e) {
+    } catch (e, st) {
+      print('Error in getCurrentUser: \$e\\n\$st');
       return null;
     }
     return null;
@@ -92,7 +101,6 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
     required String username,
     required String email,
     required String password,
-    required String userType,
     String? employeeId,
     String? mobile,
   }) async {
@@ -102,18 +110,8 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         'username': username,
         'email': email,
         'password': password,
-        'user_type': userType,
-        'employee_id': employeeId,
-        'mobile': mobile ?? '',
-        'roles': [
-          'user',
-          'creator',
-          'editor',
-          'publisher',
-          'deo',
-          'manager',
-          'general',
-        ],
+        if (employeeId != null) 'employee_id': employeeId,
+        if (mobile != null) 'mobile': mobile,
       },
     );
     return response.data as Map<String, dynamic>;

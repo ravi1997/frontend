@@ -121,4 +121,14 @@ class TranslationController extends _$TranslationController {
     final repository = ref.read(formBuilderRepositoryProvider);
     return repository.getTranslations(formId, language: language);
   }
+
+  /// Saves manual translations for a form.
+  Future<void> saveManualTranslations(
+    String formId,
+    String language,
+    Map<String, dynamic> translations,
+  ) async {
+    final repository = ref.read(formBuilderRepositoryProvider);
+    await repository.saveTranslations(formId, language, translations);
+  }
 }

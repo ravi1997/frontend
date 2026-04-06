@@ -308,7 +308,7 @@ class AnalysisPropertiesPanel extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: items.contains(value) ? value : null,
+          initialValue: items.contains(value) ? value : null,
           items: items
               .map(
                 (i) => DropdownMenuItem(

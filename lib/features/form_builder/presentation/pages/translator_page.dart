@@ -357,7 +357,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage>
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _manualTargetLanguage,
+                  initialValue: _manualTargetLanguage,
                   decoration: const InputDecoration(
                     labelText: 'Target Language',
                     border: OutlineInputBorder(),
@@ -538,7 +538,7 @@ class _TranslatorPageState extends ConsumerState<TranslatorPage>
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _sourceLanguage,
+                    initialValue: _sourceLanguage,
                     decoration: const InputDecoration(
                       labelText: 'Source Language',
                       border: OutlineInputBorder(),

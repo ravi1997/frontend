@@ -1,28 +1,64 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/core/network/envelope_interceptor.dart';
-import 'package:frontend/core/exceptions/app_exception.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockResponseInterceptorHandler extends Mock implements ResponseInterceptorHandler {}
 
 void main() {
   late EnvelopeInterceptor interceptor;
+  late MockResponseInterceptorHandler handler;
+
+  setUpAll(() {
+    registerFallbackValue(DioException(requestOptions: RequestOptions(path: '')));
+  });
 
   setUp(() {
     interceptor = EnvelopeInterceptor();
+    handler = MockResponseInterceptorHandler();
   });
 
   test('onResponse unwraps success envelope', () async {
     final response = Response(
       requestOptions: RequestOptions(path: '/test'),
-      data: {'success': true, 'data': {'key': 'value'}},
+      data: {
+        'success': true,
+        'data': {'key': 'value'},
+      },
       statusCode: 200,
     );
 
-    var interceptedResponse;
-    final handler = ResponseInterceptorHandler();
-    
-    // Create a mock handler to catch the response
-    // Since handler.next is called, we'll need to mock it or intercept it
-    // For simplicity, we just call the method directly and verify the response object is modified
-    // Wait, handler is an abstract class or requires implementation. We can use a simple mock.
+    interceptor.onResponse(response, handler);
+
+    expect(response.data, {'key': 'value'});
+    verify(() => handler.next(response)).called(1);
+  });
+
+  test('onResponse rejects failure envelope', () async {
+    final response = Response(
+      requestOptions: RequestOptions(path: '/test'),
+      data: {
+        'success': false,
+        'message': 'API error',
+      },
+      statusCode: 400,
+    );
+
+    interceptor.onResponse(response, handler);
+
+    verify(() => handler.reject(any())).called(1);
+  });
+
+  test('onResponse hands off to next handler if not envelope', () {
+    final response = Response(
+      requestOptions: RequestOptions(path: '/test'),
+      data: {'other': 'data'},
+      statusCode: 200,
+    );
+
+    interceptor.onResponse(response, handler);
+
+    expect(response.data, {'other': 'data'});
+    verify(() => handler.next(response)).called(1);
   });
 }

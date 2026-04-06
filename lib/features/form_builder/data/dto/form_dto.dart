@@ -12,24 +12,20 @@ abstract class FormDto with _$FormDto {
 
   const factory FormDto({
     // Handle both 'id' and '_id' from backend
-    // ignore: invalid_annotation_target
-    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlug) required String id,
+    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) required String id,
     @Default('Untitled Form') String title,
     @Default('draft') String status,
-    // ignore: invalid_annotation_target
     @JsonKey(name: 'active_version') String? activeVersion,
 
     // The backend returns a list of version objects under 'versions'
-    @Default([]) List<FormVersionDto> versions,
+    @Default(<FormVersionDto>[]) List<FormVersionDto> versions,
 
-    // ignore: invalid_annotation_target
     @JsonKey(
       name: 'created_at',
       fromJson: DateUtils.parse,
       toJson: DateUtils.toIso8601,
     )
     DateTime? createdAt,
-    // ignore: invalid_annotation_target
     @JsonKey(
       name: 'updated_at',
       fromJson: DateUtils.parse,
@@ -38,10 +34,9 @@ abstract class FormDto with _$FormDto {
     DateTime? updatedAt,
 
     // Workflows might be a Map or dynamic
-    @Default({}) Map<String, dynamic> workflows,
+    @Default(<String, dynamic>{}) Map<String, dynamic> workflows,
 
     // Access Policy
-    // ignore: invalid_annotation_target
     @JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy,
   }) = _FormDto;
 
@@ -81,8 +76,7 @@ abstract class FormDto with _$FormDto {
 abstract class FormVersionDto with _$FormVersionDto {
   const factory FormVersionDto({
     @Default('1.0') String version,
-    @Default([]) List<Map<String, dynamic>> sections,
-    // ignore: invalid_annotation_target
+    @Default(<Map<String, dynamic>>[]) List<Map<String, dynamic>> sections,
     @JsonKey(
       name: 'created_at',
       fromJson: DateUtils.parse,

@@ -4,10 +4,7 @@
 /// organized by feature area for easy maintenance and updates.
 class ApiEndpoints {
   // Base configuration
-  static const String serverBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:5000',
-  );
+  static const String serverBaseUrl = 'http://192.168.1.51:8051';
 
   static const String baseUrl = '$serverBaseUrl/form/api/v1';
 
@@ -71,7 +68,7 @@ class ApiEndpoints {
   /// Also available at: /user/profile
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "user": {...} }
-  static const String userStatus = '/user/status';
+  static const String userStatus = '/user/profile';
 
   /// POST - Change password
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -83,12 +80,15 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?page=int&page_size=int
   /// Returns: [{ "id": string, "username": string, "email": string, ... }]
-  static const String listUsers = '/user/users';
+  static const String adminListUsers = '/user/users';
 
   /// GET - Get user by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "username": string, "email": string, ... }
-  static String getUser(String userId) => '/user/users/$userId';
+  static String adminGetUser(String userId) => '/user/users/$userId';
+
+  /// GET - List departments (admin only)
+  static const String adminListDepartments = '/user/departments';
 
   /// PUT - Update user
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -96,24 +96,57 @@ class ApiEndpoints {
   /// Returns: { "id": string, "message": string, ... }
   static String updateUser(String userId) => '/user/users/$userId';
 
-  /// PUT - Update user roles
+  /// PATCH - Update user department
+  static String adminUpdateUserDepartment(String userId) =>
+      '/user/users/$userId/department';
+
+  /// PATCH - Set user status (active/inactive)
+  static String adminSetUserStatus(String userId) =>
+      '/user/users/$userId/status';
+
+  /// PATCH - Update user roles
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "roles": string[] }
-  static String updateUserRoles(String userId) => '/user/users/$userId/roles';
+  static String adminUpdateUserRoles(String userId) =>
+      '/user/users/$userId/roles';
+
+  /// POST - Reset user password
+  static String adminResetUserPassword(String userId) =>
+      '/user/users/$userId/reset-password';
 
   /// POST - Lock user account
   /// Headers: { "Authorization": "Bearer {token}" }
-  static String lockUser(String userId) => '/user/users/$userId/lock';
+  static String adminLockUser(String userId) => '/user/users/$userId/lock';
 
   /// POST - Unlock user account
   /// Headers: { "Authorization": "Bearer {token}" }
-  static String unlockUser(String userId) => '/user/users/$userId/unlock';
+  static String adminUnlockUser(String userId) => '/user/users/$userId/unlock';
+
+  /// DELETE - Delete user
+  static String adminDeleteUser(String userId) => '/user/users/$userId';
+
+  /// GET - Get user activity
+  static String adminGetUserActivity(String userId) =>
+      '/user/users/$userId/activity';
 
   /// GET - Get lock status
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "is_locked": bool, "lock_until": string, "failed_login_attempts": int }
   static String getLockStatus(String userId) =>
       '/user/security/lock-status/$userId';
+
+  // ============================================================================
+  // System Settings Endpoints
+  // ============================================================================
+
+  /// GET - Get system settings (superadmin)
+  static const String systemSettingsGet = '/settings/system';
+
+  /// PATCH - Update system settings (superadmin)
+  static const String systemSettingsPatch = '/settings/system';
+
+  /// POST - Reset system settings to defaults (superadmin)
+  static const String systemSettingsReset = '/settings/system/reset';
 
   // ============================================================================
   // Form Management Endpoints (§5-6)
@@ -160,6 +193,33 @@ class ApiEndpoints {
   /// Returns: { "task_id": string }
   static String cloneForm(String formId) => '/forms/$formId/clone';
 
+  // ============================================================================
+  // Form Version Endpoints
+  // ============================================================================
+
+  /// GET - List all versions for a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: [{ "version": string, "created_at": string, ... }]
+  static String getFormVersions(String formId) => '/forms/$formId/versions';
+
+  /// GET - Get a specific version of a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "id": string, "title": string, "sections": [...], ... }
+  static String getFormVersion(String formId, String version) =>
+      '/forms/$formId/versions/$version';
+
+  /// PUT - Update a specific version of a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { ... form fields ... }
+  static String updateFormVersion(String formId, String version) =>
+      '/forms/$formId/versions/$version';
+
+  /// POST - Create a new version of a form
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { "type": string, "activate": bool, ... }
+  /// Returns: { "version": string, ... }
+  static String createFormVersion(String formId) => '/forms/$formId/versions';
+
   /// GET - Check slug availability
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?slug=string
@@ -173,7 +233,11 @@ class ApiEndpoints {
 
   /// GET - List form templates
   /// Headers: { "Authorization": "Bearer {token}" }
-  static const String formTemplates = '/forms/templates';
+  static const String listFormTemplates = '/forms/templates';
+
+  /// GET - Get form template by ID
+  static String getFormTemplate(String templateId) =>
+      '/forms/templates/$templateId';
 
   // ============================================================================
   // Section Management Endpoints (§6)
@@ -295,6 +359,15 @@ class ApiEndpoints {
   /// Optional: ?response_id=string
   static String nextAction(String formId) => '/forms/$formId/next-action';
 
+  /// GET - List all workflows
+  static const String listWorkflows = '/workflows/';
+
+  /// POST - Create new workflow
+  static const String createWorkflow = '/workflows/';
+
+  /// PUT - Update existing workflow
+  static String updateWorkflow(String workflowId) => '/workflows/$workflowId';
+
   // ============================================================================
   // Submission History (§11)
   // ============================================================================
@@ -303,6 +376,11 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?question_id=string&primary_value=string
   static String submissionHistory(String formId) => '/forms/$formId/history';
+
+  /// GET - Get history for a specific response
+  /// Headers: { "Authorization": "Bearer {token}" }
+  static String getResponseHistory(String formId, String responseId) =>
+      '/forms/$formId/responses/$responseId/history';
 
   // ============================================================================
   // Export API (§10)
@@ -441,26 +519,50 @@ class ApiEndpoints {
   // AI / NLP Search API (§17)
   // ============================================================================
 
+  /// POST - Generate form structure from a prompt using AI
+  /// Body: { "prompt": string, "current_form": {...}? }
+  static const String generateFormAI = '/ai/generate';
+
+  /// POST - Get field suggestions based on current form context
+  /// Body: { "current_form": {...} }
+  static const String getFieldSuggestions = '/ai/suggestions';
+
+  /// POST - Validate form design for UX/logical issues
+  /// Body: { "form": {...} }
+  static String validateFormDesign(String formId) =>
+      '/ai/$formId/validate-design';
+
   /// GET - AI service health check (public)
-  /// Returns: { "status": string, "ollama": {...}, "timestamp": string }
   static const String aiHealthCheck = '/ai/health';
 
-  /// GET - NLP search
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Query: ?q=string
-  static String nlpSearch(String query) => '/ai/search/nlp-search?q=$query';
+  /// POST - NLP search across form responses
+  static String nlpSearch(String formId) => '/ai/forms/$formId/nlp-search';
 
-  /// POST - Semantic search
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "query": string, "form_id": string }
-  /// Results cached in Redis for 1 hour
-  static const String semanticSearch = '/ai/search/semantic-search';
+  /// POST - Semantic search across form responses
+  static String semanticSearch(String formId) =>
+      '/ai/forms/$formId/semantic-search';
 
   /// POST - Semantic search (streaming SSE)
-  /// Headers: { "Authorization": "Bearer {token}" }
-  /// Body: { "query": string }
-  static const String semanticSearchStream =
-      '/ai/search/semantic-search/stream';
+  static String semanticSearchStream(String formId) =>
+      '/ai/forms/$formId/semantic-search/stream';
+
+  /// POST - Analyze a specific form response using AI
+  static String analyzeResponseAI(String formId, String responseId) =>
+      '/ai/$formId/responses/$responseId/analyze';
+
+  /// POST - Moderate (flag/review) a specific form response using AI
+  static String moderateResponseAI(String formId, String responseId) =>
+      '/ai/$formId/responses/$responseId/moderate';
+
+  /// GET - Get sentiment distribution for a form
+  static String getFormSentimentTrends(String formId) =>
+      '/ai/$formId/sentiment';
+
+  /// POST - Detect anomalies in form responses using AI
+  static String detectFormAnomalies(String formId) => '/ai/$formId/anomalies';
+
+  /// POST - AI powered search for responses in a form
+  static String aiPoweredSearch(String formId) => '/ai/$formId/search';
 
   // ============================================================================
   // Dashboard API (§18)
@@ -493,6 +595,9 @@ class ApiEndpoints {
   /// Requires role: admin, superadmin, or manager
   /// Returns: { "total_forms": int, "active_forms": int, "total_responses": int, ... }
   static const String getDashboardStats = '/analytics/dashboard';
+
+  /// GET - Get analytics for a specific form
+  static String getAnalytics(String formId) => '/forms/$formId/analytics';
 
   /// GET - Get analytics summary
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -587,6 +692,16 @@ class ApiEndpoints {
   /// GET - API health check
   /// Returns: { "status": "ok", "version": string, "timestamp": string }
   static const String healthCheck = '/health';
+
+  // ============================================================================
+  // File Management Endpoints
+  // ============================================================================
+
+  /// POST - Upload a file
+  static const String uploadFile = '/files/upload';
+
+  /// POST - Upload a signature
+  static const String uploadSignature = '/files/upload-signature';
 
   // ============================================================================
   // Helper methods for building URLs

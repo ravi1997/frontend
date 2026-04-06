@@ -15,8 +15,15 @@ class IdReader {
     return map['id'] ?? map['_id'] ?? map['slug'];
   }
 
-  /// Freezed-compatible readValue callback for @JsonKey.
-  /// Usage: @JsonKey(readValue: IdReader.readIdCallback)
+  /// Freezed-compatible `readValue` callback for `@JsonKey` with slug fallback.
+  /// Matches the required signature: `Object? Function(Map<dynamic, dynamic>, String)`
+  /// Usage: `@JsonKey(readValue: IdReader.readIdWithSlugCallback)`
+  static Object? readIdWithSlugCallback(Map json, String key) {
+    return json['id'] ?? json['_id'] ?? json['slug'];
+  }
+
+  /// Freezed-compatible `readValue` callback for `@JsonKey`.
+  /// Usage: `@JsonKey(readValue: IdReader.readIdCallback)`
   static Object? readIdCallback(Map json, String key) {
     if (key == 'id') {
       return json['id'] ?? json['_id'];

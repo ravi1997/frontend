@@ -12,19 +12,16 @@ class ConflictRepositoryImpl implements ConflictRepository {
   ConflictRepositoryImpl();
 
   Future<void> init({String userId = 'default', String tenantId = 'default_tenant'}) async {
-    if (_box != null && _box!.isOpen) {
-      await _box!.close();
-    }
+    await close();
     _boxName = 'sync_conflicts_${tenantId}_$userId';
     _box = await Hive.openBox(_boxName);
   }
 
   Future<void> clearData() async {
-    if (_box != null) {
+    if (_box != null && _box!.isOpen) {
       await _box!.clear();
-      await _box!.close();
-      _box = null;
     }
+    await close();
   }
 
   @override
@@ -108,6 +105,14 @@ class ConflictRepositoryImpl implements ConflictRepository {
 
     for (final key in keysToDelete) {
       await _box!.delete(key);
+    }
+  }
+
+  @override
+  Future<void> close() async {
+    if (_box != null && _box!.isOpen) {
+      await _box!.close();
+      _box = null;
     }
   }
 

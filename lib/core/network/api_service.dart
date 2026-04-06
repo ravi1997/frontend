@@ -65,10 +65,8 @@ class ApiService {
     required String username,
     required String email,
     required String password,
-    required String userType,
     String? employeeId,
     String? mobile,
-    List<String>? roles,
   }) async {
     final response = await _client.post(
       ApiEndpoints.register,
@@ -76,10 +74,8 @@ class ApiService {
         'username': username,
         'email': email,
         'password': password,
-        'user_type': userType,
         if (employeeId != null) 'employee_id': employeeId,
-        'mobile': mobile ?? '',
-        'roles': roles ?? ['user'],
+        if (mobile != null) 'mobile': mobile,
       },
     );
     return response.data as Map<String, dynamic>;
@@ -209,7 +205,7 @@ class ApiService {
     String? version,
     Map<String, dynamic>? workflows,
   }) async {
-    final response = await _client.put(
+    await _client.put(
       ApiEndpoints.updateForm(formId),
       data: {
         'title': title,

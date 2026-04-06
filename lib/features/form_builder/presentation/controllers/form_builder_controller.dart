@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/utils/error_handler.dart';
@@ -542,6 +544,22 @@ class FormBuilderController extends _$FormBuilderController {
   }
 
 
+  Timer? _sectionDebounceTimer;
+
+  void _syncSectionWithBackend(FormSection section) {
+    if (formId == 'new') return;
+    _sectionDebounceTimer?.cancel();
+    _sectionDebounceTimer = Timer(const Duration(milliseconds: 1000), () async {
+      try {
+        final repository = ref.read(formBuilderRepositoryProvider);
+        await repository.updateSection(formId, section);
+      } catch (e) {
+        // Silently fail for background sync or use ErrorHandler
+        print('Failed to sync section: $e');
+      }
+    });
+  }
+
   void updateSection(FormSection updatedSection) {
     if (state.value == null) return;
     final sections = state.value!.form.sections.map((s) {
@@ -556,14 +574,18 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    
+    _syncSectionWithBackend(updatedSection);
   }
 
   void updateSectionTitle(String sectionId, String title) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
+    FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        return s.copyWith(title: _updateLocalizedField(s.title, title, locale));
+        updatedSection = s.copyWith(title: _updateLocalizedField(s.title, title, locale));
+        return updatedSection!;
       }
       return s;
     }).toList();
@@ -573,20 +595,24 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+
+    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
   }
 
   void updateSectionDescription(String sectionId, String description) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
+    FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        return s.copyWith(
+        updatedSection = s.copyWith(
           description: _updateLocalizedField(
             s.description,
             description,
             locale,
           ),
         );
+        return updatedSection!;
       }
       return s;
     }).toList();
@@ -596,6 +622,8 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+
+    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
   }
 
   void updateForm(BuilderForm updatedForm) {
@@ -871,9 +899,11 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateSectionMetadata(String sectionId, Map<String, dynamic> metadata) {
     if (state.value == null) return;
+    FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        return s.copyWith(metadata: {...s.metadata, ...metadata});
+        updatedSection = s.copyWith(metadata: {...s.metadata, ...metadata});
+        return updatedSection!;
       }
       return s;
     }).toList();
@@ -883,6 +913,8 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+
+    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
   }
 
   void updateFormMetadata(Map<String, dynamic> metadata) {

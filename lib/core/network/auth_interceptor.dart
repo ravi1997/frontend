@@ -41,6 +41,12 @@ class AuthInterceptor extends QueuedInterceptor {
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
+
+      // Add X-Organization-ID header for tenant isolation
+      final organizationId = _getTokens()?.organizationId;
+      if (organizationId != null) {
+        options.headers['X-Organization-ID'] = organizationId;
+      }
     }
     handler.next(options);
   }

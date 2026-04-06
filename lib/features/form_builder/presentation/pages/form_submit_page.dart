@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:frontend/core/exceptions/app_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:js_interop';
@@ -925,7 +926,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     .read(formSubmissionControllerProvider.notifier)
                     .submit(
                       formId: form.id,
-                      answers: Map<String, dynamic>.from(formData),
+                      answers: submissionData,
                       visibilityMap: _logicResult!.visibility,
                       repeatInstances: repeatInstances,
                     );
@@ -935,6 +936,27 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     _showSubmitted = true;
                     _isReviewing = false;
                   });
+                } else {
+                  final errorState = ref.read(formSubmissionControllerProvider).error;
+                  if (errorState is ApiException && errorState.details != null && mounted) {
+                    setState(() {
+                      if (errorState.details is Map) {
+                        (errorState.details as Map).forEach((key, value) {
+                          _fieldErrors[key.toString()] = value.toString();
+                        });
+                      } else if (errorState.details is List) {
+                        for (final err in (errorState.details as List)) {
+                          if (err is Map && err.containsKey('field') && err.containsKey('message')) {
+                            _fieldErrors[err['field'].toString()] = err['message'].toString();
+                          }
+                        }
+                      }
+                    });
+                    
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(errorState.message)),
+                    );
+                  }
                 }
               },
         style: ElevatedButton.styleFrom(
@@ -1485,7 +1507,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(submitFormDataProvider);
         return DropdownButtonFormField<String>(
-          value: formData[_fieldId]?.toString(),
+          initialValue: formData[_fieldId]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {
@@ -2116,7 +2138,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           final reader = web.FileReader();
           reader.addEventListener(
             'load',
-            (web.Event __) {
+            (web.Event _) {
               // result is a JS ArrayBuffer; convert to Uint8List
               final jsBuffer = reader.result;
               Uint8List? bytes;

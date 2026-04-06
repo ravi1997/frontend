@@ -32,8 +32,11 @@ class SyncService extends _$SyncService {
         await _box!.close();
       }
       _currentUserId = user.id;
-      // Scoping box by tenantId and userId to prevent data leakage between users/orgs
-      _box = await Hive.openBox('pending_submissions_${user.tenantId}_${user.id}');
+      // Scoping box by organizationId and userId to prevent data leakage between users/orgs
+      final organizationId = user.organizationId ?? 'default';
+      _box = await Hive.openBox(
+        'pending_submissions_${organizationId}_${user.id}',
+      );
     }
 
     // Listen for connectivity changes
@@ -66,7 +69,7 @@ class SyncService extends _$SyncService {
       try {
         final Map<String, dynamic> data = Map<String, dynamic>.from(json);
         final response = FormResponse.fromJson(data);
-        
+
         // Ensure we only sync if the user is still logged in and matches
         if (_currentUserId == null) break;
 

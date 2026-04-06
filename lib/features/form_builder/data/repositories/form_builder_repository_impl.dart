@@ -352,10 +352,13 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> getTranslations(String formId) async {
+  Future<Map<String, dynamic>> getTranslations(
+    String formId, {
+    String? language,
+  }) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.getFormTranslations(formId: formId),
+        ApiEndpoints.getFormTranslations(formId: formId, language: language),
       );
       return response.data as Map<String, dynamic>;
     } catch (e, s) {
@@ -367,13 +370,17 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<void> saveTranslations(
     String formId,
+    String language,
     Map<String, dynamic> translations,
   ) async {
     try {
       // Backend: POST /forms/translations
       // Body: { "form_id": "...", "language": "...", "translations": {...} }
-      final payload = Map<String, dynamic>.from(translations);
-      payload['form_id'] = formId;
+      final payload = {
+        'form_id': formId,
+        'language': language,
+        'translations': translations,
+      };
 
       await _apiClient.post(ApiEndpoints.saveFormTranslations, data: payload);
     } catch (e, s) {

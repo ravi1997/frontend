@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/auth/domain/entities/user.dart';
 import 'package:frontend/features/auth/data/datasources/auth_remote_source.dart';
 import 'package:frontend/core/network/api_client_wrapper.dart';
 import 'package:mocktail/mocktail.dart';
@@ -25,7 +24,7 @@ void main() {
           'email': 'test@example.com',
           'user_type': 'admin',
           'roles': ['admin'],
-        }
+        },
       };
 
       when(() => mockApiClient.get(any())).thenAnswer(
@@ -66,9 +65,7 @@ void main() {
     });
 
     test('returns null when user fields are missing', () async {
-      final responseData = {
-        'something': 'else',
-      };
+      final responseData = {'something': 'else'};
 
       when(() => mockApiClient.get(any())).thenAnswer(
         (_) async => Response(

@@ -1291,7 +1291,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(previewFormDataProvider);
         return DropdownButtonFormField<String>(
-          value: formData[q.id]?.toString(),
+          initialValue: formData[q.id]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
           items: options.map((opt) {
@@ -1922,7 +1922,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           final reader = web.FileReader();
           reader.addEventListener(
             'load',
-            (web.Event __) {
+            (web.Event _) {
               // result is a JS ArrayBuffer; convert to Uint8List
               final jsBuffer = reader.result;
               Uint8List? bytes;

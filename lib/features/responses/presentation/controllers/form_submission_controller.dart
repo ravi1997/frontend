@@ -1,3 +1,4 @@
+import 'package:frontend/core/exceptions/app_exception.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/form_response.dart';
 import '../../data/services/sync_service.dart';
@@ -54,6 +55,11 @@ class FormSubmissionController extends _$FormSubmissionController {
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {
+      if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
+        state = AsyncValue.error(e, st);
+        return false;
+      }
+      
       // Fallback to offline storage on network failure
       await ref
           .read(syncServiceProvider.notifier)

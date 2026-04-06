@@ -16,7 +16,7 @@ class EnvelopeInterceptor extends Interceptor {
           final errorStr = (data['error'] ?? data['msg'] ?? data['message'])?.toString() ?? 'Unknown API error';
           final details = data['details'];
           
-          throw DioException(
+          return handler.reject(DioException(
             requestOptions: response.requestOptions,
             response: response,
             error: ApiException(
@@ -25,7 +25,7 @@ class EnvelopeInterceptor extends Interceptor {
               statusCode: response.statusCode,
             ),
             type: DioExceptionType.badResponse,
-          );
+          ));
         }
       }
     }
