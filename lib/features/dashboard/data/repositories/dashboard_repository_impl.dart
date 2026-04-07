@@ -30,8 +30,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
         id: json['id'] ?? json['_id'] ?? '',
         title: json['title'] ?? 'Untitled Form',
         status: json['status'] ?? 'Draft',
-        updatedAt: DateUtils.parse(json['updated_at']) ?? DateTime.now(),
-        createdAt: DateUtils.parse(json['created_at']),
+        updatedAt: AppDateUtils.parse(json['updated_at']) ?? DateTime.now(),
+        createdAt: AppDateUtils.parse(json['created_at']),
       );
     }).toList();
 

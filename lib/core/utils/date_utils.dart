@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 /// The backend may return dates in either format:
 /// - ISO 8601: "2024-01-15T10:30:00Z"
 /// - RFC 1123: "Mon, 15 Jan 2024 10:30:00 GMT"
-class DateUtils {
+class AppDateUtils {
   /// Parse a date string, trying RFC 1123 first then ISO 8601.
   /// Returns null if the input is null or cannot be parsed.
   static DateTime? parse(dynamic value) {

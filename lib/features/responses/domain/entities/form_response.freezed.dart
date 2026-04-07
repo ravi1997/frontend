@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormResponse {
 
-@JsonKey(name: '_id') String get id;@JsonKey(name: 'form') String get formId;@JsonKey(name: 'organization_id') String? get organizationId;@JsonKey(name: 'submitted_by') String? get submittedBy;@JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601) DateTime? get submittedAt;@JsonKey(name: 'data') Map<String, dynamic> get answers;@JsonKey(name: 'ip_address') String? get ipAddress;@JsonKey(name: 'user_agent') String? get userAgent;@JsonKey(name: 'ai_results') Map<String, dynamic> get aiResults; String get status;
+@JsonKey(name: '_id') String get id;@JsonKey(name: 'form') String get formId;@JsonKey(name: 'organization_id') String? get organizationId;@JsonKey(name: 'submitted_by') String? get submittedBy;@JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get submittedAt;@JsonKey(name: 'data') Map<String, dynamic> get answers;@JsonKey(name: 'ip_address') String? get ipAddress;@JsonKey(name: 'user_agent') String? get userAgent;@JsonKey(name: 'ai_results') Map<String, dynamic> get aiResults; String get status;
 /// Create a copy of FormResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $FormResponseCopyWith<$Res>  {
   factory $FormResponseCopyWith(FormResponse value, $Res Function(FormResponse) _then) = _$FormResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: '_id') String id,@JsonKey(name: 'form') String formId,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'submitted_by') String? submittedBy,@JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601) DateTime? submittedAt,@JsonKey(name: 'data') Map<String, dynamic> answers,@JsonKey(name: 'ip_address') String? ipAddress,@JsonKey(name: 'user_agent') String? userAgent,@JsonKey(name: 'ai_results') Map<String, dynamic> aiResults, String status
+@JsonKey(name: '_id') String id,@JsonKey(name: 'form') String formId,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'submitted_by') String? submittedBy,@JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? submittedAt,@JsonKey(name: 'data') Map<String, dynamic> answers,@JsonKey(name: 'ip_address') String? ipAddress,@JsonKey(name: 'user_agent') String? userAgent,@JsonKey(name: 'ai_results') Map<String, dynamic> aiResults, String status
 });
 
 
@@ -162,7 +162,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormResponse() when $default != null:
 return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_that.submittedAt,_that.answers,_that.ipAddress,_that.userAgent,_that.aiResults,_that.status);case _:
@@ -183,7 +183,7 @@ return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)  $default,) {final _that = this;
 switch (_that) {
 case _FormResponse():
 return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_that.submittedAt,_that.answers,_that.ipAddress,_that.userAgent,_that.aiResults,_that.status);case _:
@@ -203,7 +203,7 @@ return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String id, @JsonKey(name: 'form')  String formId, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'submitted_by')  String? submittedBy, @JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? submittedAt, @JsonKey(name: 'data')  Map<String, dynamic> answers, @JsonKey(name: 'ip_address')  String? ipAddress, @JsonKey(name: 'user_agent')  String? userAgent, @JsonKey(name: 'ai_results')  Map<String, dynamic> aiResults,  String status)?  $default,) {final _that = this;
 switch (_that) {
 case _FormResponse() when $default != null:
 return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_that.submittedAt,_that.answers,_that.ipAddress,_that.userAgent,_that.aiResults,_that.status);case _:
@@ -218,14 +218,14 @@ return $default(_that.id,_that.formId,_that.organizationId,_that.submittedBy,_th
 @JsonSerializable()
 
 class _FormResponse implements FormResponse {
-  const _FormResponse({@JsonKey(name: '_id') required this.id, @JsonKey(name: 'form') required this.formId, @JsonKey(name: 'organization_id') this.organizationId, @JsonKey(name: 'submitted_by') this.submittedBy, @JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601) this.submittedAt, @JsonKey(name: 'data') required final  Map<String, dynamic> answers, @JsonKey(name: 'ip_address') this.ipAddress, @JsonKey(name: 'user_agent') this.userAgent, @JsonKey(name: 'ai_results') final  Map<String, dynamic> aiResults = const {}, this.status = 'pending'}): _answers = answers,_aiResults = aiResults;
+  const _FormResponse({@JsonKey(name: '_id') required this.id, @JsonKey(name: 'form') required this.formId, @JsonKey(name: 'organization_id') this.organizationId, @JsonKey(name: 'submitted_by') this.submittedBy, @JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.submittedAt, @JsonKey(name: 'data') required final  Map<String, dynamic> answers, @JsonKey(name: 'ip_address') this.ipAddress, @JsonKey(name: 'user_agent') this.userAgent, @JsonKey(name: 'ai_results') final  Map<String, dynamic> aiResults = const {}, this.status = 'pending'}): _answers = answers,_aiResults = aiResults;
   factory _FormResponse.fromJson(Map<String, dynamic> json) => _$FormResponseFromJson(json);
 
 @override@JsonKey(name: '_id') final  String id;
 @override@JsonKey(name: 'form') final  String formId;
 @override@JsonKey(name: 'organization_id') final  String? organizationId;
 @override@JsonKey(name: 'submitted_by') final  String? submittedBy;
-@override@JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601) final  DateTime? submittedAt;
+@override@JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) final  DateTime? submittedAt;
  final  Map<String, dynamic> _answers;
 @override@JsonKey(name: 'data') Map<String, dynamic> get answers {
   if (_answers is EqualUnmodifiableMapView) return _answers;
@@ -277,7 +277,7 @@ abstract mixin class _$FormResponseCopyWith<$Res> implements $FormResponseCopyWi
   factory _$FormResponseCopyWith(_FormResponse value, $Res Function(_FormResponse) _then) = __$FormResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: '_id') String id,@JsonKey(name: 'form') String formId,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'submitted_by') String? submittedBy,@JsonKey(name: 'submitted_at', fromJson: DateUtils.parse, toJson: DateUtils.toIso8601) DateTime? submittedAt,@JsonKey(name: 'data') Map<String, dynamic> answers,@JsonKey(name: 'ip_address') String? ipAddress,@JsonKey(name: 'user_agent') String? userAgent,@JsonKey(name: 'ai_results') Map<String, dynamic> aiResults, String status
+@JsonKey(name: '_id') String id,@JsonKey(name: 'form') String formId,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'submitted_by') String? submittedBy,@JsonKey(name: 'submitted_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? submittedAt,@JsonKey(name: 'data') Map<String, dynamic> answers,@JsonKey(name: 'ip_address') String? ipAddress,@JsonKey(name: 'user_agent') String? userAgent,@JsonKey(name: 'ai_results') Map<String, dynamic> aiResults, String status
 });
 
 

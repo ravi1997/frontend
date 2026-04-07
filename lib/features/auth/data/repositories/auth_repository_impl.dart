@@ -15,16 +15,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> login(String identifier, String password) async {
     final response = await _remoteSource.login(identifier, password);
-    final accessToken = response['access_token'] as String;
-    final refreshToken = response['refresh_token'] as String?;
-    final userData = response['user'] as Map<String, dynamic>?;
-    final organizationId = userData?['organization_id'] as String?;
-
-    await _tokenService.setTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      organizationId: organizationId,
-    );
+    await _handleAuthResponse(response);
 
     final user = await getCurrentUser();
     if (user == null) {
@@ -36,16 +27,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User> loginWithOtp(String mobile, String otp) async {
     final response = await _remoteSource.loginWithOtp(mobile, otp);
-    final accessToken = response['access_token'] as String;
-    final refreshToken = response['refresh_token'] as String?;
-    final userData = response['user'] as Map<String, dynamic>?;
-    final organizationId = userData?['organization_id'] as String?;
-
-    await _tokenService.setTokens(
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      organizationId: organizationId,
-    );
+    await _handleAuthResponse(response);
 
     final user = await getCurrentUser();
     if (user == null) {
@@ -103,18 +85,8 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<String> refreshToken(String refreshToken) async {
     final response = await _remoteSource.refreshToken(refreshToken);
-    final newAccessToken = response['access_token'] as String;
-    final newRefreshToken = response['refresh_token'] as String?;
-    final userData = response['user'] as Map<String, dynamic>?;
-    final organizationId = userData?['organization_id'] as String?;
-
-    await _tokenService.setTokens(
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-      organizationId: organizationId,
-    );
-
-    return newAccessToken;
+    await _handleAuthResponse(response);
+    return response['access_token'] as String;
   }
 
   @override
@@ -128,6 +100,20 @@ class AuthRepositoryImpl implements AuthRepository {
     String newPassword,
   ) async {
     await _remoteSource.changePassword(currentPassword, newPassword);
+  }
+
+  /// Centralized handler for storing tokens and org info from an authentication response.
+  Future<void> _handleAuthResponse(Map<String, dynamic> response) async {
+    final accessToken = response['access_token'] as String;
+    final refreshToken = response['refresh_token'] as String?;
+    final userData = response['user'] as Map<String, dynamic>?;
+    final organizationId = userData?['organization_id'] as String?;
+
+    await _tokenService.setTokens(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      organizationId: organizationId,
+    );
   }
 }
 

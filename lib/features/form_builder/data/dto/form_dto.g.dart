@@ -16,8 +16,8 @@ _FormDto _$FormDtoFromJson(Map<String, dynamic> json) => _FormDto(
           ?.map((e) => FormVersionDto.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const <FormVersionDto>[],
-  createdAt: DateUtils.parse(json['created_at']),
-  updatedAt: DateUtils.parse(json['updated_at']),
+  createdAt: AppDateUtils.parse(json['created_at']),
+  updatedAt: AppDateUtils.parse(json['updated_at']),
   workflows:
       json['workflows'] as Map<String, dynamic>? ?? const <String, dynamic>{},
   accessPolicy: json['accessPolicy'] as Map<String, dynamic>?,
@@ -29,8 +29,8 @@ Map<String, dynamic> _$FormDtoToJson(_FormDto instance) => <String, dynamic>{
   'status': instance.status,
   'active_version': instance.activeVersion,
   'versions': instance.versions,
-  'created_at': DateUtils.toIso8601(instance.createdAt),
-  'updated_at': DateUtils.toIso8601(instance.updatedAt),
+  'created_at': AppDateUtils.toIso8601(instance.createdAt),
+  'updated_at': AppDateUtils.toIso8601(instance.updatedAt),
   'workflows': instance.workflows,
   'accessPolicy': instance.accessPolicy,
 };
@@ -43,12 +43,12 @@ _FormVersionDto _$FormVersionDtoFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as Map<String, dynamic>)
               .toList() ??
           const <Map<String, dynamic>>[],
-      createdAt: DateUtils.parse(json['created_at']),
+      createdAt: AppDateUtils.parse(json['created_at']),
     );
 
 Map<String, dynamic> _$FormVersionDtoToJson(_FormVersionDto instance) =>
     <String, dynamic>{
       'version': instance.version,
       'sections': instance.sections,
-      'created_at': DateUtils.toIso8601(instance.createdAt),
+      'created_at': AppDateUtils.toIso8601(instance.createdAt),
     };

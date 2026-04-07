@@ -13,8 +13,8 @@ abstract class FormResponse with _$FormResponse {
     @JsonKey(name: 'submitted_by') String? submittedBy,
     @JsonKey(
       name: 'submitted_at',
-      fromJson: DateUtils.parse,
-      toJson: DateUtils.toIso8601,
+      fromJson: AppDateUtils.parse,
+      toJson: AppDateUtils.toIso8601,
     )
     DateTime? submittedAt,
     @JsonKey(name: 'data') required Map<String, dynamic> answers,

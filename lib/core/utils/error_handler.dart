@@ -10,7 +10,7 @@ class ErrorHandler {
     // English messages
     const en = {
       'auth': 'Session expired or authentication failed. Please login again.',
-      'network': 'Server unreachable. Please check your internet connection.',
+      'network': 'Server unreachable or connection blocked. This may be due to a security policy or CORS mismatch.',
       'not_found': 'The requested resource was not found.',
       'forbidden': 'You do not have permission to perform this action.',
       'timeout': 'Connection timed out. Please try again.',
@@ -21,7 +21,7 @@ class ErrorHandler {
     const es = {
       'auth':
           'La sesión ha caducado o ha fallado la autenticación. Inicie sesión de nuevo.',
-      'network': 'Servidor no accesible. Compruebe su conexión a Internet.',
+      'network': 'Servidor inaccesible o conexión bloqueada. Esto puede deberse a una política de seguridad o falta de coincidencia de CORS.',
       'not_found': 'No se ha encontrado el recurso solicitado.',
       'forbidden': 'No tiene permiso para realizar esta acción.',
       'timeout': 'Tiempo de espera agotado. Inténtelo de nuevo.',

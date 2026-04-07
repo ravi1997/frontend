@@ -23,7 +23,7 @@ abstract class BuilderForm with _$BuilderForm {
     required List<FormSection> sections,
     @Default(FormLayoutType.singleColumn) FormLayoutType layout,
     // ignore: invalid_annotation_target
-    @JsonKey(fromJson: DateUtils.parse) DateTime? updatedAt,
+    @JsonKey(fromJson: AppDateUtils.parse) DateTime? updatedAt,
     @Default(FormStyle()) FormStyle style,
     @Default([]) List<FormVersionHistory> versionHistory,
     @Default({}) Map<String, dynamic> workflows,

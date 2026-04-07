@@ -22,14 +22,14 @@ abstract class FormDto with _$FormDto {
 
     @JsonKey(
       name: 'created_at',
-      fromJson: DateUtils.parse,
-      toJson: DateUtils.toIso8601,
+      fromJson: AppDateUtils.parse,
+      toJson: AppDateUtils.toIso8601,
     )
     DateTime? createdAt,
     @JsonKey(
       name: 'updated_at',
-      fromJson: DateUtils.parse,
-      toJson: DateUtils.toIso8601,
+      fromJson: AppDateUtils.parse,
+      toJson: AppDateUtils.toIso8601,
     )
     DateTime? updatedAt,
 
@@ -79,8 +79,8 @@ abstract class FormVersionDto with _$FormVersionDto {
     @Default(<Map<String, dynamic>>[]) List<Map<String, dynamic>> sections,
     @JsonKey(
       name: 'created_at',
-      fromJson: DateUtils.parse,
-      toJson: DateUtils.toIso8601,
+      fromJson: AppDateUtils.parse,
+      toJson: AppDateUtils.toIso8601,
     )
     DateTime? createdAt,
   }) = _FormVersionDto;

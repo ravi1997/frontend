@@ -29,7 +29,7 @@ class ErrorInterceptor extends Interceptor {
         message = 'Connection timed out. Please check your internet.';
         break;
       case DioExceptionType.connectionError:
-        message = 'No internet connection available.';
+        message = 'Connection blocked or unavailable. This may be due to a security policy or CORS mismatch.';
         break;
       case DioExceptionType.badResponse:
         final statusCode = err.response?.statusCode;

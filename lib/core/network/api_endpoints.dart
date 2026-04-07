@@ -4,7 +4,8 @@
 /// organized by feature area for easy maintenance and updates.
 class ApiEndpoints {
   // Base configuration
-  static const String serverBaseUrl = 'http://192.168.1.51:8051';
+  static const String serverBaseUrl = 'http://localhost:8051';
+  // static const String serverBaseUrl = 'http://192.168.1.51:8051';
 
   static const String baseUrl = '$serverBaseUrl/form/api/v1';
 
@@ -689,9 +690,8 @@ class ApiEndpoints {
   // Health Check
   // ============================================================================
 
-  /// GET - API health check
-  /// Returns: { "status": "ok", "version": string, "timestamp": string }
-  static const String healthCheck = '/health';
+  /// GET - API health check (registered at /form/health)
+  static const String healthCheck = '/../../health';
 
   // ============================================================================
   // File Management Endpoints

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/entities/user.dart';
@@ -7,7 +8,7 @@ import '../../domain/entities/user.dart';
 part 'auth_remote_source.g.dart';
 
 abstract class AuthRemoteSource {
-  Future<Map<String, dynamic>> login(String identifier, String password);
+  Future<Map<String, dynamic>> login(String email, String password);
   Future<Map<String, dynamic>> loginWithOtp(String mobile, String otp);
   Future<void> requestOtp(String mobile);
   Future<void> logout();
@@ -30,10 +31,10 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   AuthRemoteSourceImpl(this._apiClient);
 
   @override
-  Future<Map<String, dynamic>> login(String identifier, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,
-      data: {'email': identifier, 'password': password},
+      data: {'email': email, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -91,7 +92,9 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
     final response = await _apiClient.post(
       ApiEndpoints.refreshToken,
-      data: {'refresh_token': refreshToken},
+      options: Options(
+        headers: {'Authorization': 'Bearer $refreshToken'},
+      ),
     );
     return response.data as Map<String, dynamic>;
   }

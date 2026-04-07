@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$BuilderForm {
 
  String get id; Object? get title; String get status; bool get isPublished; String get version; bool get isLatest; List<FormSection> get sections; FormLayoutType get layout;// ignore: invalid_annotation_target
-@JsonKey(fromJson: DateUtils.parse) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows; Map<String, dynamic> get metadata; AccessPolicy get accessPolicy;
+@JsonKey(fromJson: AppDateUtils.parse) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows; Map<String, dynamic> get metadata; AccessPolicy get accessPolicy;
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +49,7 @@ abstract mixin class $BuilderFormCopyWith<$Res>  {
   factory $BuilderFormCopyWith(BuilderForm value, $Res Function(BuilderForm) _then) = _$BuilderFormCopyWithImpl;
 @useResult
 $Res call({
- String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: DateUtils.parse) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata, AccessPolicy accessPolicy
+ String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: AppDateUtils.parse) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata, AccessPolicy accessPolicy
 });
 
 
@@ -184,7 +184,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: DateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: AppDateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
 return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata,_that.accessPolicy);case _:
@@ -205,7 +205,7 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: DateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: AppDateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm():
 return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata,_that.accessPolicy);case _:
@@ -225,7 +225,7 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: DateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Object? title,  String status,  bool isPublished,  String version,  bool isLatest,  List<FormSection> sections,  FormLayoutType layout, @JsonKey(fromJson: AppDateUtils.parse)  DateTime? updatedAt,  FormStyle style,  List<FormVersionHistory> versionHistory,  Map<String, dynamic> workflows,  Map<String, dynamic> metadata,  AccessPolicy accessPolicy)?  $default,) {final _that = this;
 switch (_that) {
 case _BuilderForm() when $default != null:
 return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.version,_that.isLatest,_that.sections,_that.layout,_that.updatedAt,_that.style,_that.versionHistory,_that.workflows,_that.metadata,_that.accessPolicy);case _:
@@ -240,7 +240,7 @@ return $default(_that.id,_that.title,_that.status,_that.isPublished,_that.versio
 @JsonSerializable()
 
 class _BuilderForm extends BuilderForm {
-  const _BuilderForm({required this.id, required this.title, this.status = 'draft', this.isPublished = false, this.version = '1.0.0', this.isLatest = true, required final  List<FormSection> sections, this.layout = FormLayoutType.singleColumn, @JsonKey(fromJson: DateUtils.parse) this.updatedAt, this.style = const FormStyle(), final  List<FormVersionHistory> versionHistory = const [], final  Map<String, dynamic> workflows = const {}, final  Map<String, dynamic> metadata = const {}, this.accessPolicy = const AccessPolicy()}): _sections = sections,_versionHistory = versionHistory,_workflows = workflows,_metadata = metadata,super._();
+  const _BuilderForm({required this.id, required this.title, this.status = 'draft', this.isPublished = false, this.version = '1.0.0', this.isLatest = true, required final  List<FormSection> sections, this.layout = FormLayoutType.singleColumn, @JsonKey(fromJson: AppDateUtils.parse) this.updatedAt, this.style = const FormStyle(), final  List<FormVersionHistory> versionHistory = const [], final  Map<String, dynamic> workflows = const {}, final  Map<String, dynamic> metadata = const {}, this.accessPolicy = const AccessPolicy()}): _sections = sections,_versionHistory = versionHistory,_workflows = workflows,_metadata = metadata,super._();
   factory _BuilderForm.fromJson(Map<String, dynamic> json) => _$BuilderFormFromJson(json);
 
 @override final  String id;
@@ -258,7 +258,7 @@ class _BuilderForm extends BuilderForm {
 
 @override@JsonKey() final  FormLayoutType layout;
 // ignore: invalid_annotation_target
-@override@JsonKey(fromJson: DateUtils.parse) final  DateTime? updatedAt;
+@override@JsonKey(fromJson: AppDateUtils.parse) final  DateTime? updatedAt;
 @override@JsonKey() final  FormStyle style;
  final  List<FormVersionHistory> _versionHistory;
 @override@JsonKey() List<FormVersionHistory> get versionHistory {
@@ -316,7 +316,7 @@ abstract mixin class _$BuilderFormCopyWith<$Res> implements $BuilderFormCopyWith
   factory _$BuilderFormCopyWith(_BuilderForm value, $Res Function(_BuilderForm) _then) = __$BuilderFormCopyWithImpl;
 @override @useResult
 $Res call({
- String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: DateUtils.parse) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata, AccessPolicy accessPolicy
+ String id, Object? title, String status, bool isPublished, String version, bool isLatest, List<FormSection> sections, FormLayoutType layout,@JsonKey(fromJson: AppDateUtils.parse) DateTime? updatedAt, FormStyle style, List<FormVersionHistory> versionHistory, Map<String, dynamic> workflows, Map<String, dynamic> metadata, AccessPolicy accessPolicy
 });
 
 

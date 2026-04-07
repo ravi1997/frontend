@@ -33,12 +33,12 @@ class ApiService {
 
   /// Login with email/username and password
   Future<Map<String, dynamic>> login({
-    required String identifier,
+    required String email,
     required String password,
   }) async {
     final response = await _client.post(
       ApiEndpoints.login,
-      data: {'email': identifier, 'password': password},
+      data: {'email': email, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -67,6 +67,7 @@ class ApiService {
     required String password,
     String? employeeId,
     String? mobile,
+    String userType = 'general',
   }) async {
     final response = await _client.post(
       ApiEndpoints.register,
@@ -74,6 +75,7 @@ class ApiService {
         'username': username,
         'email': email,
         'password': password,
+        'user_type': userType,
         if (employeeId != null) 'employee_id': employeeId,
         if (mobile != null) 'mobile': mobile,
       },
@@ -85,7 +87,7 @@ class ApiService {
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
     final response = await _client.post(
       ApiEndpoints.refreshToken,
-      data: {'refresh_token': refreshToken},
+      options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
     );
     final data = response.data as Map<String, dynamic>;
     return {
@@ -174,20 +176,14 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.createForm,
-      data: {
-        'title': title,
-        'slug': slug ?? title.toLowerCase().replaceAll(' ', '-'),
-        'status': status ?? 'draft',
-        'versions': [
-          {
-            'version': version ?? '1.0',
-            'sections': sections,
-            'created_at': DateTime.now().toIso8601String(),
-          },
-        ],
-        'active_version': version ?? '1.0',
-        if (workflows != null) 'workflows': workflows,
-      },
+      data: _buildFormBody(
+        title: title,
+        slug: slug,
+        status: status,
+        sections: sections,
+        version: version,
+        workflows: workflows,
+      ),
     );
     // Backend returns { "form_id": "uuid" } after envelope unwrap
     final formId =
@@ -207,20 +203,14 @@ class ApiService {
   }) async {
     await _client.put(
       ApiEndpoints.updateForm(formId),
-      data: {
-        'title': title,
-        'slug': slug ?? title.toLowerCase().replaceAll(' ', '-'),
-        'status': status ?? 'draft',
-        'versions': [
-          {
-            'version': version ?? '1.0',
-            'sections': sections,
-            'created_at': DateTime.now().toIso8601String(),
-          },
-        ],
-        'active_version': version ?? '1.0',
-        if (workflows != null) 'workflows': workflows,
-      },
+      data: _buildFormBody(
+        title: title,
+        slug: slug,
+        status: status,
+        sections: sections,
+        version: version,
+        workflows: workflows,
+      ),
     );
     return getForm(formId);
   }
@@ -482,6 +472,32 @@ class ApiService {
   Future<Map<String, dynamic>> healthCheck() async {
     final response = await _client.get(ApiEndpoints.healthCheck);
     return response.data as Map<String, dynamic>;
+  }
+
+  /// Helper to build standardized form request body
+  Map<String, dynamic> _buildFormBody({
+    required String title,
+    String? slug,
+    String? status,
+    required List<Map<String, dynamic>> sections,
+    String? version,
+    Map<String, dynamic>? workflows,
+  }) {
+    final v = version ?? '1.0';
+    return {
+      'title': title,
+      if (slug != null) 'slug': slug,
+      'status': status ?? 'draft',
+      'versions': [
+        {
+          'version': v,
+          'sections': sections,
+          'created_at': DateTime.now().toIso8601String(),
+        },
+      ],
+      'active_version': v,
+      if (workflows != null) 'workflows': workflows,
+    };
   }
 }
 

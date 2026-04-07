@@ -19,4 +19,4 @@ abstract class FormVersionHistory with _$FormVersionHistory {
       _$FormVersionHistoryFromJson(json);
 }
 
-DateTime _parseDate(dynamic date) => DateUtils.parse(date) ?? DateTime.now();
+DateTime _parseDate(dynamic date) => AppDateUtils.parse(date) ?? DateTime.now();

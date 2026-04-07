@@ -69,18 +69,12 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateLocalizedFormTitle(String title, String locale) {
     if (state.value == null) return;
-    final currentTitle = state.value!.form.title;
-
-    dynamic newTitle;
-    if (currentTitle is Map) {
-      newTitle = Map<String, dynamic>.from(currentTitle);
-      newTitle[locale] = title;
-    } else {
-      newTitle = {'en': currentTitle, locale: title};
-    }
-
     state = AsyncValue.data(
-      state.value!.copyWith(form: state.value!.form.copyWith(title: newTitle)),
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(
+          title: _updateLocalizedField(state.value!.form.title, title, locale),
+        ),
+      ),
     );
   }
 
@@ -133,26 +127,9 @@ class FormBuilderController extends _$FormBuilderController {
     String label,
     String locale,
   ) {
-    if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          label: _updateLocalizedField(
-            newQuestions[qIndex].label,
-            label,
-            locale,
-          ),
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
-      ),
+    _updateQuestion(
+      questionId,
+      (q) => q.copyWith(label: _updateLocalizedField(q.label, label, locale)),
     );
   }
 
@@ -161,25 +138,10 @@ class FormBuilderController extends _$FormBuilderController {
     String text,
     String locale,
   ) {
-    if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          helperText: _updateLocalizedField(
-            newQuestions[qIndex].helperText,
-            text,
-            locale,
-          ),
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+    _updateQuestion(
+      questionId,
+      (q) => q.copyWith(
+        helperText: _updateLocalizedField(q.helperText, text, locale),
       ),
     );
   }
@@ -189,18 +151,25 @@ class FormBuilderController extends _$FormBuilderController {
     String text,
     String locale,
   ) {
+    _updateQuestion(
+      questionId,
+      (q) => q.copyWith(
+        placeholder: _updateLocalizedField(q.placeholder, text, locale),
+      ),
+    );
+  }
+
+  /// Generic helper to search for and update a question across all sections.
+  void _updateQuestion(
+    String questionId,
+    FormQuestion Function(FormQuestion) updater,
+  ) {
     if (state.value == null) return;
     final sections = state.value!.form.sections.map((s) {
       final qIndex = s.questions.indexWhere((q) => q.id == questionId);
       if (qIndex != -1) {
         final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          placeholder: _updateLocalizedField(
-            newQuestions[qIndex].placeholder,
-            text,
-            locale,
-          ),
-        );
+        newQuestions[qIndex] = updater(newQuestions[qIndex]);
         return s.copyWith(questions: newQuestions);
       }
       return s;
@@ -210,6 +179,10 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+  }
+  
+  void updateQuestionRequired(String questionId, bool required) {
+    _updateQuestion(questionId, (q) => q.copyWith(isRequired: required));
   }
 
   Future<void> addSection() async {
