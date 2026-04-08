@@ -3,12 +3,14 @@ import 'package:uuid/uuid.dart';
 import '../../domain/entities/condition_rule.dart';
 import '../../domain/entities/condition_enums.dart';
 import '../../domain/repositories/condition_repository.dart';
+import '../../../../core/controllers/base_controller_mixin.dart';
 
 part 'condition_controller.g.dart';
 
 /// Controller for managing conditional logic rules.
 @riverpod
-class ConditionController extends _$ConditionController {
+class ConditionController extends _$ConditionController
+    with BaseControllerMixin {
   @override
   List<ConditionalRule> build() {
     return [];
@@ -16,11 +18,14 @@ class ConditionController extends _$ConditionController {
 
   /// Loads all rules for a form.
   Future<void> loadRules(String formId) async {
-    final repository = ref.read(conditionRepositoryProvider);
-    final rules = await repository.getRules(formId);
-    // Sort by priority
-    rules.sort((a, b) => a.priority.compareTo(b.priority));
-    state = rules;
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(conditionRepositoryProvider);
+        final rules = await repository.getRules(formId);
+        rules.sort((a, b) => a.priority.compareTo(b.priority));
+        state = rules;
+      },
+    );
   }
 
   /// Gets rules for a specific field.
@@ -57,24 +62,47 @@ class ConditionController extends _$ConditionController {
       priority: state.length,
     );
 
-    final created = await repository.createRule(rule);
-    state = [...state, created];
-    return created;
+    final created = await executeCreate(
+      createOperation: () => repository.createRule(rule),
+      entityName: 'condition rule',
+    );
+
+    if (created != null) {
+      state = [...state, created];
+      return created;
+    }
+
+    throw Exception('Failed to create condition rule');
   }
 
   /// Updates an existing rule.
   Future<void> updateRule(ConditionalRule rule) async {
-    final repository = ref.read(conditionRepositoryProvider);
-    final updated = await repository.updateRule(rule);
-    state = state.map((r) => r.id == updated.id ? updated : r).toList();
+    await executeUpdate(
+      item: rule,
+      updateOperation: (r) async {
+        final repository = ref.read(conditionRepositoryProvider);
+        final updated = await repository.updateRule(r);
+        state = state.map((r) => r.id == updated.id ? updated : r).toList();
+        return updated;
+      },
+      entityName: 'condition rule',
+    );
   }
 
   /// Deletes a rule.
   Future<void> deleteRule(String ruleId) async {
-    final repository = ref.read(conditionRepositoryProvider);
-    await repository.deleteRule(ruleId);
-    state = state.where((r) => r.id != ruleId).toList();
-    _reorderPriorities();
+    await executeDelete(
+      id: ruleId,
+      deleteOperation: (id) async {
+        final repository = ref.read(conditionRepositoryProvider);
+        await repository.deleteRule(id);
+      },
+      refreshAfterDelete: () async {
+        state = state.where((r) => r.id != ruleId).toList();
+        _reorderPriorities();
+      },
+      entityName: 'condition rule',
+    );
   }
 
   /// Toggles rule enabled state.

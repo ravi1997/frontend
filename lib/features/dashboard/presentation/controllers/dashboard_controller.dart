@@ -2,11 +2,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/dashboard_data.dart';
 import '../../domain/entities/recent_form.dart';
 import '../../data/repositories/dashboard_repository_impl.dart';
+import '../../../../core/controllers/base_controller_mixin.dart';
 
 part 'dashboard_controller.g.dart';
 
 @Riverpod(keepAlive: true)
-class DashboardController extends _$DashboardController {
+class DashboardController extends _$DashboardController
+    with BaseControllerMixin {
   @override
   FutureOr<DashboardData> build() async {
     return _fetch();
@@ -18,20 +20,34 @@ class DashboardController extends _$DashboardController {
   }
 
   Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetch());
+    await executeRefresh(
+      refreshOperation: () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => _fetch());
+      },
+    );
   }
 
   Future<void> deleteForm(String id) async {
-    final repo = ref.read(dashboardRepositoryProvider);
-    await repo.deleteForm(id);
-    await refresh();
+    await executeDelete(
+      id: id,
+      deleteOperation: (formId) async {
+        final repo = ref.read(dashboardRepositoryProvider);
+        await repo.deleteForm(formId);
+      },
+      refreshAfterDelete: refresh,
+      entityName: 'form',
+    );
   }
 
   Future<void> duplicateForm(String id, String title) async {
-    final repo = ref.read(dashboardRepositoryProvider);
-    await repo.duplicateForm(id, '$title (Copy)');
-    await refresh();
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(dashboardRepositoryProvider);
+        await repo.duplicateForm(id, '$title (Copy)');
+        await refresh();
+      },
+    );
   }
 }
 

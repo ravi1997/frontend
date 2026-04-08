@@ -1,14 +1,15 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/repositories/user_management_repository_impl.dart';
 import 'package:frontend/features/auth/domain/entities/user.dart';
-import '../../../../core/utils/error_handler.dart';
+import '../../../../core/controllers/base_controller_mixin.dart';
 
 part 'user_management_controller.g.dart';
 
 // ─── Main users list controller ───────────────────────────────────────────────
 
 @riverpod
-class UserManagementController extends _$UserManagementController {
+class UserManagementController extends _$UserManagementController
+    with BaseControllerMixin {
   @override
   FutureOr<List<User>> build() async {
     return _fetchUsers();
@@ -20,73 +21,86 @@ class UserManagementController extends _$UserManagementController {
   }
 
   Future<void> refreshUsers() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _fetchUsers());
+    await executeRefresh(
+      refreshOperation: () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => _fetchUsers());
+      },
+    );
   }
 
   Future<void> updateDepartment(String userId, String department) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.updateUserDepartment(userId, department);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.updateUserDepartment(userId, department);
+        await refreshUsers();
+      },
+    );
   }
 
   Future<void> toggleUserStatus(String userId, bool isActive) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.updateUserStatus(userId, !isActive);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.updateUserStatus(userId, !isActive);
+        await refreshUsers();
+      },
+    );
   }
 
   Future<void> updateRoles(String userId, List<String> roles) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.updateUserRoles(userId, roles);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.updateUserRoles(userId, roles);
+        await refreshUsers();
+      },
+    );
   }
 
   Future<void> resetPassword(String userId, String newPassword) async {
-    final repo = ref.read(userManagementRepositoryImplProvider);
-    await repo.resetUserPassword(userId, newPassword);
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.resetUserPassword(userId, newPassword);
+      },
+    );
   }
 
   Future<void> lockUser(String userId) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.lockUser(userId);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.lockUser(userId);
+        await refreshUsers();
+      },
+    );
   }
 
   Future<void> unlockUser(String userId) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.unlockUser(userId);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeOperation(
+      operation: () async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.unlockUser(userId);
+        await refreshUsers();
+      },
+    );
   }
 
   Future<void> deleteUser(String userId) async {
-    try {
-      final repo = ref.read(userManagementRepositoryImplProvider);
-      await repo.deleteUser(userId);
-      await refreshUsers();
-    } catch (e, st) {
-      state = AsyncValue.error(ErrorHandler.handle(e), st);
-    }
+    await executeDelete(
+      id: userId,
+      deleteOperation: (id) async {
+        final repo = ref.read(userManagementRepositoryImplProvider);
+        await repo.deleteUser(id);
+      },
+      refreshAfterDelete: () async {
+        state = const AsyncValue.loading();
+        state = await AsyncValue.guard(() => _fetchUsers());
+      },
+      entityName: 'user',
+    );
   }
 }
 

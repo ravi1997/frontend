@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
@@ -180,14 +181,14 @@ class FormBuilderController extends _$FormBuilderController {
       ),
     );
   }
-  
+
   void updateQuestionRequired(String questionId, bool required) {
     _updateQuestion(questionId, (q) => q.copyWith(isRequired: required));
   }
 
   Future<void> addSection() async {
     if (state.value == null) return;
-    
+
     FormSection newSection = FormSection(
       id: _uuid.v4(),
       title: 'Untitled Section',
@@ -516,7 +517,6 @@ class FormBuilderController extends _$FormBuilderController {
     );
   }
 
-
   Timer? _sectionDebounceTimer;
 
   void _syncSectionWithBackend(FormSection section) {
@@ -527,8 +527,7 @@ class FormBuilderController extends _$FormBuilderController {
         final repository = ref.read(formBuilderRepositoryProvider);
         await repository.updateSection(formId, section);
       } catch (e) {
-        // Silently fail for background sync or use ErrorHandler
-        print('Failed to sync section: $e');
+        debugPrint('Failed to sync section: $e');
       }
     });
   }
@@ -547,7 +546,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
-    
+
     _syncSectionWithBackend(updatedSection);
   }
 
@@ -557,7 +556,9 @@ class FormBuilderController extends _$FormBuilderController {
     FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        updatedSection = s.copyWith(title: _updateLocalizedField(s.title, title, locale));
+        updatedSection = s.copyWith(
+          title: _updateLocalizedField(s.title, title, locale),
+        );
         return updatedSection!;
       }
       return s;
@@ -638,7 +639,7 @@ class FormBuilderController extends _$FormBuilderController {
       } catch (e) {
         final error = ErrorHandler.handle(e);
         state = AsyncValue.data(state.value!.copyWith(error: error));
-        // We might want to revert local state if it fails, 
+        // We might want to revert local state if it fails,
         // but for now we'll just keep local state and show error.
       }
     }

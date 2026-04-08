@@ -3,12 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:logger/logger.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
-import 'retry_interceptor.dart';
+import 'unified_network_interceptor.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../widgets/snackbar_service.dart';
 import '../router/app_router.dart';
-import 'error_interceptor.dart';
-import 'envelope_interceptor.dart';
 import 'api_endpoints.dart';
 
 part 'api_client.g.dart';
@@ -44,7 +42,6 @@ Dio dio(Ref ref) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      // Validate status codes 2xx and 3xx as successful
       validateStatus: (status) {
         return status != null && status >= 200 && status < 400;
       },
@@ -54,16 +51,16 @@ Dio dio(Ref ref) {
   final tokenService = ref.read(tokenServiceProvider.notifier);
   final snackbarService = ref.read(snackbarServiceProvider.notifier);
 
-  // Add retry interceptor first (before auth to retry auth failures too)
+  // Add unified network interceptor (handles retry, error, and envelope parsing)
   dio.interceptors.add(
-    RetryInterceptor(
-      dio: dio,
+    UnifiedNetworkInterceptor(
       logger: logger,
+      snackbarService: snackbarService,
       maxRetries: 3,
       retryDelays: const [
         Duration(seconds: 1),
         Duration(seconds: 2),
-        Duration(seconds: 3),
+        Duration(seconds: 4),
       ],
     ),
   );
@@ -90,12 +87,6 @@ Dio dio(Ref ref) {
       dio: dio,
     ),
   );
-
-  // Add envelope unwrapping interceptor
-  dio.interceptors.add(EnvelopeInterceptor());
-
-  // Add error interceptor for user-friendly error messages
-  dio.interceptors.add(ErrorInterceptor(snackbarService));
 
   // Add logging interceptor (add last to log everything including retries)
   dio.interceptors.add(

@@ -8,6 +8,7 @@ import '../../domain/entities/workflow_transition.dart';
 import '../../domain/repositories/workflow_repository.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../data/repositories/workflow_repository_impl.dart';
+import '../../../../core/controllers/base_controller_mixin.dart';
 
 part 'workflow_controller.g.dart';
 
@@ -20,7 +21,7 @@ WorkflowRepository workflowRepository(Ref ref) {
 
 /// Controller for managing workflow builder state.
 @riverpod
-class WorkflowController extends _$WorkflowController {
+class WorkflowController extends _$WorkflowController with BaseControllerMixin {
   @override
   List<Workflow> build() {
     return [];
@@ -28,9 +29,13 @@ class WorkflowController extends _$WorkflowController {
 
   /// Loads all workflows for a form.
   Future<void> loadWorkflows(String formId) async {
-    final repository = ref.read(workflowRepositoryProvider);
-    final workflows = await repository.getWorkflows(formId);
-    state = workflows;
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(workflowRepositoryProvider);
+        final workflows = await repository.getWorkflows(formId);
+        state = workflows;
+      },
+    );
   }
 
   /// Gets a specific workflow by ID.
@@ -57,37 +62,68 @@ class WorkflowController extends _$WorkflowController {
       createdBy: createdBy,
     );
 
-    final created = await repository.createWorkflow(workflow);
-    state = [...state, created];
-    return created;
+    final created = await executeCreate(
+      createOperation: () => repository.createWorkflow(workflow),
+      entityName: 'workflow',
+    );
+
+    if (created != null) {
+      state = [...state, created];
+      return created;
+    }
+
+    throw Exception('Failed to create workflow');
   }
 
   /// Updates an existing workflow.
   Future<void> updateWorkflow(Workflow workflow) async {
-    final repository = ref.read(workflowRepositoryProvider);
-    final updated = await repository.updateWorkflow(workflow);
-    state = state.map((w) => w.id == updated.id ? updated : w).toList();
+    await executeUpdate(
+      item: workflow,
+      updateOperation: (w) async {
+        final repository = ref.read(workflowRepositoryProvider);
+        final updated = await repository.updateWorkflow(w);
+        state = state.map((w) => w.id == updated.id ? updated : w).toList();
+        return updated;
+      },
+      entityName: 'workflow',
+    );
   }
 
   /// Deletes a workflow.
   Future<void> deleteWorkflow(String workflowId) async {
-    final repository = ref.read(workflowRepositoryProvider);
-    await repository.deleteWorkflow(workflowId);
-    state = state.where((w) => w.id != workflowId).toList();
+    await executeDelete(
+      id: workflowId,
+      deleteOperation: (id) async {
+        final repository = ref.read(workflowRepositoryProvider);
+        await repository.deleteWorkflow(id);
+      },
+      refreshAfterDelete: () async {
+        state = state.where((w) => w.id != workflowId).toList();
+      },
+      entityName: 'workflow',
+    );
   }
 
   /// Activates a workflow.
   Future<void> activateWorkflow(String workflowId) async {
-    final repository = ref.read(workflowRepositoryProvider);
-    final updated = await repository.activateWorkflow(workflowId);
-    state = state.map((w) => w.id == updated.id ? updated : w).toList();
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(workflowRepositoryProvider);
+        final updated = await repository.activateWorkflow(workflowId);
+        state = state.map((w) => w.id == updated.id ? updated : w).toList();
+      },
+    );
   }
 
   /// Pauses a workflow.
   Future<void> pauseWorkflow(String workflowId) async {
-    final repository = ref.read(workflowRepositoryProvider);
-    final updated = await repository.pauseWorkflow(workflowId);
-    state = state.map((w) => w.id == updated.id ? updated : w).toList();
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(workflowRepositoryProvider);
+        final updated = await repository.pauseWorkflow(workflowId);
+        state = state.map((w) => w.id == updated.id ? updated : w).toList();
+      },
+    );
   }
 
   /// Adds a step to a workflow.
@@ -154,14 +190,14 @@ class WorkflowController extends _$WorkflowController {
     await updateWorkflow(updated);
   }
 
-  /// Sets the initial step for a workflow.
+  /// Sets initial step for a workflow.
   Future<void> setInitialStep(String workflowId, String stepId) async {
     final workflow = state.firstWhere((w) => w.id == workflowId);
     final updated = workflow.copyWith(initialStepId: stepId);
     await updateWorkflow(updated);
   }
 
-  /// Gets the default allowed actions for a step type.
+  /// Gets default allowed actions for a step type.
   List<String> _getDefaultActionsForType(WorkflowStepType type) {
     switch (type) {
       case WorkflowStepType.approval:

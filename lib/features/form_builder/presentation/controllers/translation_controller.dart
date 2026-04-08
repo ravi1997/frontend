@@ -6,6 +6,7 @@ import '../../domain/repositories/translation_repository.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../data/repositories/translation_repository_impl.dart';
+import '../../../../core/controllers/base_controller_mixin.dart';
 
 part 'translation_controller.g.dart';
 
@@ -18,7 +19,8 @@ TranslationRepository translationRepository(Ref ref) {
 
 /// Controller for managing bulk translation operations.
 @riverpod
-class TranslationController extends _$TranslationController {
+class TranslationController extends _$TranslationController
+    with BaseControllerMixin {
   @override
   List<TranslationJob> build() {
     return [];
@@ -26,16 +28,25 @@ class TranslationController extends _$TranslationController {
 
   /// Loads available languages.
   Future<List<TranslationLanguage>> loadLanguages() async {
-    final repository = ref.read(translationRepositoryProvider);
-    final languages = await repository.getAvailableLanguages();
-    return languages.where((l) => l.isEnabled).toList();
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(translationRepositoryProvider);
+        final languages = await repository.getAvailableLanguages();
+        return languages.where((l) => l.isEnabled).toList();
+      },
+    );
+    return [];
   }
 
   /// Loads translation jobs for a form.
   Future<void> loadTranslationJobs(String formId) async {
-    final repository = ref.read(translationRepositoryProvider);
-    final jobs = await repository.getTranslationJobs(formId);
-    state = jobs;
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(translationRepositoryProvider);
+        final jobs = await repository.getTranslationJobs(formId);
+        state = jobs;
+      },
+    );
   }
 
   /// Starts a new translation job.
@@ -50,16 +61,23 @@ class TranslationController extends _$TranslationController {
 
     final createdBy = user.value?.id ?? 'unknown';
 
-    final job = await repository.startTranslationJob(
-      formId: formId,
-      sourceLanguage: sourceLanguage,
-      targetLanguages: targetLanguages,
-      createdBy: createdBy,
-      totalFields: totalFields,
+    final job = await executeCreate(
+      createOperation: () => repository.startTranslationJob(
+        formId: formId,
+        sourceLanguage: sourceLanguage,
+        targetLanguages: targetLanguages,
+        createdBy: createdBy,
+        totalFields: totalFields,
+      ),
+      entityName: 'translation job',
     );
 
-    state = [...state, job];
-    return job;
+    if (job != null) {
+      state = [...state, job];
+      return job;
+    }
+
+    throw Exception('Failed to start translation job');
   }
 
   /// Gets a specific translation job.
@@ -70,16 +88,28 @@ class TranslationController extends _$TranslationController {
 
   /// Cancels a translation job.
   Future<void> cancelTranslationJob(String jobId) async {
-    final repository = ref.read(translationRepositoryProvider);
-    final updated = await repository.cancelTranslationJob(jobId);
-    state = state.map((j) => j.id == jobId ? updated : j).toList();
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(translationRepositoryProvider);
+        final updated = await repository.cancelTranslationJob(jobId);
+        state = state.map((j) => j.id == jobId ? updated : j).toList();
+      },
+    );
   }
 
   /// Deletes a translation job.
   Future<void> deleteTranslationJob(String jobId) async {
-    final repository = ref.read(translationRepositoryProvider);
-    await repository.deleteTranslationJob(jobId);
-    state = state.where((j) => j.id != jobId).toList();
+    await executeDelete(
+      id: jobId,
+      deleteOperation: (id) async {
+        final repository = ref.read(translationRepositoryProvider);
+        await repository.deleteTranslationJob(id);
+      },
+      refreshAfterDelete: () async {
+        state = state.where((j) => j.id != jobId).toList();
+      },
+      entityName: 'translation job',
+    );
   }
 
   /// Previews a single translation.
@@ -101,13 +131,13 @@ class TranslationController extends _$TranslationController {
     return state.where((j) => j.status == status).toList();
   }
 
-  /// Gets the most recent job.
+  /// Gets most recent job.
   TranslationJob? getMostRecentJob() {
     if (state.isEmpty) return null;
     return state.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
   }
 
-  /// Gets the translated content for a job.
+  /// Gets translated content for a job.
   Future<Map<String, dynamic>?> getTranslatedContent(String jobId) async {
     final repository = ref.read(translationRepositoryProvider);
     return repository.getTranslatedContent(jobId);
@@ -128,7 +158,11 @@ class TranslationController extends _$TranslationController {
     String language,
     Map<String, dynamic> translations,
   ) async {
-    final repository = ref.read(formBuilderRepositoryProvider);
-    await repository.saveTranslations(formId, language, translations);
+    await executeOperation(
+      operation: () async {
+        final repository = ref.read(formBuilderRepositoryProvider);
+        await repository.saveTranslations(formId, language, translations);
+      },
+    );
   }
 }

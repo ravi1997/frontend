@@ -3,6 +3,13 @@ import 'package:dio/dio.dart';
 import '../network/token_service.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 
+/// Auth interceptor that handles JWT token management and refresh.
+///
+/// Responsibilities:
+/// - Add access token to all requests (except auth endpoints)
+/// - Add organization ID header for multi-tenancy
+/// - Automatically refresh expired tokens
+/// - Handle concurrent refresh requests with locking
 class AuthInterceptor extends QueuedInterceptor {
   final AuthTokens? Function() _getTokens;
   final Future<void> Function() _clearTokens;
@@ -10,7 +17,6 @@ class AuthInterceptor extends QueuedInterceptor {
   final Function() _onNavigateToLogin;
   final Dio _dio;
 
-  // Lock to prevent multiple concurrent refresh requests
   bool _isRefreshing = false;
   Completer<void>? _refreshCompleter;
 
@@ -28,13 +34,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // Don't add token to auth-related endpoints as they might fail or confuse the backend
-    final isAuthPath =
-        options.path.contains('/auth/') ||
-        options.path.contains('/login') ||
-        options.path.contains('/register') ||
-        options.path.contains('/generate-otp') ||
-        options.path.contains('/request-password-reset');
+    final isAuthPath = _isAuthEndpoint(options.path);
 
     if (!isAuthPath) {
       final token = _getTokens()?.accessToken;
@@ -42,12 +42,12 @@ class AuthInterceptor extends QueuedInterceptor {
         options.headers['Authorization'] = 'Bearer $token';
       }
 
-      // Add X-Organization-ID header for tenant isolation
       final organizationId = _getTokens()?.organizationId;
       if (organizationId != null) {
         options.headers['X-Organization-ID'] = organizationId;
       }
     }
+
     handler.next(options);
   }
 
@@ -56,79 +56,86 @@ class AuthInterceptor extends QueuedInterceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final isAuthPath =
-        err.requestOptions.path.contains('/auth/') ||
-        err.requestOptions.path.contains('/login') ||
-        err.requestOptions.path.contains('/register') ||
-        err.requestOptions.path.contains('/generate-otp') ||
-        err.requestOptions.path.contains('/request-password-reset');
+    final isAuthPath = _isAuthEndpoint(err.requestOptions.path);
 
     if (err.response?.statusCode == 401 && !isAuthPath) {
-      // If the request was already retried, it means refresh failed or token is still invalid.
       if (err.requestOptions.extra['_retried'] == true) {
         await _clearTokens();
         _onNavigateToLogin();
         return handler.next(err);
       }
 
-      // If a refresh is already in progress, wait for it to complete
       if (_isRefreshing) {
-        try {
-          // Wait for the pending refresh to complete
-          await _refreshCompleter?.future;
-
-          // Get the new token (it should be updated in storage by the refresher)
-          final newTokens = _getTokens();
-          final newAccessToken = newTokens?.accessToken;
-
-          if (newAccessToken != null) {
-            return _retry(err.requestOptions, newAccessToken, handler);
-          } else {
-            // New token not found? potentially refresh failed.
-            // Let the original error proceed or maybe 401 again.
-            return handler.next(err);
-          }
-        } catch (e) {
-          // If the refresh failed, we fail too
-          return handler.next(err);
-        }
+        return await _waitForRefresh(err, handler);
       }
 
-      // Start a new refresh
-      _isRefreshing = true;
-      _refreshCompleter = Completer<void>();
+      return await _performRefresh(err, handler);
+    }
 
-      try {
-        final currentTokens = _getTokens();
-        final accessToken = currentTokens?.accessToken;
-        final refreshToken = currentTokens?.refreshToken;
+    handler.next(err);
+  }
 
-        if (refreshToken == null) {
-          _failRefresh(handler, err);
-          return;
-        }
+  bool _isAuthEndpoint(String path) {
+    return path.contains('/auth/') ||
+        path.contains('/login') ||
+        path.contains('/register') ||
+        path.contains('/generate-otp') ||
+        path.contains('/request-password-reset');
+  }
 
-        // Double check: Check if the token in the request is different from current storage
-        // This optimizes if a refresh happened between the request start and now (unlikely with lock but possible in edge cases)
-        final requestToken = err.requestOptions.headers['Authorization']
-            ?.toString()
-            .replaceFirst('Bearer ', '');
+  Future<void> _waitForRefresh(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    try {
+      await _refreshCompleter?.future;
 
-        if (accessToken != null && requestToken != accessToken) {
-          _completeRefresh();
-          return _retry(err.requestOptions, accessToken, handler);
-        }
+      final newTokens = _getTokens();
+      final newAccessToken = newTokens?.accessToken;
 
-        final repo = _getAuthRepository();
-        final newAccessToken = await repo.refreshToken(refreshToken);
-
-        _completeRefresh();
+      if (newAccessToken != null) {
         return _retry(err.requestOptions, newAccessToken, handler);
-      } catch (e) {
-        _failRefresh(handler, err);
+      } else {
+        return handler.next(err);
       }
-    } else {
-      handler.next(err);
+    } catch (e) {
+      return handler.next(err);
+    }
+  }
+
+  Future<void> _performRefresh(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    _isRefreshing = true;
+    _refreshCompleter = Completer<void>();
+
+    try {
+      final currentTokens = _getTokens();
+      final accessToken = currentTokens?.accessToken;
+      final refreshToken = currentTokens?.refreshToken;
+
+      if (refreshToken == null) {
+        _failRefresh(handler, err);
+        return;
+      }
+
+      final requestToken = err.requestOptions.headers['Authorization']
+          ?.toString()
+          .replaceFirst('Bearer ', '');
+
+      if (accessToken != null && requestToken != accessToken) {
+        _completeRefresh();
+        return _retry(err.requestOptions, accessToken, handler);
+      }
+
+      final repo = _getAuthRepository();
+      final newAccessToken = await repo.refreshToken(refreshToken);
+
+      _completeRefresh();
+      return _retry(err.requestOptions, newAccessToken, handler);
+    } catch (e) {
+      _failRefresh(handler, err);
     }
   }
 

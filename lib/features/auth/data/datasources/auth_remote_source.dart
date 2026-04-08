@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_endpoints.dart';
@@ -81,8 +82,8 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
           return User.fromJson(mapData);
         }
       }
-    } catch (e, st) {
-      print('Error in getCurrentUser: \$e\\n\$st');
+    } catch (e) {
+      debugPrint('Error in getCurrentUser: $e');
       return null;
     }
     return null;
@@ -92,9 +93,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
     final response = await _apiClient.post(
       ApiEndpoints.refreshToken,
-      options: Options(
-        headers: {'Authorization': 'Bearer $refreshToken'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
     );
     return response.data as Map<String, dynamic>;
   }

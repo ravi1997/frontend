@@ -92,9 +92,9 @@ class EnhancedSyncService extends _$EnhancedSyncService {
       final organizationId = user.organizationId ?? 'default';
 
       _pendingBox = await Hive.openBox(
-        'pending_submissions_$organizationId\_$userId',
+        "pending_submissions_$organizationId\_$userId",
       );
-      _retryBox = await Hive.openBox('sync_retries_$organizationId\_$userId');
+      _retryBox = await Hive.openBox("sync_retries_$organizationId\_$userId");
       _conflictRepo = ConflictRepositoryImpl();
       await _conflictRepo!.init(userId: userId, tenantId: organizationId);
     }

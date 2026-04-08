@@ -10,6 +10,7 @@ class PropertyBuilderUtils {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     bool readOnly = false,
+    int maxLines = 1,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,6 +29,7 @@ class PropertyBuilderUtils {
           keyboardType: keyboardType,
           validator: validator,
           readOnly: readOnly,
+          maxLines: maxLines,
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: const TextStyle(color: Colors.black26),
@@ -57,17 +59,33 @@ class PropertyBuilderUtils {
     required String label,
     required bool value,
     required Function(bool) onChanged,
+    String? description,
   }) {
+    final children = [
+      Text(
+        label,
+        style: const TextStyle(
+          color: AppColors.textDark,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      if (description != null) ...[
+        const SizedBox(height: 4),
+        Text(
+          description,
+          style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
+        ),
+      ],
+    ];
+
     return Row(
       children: [
         Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.textDark,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: children,
           ),
         ),
         const SizedBox(width: 8),
@@ -172,6 +190,27 @@ class PropertyBuilderUtils {
           ),
         ),
       ],
+    );
+  }
+
+  static Widget buildSectionHeader({required String title, Widget? trailing}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.textGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
+      ),
     );
   }
 }
