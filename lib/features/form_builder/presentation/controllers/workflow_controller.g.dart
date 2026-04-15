@@ -98,7 +98,7 @@ final class WorkflowControllerProvider
 }
 
 String _$workflowControllerHash() =>
-    r'2af9bf7328ec173108e908525086e76f96bc4d37';
+    r'd8396124929ebfed20f60de83e0852c5482baa29';
 
 /// Controller for managing workflow builder state.
 

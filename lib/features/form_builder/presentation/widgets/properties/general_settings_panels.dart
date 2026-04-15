@@ -1,9 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
+import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
+
 import 'property_builder_utils.dart';
+
+class FormGeneralSettings extends ConsumerStatefulWidget {
+  final String formId;
+  final BuilderForm form;
+  final TextEditingController titleController;
+
+  const FormGeneralSettings({
+    super.key,
+    required this.formId,
+    required this.form,
+    required this.titleController,
+  });
+
+  @override
+  ConsumerState<FormGeneralSettings> createState() => _FormGeneralSettingsState();
+}
+
+class _FormGeneralSettingsState extends ConsumerState<FormGeneralSettings> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PropertyBuilderUtils.buildTextField(
+            label: 'Form Title',
+            controller: widget.titleController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Form title cannot be empty';
+              }
+              return null;
+            },
+            onChanged: (val) {
+              if (_formKey.currentState!.validate()) {
+                ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .updateFormTitle(val);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class SectionGeneralSettings extends ConsumerStatefulWidget {
   final String formId;
@@ -24,8 +75,7 @@ class SectionGeneralSettings extends ConsumerStatefulWidget {
       _SectionGeneralSettingsState();
 }
 
-class _SectionGeneralSettingsState
-    extends ConsumerState<SectionGeneralSettings> {
+class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
 
@@ -73,7 +123,6 @@ class _SectionGeneralSettingsState
   @override
   Widget build(BuildContext context) {
     final metadata = widget.section.metadata;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,9 +160,7 @@ class _SectionGeneralSettingsState
         PropertyBuilderUtils.buildSwitch(
           label: 'Hidden Section',
           value: widget.section.isHidden,
-          onChanged: (val) {
-            _updateSection(widget.section.copyWith(isHidden: val));
-          },
+          onChanged: (val) => _updateSection(widget.section.copyWith(isHidden: val)),
         ),
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildSwitch(
@@ -142,11 +189,7 @@ class _SectionGeneralSettingsState
       children: [
         const Text(
           'Section Icon',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: AppColors.textDark, fontSize: 13, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         GestureDetector(
@@ -158,17 +201,13 @@ class _SectionGeneralSettingsState
               borderRadius: BorderRadius.circular(8),
               color: AppColors.builderElement,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (currentIcon != null && currentIcon.isNotEmpty)
-                  _getIconWidget(currentIcon)
-                else
-                  const Text(
-                    'Select Icon',
-                    style: TextStyle(color: AppColors.textGrey),
-                  ),
-              ],
+            child: Center(
+              child: currentIcon != null && currentIcon.isNotEmpty
+                  ? _getIconWidget(currentIcon)
+                  : const Text(
+                      'Select Icon',
+                      style: TextStyle(color: AppColors.textGrey),
+                    ),
             ),
           ),
         ),
@@ -177,7 +216,6 @@ class _SectionGeneralSettingsState
   }
 
   Widget _getIconWidget(String iconName) {
-    // Map string names to IconData
     final IconData iconData;
     switch (iconName) {
       case 'info':

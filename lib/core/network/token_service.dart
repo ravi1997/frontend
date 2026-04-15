@@ -69,6 +69,13 @@ class TokenService extends _$TokenService {
     String? refreshToken,
     String? organizationId,
   }) async {
+    final current = state.value;
+    if (current?.accessToken == accessToken &&
+        (refreshToken == null || current?.refreshToken == refreshToken) &&
+        (organizationId == null || current?.organizationId == organizationId)) {
+      return;
+    }
+
     final box = await Hive.openBox(_boxName);
     await box.put(_accessTokenKey, accessToken);
     if (refreshToken != null) {
@@ -87,6 +94,10 @@ class TokenService extends _$TokenService {
   }
 
   Future<void> setOrganizationId(String organizationId) async {
+    if (state.value?.organizationId == organizationId) {
+      return;
+    }
+
     final box = await Hive.openBox(_boxName);
     await box.put(_organizationIdKey, organizationId);
     state = AsyncData(
@@ -101,6 +112,14 @@ class TokenService extends _$TokenService {
   String? get organizationId => state.value?.organizationId;
 
   Future<void> clearTokens() async {
+    final current = state.value;
+    if (current == null ||
+        (current.accessToken == null &&
+            current.refreshToken == null &&
+            current.organizationId == null)) {
+      return;
+    }
+
     final box = await Hive.openBox(_boxName);
     await box.delete(_accessTokenKey);
     await box.delete(_refreshTokenKey);

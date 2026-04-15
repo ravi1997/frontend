@@ -62,6 +62,8 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   @override
   Future<User?> getCurrentUser() async {
     try {
+      print("we are here");
+
       final response = await _apiClient.get(ApiEndpoints.userStatus);
       dynamic data = response.data;
 
@@ -82,9 +84,15 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
           return User.fromJson(mapData);
         }
       }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return null;
+      }
+      debugPrint('Error in getCurrentUser: $e');
+      rethrow;
     } catch (e) {
       debugPrint('Error in getCurrentUser: $e');
-      return null;
+      rethrow;
     }
     return null;
   }

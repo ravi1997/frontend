@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../features/dashboard/presentation/pages/project_dashboard_page.dart';
+import '../../features/dashboard/presentation/pages/form_dashboard_page.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
@@ -12,16 +14,7 @@ import '../../features/form_builder/domain/entities/builder_form.dart';
 import '../../features/form_builder/presentation/pages/form_preview_page.dart';
 import '../../features/analytics/presentation/pages/analytics_page.dart';
 import '../../features/auth/presentation/screens/otp_verification_screen.dart';
-import '../../features/form_builder/presentation/pages/translator_page.dart';
-import '../../features/form_builder/presentation/pages/version_history_page.dart';
-import '../../features/form_builder/presentation/pages/workflow_builder_page.dart';
-import '../../features/form_builder/presentation/pages/create_template_page.dart';
-import '../../features/user_management/presentation/pages/user_management_page.dart';
-import '../../features/backend_settings/presentation/pages/backend_settings_page.dart';
 import '../../features/form_builder/presentation/pages/form_submit_page.dart';
-import '../../features/form_builder/presentation/pages/form_access_page.dart';
-import '../../features/qr_scanner/presentation/pages/qr_scanner_page.dart';
-import '../../features/analytics/presentation/pages/analysis_builder_page.dart';
 
 part 'app_router.g.dart';
 
@@ -61,18 +54,29 @@ Raw<GoRouter> appRouter(Ref ref) {
         final user = authState.value!;
         final isAdminOnly = state.matchedLocation == '/user-management';
         final isSuperAdminOnly = state.matchedLocation == '/backend-settings';
-        if (isAdminOnly && !user.isAdmin) {
-          return '/';
-        }
-        if (isSuperAdminOnly && !user.roles.contains('superadmin')) {
-          return '/';
-        }
+        if (isAdminOnly && !user.isAdmin) return '/';
+        if (isSuperAdminOnly && !user.roles.contains('superadmin')) return '/';
       }
 
       return null;
     },
     routes: [
       GoRoute(path: '/', builder: (context, state) => const DashboardPage()),
+      GoRoute(
+        path: '/projects/:projectId',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          return ProjectDashboardPage(projectId: projectId);
+        },
+      ),
+      GoRoute(
+        path: '/projects/:projectId/forms/:formId',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          final formId = state.pathParameters['formId']!;
+          return FormDashboardPage(projectId: projectId, formId: formId);
+        },
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -91,6 +95,14 @@ Raw<GoRouter> appRouter(Ref ref) {
       ),
       GoRoute(
         path: '/builder/:formId',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId'] ?? 'new';
+          final mode = state.uri.queryParameters['mode'];
+          return FormBuilderPage(formId: formId, mode: mode);
+        },
+      ),
+      GoRoute(
+        path: '/forms/:formId',
         builder: (context, state) {
           final formId = state.pathParameters['formId'] ?? 'new';
           final mode = state.uri.queryParameters['mode'];
@@ -132,60 +144,6 @@ Raw<GoRouter> appRouter(Ref ref) {
           final formId = state.pathParameters['formId']!;
           return AnalyticsPage(formId: formId);
         },
-      ),
-      GoRoute(
-        path: '/forms/:formId/analysis-builder',
-        builder: (context, state) {
-          final formId = state.pathParameters['formId']!;
-          final dashboardId = state.uri.queryParameters['dashboardId'];
-          return AnalysisBuilderPage(formId: formId, dashboardId: dashboardId);
-        },
-      ),
-      GoRoute(
-        path: '/forms/:formId/translate',
-        builder: (context, state) {
-          final formId = state.pathParameters['formId']!;
-          return TranslatorPage(formId: formId);
-        },
-      ),
-      GoRoute(
-        path: '/forms/:formId/versions',
-        builder: (context, state) {
-          final formId = state.pathParameters['formId']!;
-          final formTitle = state.uri.queryParameters['title'];
-          return VersionHistoryPage(formId: formId, formTitle: formTitle);
-        },
-      ),
-      GoRoute(
-        path: '/forms/:formId/access',
-        builder: (context, state) {
-          final formId = state.pathParameters['formId']!;
-          return FormAccessPage(formId: formId);
-        },
-      ),
-      GoRoute(
-        path: '/forms/:formId/workflows',
-        builder: (context, state) {
-          final formId = state.pathParameters['formId']!;
-          final workflowId = state.uri.queryParameters['workflowId'];
-          return WorkflowBuilderPage(formId: formId, workflowId: workflowId);
-        },
-      ),
-      GoRoute(
-        path: '/templates/create',
-        builder: (context, state) => const CreateTemplatePage(),
-      ),
-      GoRoute(
-        path: '/user-management',
-        builder: (context, state) => const UserManagementPage(),
-      ),
-      GoRoute(
-        path: '/scan-qr',
-        builder: (context, state) => const QrScannerPage(),
-      ),
-      GoRoute(
-        path: '/backend-settings',
-        builder: (context, state) => const BackendSettingsPage(),
       ),
     ],
   );

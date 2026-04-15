@@ -33,7 +33,7 @@ final class TokenServiceProvider
   TokenService create() => TokenService();
 }
 
-String _$tokenServiceHash() => r'6fcbb9ac577874323329fecaeed664a2f6163987';
+String _$tokenServiceHash() => r'e5bd6aa5fb37e4b17696e9a363e12ed5b0e28619';
 
 abstract class _$TokenService extends $AsyncNotifier<AuthTokens> {
   FutureOr<AuthTokens> build();

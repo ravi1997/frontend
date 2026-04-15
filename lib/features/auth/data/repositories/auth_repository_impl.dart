@@ -52,12 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
-    final user = await _remoteSource.getCurrentUser();
-    // After getting user, update organizationId if available
-    if (user?.organizationId != null) {
-      await _tokenService.setOrganizationId(user!.organizationId!);
-    }
-    return user;
+    return _remoteSource.getCurrentUser();
   }
 
   @override

@@ -9,7 +9,7 @@ import '../../data/repositories/form_builder_repository_impl.dart';
 part 'form_builder_repository.g.dart';
 
 abstract class FormBuilderRepository {
-  Future<BuilderForm> getForm(String id);
+  Future<BuilderForm> getForm(String id, {String? projectId});
   Future<List<FormVersionHistory>> getVersionHistory(String formId);
   Future<BuilderForm> getFormVersion(String formId, String version);
   Future<BuilderForm> saveForm(

@@ -21,12 +21,12 @@ class ApiEndpoints {
   /// POST - Login with mobile and OTP
   /// Body: { "mobile": string, "otp": string }
   /// Returns: { "access_token": string, "refresh_token": string, "user": {...} }
-  static const String loginWithOtp = '/auth/login';
+  static const String loginWithOtp = '/auth/otp/verify';
 
   /// POST - Request OTP for mobile number
   /// Body: { "mobile": string }
   /// Returns: { "message": string }
-  static const String requestOtp = '/auth/request-otp';
+  static const String requestOtp = '/auth/otp/request';
 
   /// POST - Revoke all sessions
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -70,6 +70,7 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "user": {...} }
   static const String userStatus = '/user/profile';
+  static const String userProfile = '/user/profile';
 
   /// POST - Change password
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -82,11 +83,13 @@ class ApiEndpoints {
   /// Query: ?page=int&page_size=int
   /// Returns: [{ "id": string, "username": string, "email": string, ... }]
   static const String adminListUsers = '/user/users';
+  static const String adminListUsersAlt = '/users/users';
 
   /// GET - Get user by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "username": string, "email": string, ... }
   static String adminGetUser(String userId) => '/user/users/$userId';
+  static String adminGetUserAlt(String userId) => '/users/users/$userId';
 
   /// GET - List departments (admin only)
   static const String adminListDepartments = '/user/departments';
@@ -141,13 +144,13 @@ class ApiEndpoints {
   // ============================================================================
 
   /// GET - Get system settings (superadmin)
-  static const String systemSettingsGet = '/settings/system';
+  static const String systemSettingsGet = '/admin/system-settings/';
 
   /// PATCH - Update system settings (superadmin)
-  static const String systemSettingsPatch = '/settings/system';
+  static const String systemSettingsPatch = '/admin/system-settings/';
 
   /// POST - Reset system settings to defaults (superadmin)
-  static const String systemSettingsReset = '/settings/system/reset';
+  static const String systemSettingsReset = '/admin/system-settings/reset';
 
   // ============================================================================
   // Form Management Endpoints (§5-6)
@@ -164,6 +167,12 @@ class ApiEndpoints {
   /// Optional: ?lang=string
   /// Returns: { "id": string, "title": string, "sections": [...], ... }
   static String getForm(String formId) => '/forms/$formId';
+
+  /// GET - Get form by project and form ID
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Returns: { "id": string, "title": string, "sections": [...], ... }
+  static String getProjectForm(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId';
 
   /// POST - Create new form
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -193,6 +202,33 @@ class ApiEndpoints {
   /// Body: { "title": string, "slug": string? }
   /// Returns: { "task_id": string }
   static String cloneForm(String formId) => '/forms/$formId/clone';
+
+  // ============================================================================
+  // Project Management Endpoints (§2b)
+  // ============================================================================
+
+  /// POST - Create a project
+  static const String createProject = '/projects/';
+
+  /// GET - List projects
+  static const String listProjects = '/projects/';
+
+  /// GET - Get a project
+  static String getProject(String projectId) => '/projects/$projectId';
+
+  /// PUT - Update a project
+  static String updateProject(String projectId) => '/projects/$projectId';
+
+  /// DELETE - Soft delete a project
+  static String deleteProject(String projectId) => '/projects/$projectId';
+
+  /// POST - Create a form inside a project
+  static String createProjectForm(String projectId) =>
+      '/projects/$projectId/forms';
+
+  /// GET - List forms in a project
+  static String listProjectForms(String projectId) =>
+      '/projects/$projectId/forms';
 
   // ============================================================================
   // Form Version Endpoints
@@ -368,6 +404,14 @@ class ApiEndpoints {
 
   /// PUT - Update existing workflow
   static String updateWorkflow(String workflowId) => '/workflows/$workflowId';
+
+  // ============================================================================
+  // Project / Hook Routes
+  // ============================================================================
+
+  /// POST - Trigger hooks for a project
+  static String triggerProjectHooks(String projectId) =>
+      '/forms/projects/$projectId/hooks/trigger';
 
   // ============================================================================
   // Submission History (§11)
@@ -587,6 +631,9 @@ class ApiEndpoints {
   /// Dashboard settings
   static const String dashboardSettings = '/dashboard-settings';
 
+  /// Public view route for a form
+  static String viewForm(String formId) => '/view/$formId';
+
   // ============================================================================
   // Analytics Endpoints (§19)
   // ============================================================================
@@ -691,17 +738,17 @@ class ApiEndpoints {
   // ============================================================================
 
   /// GET - API health check (registered at /form/health)
-  static const String healthCheck = '/../../health';
+  static const String healthCheck = '/health';
 
   // ============================================================================
   // File Management Endpoints
   // ============================================================================
 
   /// POST - Upload a file
-  static const String uploadFile = '/files/upload';
+  static const String uploadFile = '/forms/upload';
 
   /// POST - Upload a signature
-  static const String uploadSignature = '/files/upload-signature';
+  static const String uploadSignature = '/forms/signatures';
 
   // ============================================================================
   // Helper methods for building URLs

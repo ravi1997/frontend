@@ -35,7 +35,7 @@ class ResponseListPage extends ConsumerWidget {
       body: authState.when(
         data: (user) => Column(
           children: [
-            _TopBar(formId: formId),
+            _TopBar(formId: formId, searchQuery: searchQuery),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () => ref.refresh(
@@ -86,7 +86,8 @@ class ResponseListPage extends ConsumerWidget {
 
 class _TopBar extends ConsumerWidget {
   final String formId;
-  const _TopBar({required this.formId});
+  final String? searchQuery;
+  const _TopBar({required this.formId, required this.searchQuery});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -120,7 +121,7 @@ class _TopBar extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 16),
-          _ActionButtons(formId: formId),
+          _ActionButtons(formId: formId, searchQuery: searchQuery),
         ],
       ),
     );
@@ -129,11 +130,14 @@ class _TopBar extends ConsumerWidget {
 
 class _ActionButtons extends ConsumerWidget {
   final String formId;
-  const _ActionButtons({required this.formId});
+  final String? searchQuery;
+  const _ActionButtons({required this.formId, required this.searchQuery});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final responsesAsync = ref.watch(formResponsesProvider(formId));
+    final responsesAsync = ref.watch(
+      formResponsesProvider(formId, searchQuery: searchQuery),
+    );
 
     return responsesAsync.maybeWhen(
       data: (responses) => responses.isNotEmpty
@@ -142,6 +146,7 @@ class _ActionButtons extends ConsumerWidget {
                 context,
                 ref,
                 formId,
+                searchQuery,
                 responses,
               ),
               style: ElevatedButton.styleFrom(
@@ -589,6 +594,7 @@ class _ResponseListPageUtils {
     BuildContext context,
     WidgetRef ref,
     String formId,
+    String? searchQuery,
     List<FormResponse> responses,
   ) async {
     final form = await ref.read(formBuilderRepositoryProvider).getForm(formId);

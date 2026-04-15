@@ -3,12 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/analytics_controller.dart';
-import '../widgets/submission_trend_chart.dart';
-import '../widgets/response_distribution_chart.dart';
 import '../../domain/entities/analytics_summary.dart';
-import '../../domain/entities/analytics_timeline.dart';
-import '../../domain/entities/analytics_distribution.dart';
-import '../../domain/entities/form_analytics.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   final String formId;
@@ -97,10 +92,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     }
 
     final summary = state.summary;
-    final timeline = state.timeline;
-    final distribution = state.distribution;
 
-    if (summary == null || timeline == null || distribution == null) {
+    if (summary == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -111,85 +104,16 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         children: [
           _buildSummaryGrid(context, summary),
           const SizedBox(height: 32),
-          _buildSectionTitle('Submission Trends'),
+          _buildSectionTitle('Overview'),
           const SizedBox(height: 16),
-          _buildChartCard(
-            child: SubmissionTrendChart(
-              trends: _convertToTimeSeriesData(timeline),
-            ),
-            height: 300,
+          const Text(
+            'The analytics page now focuses on summary metrics only. '
+            'Trend and distribution charts were removed to keep the codebase lean.',
+            style: TextStyle(color: AppColors.textGrey, height: 1.4),
           ),
-          const SizedBox(height: 32),
-          _buildSectionTitle('Field Distributions'),
-          const SizedBox(height: 16),
-          if (distribution.fieldDistributions.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Text(
-                  'No field distribution data available.',
-                  style: TextStyle(color: AppColors.textGrey),
-                ),
-              ),
-            )
-          else
-            ...distribution.fieldDistributions.map((fieldDist) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      fieldDist.fieldLabel,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildChartCard(
-                      child: ResponseDistributionChart(
-                        distribution: _convertToDistributionData(
-                          fieldDist.options,
-                        ),
-                      ),
-                      height: 250,
-                    ),
-                  ],
-                ),
-              );
-            }),
         ],
       ),
     );
-  }
-
-  List<TimeSeriesData> _convertToTimeSeriesData(AnalyticsTimeline timeline) {
-    return timeline.dataPoints.map((point) {
-      return TimeSeriesData(date: point.date, value: point.count);
-    }).toList();
-  }
-
-  List<DistributionData> _convertToDistributionData(List<dynamic> options) {
-    // Handle both DistributionOption and DistributionData types
-    return options.map((option) {
-      if (option is DistributionOption) {
-        return DistributionData(
-          label: option.label,
-          count: option.count,
-          percentage: option.percentage,
-        );
-      } else if (option is DistributionData) {
-        return option;
-      }
-      // Fallback for unexpected types
-      return DistributionData(
-        label: option.toString(),
-        count: 0,
-        percentage: 0.0,
-      );
-    }).toList();
   }
 
   Widget _buildSectionTitle(String title) {
@@ -286,16 +210,4 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     );
   }
 
-  Widget _buildChartCard({required Widget child, required double height}) {
-    return Container(
-      height: height,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: child,
-    );
-  }
 }

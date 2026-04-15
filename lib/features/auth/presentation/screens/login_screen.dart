@@ -159,6 +159,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (next is AsyncData && next.value != null && previous is AsyncLoading) {
         if (context.mounted) {
           _formKey.currentState?.reset();
+          context.go('/');
         }
       }
     });

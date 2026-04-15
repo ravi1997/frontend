@@ -1,12 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:logger/logger.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
 import 'unified_network_interceptor.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../widgets/snackbar_service.dart';
-import '../router/app_router.dart';
 import 'api_endpoints.dart';
 
 part 'api_client.g.dart';
@@ -16,22 +13,10 @@ part 'api_client.g.dart';
 /// This provider creates and configures a Dio instance with:
 /// - JWT authentication with automatic token refresh
 /// - Request/response logging for debugging
-/// - Automatic retry on network failures
 /// - Centralized error handling and user notifications
 /// - Connection and timeout configurations
 @Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
-  final logger = Logger(
-    printer: PrettyPrinter(
-      methodCount: 0,
-      errorMethodCount: 5,
-      lineLength: 80,
-      colors: true,
-      printEmojis: true,
-      dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
-    ),
-  );
-
   final dio = Dio(
     BaseOptions(
       baseUrl: ApiEndpoints.baseUrl,
@@ -54,14 +39,7 @@ Dio dio(Ref ref) {
   // Add unified network interceptor (handles retry, error, and envelope parsing)
   dio.interceptors.add(
     UnifiedNetworkInterceptor(
-      logger: logger,
       snackbarService: snackbarService,
-      maxRetries: 3,
-      retryDelays: const [
-        Duration(seconds: 1),
-        Duration(seconds: 2),
-        Duration(seconds: 4),
-      ],
     ),
   );
 
@@ -76,15 +54,9 @@ Dio dio(Ref ref) {
         if (!ref.mounted) return;
         await tokenService.clearTokens();
       },
-      getAuthRepository: () {
-        if (!ref.mounted) throw Exception('Provider disposed');
-        return ref.read(authRepositoryImplProvider) as AuthRepositoryImpl;
-      },
       onNavigateToLogin: () {
         if (!ref.mounted) return;
-        ref.read(appRouterProvider).go('/login');
       },
-      dio: dio,
     ),
   );
 
@@ -96,9 +68,7 @@ Dio dio(Ref ref) {
       requestHeader: true,
       responseHeader: false,
       error: true,
-      logPrint: (obj) {
-        logger.d(obj);
-      },
+      logPrint: (obj) {},
     ),
   );
 

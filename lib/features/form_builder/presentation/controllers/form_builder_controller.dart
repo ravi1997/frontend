@@ -22,7 +22,11 @@ class FormBuilderController extends _$FormBuilderController {
   final _uuid = const Uuid();
 
   @override
-  FutureOr<FormBuilderState> build(String formId) async {
+  FutureOr<FormBuilderState> build(String formKey) async {
+    final parts = formKey.split('::');
+    final projectId = parts.length > 1 ? parts.first : null;
+    final formId = parts.length > 1 ? parts.sublist(1).join('::') : formKey;
+
     // For now, let's create an empty form if formId is 'new'
     if (formId == 'new') {
       return FormBuilderState(
@@ -42,7 +46,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     // Otherwise fetch from repository
     final repository = ref.read(formBuilderRepositoryProvider);
-    final form = await repository.getForm(formId);
+    final form = await repository.getForm(formId, projectId: projectId);
     return FormBuilderState(form: form);
   }
 
@@ -55,6 +59,27 @@ class FormBuilderController extends _$FormBuilderController {
       return {...Map<String, dynamic>.from(current), locale: newValue};
     }
     return {'en': current?.toString() ?? '', locale: newValue};
+  }
+
+  FormSection? _updateSectionById(
+    String sectionId,
+    FormSection Function(FormSection section) updater,
+  ) {
+    if (state.value == null) return null;
+
+    final sections = [...state.value!.form.sections];
+    final index = sections.indexWhere((section) => section.id == sectionId);
+    if (index == -1) return null;
+
+    final updatedSection = updater(sections[index]);
+    sections[index] = updatedSection;
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+    return updatedSection;
   }
 
   void setEditingLocale(String locale) {
@@ -84,16 +109,10 @@ class FormBuilderController extends _$FormBuilderController {
     String title,
     String locale,
   ) {
-    if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        return s.copyWith(title: _updateLocalizedField(s.title, title, locale));
-      }
-      return s;
-    }).toList();
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+    _updateSectionById(
+      sectionId,
+      (section) => section.copyWith(
+        title: _updateLocalizedField(section.title, title, locale),
       ),
     );
   }
@@ -103,22 +122,14 @@ class FormBuilderController extends _$FormBuilderController {
     String description,
     String locale,
   ) {
-    if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        return s.copyWith(
-          description: _updateLocalizedField(
-            s.description,
-            description,
-            locale,
-          ),
-        );
-      }
-      return s;
-    }).toList();
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+    _updateSectionById(
+      sectionId,
+      (section) => section.copyWith(
+        description: _updateLocalizedField(
+          section.description,
+          description,
+          locale,
+        ),
       ),
     );
   }
@@ -533,19 +544,7 @@ class FormBuilderController extends _$FormBuilderController {
   }
 
   void updateSection(FormSection updatedSection) {
-    if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == updatedSection.id) {
-        return updatedSection;
-      }
-      return s;
-    }).toList();
-
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
-      ),
-    );
+    _updateSectionById(updatedSection.id, (_) => updatedSection);
 
     _syncSectionWithBackend(updatedSection);
   }
@@ -553,51 +552,29 @@ class FormBuilderController extends _$FormBuilderController {
   void updateSectionTitle(String sectionId, String title) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
-    FormSection? updatedSection;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        updatedSection = s.copyWith(
-          title: _updateLocalizedField(s.title, title, locale),
-        );
-        return updatedSection!;
-      }
-      return s;
-    }).toList();
-
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+    final updatedSection = _updateSectionById(
+      sectionId,
+      (section) => section.copyWith(
+        title: _updateLocalizedField(section.title, title, locale),
       ),
     );
-
-    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
+    if (updatedSection != null) _syncSectionWithBackend(updatedSection);
   }
 
   void updateSectionDescription(String sectionId, String description) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
-    FormSection? updatedSection;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        updatedSection = s.copyWith(
-          description: _updateLocalizedField(
-            s.description,
-            description,
-            locale,
-          ),
-        );
-        return updatedSection!;
-      }
-      return s;
-    }).toList();
-
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+    final updatedSection = _updateSectionById(
+      sectionId,
+      (section) => section.copyWith(
+        description: _updateLocalizedField(
+          section.description,
+          description,
+          locale,
+        ),
       ),
     );
-
-    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
+    if (updatedSection != null) _syncSectionWithBackend(updatedSection);
   }
 
   void updateForm(BuilderForm updatedForm) {

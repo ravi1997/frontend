@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../controllers/auth_controller.dart';
 import '../../../../core/widgets/snackbar_service.dart';
-import '../widgets/auth_text_form_field.dart'; // Added import
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -111,8 +110,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    AuthTextFormField(
-                      // Replaced _buildTextField
+                    _AuthTextFormField(
                       controller: _emailController,
                       label: 'Email Address',
                       placeholder: 'you@example.com',
@@ -202,6 +200,70 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AuthTextFormField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String placeholder;
+  final String? Function(String?)? validator;
+  final TextInputType keyboardType;
+
+  const _AuthTextFormField({
+    required this.controller,
+    required this.label,
+    required this.placeholder,
+    this.validator,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: placeholder,
+            hintStyle: GoogleFonts.inter(color: Colors.grey[400], fontSize: 14),
+            filled: true,
+            fillColor: AppColors.fieldBackground,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.borderLight),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.borderLight),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(
+                color: AppColors.brandBlue,
+                width: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

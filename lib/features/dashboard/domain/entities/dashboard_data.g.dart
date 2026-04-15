@@ -12,10 +12,16 @@ _DashboardData _$DashboardDataFromJson(Map<String, dynamic> json) =>
       recentForms: (json['recentForms'] as List<dynamic>)
           .map((e) => RecentForm.fromJson(e as Map<String, dynamic>))
           .toList(),
+      projects:
+          (json['projects'] as List<dynamic>?)
+              ?.map((e) => ProjectSummary.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <ProjectSummary>[],
     );
 
 Map<String, dynamic> _$DashboardDataToJson(_DashboardData instance) =>
     <String, dynamic>{
       'stats': instance.stats,
       'recentForms': instance.recentForms,
+      'projects': instance.projects,
     };

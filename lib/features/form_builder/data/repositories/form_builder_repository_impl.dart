@@ -24,9 +24,12 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   FormBuilderRepositoryImpl(this._apiClient);
 
   @override
-  Future<BuilderForm> getForm(String id) async {
+  Future<BuilderForm> getForm(String id, {String? projectId}) async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.getForm(id));
+      final endpoint = projectId == null
+          ? ApiEndpoints.getForm(id)
+          : ApiEndpoints.getProjectForm(projectId, id);
+      final response = await _apiClient.get(endpoint);
       final data = response.data;
       final dto = FormDto.fromJson(data as Map<String, dynamic>);
 

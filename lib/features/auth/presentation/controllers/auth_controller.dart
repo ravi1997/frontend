@@ -1,15 +1,17 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../../../core/controllers/base_controller_mixin.dart';
-import '../../../responses/data/services/sync_service.dart';
-import '../../../offline/data/services/enhanced_sync_service.dart';
 
 part 'auth_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController with BaseControllerMixin {
+  String? _cachedAccessToken;
+  User? _cachedUser;
+
   @override
   FutureOr<User?> build() async {
     final tokenState = ref.watch(tokenServiceProvider);
@@ -20,10 +22,18 @@ class AuthController extends _$AuthController with BaseControllerMixin {
     final tokens = tokenState.value;
     if (tokens == null || tokens.accessToken == null) return null;
 
+    if (_cachedAccessToken == tokens.accessToken && _cachedUser != null) {
+      return _cachedUser;
+    }
+
     try {
       final repo = ref.read(authRepositoryImplProvider);
-      return await repo.getCurrentUser();
+      final user = await repo.getCurrentUser();
+      _cachedAccessToken = tokens.accessToken;
+      _cachedUser = user;
+      return user;
     } catch (e) {
+      debugPrint('AuthController build failed to load current user: $e');
       return null;
     }
   }
@@ -68,9 +78,9 @@ class AuthController extends _$AuthController with BaseControllerMixin {
     try {
       final repo = ref.read(authRepositoryImplProvider);
       await repo.logout();
-      await ref.read(syncServiceProvider.notifier).clearData();
-      await ref.read(enhancedSyncServiceProvider.notifier).clearData();
     } finally {
+      _cachedAccessToken = null;
+      _cachedUser = null;
       state = const AsyncValue.data(null);
     }
   }

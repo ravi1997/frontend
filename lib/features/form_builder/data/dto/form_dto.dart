@@ -12,7 +12,8 @@ abstract class FormDto with _$FormDto {
 
   const factory FormDto({
     // Handle both 'id' and '_id' from backend
-    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) required String id,
+    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)
+    required String id,
     @Default('Untitled Form') String title,
     @Default('draft') String status,
     @JsonKey(name: 'active_version') String? activeVersion,
@@ -76,7 +77,9 @@ abstract class FormDto with _$FormDto {
 abstract class FormVersionDto with _$FormVersionDto {
   const factory FormVersionDto({
     @Default('1.0') String version,
-    @Default(<Map<String, dynamic>>[]) List<Map<String, dynamic>> sections,
+    @JsonKey(fromJson: _sectionsFromJson)
+    @Default(<Map<String, dynamic>>[])
+    List<Map<String, dynamic>> sections,
     @JsonKey(
       name: 'created_at',
       fromJson: AppDateUtils.parse,
@@ -87,4 +90,14 @@ abstract class FormVersionDto with _$FormVersionDto {
 
   factory FormVersionDto.fromJson(Map<String, dynamic> json) =>
       _$FormVersionDtoFromJson(json);
+}
+
+List<Map<String, dynamic>> _sectionsFromJson(dynamic value) {
+  if (value is! List) return const <Map<String, dynamic>>[];
+  return value.map((item) {
+    if (item is Map<String, dynamic>) return item;
+    if (item is Map) return Map<String, dynamic>.from(item);
+    final id = item.toString();
+    return {'id': id, 'title': id, 'questions': const <Map<String, dynamic>>[]};
+  }).toList();
 }

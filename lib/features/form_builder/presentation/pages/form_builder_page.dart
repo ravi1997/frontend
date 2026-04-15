@@ -13,9 +13,15 @@ import '../../domain/entities/question_type.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
   final String formId;
+  final String? projectId;
   final String? mode;
 
-  const FormBuilderPage({super.key, required this.formId, this.mode});
+  const FormBuilderPage({
+    super.key,
+    required this.formId,
+    this.projectId,
+    this.mode,
+  });
 
   @override
   ConsumerState<FormBuilderPage> createState() => _FormBuilderPageState();
@@ -27,12 +33,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final controllerKey = widget.projectId == null
+        ? widget.formId
+        : '${widget.projectId}::${widget.formId}';
+
     // Watch the form state
     final builderStateAsync = ref.watch(
-      formBuilderControllerProvider(widget.formId),
+      formBuilderControllerProvider(controllerKey),
     );
 
-    ref.listen(formBuilderControllerProvider(widget.formId), (previous, next) {
+    ref.listen(formBuilderControllerProvider(controllerKey), (previous, next) {
       if (next.hasValue) {
         final state = next.value!;
         // Auto-initialize first question if in question mode and empty
@@ -42,7 +52,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             state.selectedQuestionId == null) {
           Future.microtask(() {
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(formBuilderControllerProvider(controllerKey).notifier)
                 .addQuestion(state.form.sections[0].id, QuestionType.shortText);
           });
         }
@@ -164,7 +174,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               ),
               ElevatedButton(
                 onPressed: () =>
-                    ref.refresh(formBuilderControllerProvider(widget.formId)),
+                    ref.refresh(formBuilderControllerProvider(controllerKey)),
                 child: const Text('Retry'),
               ),
             ],

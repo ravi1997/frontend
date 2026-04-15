@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../controllers/form_builder_controller.dart';
-import 'properties/form_general_settings.dart';
+import 'properties/general_settings_panels.dart';
 import 'properties/form_layout_settings.dart';
 import 'properties/form_style_settings.dart';
 import 'properties/form_logic_settings.dart';

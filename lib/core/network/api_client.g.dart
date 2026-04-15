@@ -13,7 +13,6 @@ part of 'api_client.dart';
 /// This provider creates and configures a Dio instance with:
 /// - JWT authentication with automatic token refresh
 /// - Request/response logging for debugging
-/// - Automatic retry on network failures
 /// - Centralized error handling and user notifications
 /// - Connection and timeout configurations
 
@@ -25,7 +24,6 @@ final dioProvider = DioProvider._();
 /// This provider creates and configures a Dio instance with:
 /// - JWT authentication with automatic token refresh
 /// - Request/response logging for debugging
-/// - Automatic retry on network failures
 /// - Centralized error handling and user notifications
 /// - Connection and timeout configurations
 
@@ -36,7 +34,6 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   /// This provider creates and configures a Dio instance with:
   /// - JWT authentication with automatic token refresh
   /// - Request/response logging for debugging
-  /// - Automatic retry on network failures
   /// - Centralized error handling and user notifications
   /// - Connection and timeout configurations
   DioProvider._()
@@ -72,4 +69,4 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'36a9dbfbc053eb352c3f25a700634e1c271ab657';
+String _$dioHash() => r'cb5c1c44925190b0d68108627a1e54ddd843b08e';
