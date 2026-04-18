@@ -14,50 +14,62 @@ abstract class FormQuestion with _$FormQuestion {
   const FormQuestion._();
   const factory FormQuestion({
     @JsonKey(readValue: IdReader.readIdCallback) required String id,
+    @JsonKey(name: 'variable_name')
     String? variableName,
     required Object? label,
     @JsonKey(name: 'field_type') required QuestionType type,
+    @JsonKey(name: 'help_text')
     Object? helperText,
+    @JsonKey(includeToJson: false)
     Object? placeholder,
+    @JsonKey(name: 'default_value')
     Object? defaultValue,
+    @JsonKey(name: 'validation', includeToJson: false)
+    Map<String, dynamic>? validation,
+    @JsonKey(name: 'is_required', includeToJson: false)
     @Default(false) bool isRequired,
     List<FormQuestionOption>? options,
+    @JsonKey(name: 'is_read_only')
     @Default(false) bool isReadOnly,
+    @JsonKey(name: 'is_hidden')
     @Default(false) bool isHidden,
-    String? validationRegex,
-    int? minLength,
-    int? maxLength,
-    num? minValue,
-    num? maxValue,
-    String? inputMask,
-    String? customErrorMessage,
+    @JsonKey(includeToJson: false) String? validationRegex,
+    @JsonKey(includeToJson: false) int? minLength,
+    @JsonKey(includeToJson: false) int? maxLength,
+    @JsonKey(includeToJson: false) num? minValue,
+    @JsonKey(includeToJson: false) num? maxValue,
+    @JsonKey(includeToJson: false) String? inputMask,
+    @JsonKey(includeToJson: false) String? customErrorMessage,
 
     // Advanced Validation
-    DateTime? dateMin,
-    DateTime? dateMax,
-    List<String>? allowedFileTypes,
-    int? maxFileSize, // in MB
-    int? maxFiles,
-    bool? isUnique,
-    bool? requiresConfirmation,
+    @JsonKey(includeToJson: false) DateTime? dateMin,
+    @JsonKey(includeToJson: false) DateTime? dateMax,
+    @JsonKey(includeToJson: false) List<String>? allowedFileTypes,
+    @JsonKey(includeToJson: false) int? maxFileSize, // in MB
+    @JsonKey(includeToJson: false) int? maxFiles,
+    @JsonKey(includeToJson: false) bool? isUnique,
+    @JsonKey(includeToJson: false) bool? requiresConfirmation,
 
     // Checkbox / Select Limits
-    int? minSelection,
-    int? maxSelection,
+    @JsonKey(includeToJson: false) int? minSelection,
+    @JsonKey(includeToJson: false) int? maxSelection,
 
     // Word Count (Paragraph)
-    int? minWordCount,
-    int? maxWordCount,
+    @JsonKey(includeToJson: false) int? minWordCount,
+    @JsonKey(includeToJson: false) int? maxWordCount,
 
     // Date Constraints
-    bool? disablePastDates,
-    bool? disableFutureDates,
-    bool? disableWeekends,
+    @JsonKey(includeToJson: false) bool? disablePastDates,
+    @JsonKey(includeToJson: false) bool? disableFutureDates,
+    @JsonKey(includeToJson: false) bool? disableWeekends,
 
+    @JsonKey(name: 'conditional_logic', includeToJson: false)
     Map<String, dynamic>? conditionalLogic,
+    @JsonKey(name: 'action_config', includeToJson: false)
     Map<String, dynamic>? actionConfig,
-    @JsonKey(name: 'metadata') Map<String, dynamic>? metadata,
-    @Default(QuestionStyle()) QuestionStyle style,
+    @JsonKey(name: 'meta_data')
+    Map<String, dynamic>? metadata,
+    @JsonKey(includeToJson: false) @Default(QuestionStyle()) QuestionStyle style,
   }) = _FormQuestion;
 
   factory FormQuestion.fromJson(Map<String, dynamic> json) =>
