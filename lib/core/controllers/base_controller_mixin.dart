@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/utils/error_handler.dart';
 
 /// Base mixin for all controllers providing common error handling and state management.

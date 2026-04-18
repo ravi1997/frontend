@@ -7,11 +7,13 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class FormAccessSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final BuilderForm form;
 
   const FormAccessSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.form,
   });
@@ -49,7 +51,11 @@ class FormAccessSettings extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateAccessPolicy(policy.copyWith(formVisibility: val));
             }
           },
@@ -63,7 +69,11 @@ class FormAccessSettings extends ConsumerWidget {
             onAdd: (val) {
               final newList = [...policy.allowedDepartments, val];
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateAccessPolicy(
                     policy.copyWith(allowedDepartments: newList),
                   );
@@ -73,7 +83,11 @@ class FormAccessSettings extends ConsumerWidget {
                   .where((e) => e != val)
                   .toList();
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateAccessPolicy(
                     policy.copyWith(allowedDepartments: newList),
                   );
@@ -112,7 +126,11 @@ class FormAccessSettings extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateAccessPolicy(policy.copyWith(responseVisibility: val));
             }
           },
@@ -125,7 +143,9 @@ class FormAccessSettings extends ConsumerWidget {
           onAdd: (val) {
             final newList = [...policy.canViewResponses, val];
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateAccessPolicy(policy.copyWith(canViewResponses: newList));
           },
           onDelete: (val) {
@@ -133,7 +153,9 @@ class FormAccessSettings extends ConsumerWidget {
                 .where((e) => e != val)
                 .toList();
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateAccessPolicy(policy.copyWith(canViewResponses: newList));
           },
         ),
@@ -145,7 +167,9 @@ class FormAccessSettings extends ConsumerWidget {
           onAdd: (val) {
             final newList = [...policy.canManageAccess, val];
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateAccessPolicy(policy.copyWith(canManageAccess: newList));
           },
           onDelete: (val) {
@@ -153,7 +177,9 @@ class FormAccessSettings extends ConsumerWidget {
                 .where((e) => e != val)
                 .toList();
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateAccessPolicy(policy.copyWith(canManageAccess: newList));
           },
         ),

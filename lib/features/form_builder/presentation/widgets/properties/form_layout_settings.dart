@@ -7,11 +7,13 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class FormLayoutSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final BuilderForm form;
 
   const FormLayoutSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.form,
   });
@@ -30,7 +32,11 @@ class FormLayoutSettings extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateForm(form.copyWith(layout: val));
             }
           },
@@ -60,7 +66,11 @@ class FormLayoutSettings extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateForm(
                     form.copyWith(style: form.style.copyWith(layoutType: val)),
                   );
@@ -75,7 +85,9 @@ class FormLayoutSettings extends ConsumerWidget {
           max: 1600,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(style: form.style.copyWith(maxWidth: val)),
                 );
@@ -99,7 +111,9 @@ class FormLayoutSettings extends ConsumerWidget {
           max: 100,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(
                     style: form.style.copyWith(sectionSpacing: val),
@@ -115,7 +129,9 @@ class FormLayoutSettings extends ConsumerWidget {
           max: 100,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(
                     style: form.style.copyWith(questionSpacing: val),

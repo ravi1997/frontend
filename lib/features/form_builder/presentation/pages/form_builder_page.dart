@@ -104,6 +104,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     // Center: Form Canvas
                     Expanded(
                       child: FormCanvasWidget(
+                        controllerKey: controllerKey,
+                        projectId: widget.projectId ?? '',
                         formId: widget.formId,
                         mode: widget.mode,
                       ),
@@ -137,16 +139,22 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                           builder: (context) {
                             if (builderState.selectedQuestionId != null) {
                               return FieldPropertiesWidget(
+                                controllerKey: controllerKey,
+                                projectId: widget.projectId ?? '',
                                 formId: widget.formId,
                                 selectedQuestionId:
                                     builderState.selectedQuestionId!,
                               );
                             } else if (builderState.isFormSelected) {
                               return FormPropertiesWidget(
+                                controllerKey: controllerKey,
+                                projectId: widget.projectId ?? '',
                                 formId: widget.formId,
                               );
                             } else if (builderState.selectedSectionId != null) {
                               return SectionPropertiesWidget(
+                                controllerKey: controllerKey,
+                                projectId: widget.projectId ?? '',
                                 formId: widget.formId,
                                 selectedSectionId:
                                     builderState.selectedSectionId!,
@@ -185,6 +193,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   }
 
   Widget _buildTopBar(BuildContext context) {
-    return FormBuilderTopBar(formId: widget.formId, mode: widget.mode);
+    return FormBuilderTopBar(
+      controllerKey: widget.projectId == null
+          ? widget.formId
+          : '${widget.projectId}::${widget.formId}',
+      projectId: widget.projectId,
+      formId: widget.formId,
+      mode: widget.mode,
+    );
   }
 }

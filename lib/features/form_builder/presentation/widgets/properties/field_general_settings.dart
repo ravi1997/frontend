@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'property_builder_utils.dart';
 
 class FieldGeneralSettings extends ConsumerStatefulWidget {
+  final String projectId;
   final String formId;
   final FormQuestion question;
   final TextEditingController labelController;
@@ -18,6 +19,7 @@ class FieldGeneralSettings extends ConsumerStatefulWidget {
 
   const FieldGeneralSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.question,
     required this.labelController,
@@ -289,7 +291,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             value: widget.question.isHidden,
             onChanged: (val) {
               ref
-                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '${widget.projectId}::${widget.formId}',
+                    ).notifier,
+                  )
                   .updateQuestion(widget.question.copyWith(isHidden: val));
             },
           ),

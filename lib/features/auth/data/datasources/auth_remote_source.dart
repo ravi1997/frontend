@@ -62,8 +62,6 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   @override
   Future<User?> getCurrentUser() async {
     try {
-      print("we are here");
-
       final response = await _apiClient.get(ApiEndpoints.userStatus);
       dynamic data = response.data;
 

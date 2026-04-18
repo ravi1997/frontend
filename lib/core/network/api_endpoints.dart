@@ -280,14 +280,24 @@ class ApiEndpoints {
   // Section Management Endpoints (§6)
   // ============================================================================
 
-  static String listSections(String formId) => '/forms/$formId/sections';
-  static String createSection(String formId) => '/forms/$formId/sections';
-  static String updateSection(String formId, String sectionId) =>
-      '/forms/$formId/sections/$sectionId';
-  static String deleteSection(String formId, String sectionId) =>
-      '/forms/$formId/sections/$sectionId';
-  static String reorderSections(String formId) =>
-      '/forms/$formId/sections/reorder';
+  static String listSections(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/sections';
+  static String createSection(String projectId, String formId) {
+    return '/projects/$projectId/forms/$formId/sections';
+  }
+
+  static String updateSection(
+    String projectId,
+    String formId,
+    String sectionId,
+  ) => '/projects/$projectId/forms/$formId/sections/$sectionId';
+  static String deleteSection(
+    String projectId,
+    String formId,
+    String sectionId,
+  ) => '/projects/$projectId/forms/$formId/sections/$sectionId';
+  static String reorderSections(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/sections/reorder';
 
   // ============================================================================
   // Response Submission Endpoints (§8)

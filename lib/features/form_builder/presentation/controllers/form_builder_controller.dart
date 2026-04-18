@@ -20,15 +20,17 @@ part 'form_builder_controller.g.dart';
 @riverpod
 class FormBuilderController extends _$FormBuilderController {
   final _uuid = const Uuid();
+  String _projectId = '';
+  String _formId = '';
 
   @override
   FutureOr<FormBuilderState> build(String formKey) async {
     final parts = formKey.split('::');
-    final projectId = parts.length > 1 ? parts.first : null;
-    final formId = parts.length > 1 ? parts.sublist(1).join('::') : formKey;
+    _projectId = parts.first;
+    _formId = parts.sublist(1).join('::');
 
     // For now, let's create an empty form if formId is 'new'
-    if (formId == 'new') {
+    if (_formId == 'new') {
       return FormBuilderState(
         form: BuilderForm(
           id: _uuid.v4(),
@@ -46,7 +48,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     // Otherwise fetch from repository
     final repository = ref.read(formBuilderRepositoryProvider);
-    final form = await repository.getForm(formId, projectId: projectId);
+    final form = await repository.getForm(_projectId, _formId);
     return FormBuilderState(form: form);
   }
 
@@ -207,10 +209,14 @@ class FormBuilderController extends _$FormBuilderController {
     );
 
     // If form is persisted, call backend
-    if (formId != 'new') {
+    if (_formId != 'new') {
       try {
         final repository = ref.read(formBuilderRepositoryProvider);
-        newSection = await repository.createSection(formId, newSection);
+        newSection = await repository.createSection(
+          _projectId,
+          _formId,
+          newSection,
+        );
       } catch (e) {
         final error = ErrorHandler.handle(e);
         state = AsyncValue.data(state.value!.copyWith(error: error));
@@ -234,10 +240,10 @@ class FormBuilderController extends _$FormBuilderController {
     if (state.value == null) return;
 
     // If form is persisted, call backend
-    if (formId != 'new') {
+    if (_formId != 'new') {
       try {
         final repository = ref.read(formBuilderRepositoryProvider);
-        await repository.deleteSection(formId, sectionId);
+        await repository.deleteSection(_projectId, _formId, sectionId);
       } catch (e) {
         final error = ErrorHandler.handle(e);
         state = AsyncValue.data(state.value!.copyWith(error: error));
@@ -531,12 +537,12 @@ class FormBuilderController extends _$FormBuilderController {
   Timer? _sectionDebounceTimer;
 
   void _syncSectionWithBackend(FormSection section) {
-    if (formId == 'new') return;
+    if (_formId == 'new') return;
     _sectionDebounceTimer?.cancel();
     _sectionDebounceTimer = Timer(const Duration(milliseconds: 1000), () async {
       try {
         final repository = ref.read(formBuilderRepositoryProvider);
-        await repository.updateSection(formId, section);
+        await repository.updateSection(_projectId, _formId, section);
       } catch (e) {
         debugPrint('Failed to sync section: $e');
       }
@@ -551,28 +557,18 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateSectionTitle(String sectionId, String title) {
     if (state.value == null) return;
-    final locale = state.value!.editingLocale;
     final updatedSection = _updateSectionById(
       sectionId,
-      (section) => section.copyWith(
-        title: _updateLocalizedField(section.title, title, locale),
-      ),
+      (section) => section.copyWith(title: title),
     );
     if (updatedSection != null) _syncSectionWithBackend(updatedSection);
   }
 
   void updateSectionDescription(String sectionId, String description) {
     if (state.value == null) return;
-    final locale = state.value!.editingLocale;
     final updatedSection = _updateSectionById(
       sectionId,
-      (section) => section.copyWith(
-        description: _updateLocalizedField(
-          section.description,
-          description,
-          locale,
-        ),
-      ),
+      (section) => section.copyWith(description: description),
     );
     if (updatedSection != null) _syncSectionWithBackend(updatedSection);
   }
@@ -606,11 +602,12 @@ class FormBuilderController extends _$FormBuilderController {
     sections.insert(newIndex, item);
 
     // If form is persisted, call backend
-    if (formId != 'new') {
+    if (_formId != 'new') {
       try {
         final repository = ref.read(formBuilderRepositoryProvider);
         await repository.reorderSections(
-          formId,
+          _projectId,
+          _formId,
           sections.map((s) => s.id).toList(),
         );
       } catch (e) {
@@ -733,6 +730,7 @@ class FormBuilderController extends _$FormBuilderController {
       final repository = ref.read(formBuilderRepositoryProvider);
       final savedForm = await repository.saveForm(
         state.value!.form,
+        projectId: _projectId,
         versionType: versionType,
       );
       state = AsyncValue.data(
@@ -853,7 +851,7 @@ class FormBuilderController extends _$FormBuilderController {
     FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        updatedSection = s.copyWith(metadata: {...s.metadata, ...metadata});
+        updatedSection = s.copyWith(metaData: {...s.metaData, ...metadata});
         return updatedSection!;
       }
       return s;

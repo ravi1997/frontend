@@ -8,18 +8,20 @@ import 'property_builder_utils.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 
 class FieldLayoutSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormQuestion question;
 
   const FieldLayoutSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.question,
   });
 
   void _updateStyle(WidgetRef ref, QuestionStyle newStyle) {
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateQuestion(question.copyWith(style: newStyle));
   }
 
@@ -138,7 +140,11 @@ class FieldLayoutSettings extends ConsumerWidget {
             onChanged: (val) {
               if (val != null) {
                 ref
-                    .read(formBuilderControllerProvider(formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        '$projectId::$formId',
+                      ).notifier,
+                    )
                     .updateQuestionMetadata(question.id, {
                       'widthPercentage': val,
                     });
@@ -153,7 +159,11 @@ class FieldLayoutSettings extends ConsumerWidget {
             max: 100,
             onChanged: (val) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateQuestionMetadata(question.id, {
                     'widthPercentage': val.toInt(),
                   });
@@ -167,7 +177,9 @@ class FieldLayoutSettings extends ConsumerWidget {
           value: question.metadata?['mobileFullWidth'] ?? true,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateQuestionMetadata(question.id, {'mobileFullWidth': val});
           },
         ),

@@ -29,8 +29,10 @@ import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 
 final submitFormProvider = FutureProvider.autoDispose
-    .family<BuilderForm, String>((ref, id) {
-      return ref.watch(formBuilderRepositoryProvider).getForm(id);
+    .family<BuilderForm, ({String formId, String? projectId})>((ref, args) {
+      return ref
+          .watch(formBuilderRepositoryProvider)
+          .getForm(args.projectId ?? '', args.formId);
     });
 
 final submitFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
@@ -43,8 +45,9 @@ final repeatInstancesProvider = StateProvider.autoDispose<Map<String, int>>(
 
 class FormSubmitPage extends ConsumerStatefulWidget {
   final String formId;
+  final String? projectId;
 
-  const FormSubmitPage({super.key, required this.formId});
+  const FormSubmitPage({super.key, required this.formId, this.projectId});
 
   @override
   ConsumerState<FormSubmitPage> createState() => _FormSubmitPageState();
@@ -78,7 +81,14 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncForm = ref.watch(submitFormProvider(widget.formId));
+    final effectiveProjectId =
+        widget.projectId ?? GoRouterState.of(context).uri.queryParameters['projectId'];
+    final asyncForm = ref.watch(
+      submitFormProvider((
+        formId: widget.formId,
+        projectId: effectiveProjectId,
+      )),
+    );
 
     return asyncForm.when(
       data: (form) => _buildFormContent(context, form),

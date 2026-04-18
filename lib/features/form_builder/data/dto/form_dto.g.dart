@@ -38,7 +38,9 @@ Map<String, dynamic> _$FormDtoToJson(_FormDto instance) => <String, dynamic>{
 _FormVersionDto _$FormVersionDtoFromJson(Map<String, dynamic> json) =>
     _FormVersionDto(
       version: json['version'] as String? ?? '1.0',
-      sections: _sectionsFromJson(json['sections']),
+      sections: json['sections'] == null
+          ? const <Map<String, dynamic>>[]
+          : _sectionsFromJson(json['sections']),
       createdAt: AppDateUtils.parse(json['created_at']),
     );
 

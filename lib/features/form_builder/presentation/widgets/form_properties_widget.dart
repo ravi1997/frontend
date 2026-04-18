@@ -11,9 +11,16 @@ import 'properties/form_access_settings.dart';
 import 'package:frontend/core/localization/locale_controller.dart';
 
 class FormPropertiesWidget extends ConsumerStatefulWidget {
+  final String controllerKey;
+  final String projectId;
   final String formId;
 
-  const FormPropertiesWidget({super.key, required this.formId});
+  const FormPropertiesWidget({
+    super.key,
+    required this.projectId,
+    required this.controllerKey,
+    required this.formId,
+  });
 
   @override
   ConsumerState<FormPropertiesWidget> createState() =>
@@ -38,7 +45,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
   @override
   Widget build(BuildContext context) {
     final builderState = ref.watch(
-      formBuilderControllerProvider(widget.formId),
+      formBuilderControllerProvider(widget.controllerKey),
     );
 
     return builderState.when(
@@ -90,7 +97,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                         onPressed: () => ref
                             .read(
                               formBuilderControllerProvider(
-                                widget.formId,
+                                widget.controllerKey,
                               ).notifier,
                             )
                             .selectQuestion(null, null),
@@ -155,7 +162,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                               ref
                                   .read(
                                     formBuilderControllerProvider(
-                                      widget.formId,
+                                      widget.controllerKey,
                                     ).notifier,
                                   )
                                   .setEditingLocale(val);
@@ -194,6 +201,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormGeneralSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           form: form,
                           titleController: _titleController,
@@ -202,6 +210,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormLayoutSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           form: form,
                         ),
@@ -209,6 +218,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormStyleSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           form: form,
                         ),
@@ -216,6 +226,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormLogicSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           form: form,
                         ),
@@ -223,6 +234,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FormAccessSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           form: form,
                         ),

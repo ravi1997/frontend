@@ -8,19 +8,22 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class FormGeneralSettings extends ConsumerStatefulWidget {
+  final String projectId;
   final String formId;
   final BuilderForm form;
   final TextEditingController titleController;
 
   const FormGeneralSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.form,
     required this.titleController,
   });
 
   @override
-  ConsumerState<FormGeneralSettings> createState() => _FormGeneralSettingsState();
+  ConsumerState<FormGeneralSettings> createState() =>
+      _FormGeneralSettingsState();
 }
 
 class _FormGeneralSettingsState extends ConsumerState<FormGeneralSettings> {
@@ -45,7 +48,11 @@ class _FormGeneralSettingsState extends ConsumerState<FormGeneralSettings> {
             onChanged: (val) {
               if (_formKey.currentState!.validate()) {
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        '${widget.projectId}::${widget.formId}',
+                      ).notifier,
+                    )
                     .updateFormTitle(val);
               }
             },
@@ -57,6 +64,7 @@ class _FormGeneralSettingsState extends ConsumerState<FormGeneralSettings> {
 }
 
 class SectionGeneralSettings extends ConsumerStatefulWidget {
+  final String projectId;
   final String formId;
   final FormSection section;
   final TextEditingController titleController;
@@ -64,6 +72,7 @@ class SectionGeneralSettings extends ConsumerStatefulWidget {
 
   const SectionGeneralSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.section,
     required this.titleController,
@@ -75,7 +84,8 @@ class SectionGeneralSettings extends ConsumerStatefulWidget {
       _SectionGeneralSettingsState();
 }
 
-class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings> {
+class _SectionGeneralSettingsState
+    extends ConsumerState<SectionGeneralSettings> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
 
@@ -110,19 +120,27 @@ class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings>
 
   void _updateSection(FormSection updatedSection) {
     ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
+        .read(
+          formBuilderControllerProvider(
+            '${widget.projectId}::${widget.formId}',
+          ).notifier,
+        )
         .updateSection(updatedSection);
   }
 
   void _updateMetadata(String key, dynamic value) {
     ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
+        .read(
+          formBuilderControllerProvider(
+            '${widget.projectId}::${widget.formId}',
+          ).notifier,
+        )
         .updateSectionMetadata(widget.section.id, {key: value});
   }
 
   @override
   Widget build(BuildContext context) {
-    final metadata = widget.section.metadata;
+    final metadata = widget.section.metaData;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -131,7 +149,11 @@ class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings>
           controller: _titleController,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(
+                  formBuilderControllerProvider(
+                    '${widget.projectId}::${widget.formId}',
+                  ).notifier,
+                )
                 .updateSectionTitle(widget.section.id, val);
           },
         ),
@@ -142,7 +164,11 @@ class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings>
           controller: _descriptionController,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(
+                  formBuilderControllerProvider(
+                    '${widget.projectId}::${widget.formId}',
+                  ).notifier,
+                )
                 .updateSectionDescription(widget.section.id, val);
           },
         ),
@@ -160,7 +186,8 @@ class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings>
         PropertyBuilderUtils.buildSwitch(
           label: 'Hidden Section',
           value: widget.section.isHidden,
-          onChanged: (val) => _updateSection(widget.section.copyWith(isHidden: val)),
+          onChanged: (val) =>
+              _updateSection(widget.section.copyWith(isHidden: val)),
         ),
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildSwitch(
@@ -189,7 +216,11 @@ class _SectionGeneralSettingsState extends ConsumerState<SectionGeneralSettings>
       children: [
         const Text(
           'Section Icon',
-          style: TextStyle(color: AppColors.textDark, fontSize: 13, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 8),
         GestureDetector(

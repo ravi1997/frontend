@@ -9,11 +9,12 @@ import '../../data/repositories/form_builder_repository_impl.dart';
 part 'form_builder_repository.g.dart';
 
 abstract class FormBuilderRepository {
-  Future<BuilderForm> getForm(String id, {String? projectId});
+  Future<BuilderForm> getForm(String projectId, String id);
   Future<List<FormVersionHistory>> getVersionHistory(String formId);
   Future<BuilderForm> getFormVersion(String formId, String version);
   Future<BuilderForm> saveForm(
     BuilderForm form, {
+    required String projectId,
     String versionType = 'patch',
   });
   Future<void> updateFormVersion(
@@ -40,10 +41,22 @@ abstract class FormBuilderRepository {
   Future<void> saveTemplate(CustomFieldTemplate template);
 
   // Section CRUD
-  Future<FormSection> createSection(String formId, FormSection section);
-  Future<FormSection> updateSection(String formId, FormSection section);
-  Future<void> deleteSection(String formId, String sectionId);
-  Future<void> reorderSections(String formId, List<String> sectionIds);
+  Future<FormSection> createSection(
+    String projectId,
+    String formId,
+    FormSection section,
+  );
+  Future<FormSection> updateSection(
+    String projectId,
+    String formId,
+    FormSection section,
+  );
+  Future<void> deleteSection(String projectId, String formId, String sectionId);
+  Future<void> reorderSections(
+    String projectId,
+    String formId,
+    List<String> sectionIds,
+  );
 
   // Translations
   Future<Map<String, dynamic>> getTranslations(
@@ -57,7 +70,12 @@ abstract class FormBuilderRepository {
   );
 
   // Clone
-  Future<BuilderForm> cloneForm(String formId, {String? title, String? slug});
+  Future<BuilderForm> cloneForm(
+    String projectId,
+    String formId, {
+    String? title,
+    String? slug,
+  });
 }
 
 @riverpod

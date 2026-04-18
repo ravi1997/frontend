@@ -63,8 +63,9 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                       ),
                       const Spacer(),
                       FilledButton.icon(
-                        onPressed: () =>
-                            context.push('/builder/${widget.formId}'),
+                        onPressed: () => context.push(
+                          '/projects/${widget.projectId}/forms/${widget.formId}/edit',
+                        ),
                         icon: const Icon(Icons.edit_outlined),
                         label: const Text('Edit form'),
                       ),
@@ -161,8 +162,9 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                             _DashboardAction(
                               label: 'Edit form',
                               icon: Icons.edit_outlined,
-                              onPressed: () =>
-                                  context.push('/builder/${widget.formId}'),
+                              onPressed: () => context.push(
+                                '/projects/${widget.projectId}/forms/${widget.formId}/edit',
+                              ),
                             ),
                           ],
                         ),

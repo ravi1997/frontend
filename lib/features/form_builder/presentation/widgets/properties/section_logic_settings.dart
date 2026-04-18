@@ -7,12 +7,14 @@ import '../logic_rule_dialog.dart';
 import 'property_builder_utils.dart';
 
 class SectionLogicSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormSection section;
   final List<FormSection> allSections;
 
   const SectionLogicSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.section,
     required this.allSections,
@@ -23,7 +25,10 @@ class SectionLogicSettings extends ConsumerWidget {
     final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
     final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
     final locale =
-        ref.watch(formBuilderControllerProvider(formId)).value?.editingLocale ??
+        ref
+            .watch(formBuilderControllerProvider('$projectId::$formId'))
+            .value
+            ?.editingLocale ??
         'en';
 
     return Column(
@@ -82,10 +87,12 @@ class SectionLogicSettings extends ConsumerWidget {
         const SizedBox(height: 24),
         PropertyBuilderUtils.buildSwitch(
           label: 'Disable Section when hidden',
-          value: section.metadata['disableWhenHidden'] ?? true,
+          value: section.metaData['disableWhenHidden'] ?? true,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateSectionMetadata(section.id, {'disableWhenHidden': val});
           },
         ),
@@ -196,7 +203,7 @@ class SectionLogicSettings extends ConsumerWidget {
         initialRule: initialRule,
         locale:
             ref
-                .read(formBuilderControllerProvider(formId))
+                .read(formBuilderControllerProvider('$projectId::$formId'))
                 .value
                 ?.editingLocale ??
             'en',
@@ -213,7 +220,7 @@ class SectionLogicSettings extends ConsumerWidget {
       }
 
       ref
-          .read(formBuilderControllerProvider(formId).notifier)
+          .read(formBuilderControllerProvider('$projectId::$formId').notifier)
           .updateSection(
             section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
           );
@@ -225,7 +232,7 @@ class SectionLogicSettings extends ConsumerWidget {
     final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? [])
       ..removeAt(index);
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateSection(
           section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
         );

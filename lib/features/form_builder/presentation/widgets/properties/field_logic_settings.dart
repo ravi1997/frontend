@@ -8,12 +8,14 @@ import 'package:frontend/core/localization/locale_controller.dart';
 import '../logic_rule_dialog.dart';
 
 class FieldLogicSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormQuestion question;
   final List<FormSection> sections;
 
   const FieldLogicSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.question,
     required this.sections,
@@ -43,7 +45,7 @@ class FieldLogicSettings extends ConsumerWidget {
 
   void _updateLogic(WidgetRef ref, Map<String, dynamic> newLogic) {
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateQuestion(question.copyWith(conditionalLogic: newLogic));
   }
 
@@ -53,7 +55,10 @@ class FieldLogicSettings extends ConsumerWidget {
     final rules = (logicState['rules'] as List? ?? [])
         .cast<Map<String, dynamic>>();
     final locale =
-        ref.watch(formBuilderControllerProvider(formId)).value?.editingLocale ??
+        ref
+            .watch(formBuilderControllerProvider('$projectId::$formId'))
+            .value
+            ?.editingLocale ??
         'en';
 
     return Column(
@@ -231,7 +236,9 @@ class FieldLogicSettings extends ConsumerWidget {
     Map<String, dynamic>? initialRule,
     int? index,
   }) async {
-    final state = ref.read(formBuilderControllerProvider(formId)).value;
+    final state = ref
+        .read(formBuilderControllerProvider('$projectId::$formId'))
+        .value;
     final locale = state?.editingLocale ?? 'en';
 
     final result = await showDialog<Map<String, dynamic>>(

@@ -98,6 +98,10 @@ List<Map<String, dynamic>> _sectionsFromJson(dynamic value) {
     if (item is Map<String, dynamic>) return item;
     if (item is Map) return Map<String, dynamic>.from(item);
     final id = item.toString();
-    return {'id': id, 'title': id, 'questions': const <Map<String, dynamic>>[]};
+    return {
+      'id': id,
+      'title': 'Untitled Section',
+      'questions': const <Map<String, dynamic>>[],
+    };
   }).toList();
 }

@@ -12,11 +12,13 @@ import 'package:frontend/features/responses/domain/entities/response_history.dar
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 
 class ResponseDetailPage extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final String responseId;
 
   const ResponseDetailPage({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.responseId,
   });
@@ -30,8 +32,11 @@ class ResponseDetailPage extends ConsumerWidget {
       backgroundColor: const Color(0xFFF9FAFB),
       body: authState.when(
         data: (user) => responseAsync.when(
-          data: (response) =>
-              _ResponseDetailView(formId: formId, response: response),
+          data: (response) => _ResponseDetailView(
+            projectId: projectId,
+            formId: formId,
+            response: response,
+          ),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => _ErrorSection(error: err.toString()),
         ),
@@ -43,10 +48,15 @@ class ResponseDetailPage extends ConsumerWidget {
 }
 
 class _ResponseDetailView extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormResponse response;
 
-  const _ResponseDetailView({required this.formId, required this.response});
+  const _ResponseDetailView({
+    required this.projectId,
+    required this.formId,
+    required this.response,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,7 +92,11 @@ class _ResponseDetailView extends ConsumerWidget {
           Expanded(
             child: TabBarView(
               children: [
-                _AnswersTab(formId: formId, response: response),
+                _AnswersTab(
+                  projectId: projectId,
+                  formId: formId,
+                  response: response,
+                ),
                 _HistoryTab(formId: formId, responseId: response.id),
               ],
             ),
@@ -94,10 +108,15 @@ class _ResponseDetailView extends ConsumerWidget {
 }
 
 class _AnswersTab extends StatelessWidget {
+  final String projectId;
   final String formId;
   final FormResponse response;
 
-  const _AnswersTab({required this.formId, required this.response});
+  const _AnswersTab({
+    required this.projectId,
+    required this.formId,
+    required this.response,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +142,11 @@ class _AnswersTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              _AnswersList(formId: formId, answers: response.answers),
+              _AnswersList(
+                projectId: projectId,
+                formId: formId,
+                answers: response.answers,
+              ),
             ],
           ),
         ),
@@ -488,14 +511,21 @@ class _InsightCard extends StatelessWidget {
 }
 
 class _AnswersList extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final Map<String, dynamic> answers;
 
-  const _AnswersList({required this.formId, required this.answers});
+  const _AnswersList({
+    required this.projectId,
+    required this.formId,
+    required this.answers,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final formAsync = ref.watch(formBuilderControllerProvider(formId));
+    final formAsync = ref.watch(
+      formBuilderControllerProvider('$projectId::$formId'),
+    );
 
     return formAsync.when(
       data: (formState) {

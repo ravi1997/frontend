@@ -16,16 +16,24 @@ abstract class FormSection with _$FormSection {
     @JsonKey(readValue: IdReader.readIdCallback) required String id,
     required Object? title,
     Object? description,
+    @JsonKey(name: 'help_text') Object? helpText,
+    @Default(0) int order,
     required List<FormQuestion> questions,
     @Default(SectionLayoutType.standard) SectionLayoutType layout,
-    @Default(2) int gridColumns,
-    @Default(false) bool isHidden,
-    @Default(false) bool isRepeatable,
-    int? repeatMin,
-    int? repeatMax,
-    Map<String, dynamic>? conditionalLogic,
+    @JsonKey(name: 'grid_columns') @Default(2) int gridColumns,
+    @JsonKey(name: 'is_hidden') @Default(false) bool isHidden,
+    @JsonKey(name: 'is_repeatable') @Default(false) bool isRepeatable,
+    @JsonKey(name: 'repeat_min') int? repeatMin,
+    @JsonKey(name: 'repeat_max') int? repeatMax,
+    @JsonKey(name: 'conditional_logic') Map<String, dynamic>? conditionalLogic,
+    Map<String, dynamic>? logic,
+    @JsonKey(name: 'sections') @Default(<FormSection>[]) List<FormSection> sections,
+    @JsonKey(name: 'response_templates')
+    @Default(<Map<String, dynamic>>[])
+    List<Map<String, dynamic>> responseTemplates,
+    @Default(<String>[]) List<String> tags,
     @Default(SectionStyle()) SectionStyle style,
-    @Default({}) Map<String, dynamic> metadata,
+    @JsonKey(name: 'meta_data') @Default({}) Map<String, dynamic> metaData,
   }) = _FormSection;
 
   factory FormSection.fromJson(Map<String, dynamic> json) =>

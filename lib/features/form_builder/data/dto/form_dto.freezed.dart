@@ -333,7 +333,7 @@ as Map<String, dynamic>?,
 /// @nodoc
 mixin _$FormVersionDto {
 
- String get version; List<Map<String, dynamic>> get sections;@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get createdAt;
+ String get version;@JsonKey(fromJson: _sectionsFromJson) List<Map<String, dynamic>> get sections;@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get createdAt;
 /// Create a copy of FormVersionDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -366,7 +366,7 @@ abstract mixin class $FormVersionDtoCopyWith<$Res>  {
   factory $FormVersionDtoCopyWith(FormVersionDto value, $Res Function(FormVersionDto) _then) = _$FormVersionDtoCopyWithImpl;
 @useResult
 $Res call({
- String version, List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt
+ String version,@JsonKey(fromJson: _sectionsFromJson) List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt
 });
 
 
@@ -473,7 +473,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _sectionsFromJson)  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormVersionDto() when $default != null:
 return $default(_that.version,_that.sections,_that.createdAt);case _:
@@ -494,7 +494,7 @@ return $default(_that.version,_that.sections,_that.createdAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version, @JsonKey(fromJson: _sectionsFromJson)  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionDto():
 return $default(_that.version,_that.sections,_that.createdAt);case _:
@@ -514,7 +514,7 @@ return $default(_that.version,_that.sections,_that.createdAt);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version, @JsonKey(fromJson: _sectionsFromJson)  List<Map<String, dynamic>> sections, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _FormVersionDto() when $default != null:
 return $default(_that.version,_that.sections,_that.createdAt);case _:
@@ -529,12 +529,12 @@ return $default(_that.version,_that.sections,_that.createdAt);case _:
 @JsonSerializable()
 
 class _FormVersionDto implements FormVersionDto {
-  const _FormVersionDto({this.version = '1.0', final  List<Map<String, dynamic>> sections = const <Map<String, dynamic>>[], @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.createdAt}): _sections = sections;
+  const _FormVersionDto({this.version = '1.0', @JsonKey(fromJson: _sectionsFromJson) final  List<Map<String, dynamic>> sections = const <Map<String, dynamic>>[], @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.createdAt}): _sections = sections;
   factory _FormVersionDto.fromJson(Map<String, dynamic> json) => _$FormVersionDtoFromJson(json);
 
 @override@JsonKey() final  String version;
  final  List<Map<String, dynamic>> _sections;
-@override@JsonKey() List<Map<String, dynamic>> get sections {
+@override@JsonKey(fromJson: _sectionsFromJson) List<Map<String, dynamic>> get sections {
   if (_sections is EqualUnmodifiableListView) return _sections;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_sections);
@@ -575,7 +575,7 @@ abstract mixin class _$FormVersionDtoCopyWith<$Res> implements $FormVersionDtoCo
   factory _$FormVersionDtoCopyWith(_FormVersionDto value, $Res Function(_FormVersionDto) _then) = __$FormVersionDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String version, List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt
+ String version,@JsonKey(fromJson: _sectionsFromJson) List<Map<String, dynamic>> sections,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt
 });
 
 

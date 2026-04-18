@@ -7,30 +7,32 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class SectionLayoutSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormSection section;
 
   const SectionLayoutSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.section,
   });
 
   void _updateSection(WidgetRef ref, FormSection updatedSection) {
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateSection(updatedSection);
   }
 
   void _updateMetadata(WidgetRef ref, String key, dynamic value) {
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateSectionMetadata(section.id, {key: value});
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final metadata = section.metadata;
+    final metadata = section.metaData;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

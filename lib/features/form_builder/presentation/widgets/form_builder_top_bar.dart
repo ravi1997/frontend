@@ -11,43 +11,51 @@ import 'workflow_configuration_dialog.dart';
 import 'publish_success_dialog.dart';
 
 class FormBuilderTopBar extends ConsumerWidget {
+  final String controllerKey;
+  final String? projectId;
   final String formId;
   final String? mode;
 
-  const FormBuilderTopBar({super.key, required this.formId, this.mode});
+  const FormBuilderTopBar({
+    super.key,
+    required this.controllerKey,
+    required this.projectId,
+    required this.formId,
+    this.mode,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Select specific parts of the state to minimize rebuilds
     final formTitle = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.form.title),
     );
     final formVersion = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.form.version ?? '1.0'),
     );
     final isSaving = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.isSaving ?? false),
     );
     final editingLocale = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.editingLocale ?? 'en'),
     );
     // Needed for workflow dialog
     final workflows = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.form.workflows ?? {}),
     );
     final sections = ref.watch(
       formBuilderControllerProvider(
-        formId,
+        controllerKey,
       ).select((state) => state.value?.form.sections ?? []),
     );
 
@@ -80,7 +88,7 @@ class FormBuilderTopBar extends ConsumerWidget {
                 children: [
                   InkWell(
                     onTap: () => ref
-                        .read(formBuilderControllerProvider(formId).notifier)
+                        .read(formBuilderControllerProvider(controllerKey).notifier)
                         .selectForm(),
                     child: Text(
                       formTitle.translate(editingLocale),
@@ -97,6 +105,7 @@ class FormBuilderTopBar extends ConsumerWidget {
                   const _EditingBadge(),
                   const SizedBox(width: 8),
                   _EditingLocaleSwitcher(
+                    controllerKey: controllerKey,
                     formId: formId,
                     currentLocale: editingLocale,
                   ),
@@ -130,7 +139,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               // We need the full form for preview.
               // It's acceptable to read the current state here as it's an action.
               final form = ref
-                  .read(formBuilderControllerProvider(formId))
+                  .read(formBuilderControllerProvider(controllerKey))
                   .value
                   ?.form;
               if (form != null) {
@@ -152,9 +161,9 @@ class FormBuilderTopBar extends ConsumerWidget {
             label: 'History',
             onTap: () async {
               await context.push(
-                '/forms/$formId/versions?title=${formTitle.translate('en')}',
+                '/forms/$formId/versions?title=${formTitle.translate('en')}${projectId != null ? '&projectId=$projectId' : ''}',
               );
-              ref.invalidate(formBuilderControllerProvider(formId));
+              ref.invalidate(formBuilderControllerProvider(controllerKey));
             },
           ),
           const SizedBox(width: 8),
@@ -178,7 +187,7 @@ class FormBuilderTopBar extends ConsumerWidget {
                   locale: editingLocale,
                   onSave: (config) {
                     ref
-                        .read(formBuilderControllerProvider(formId).notifier)
+                        .read(formBuilderControllerProvider(controllerKey).notifier)
                         .updateWorkflows(config);
                   },
                 ),
@@ -186,9 +195,17 @@ class FormBuilderTopBar extends ConsumerWidget {
             },
           ),
           const SizedBox(width: 16),
-          _SaveButton(formId: formId, isSaving: isSaving),
+          _SaveButton(
+            controllerKey: controllerKey,
+            formId: formId,
+            isSaving: isSaving,
+          ),
           const SizedBox(width: 12),
-          _PublishButton(formId: formId, mode: mode),
+          _PublishButton(
+            controllerKey: controllerKey,
+            formId: formId,
+            mode: mode,
+          ),
         ],
       ),
     );
@@ -243,10 +260,12 @@ class _EditingBadge extends StatelessWidget {
 }
 
 class _EditingLocaleSwitcher extends ConsumerWidget {
+  final String controllerKey;
   final String formId;
   final String currentLocale;
 
   const _EditingLocaleSwitcher({
+    required this.controllerKey,
     required this.formId,
     required this.currentLocale,
   });
@@ -283,7 +302,7 @@ class _EditingLocaleSwitcher extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(formBuilderControllerProvider(controllerKey).notifier)
                   .setEditingLocale(val);
             }
           },
@@ -321,10 +340,15 @@ class _TopBarActionButton extends StatelessWidget {
 }
 
 class _SaveButton extends ConsumerWidget {
+  final String controllerKey;
   final String formId;
   final bool isSaving;
 
-  const _SaveButton({required this.formId, required this.isSaving});
+  const _SaveButton({
+    required this.controllerKey,
+    required this.formId,
+    required this.isSaving,
+  });
 
   Future<void> _handleSave(
     BuildContext context,
@@ -334,7 +358,7 @@ class _SaveButton extends ConsumerWidget {
     final wasNew = formId == 'new';
 
     final success = await ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider(controllerKey).notifier)
         .saveForm(versionType: type);
 
     if (!context.mounted) return;
@@ -344,7 +368,7 @@ class _SaveButton extends ConsumerWidget {
       // real ID returned by the API so the controller and URL stay in sync.
       if (wasNew) {
         final savedFormId = ref
-            .read(formBuilderControllerProvider(formId))
+            .read(formBuilderControllerProvider(controllerKey))
             .value
             ?.form
             .id;
@@ -371,7 +395,7 @@ class _SaveButton extends ConsumerWidget {
       );
     } else {
       final error = ref
-          .read(formBuilderControllerProvider(formId))
+          .read(formBuilderControllerProvider(controllerKey))
           .value
           ?.error;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -466,17 +490,22 @@ class _SaveButton extends ConsumerWidget {
 }
 
 class _PublishButton extends ConsumerWidget {
+  final String controllerKey;
   final String formId;
   final String? mode;
 
-  const _PublishButton({required this.formId, this.mode});
+  const _PublishButton({
+    required this.controllerKey,
+    required this.formId,
+    this.mode,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       onPressed: () async {
         final success = await ref
-            .read(formBuilderControllerProvider(formId).notifier)
+            .read(formBuilderControllerProvider(controllerKey).notifier)
             .publishForm();
 
         if (success && context.mounted) {
@@ -486,7 +515,7 @@ class _PublishButton extends ConsumerWidget {
           );
         } else if (!success && context.mounted) {
           final error = ref
-              .read(formBuilderControllerProvider(formId))
+              .read(formBuilderControllerProvider(controllerKey))
               .value
               ?.error;
           ScaffoldMessenger.of(context).showSnackBar(

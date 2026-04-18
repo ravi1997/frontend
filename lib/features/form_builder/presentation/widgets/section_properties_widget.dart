@@ -10,11 +10,15 @@ import 'properties/section_logic_settings.dart';
 import '../../../../core/localization/locale_controller.dart';
 
 class SectionPropertiesWidget extends ConsumerStatefulWidget {
+  final String controllerKey;
+  final String projectId;
   final String formId;
   final String selectedSectionId;
 
   const SectionPropertiesWidget({
     super.key,
+    required this.projectId,
+    required this.controllerKey,
     required this.formId,
     required this.selectedSectionId,
   });
@@ -46,7 +50,7 @@ class _SectionPropertiesWidgetState
   @override
   Widget build(BuildContext context) {
     final builderState = ref.watch(
-      formBuilderControllerProvider(widget.formId),
+      formBuilderControllerProvider(widget.controllerKey),
     );
 
     return builderState.when(
@@ -109,7 +113,7 @@ class _SectionPropertiesWidgetState
                         onPressed: () => ref
                             .read(
                               formBuilderControllerProvider(
-                                widget.formId,
+                                widget.controllerKey,
                               ).notifier,
                             )
                             .selectQuestion(null, null),
@@ -146,6 +150,7 @@ class _SectionPropertiesWidgetState
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: SectionGeneralSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           section: section,
                           titleController: _titleController,
@@ -155,6 +160,7 @@ class _SectionPropertiesWidgetState
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: SectionLayoutSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           section: section,
                         ),
@@ -162,6 +168,7 @@ class _SectionPropertiesWidgetState
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: SectionStyleSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           section: section,
                         ),
@@ -169,6 +176,7 @@ class _SectionPropertiesWidgetState
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: SectionLogicSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           section: section,
                           allSections: state.form.sections,

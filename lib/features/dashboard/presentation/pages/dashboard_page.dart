@@ -109,7 +109,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ?.organizationId,
         'sub_projects': const [],
         'forms': const [],
-        'tags': created.tags ?? const [],
+        'tags': created.tags,
         'triggers': const [],
       },
     );
@@ -195,7 +195,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             children: [
               _TopBar(
                 userName: user.username,
-                userEmail: user.email ?? 'admin@example.com',
+                userEmail: user.email,
                 onLogout: () =>
                     ref.read(authControllerProvider.notifier).logout(),
                 onRefresh: () =>

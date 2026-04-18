@@ -51,7 +51,7 @@ final class FormBuilderControllerProvider
 }
 
 String _$formBuilderControllerHash() =>
-    r'1e5b47106d01f95c1cbae0dbb520704f7bc7e079';
+    r'64282217f2db68276f9893e02b542c9d212a0fda';
 
 final class FormBuilderControllerFamily extends $Family
     with
@@ -71,8 +71,8 @@ final class FormBuilderControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  FormBuilderControllerProvider call(String formId) =>
-      FormBuilderControllerProvider._(argument: formId, from: this);
+  FormBuilderControllerProvider call(String formKey) =>
+      FormBuilderControllerProvider._(argument: formKey, from: this);
 
   @override
   String toString() => r'formBuilderControllerProvider';
@@ -81,9 +81,9 @@ final class FormBuilderControllerFamily extends $Family
 abstract class _$FormBuilderController
     extends $AsyncNotifier<FormBuilderState> {
   late final _$args = ref.$arg as String;
-  String get formId => _$args;
+  String get formKey => _$args;
 
-  FutureOr<FormBuilderState> build(String formId);
+  FutureOr<FormBuilderState> build(String formKey);
   @$mustCallSuper
   @override
   void runBuild() {

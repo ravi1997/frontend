@@ -14,11 +14,15 @@ import 'package:frontend/features/form_builder/presentation/controllers/custom_f
 import '../../../../core/localization/locale_controller.dart';
 
 class FieldPropertiesWidget extends ConsumerStatefulWidget {
+  final String controllerKey;
+  final String projectId;
   final String formId;
   final String selectedQuestionId;
 
   const FieldPropertiesWidget({
     super.key,
+    required this.projectId,
+    required this.controllerKey,
     required this.formId,
     required this.selectedQuestionId,
   });
@@ -130,7 +134,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   @override
   Widget build(BuildContext context) {
     final builderState = ref.watch(
-      formBuilderControllerProvider(widget.formId),
+      formBuilderControllerProvider(widget.controllerKey),
     );
 
     return builderState.when(
@@ -211,7 +215,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                         onPressed: () => ref
                             .read(
                               formBuilderControllerProvider(
-                                widget.formId,
+                                widget.controllerKey,
                               ).notifier,
                             )
                             .selectQuestion(null, null),
@@ -254,6 +258,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FieldGeneralSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           question: question,
                           labelController: _labelController,
@@ -267,6 +272,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FieldLayoutSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           question: question,
                         ),
@@ -312,6 +318,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
                         child: FieldLogicSettings(
+                          projectId: widget.projectId,
                           formId: widget.formId,
                           question: question,
                           sections: state.form.sections,

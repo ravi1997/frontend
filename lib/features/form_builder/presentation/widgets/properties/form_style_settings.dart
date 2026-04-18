@@ -6,11 +6,13 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class FormStyleSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final BuilderForm form;
 
   const FormStyleSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.form,
   });
@@ -50,7 +52,7 @@ class FormStyleSettings extends ConsumerWidget {
     );
 
     ref
-        .read(formBuilderControllerProvider(formId).notifier)
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
         .updateForm(form.copyWith(style: newStyle));
   }
 
@@ -103,7 +105,9 @@ class FormStyleSettings extends ConsumerWidget {
           value: form.style.backgroundColor,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(
                     style: form.style.copyWith(backgroundColor: val),
@@ -117,7 +121,9 @@ class FormStyleSettings extends ConsumerWidget {
           value: form.style.primaryColor,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(style: form.style.copyWith(primaryColor: val)),
                 );
@@ -145,7 +151,11 @@ class FormStyleSettings extends ConsumerWidget {
           onChanged: (val) {
             if (val != null) {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateForm(
                     form.copyWith(style: form.style.copyWith(fontFamily: val)),
                   );
@@ -170,7 +180,9 @@ class FormStyleSettings extends ConsumerWidget {
           max: 32,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateForm(
                   form.copyWith(
                     style: form.style.copyWith(globalBorderRadius: val),

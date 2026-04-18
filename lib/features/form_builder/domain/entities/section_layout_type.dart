@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 enum SectionLayoutType {
-  @JsonValue('standard')
+  @JsonValue('flex')
   standard,
   @JsonValue('grid')
   grid,

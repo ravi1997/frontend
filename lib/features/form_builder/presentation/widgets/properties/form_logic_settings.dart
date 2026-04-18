@@ -6,11 +6,13 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import '../logic_rule_dialog.dart';
 
 class FormLogicSettings extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final BuilderForm form;
 
   const FormLogicSettings({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.form,
   });
@@ -21,7 +23,10 @@ class FormLogicSettings extends ConsumerWidget {
     final rules = (settings['rules'] as List? ?? [])
         .cast<Map<String, dynamic>>();
     final locale =
-        ref.watch(formBuilderControllerProvider(formId)).value?.editingLocale ??
+        ref
+            .watch(formBuilderControllerProvider('$projectId::$formId'))
+            .value
+            ?.editingLocale ??
         'en';
 
     return Column(
@@ -204,7 +209,9 @@ class FormLogicSettings extends ConsumerWidget {
           ),
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(
+                  formBuilderControllerProvider('$projectId::$formId').notifier,
+                )
                 .updateFormMetadata({'webhookUrl': val});
           },
         ),
@@ -226,7 +233,7 @@ class FormLogicSettings extends ConsumerWidget {
       final newRules = List<Map<String, dynamic>>.from(settings['rules'])
         ..add(result);
       ref
-          .read(formBuilderControllerProvider(formId).notifier)
+          .read(formBuilderControllerProvider('$projectId::$formId').notifier)
           .updateFormMetadata({
             'logicSettings': {'rules': newRules},
           });
@@ -237,10 +244,10 @@ class FormLogicSettings extends ConsumerWidget {
     final settings = form.metadata['logicSettings'] ?? {'rules': []};
     final newRules = List<Map<String, dynamic>>.from(settings['rules'])
       ..removeAt(index);
-    ref.read(formBuilderControllerProvider(formId).notifier).updateFormMetadata(
-      {
-        'logicSettings': {'rules': newRules},
-      },
-    );
+    ref
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+        .updateFormMetadata({
+          'logicSettings': {'rules': newRules},
+        });
   }
 }

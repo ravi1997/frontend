@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormSection {
 
-@JsonKey(readValue: IdReader.readIdCallback) String get id; Object? get title; Object? get description; List<FormQuestion> get questions; SectionLayoutType get layout; int get gridColumns; bool get isHidden; bool get isRepeatable; int? get repeatMin; int? get repeatMax; Map<String, dynamic>? get conditionalLogic; SectionStyle get style; Map<String, dynamic> get metadata;
+@JsonKey(readValue: IdReader.readIdCallback) String get id; Object? get title; Object? get description;@JsonKey(name: 'help_text') Object? get helpText; int get order; List<FormQuestion> get questions; SectionLayoutType get layout;@JsonKey(name: 'grid_columns') int get gridColumns;@JsonKey(name: 'is_hidden') bool get isHidden;@JsonKey(name: 'is_repeatable') bool get isRepeatable;@JsonKey(name: 'repeat_min') int? get repeatMin;@JsonKey(name: 'repeat_max') int? get repeatMax;@JsonKey(name: 'conditional_logic') Map<String, dynamic>? get conditionalLogic; Map<String, dynamic>? get logic;@JsonKey(name: 'sections') List<FormSection> get sections;@JsonKey(name: 'response_templates') List<Map<String, dynamic>> get responseTemplates; List<String> get tags; SectionStyle get style;@JsonKey(name: 'meta_data') Map<String, dynamic> get metaData;
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FormSectionCopyWith<FormSection> get copyWith => _$FormSectionCopyWithImpl<Form
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.isRepeatable, isRepeatable) || other.isRepeatable == isRepeatable)&&(identical(other.repeatMin, repeatMin) || other.repeatMin == repeatMin)&&(identical(other.repeatMax, repeatMax) || other.repeatMax == repeatMax)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other.metadata, metadata));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other.helpText, helpText)&&(identical(other.order, order) || other.order == order)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.isRepeatable, isRepeatable) || other.isRepeatable == isRepeatable)&&(identical(other.repeatMin, repeatMin) || other.repeatMin == repeatMin)&&(identical(other.repeatMax, repeatMax) || other.repeatMax == repeatMax)&&const DeepCollectionEquality().equals(other.conditionalLogic, conditionalLogic)&&const DeepCollectionEquality().equals(other.logic, logic)&&const DeepCollectionEquality().equals(other.sections, sections)&&const DeepCollectionEquality().equals(other.responseTemplates, responseTemplates)&&const DeepCollectionEquality().equals(other.tags, tags)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other.metaData, metaData));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(questions),layout,gridColumns,isHidden,isRepeatable,repeatMin,repeatMax,const DeepCollectionEquality().hash(conditionalLogic),style,const DeepCollectionEquality().hash(metadata));
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(helpText),order,const DeepCollectionEquality().hash(questions),layout,gridColumns,isHidden,isRepeatable,repeatMin,repeatMax,const DeepCollectionEquality().hash(conditionalLogic),const DeepCollectionEquality().hash(logic),const DeepCollectionEquality().hash(sections),const DeepCollectionEquality().hash(responseTemplates),const DeepCollectionEquality().hash(tags),style,const DeepCollectionEquality().hash(metaData)]);
 
 @override
 String toString() {
-  return 'FormSection(id: $id, title: $title, description: $description, questions: $questions, layout: $layout, gridColumns: $gridColumns, isHidden: $isHidden, isRepeatable: $isRepeatable, repeatMin: $repeatMin, repeatMax: $repeatMax, conditionalLogic: $conditionalLogic, style: $style, metadata: $metadata)';
+  return 'FormSection(id: $id, title: $title, description: $description, helpText: $helpText, order: $order, questions: $questions, layout: $layout, gridColumns: $gridColumns, isHidden: $isHidden, isRepeatable: $isRepeatable, repeatMin: $repeatMin, repeatMax: $repeatMax, conditionalLogic: $conditionalLogic, logic: $logic, sections: $sections, responseTemplates: $responseTemplates, tags: $tags, style: $style, metaData: $metaData)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FormSectionCopyWith<$Res>  {
   factory $FormSectionCopyWith(FormSection value, $Res Function(FormSection) _then) = _$FormSectionCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
+@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description,@JsonKey(name: 'help_text') Object? helpText, int order, List<FormQuestion> questions, SectionLayoutType layout,@JsonKey(name: 'grid_columns') int gridColumns,@JsonKey(name: 'is_hidden') bool isHidden,@JsonKey(name: 'is_repeatable') bool isRepeatable,@JsonKey(name: 'repeat_min') int? repeatMin,@JsonKey(name: 'repeat_max') int? repeatMax,@JsonKey(name: 'conditional_logic') Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? logic,@JsonKey(name: 'sections') List<FormSection> sections,@JsonKey(name: 'response_templates') List<Map<String, dynamic>> responseTemplates, List<String> tags, SectionStyle style,@JsonKey(name: 'meta_data') Map<String, dynamic> metaData
 });
 
 
@@ -65,10 +65,11 @@ class _$FormSectionCopyWithImpl<$Res>
 
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? isRepeatable = null,Object? repeatMin = freezed,Object? repeatMax = freezed,Object? conditionalLogic = freezed,Object? style = null,Object? metadata = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? helpText = freezed,Object? order = null,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? isRepeatable = null,Object? repeatMin = freezed,Object? repeatMax = freezed,Object? conditionalLogic = freezed,Object? logic = freezed,Object? sections = null,Object? responseTemplates = null,Object? tags = null,Object? style = null,Object? metaData = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,helpText: freezed == helpText ? _self.helpText : helpText ,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as int,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
 as List<FormQuestion>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as SectionLayoutType,gridColumns: null == gridColumns ? _self.gridColumns : gridColumns // ignore: cast_nullable_to_non_nullable
 as int,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable
@@ -76,8 +77,12 @@ as bool,isRepeatable: null == isRepeatable ? _self.isRepeatable : isRepeatable /
 as bool,repeatMin: freezed == repeatMin ? _self.repeatMin : repeatMin // ignore: cast_nullable_to_non_nullable
 as int?,repeatMax: freezed == repeatMax ? _self.repeatMax : repeatMax // ignore: cast_nullable_to_non_nullable
 as int?,conditionalLogic: freezed == conditionalLogic ? _self.conditionalLogic : conditionalLogic // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
-as SectionStyle,metadata: null == metadata ? _self.metadata : metadata // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,logic: freezed == logic ? _self.logic : logic // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,sections: null == sections ? _self.sections : sections // ignore: cast_nullable_to_non_nullable
+as List<FormSection>,responseTemplates: null == responseTemplates ? _self.responseTemplates : responseTemplates // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,tags: null == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
+as List<String>,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as SectionStyle,metaData: null == metaData ? _self.metaData : metaData // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }
@@ -172,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description, @JsonKey(name: 'help_text')  Object? helpText,  int order,  List<FormQuestion> questions,  SectionLayoutType layout, @JsonKey(name: 'grid_columns')  int gridColumns, @JsonKey(name: 'is_hidden')  bool isHidden, @JsonKey(name: 'is_repeatable')  bool isRepeatable, @JsonKey(name: 'repeat_min')  int? repeatMin, @JsonKey(name: 'repeat_max')  int? repeatMax, @JsonKey(name: 'conditional_logic')  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? logic, @JsonKey(name: 'sections')  List<FormSection> sections, @JsonKey(name: 'response_templates')  List<Map<String, dynamic>> responseTemplates,  List<String> tags,  SectionStyle style, @JsonKey(name: 'meta_data')  Map<String, dynamic> metaData)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
+return $default(_that.id,_that.title,_that.description,_that.helpText,_that.order,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.logic,_that.sections,_that.responseTemplates,_that.tags,_that.style,_that.metaData);case _:
   return orElse();
 
 }
@@ -193,10 +198,10 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description, @JsonKey(name: 'help_text')  Object? helpText,  int order,  List<FormQuestion> questions,  SectionLayoutType layout, @JsonKey(name: 'grid_columns')  int gridColumns, @JsonKey(name: 'is_hidden')  bool isHidden, @JsonKey(name: 'is_repeatable')  bool isRepeatable, @JsonKey(name: 'repeat_min')  int? repeatMin, @JsonKey(name: 'repeat_max')  int? repeatMax, @JsonKey(name: 'conditional_logic')  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? logic, @JsonKey(name: 'sections')  List<FormSection> sections, @JsonKey(name: 'response_templates')  List<Map<String, dynamic>> responseTemplates,  List<String> tags,  SectionStyle style, @JsonKey(name: 'meta_data')  Map<String, dynamic> metaData)  $default,) {final _that = this;
 switch (_that) {
 case _FormSection():
-return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
+return $default(_that.id,_that.title,_that.description,_that.helpText,_that.order,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.logic,_that.sections,_that.responseTemplates,_that.tags,_that.style,_that.metaData);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +218,10 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description,  List<FormQuestion> questions,  SectionLayoutType layout,  int gridColumns,  bool isHidden,  bool isRepeatable,  int? repeatMin,  int? repeatMax,  Map<String, dynamic>? conditionalLogic,  SectionStyle style,  Map<String, dynamic> metadata)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(readValue: IdReader.readIdCallback)  String id,  Object? title,  Object? description, @JsonKey(name: 'help_text')  Object? helpText,  int order,  List<FormQuestion> questions,  SectionLayoutType layout, @JsonKey(name: 'grid_columns')  int gridColumns, @JsonKey(name: 'is_hidden')  bool isHidden, @JsonKey(name: 'is_repeatable')  bool isRepeatable, @JsonKey(name: 'repeat_min')  int? repeatMin, @JsonKey(name: 'repeat_max')  int? repeatMax, @JsonKey(name: 'conditional_logic')  Map<String, dynamic>? conditionalLogic,  Map<String, dynamic>? logic, @JsonKey(name: 'sections')  List<FormSection> sections, @JsonKey(name: 'response_templates')  List<Map<String, dynamic>> responseTemplates,  List<String> tags,  SectionStyle style, @JsonKey(name: 'meta_data')  Map<String, dynamic> metaData)?  $default,) {final _that = this;
 switch (_that) {
 case _FormSection() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.style,_that.metadata);case _:
+return $default(_that.id,_that.title,_that.description,_that.helpText,_that.order,_that.questions,_that.layout,_that.gridColumns,_that.isHidden,_that.isRepeatable,_that.repeatMin,_that.repeatMax,_that.conditionalLogic,_that.logic,_that.sections,_that.responseTemplates,_that.tags,_that.style,_that.metaData);case _:
   return null;
 
 }
@@ -228,12 +233,14 @@ return $default(_that.id,_that.title,_that.description,_that.questions,_that.lay
 @JsonSerializable()
 
 class _FormSection extends FormSection {
-  const _FormSection({@JsonKey(readValue: IdReader.readIdCallback) required this.id, required this.title, this.description, required final  List<FormQuestion> questions, this.layout = SectionLayoutType.standard, this.gridColumns = 2, this.isHidden = false, this.isRepeatable = false, this.repeatMin, this.repeatMax, final  Map<String, dynamic>? conditionalLogic, this.style = const SectionStyle(), final  Map<String, dynamic> metadata = const {}}): _questions = questions,_conditionalLogic = conditionalLogic,_metadata = metadata,super._();
+  const _FormSection({@JsonKey(readValue: IdReader.readIdCallback) required this.id, required this.title, this.description, @JsonKey(name: 'help_text') this.helpText, this.order = 0, required final  List<FormQuestion> questions, this.layout = SectionLayoutType.standard, @JsonKey(name: 'grid_columns') this.gridColumns = 2, @JsonKey(name: 'is_hidden') this.isHidden = false, @JsonKey(name: 'is_repeatable') this.isRepeatable = false, @JsonKey(name: 'repeat_min') this.repeatMin, @JsonKey(name: 'repeat_max') this.repeatMax, @JsonKey(name: 'conditional_logic') final  Map<String, dynamic>? conditionalLogic, final  Map<String, dynamic>? logic, @JsonKey(name: 'sections') final  List<FormSection> sections = const <FormSection>[], @JsonKey(name: 'response_templates') final  List<Map<String, dynamic>> responseTemplates = const <Map<String, dynamic>>[], final  List<String> tags = const <String>[], this.style = const SectionStyle(), @JsonKey(name: 'meta_data') final  Map<String, dynamic> metaData = const {}}): _questions = questions,_conditionalLogic = conditionalLogic,_logic = logic,_sections = sections,_responseTemplates = responseTemplates,_tags = tags,_metaData = metaData,super._();
   factory _FormSection.fromJson(Map<String, dynamic> json) => _$FormSectionFromJson(json);
 
 @override@JsonKey(readValue: IdReader.readIdCallback) final  String id;
 @override final  Object? title;
 @override final  Object? description;
+@override@JsonKey(name: 'help_text') final  Object? helpText;
+@override@JsonKey() final  int order;
  final  List<FormQuestion> _questions;
 @override List<FormQuestion> get questions {
   if (_questions is EqualUnmodifiableListView) return _questions;
@@ -242,13 +249,13 @@ class _FormSection extends FormSection {
 }
 
 @override@JsonKey() final  SectionLayoutType layout;
-@override@JsonKey() final  int gridColumns;
-@override@JsonKey() final  bool isHidden;
-@override@JsonKey() final  bool isRepeatable;
-@override final  int? repeatMin;
-@override final  int? repeatMax;
+@override@JsonKey(name: 'grid_columns') final  int gridColumns;
+@override@JsonKey(name: 'is_hidden') final  bool isHidden;
+@override@JsonKey(name: 'is_repeatable') final  bool isRepeatable;
+@override@JsonKey(name: 'repeat_min') final  int? repeatMin;
+@override@JsonKey(name: 'repeat_max') final  int? repeatMax;
  final  Map<String, dynamic>? _conditionalLogic;
-@override Map<String, dynamic>? get conditionalLogic {
+@override@JsonKey(name: 'conditional_logic') Map<String, dynamic>? get conditionalLogic {
   final value = _conditionalLogic;
   if (value == null) return null;
   if (_conditionalLogic is EqualUnmodifiableMapView) return _conditionalLogic;
@@ -256,12 +263,42 @@ class _FormSection extends FormSection {
   return EqualUnmodifiableMapView(value);
 }
 
-@override@JsonKey() final  SectionStyle style;
- final  Map<String, dynamic> _metadata;
-@override@JsonKey() Map<String, dynamic> get metadata {
-  if (_metadata is EqualUnmodifiableMapView) return _metadata;
+ final  Map<String, dynamic>? _logic;
+@override Map<String, dynamic>? get logic {
+  final value = _logic;
+  if (value == null) return null;
+  if (_logic is EqualUnmodifiableMapView) return _logic;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableMapView(_metadata);
+  return EqualUnmodifiableMapView(value);
+}
+
+ final  List<FormSection> _sections;
+@override@JsonKey(name: 'sections') List<FormSection> get sections {
+  if (_sections is EqualUnmodifiableListView) return _sections;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_sections);
+}
+
+ final  List<Map<String, dynamic>> _responseTemplates;
+@override@JsonKey(name: 'response_templates') List<Map<String, dynamic>> get responseTemplates {
+  if (_responseTemplates is EqualUnmodifiableListView) return _responseTemplates;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_responseTemplates);
+}
+
+ final  List<String> _tags;
+@override@JsonKey() List<String> get tags {
+  if (_tags is EqualUnmodifiableListView) return _tags;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_tags);
+}
+
+@override@JsonKey() final  SectionStyle style;
+ final  Map<String, dynamic> _metaData;
+@override@JsonKey(name: 'meta_data') Map<String, dynamic> get metaData {
+  if (_metaData is EqualUnmodifiableMapView) return _metaData;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_metaData);
 }
 
 
@@ -278,16 +315,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.isRepeatable, isRepeatable) || other.isRepeatable == isRepeatable)&&(identical(other.repeatMin, repeatMin) || other.repeatMin == repeatMin)&&(identical(other.repeatMax, repeatMax) || other.repeatMax == repeatMax)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other._metadata, _metadata));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormSection&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.title, title)&&const DeepCollectionEquality().equals(other.description, description)&&const DeepCollectionEquality().equals(other.helpText, helpText)&&(identical(other.order, order) || other.order == order)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.layout, layout) || other.layout == layout)&&(identical(other.gridColumns, gridColumns) || other.gridColumns == gridColumns)&&(identical(other.isHidden, isHidden) || other.isHidden == isHidden)&&(identical(other.isRepeatable, isRepeatable) || other.isRepeatable == isRepeatable)&&(identical(other.repeatMin, repeatMin) || other.repeatMin == repeatMin)&&(identical(other.repeatMax, repeatMax) || other.repeatMax == repeatMax)&&const DeepCollectionEquality().equals(other._conditionalLogic, _conditionalLogic)&&const DeepCollectionEquality().equals(other._logic, _logic)&&const DeepCollectionEquality().equals(other._sections, _sections)&&const DeepCollectionEquality().equals(other._responseTemplates, _responseTemplates)&&const DeepCollectionEquality().equals(other._tags, _tags)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other._metaData, _metaData));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(_questions),layout,gridColumns,isHidden,isRepeatable,repeatMin,repeatMax,const DeepCollectionEquality().hash(_conditionalLogic),style,const DeepCollectionEquality().hash(_metadata));
+int get hashCode => Object.hashAll([runtimeType,id,const DeepCollectionEquality().hash(title),const DeepCollectionEquality().hash(description),const DeepCollectionEquality().hash(helpText),order,const DeepCollectionEquality().hash(_questions),layout,gridColumns,isHidden,isRepeatable,repeatMin,repeatMax,const DeepCollectionEquality().hash(_conditionalLogic),const DeepCollectionEquality().hash(_logic),const DeepCollectionEquality().hash(_sections),const DeepCollectionEquality().hash(_responseTemplates),const DeepCollectionEquality().hash(_tags),style,const DeepCollectionEquality().hash(_metaData)]);
 
 @override
 String toString() {
-  return 'FormSection(id: $id, title: $title, description: $description, questions: $questions, layout: $layout, gridColumns: $gridColumns, isHidden: $isHidden, isRepeatable: $isRepeatable, repeatMin: $repeatMin, repeatMax: $repeatMax, conditionalLogic: $conditionalLogic, style: $style, metadata: $metadata)';
+  return 'FormSection(id: $id, title: $title, description: $description, helpText: $helpText, order: $order, questions: $questions, layout: $layout, gridColumns: $gridColumns, isHidden: $isHidden, isRepeatable: $isRepeatable, repeatMin: $repeatMin, repeatMax: $repeatMax, conditionalLogic: $conditionalLogic, logic: $logic, sections: $sections, responseTemplates: $responseTemplates, tags: $tags, style: $style, metaData: $metaData)';
 }
 
 
@@ -298,7 +335,7 @@ abstract mixin class _$FormSectionCopyWith<$Res> implements $FormSectionCopyWith
   factory _$FormSectionCopyWith(_FormSection value, $Res Function(_FormSection) _then) = __$FormSectionCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description, List<FormQuestion> questions, SectionLayoutType layout, int gridColumns, bool isHidden, bool isRepeatable, int? repeatMin, int? repeatMax, Map<String, dynamic>? conditionalLogic, SectionStyle style, Map<String, dynamic> metadata
+@JsonKey(readValue: IdReader.readIdCallback) String id, Object? title, Object? description,@JsonKey(name: 'help_text') Object? helpText, int order, List<FormQuestion> questions, SectionLayoutType layout,@JsonKey(name: 'grid_columns') int gridColumns,@JsonKey(name: 'is_hidden') bool isHidden,@JsonKey(name: 'is_repeatable') bool isRepeatable,@JsonKey(name: 'repeat_min') int? repeatMin,@JsonKey(name: 'repeat_max') int? repeatMax,@JsonKey(name: 'conditional_logic') Map<String, dynamic>? conditionalLogic, Map<String, dynamic>? logic,@JsonKey(name: 'sections') List<FormSection> sections,@JsonKey(name: 'response_templates') List<Map<String, dynamic>> responseTemplates, List<String> tags, SectionStyle style,@JsonKey(name: 'meta_data') Map<String, dynamic> metaData
 });
 
 
@@ -315,10 +352,11 @@ class __$FormSectionCopyWithImpl<$Res>
 
 /// Create a copy of FormSection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? isRepeatable = null,Object? repeatMin = freezed,Object? repeatMax = freezed,Object? conditionalLogic = freezed,Object? style = null,Object? metadata = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = freezed,Object? description = freezed,Object? helpText = freezed,Object? order = null,Object? questions = null,Object? layout = null,Object? gridColumns = null,Object? isHidden = null,Object? isRepeatable = null,Object? repeatMin = freezed,Object? repeatMax = freezed,Object? conditionalLogic = freezed,Object? logic = freezed,Object? sections = null,Object? responseTemplates = null,Object? tags = null,Object? style = null,Object? metaData = null,}) {
   return _then(_FormSection(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title ,description: freezed == description ? _self.description : description ,helpText: freezed == helpText ? _self.helpText : helpText ,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
+as int,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
 as List<FormQuestion>,layout: null == layout ? _self.layout : layout // ignore: cast_nullable_to_non_nullable
 as SectionLayoutType,gridColumns: null == gridColumns ? _self.gridColumns : gridColumns // ignore: cast_nullable_to_non_nullable
 as int,isHidden: null == isHidden ? _self.isHidden : isHidden // ignore: cast_nullable_to_non_nullable
@@ -326,8 +364,12 @@ as bool,isRepeatable: null == isRepeatable ? _self.isRepeatable : isRepeatable /
 as bool,repeatMin: freezed == repeatMin ? _self.repeatMin : repeatMin // ignore: cast_nullable_to_non_nullable
 as int?,repeatMax: freezed == repeatMax ? _self.repeatMax : repeatMax // ignore: cast_nullable_to_non_nullable
 as int?,conditionalLogic: freezed == conditionalLogic ? _self._conditionalLogic : conditionalLogic // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>?,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
-as SectionStyle,metadata: null == metadata ? _self._metadata : metadata // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,logic: freezed == logic ? _self._logic : logic // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,sections: null == sections ? _self._sections : sections // ignore: cast_nullable_to_non_nullable
+as List<FormSection>,responseTemplates: null == responseTemplates ? _self._responseTemplates : responseTemplates // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,tags: null == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
+as List<String>,style: null == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as SectionStyle,metaData: null == metaData ? _self._metaData : metaData // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
 }

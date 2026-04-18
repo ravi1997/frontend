@@ -102,26 +102,50 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        path: '/forms/:formId',
+        path: '/projects/:projectId/forms/:formId/edit',
         builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
           final formId = state.pathParameters['formId'] ?? 'new';
           final mode = state.uri.queryParameters['mode'];
-          return FormBuilderPage(formId: formId, mode: mode);
+          return FormBuilderPage(
+            formId: formId,
+            projectId: projectId,
+            mode: mode,
+          );
         },
       ),
       GoRoute(
-        path: '/forms/:formId/responses',
+        path: '/projects/:projectId/forms/:formId',
         builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          final formId = state.pathParameters['formId'] ?? 'new';
+          final mode = state.uri.queryParameters['mode'];
+          return FormBuilderPage(
+            projectId: projectId,
+            formId: formId,
+            mode: mode,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/projects/:projectId/forms/:formId/responses',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
           final formId = state.pathParameters['formId']!;
-          return ResponseListPage(formId: formId);
+          return ResponseListPage(projectId: projectId, formId: formId);
         },
       ),
       GoRoute(
-        path: '/forms/:formId/responses/:responseId',
+        path: '/projects/:projectId/forms/:formId/responses/:responseId',
         builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
           final formId = state.pathParameters['formId']!;
           final responseId = state.pathParameters['responseId']!;
-          return ResponseDetailPage(formId: formId, responseId: responseId);
+          return ResponseDetailPage(
+            projectId: projectId,
+            formId: formId,
+            responseId: responseId,
+          );
         },
       ),
       GoRoute(

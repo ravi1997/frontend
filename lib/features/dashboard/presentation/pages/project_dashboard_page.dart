@@ -472,7 +472,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
     }
 
     if (formId != null && formId.isNotEmpty && mounted) {
-      context.push('/builder/$formId');
+      context.push('/projects/${widget.projectId}/forms/$formId');
     }
   }
 

@@ -10,14 +10,24 @@ import 'form_drag_data.dart';
 import 'section_widget.dart';
 
 class FormCanvasWidget extends ConsumerWidget {
+  final String controllerKey;
+  final String projectId;
   final String formId;
   final String? mode;
 
-  const FormCanvasWidget({super.key, required this.formId, this.mode});
+  const FormCanvasWidget({
+    super.key,
+    required this.controllerKey,
+    required this.projectId,
+    required this.formId,
+    this.mode,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final builderState = ref.watch(formBuilderControllerProvider(formId));
+    final builderState = ref.watch(
+      formBuilderControllerProvider(controllerKey),
+    );
 
     return builderState.when(
       data: (state) {
@@ -43,13 +53,13 @@ class FormCanvasWidget extends ConsumerWidget {
           onAcceptWithDetails: (details) {
             final template = details.data as CustomFieldTemplate;
             ref
-                .read(formBuilderControllerProvider(formId).notifier)
+                .read(formBuilderControllerProvider(controllerKey).notifier)
                 .addFromTemplate(null, template);
           },
           builder: (context, candidateData, rejectedData) => GestureDetector(
             onTap: () {
               ref
-                  .read(formBuilderControllerProvider(formId).notifier)
+                  .read(formBuilderControllerProvider(controllerKey).notifier)
                   .selectQuestion(null, null);
             },
             behavior: HitTestBehavior.opaque,
@@ -160,6 +170,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                   final sectionWidget = SizedBox(
                                     width: itemWidth,
                                     child: SectionWidget(
+                                      projectId: projectId,
                                       formId: formId,
                                       section: section,
                                       sectionIndex: index,
@@ -247,7 +258,7 @@ class FormCanvasWidget extends ConsumerWidget {
                               onPressed: () => ref
                                   .read(
                                     formBuilderControllerProvider(
-                                      formId,
+                                      '$projectId::$formId',
                                     ).notifier,
                                   )
                                   .addSection(),
@@ -255,7 +266,7 @@ class FormCanvasWidget extends ConsumerWidget {
                               label: const Text('Add New Section'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.builderElement,
-                                foregroundColor: Colors.white,
+                                foregroundColor: Colors.black,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
                                   vertical: 12,
@@ -299,7 +310,7 @@ class FormCanvasWidget extends ConsumerWidget {
     return InkWell(
       onTap: () {
         ref
-            .read(formBuilderControllerProvider(formId).notifier)
+            .read(formBuilderControllerProvider(controllerKey).notifier)
             .selectQuestion(null, null);
       },
       child: Container(

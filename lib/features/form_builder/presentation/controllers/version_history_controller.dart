@@ -61,12 +61,21 @@ class VersionHistoryState {
 /// - Version restoration functionality
 @riverpod
 class VersionHistoryController extends _$VersionHistoryController {
+  late String _projectId;
+
   @override
-  VersionHistoryState build(String formId) {
+  VersionHistoryState build(String formKey) {
+    final parts = formKey.split('::');
+    _projectId = parts.first;
+    formId = parts.sublist(1).join('::');
+
     // Load initial data
     Future.microtask(() => _loadVersionHistory());
     return const VersionHistoryState(isLoading: true);
   }
+
+  @override
+  late String formId;
 
   Future<void> _loadVersionHistory() async {
     // Avoid setting loading state again if we already returned it as true
@@ -155,7 +164,7 @@ class VersionHistoryController extends _$VersionHistoryController {
       );
 
       // Save the restored form (creates a new version)
-      await repository.saveForm(updatedForm);
+      await repository.saveForm(updatedForm, projectId: _projectId);
 
       // Refresh the version history
       final versions = await repository.getVersionHistory(formId);

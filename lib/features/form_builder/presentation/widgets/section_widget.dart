@@ -11,6 +11,7 @@ import 'builder_field_widget.dart';
 import 'form_drag_data.dart';
 
 class SectionWidget extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final FormSection section;
   final int sectionIndex;
@@ -21,6 +22,7 @@ class SectionWidget extends ConsumerWidget {
 
   const SectionWidget({
     super.key,
+    required this.projectId,
     required this.formId,
     required this.section,
     required this.sectionIndex,
@@ -58,7 +60,7 @@ class SectionWidget extends ConsumerWidget {
       },
       onAcceptWithDetails: (details) {
         final notifier = ref.read(
-          formBuilderControllerProvider(formId).notifier,
+          formBuilderControllerProvider('$projectId::$formId').notifier,
         );
         if (details.data is QuestionType) {
           notifier.addQuestion(section.id, details.data as QuestionType);
@@ -111,7 +113,11 @@ class SectionWidget extends ConsumerWidget {
                   if (sectionStyle.showHeader && mode != 'question')
                     InkWell(
                       onTap: () => ref
-                          .read(formBuilderControllerProvider(formId).notifier)
+                          .read(
+                            formBuilderControllerProvider(
+                              '$projectId::$formId',
+                            ).notifier,
+                          )
                           .selectSection(section.id),
                       child: Container(
                         padding: const EdgeInsets.all(24),
@@ -156,7 +162,7 @@ class SectionWidget extends ConsumerWidget {
                                     ref
                                         .read(
                                           formBuilderControllerProvider(
-                                            formId,
+                                            '$projectId::$formId',
                                           ).notifier,
                                         )
                                         .removeSection(section.id);
@@ -171,7 +177,7 @@ class SectionWidget extends ConsumerWidget {
                                   onSelected: (value) {
                                     final notifier = ref.read(
                                       formBuilderControllerProvider(
-                                        formId,
+                                        '$projectId::$formId',
                                       ).notifier,
                                     );
                                     if (value == 'duplicate') {
@@ -245,7 +251,7 @@ class SectionWidget extends ConsumerWidget {
                       builder: (context, constraints) {
                         final availableWidth = constraints.maxWidth;
                         final builderState = ref.watch(
-                          formBuilderControllerProvider(formId),
+                          formBuilderControllerProvider('$projectId::$formId'),
                         );
                         final questionSpacing = builderState.when(
                           data: (s) => s.form.style.questionSpacing,
@@ -337,7 +343,7 @@ class SectionWidget extends ConsumerWidget {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          formId,
+                                          '$projectId::$formId',
                                         ).notifier,
                                       )
                                       .selectQuestion(section.id, q.id);
@@ -346,7 +352,7 @@ class SectionWidget extends ConsumerWidget {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          formId,
+                                          '$projectId::$formId',
                                         ).notifier,
                                       )
                                       .removeQuestion(section.id, q.id);
@@ -355,7 +361,7 @@ class SectionWidget extends ConsumerWidget {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          formId,
+                                          '$projectId::$formId',
                                         ).notifier,
                                       )
                                       .duplicateQuestion(section.id, q);

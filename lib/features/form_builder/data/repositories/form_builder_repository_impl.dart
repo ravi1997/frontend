@@ -24,14 +24,18 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   FormBuilderRepositoryImpl(this._apiClient);
 
   @override
-  Future<BuilderForm> getForm(String id, {String? projectId}) async {
+  Future<BuilderForm> getForm(String projectId, String id) async {
     try {
-      final endpoint = projectId == null
-          ? ApiEndpoints.getForm(id)
-          : ApiEndpoints.getProjectForm(projectId, id);
+      final endpoint = ApiEndpoints.getProjectForm(projectId, id);
+      _logger.i('projectId: $projectId Endpoint: $endpoint');
       final response = await _apiClient.get(endpoint);
-      final data = response.data;
-      final dto = FormDto.fromJson(data as Map<String, dynamic>);
+      final data = Map<String, dynamic>.from(response.data as Map);
+      final hydratedSections = await _loadSections(projectId, id, data);
+      if (hydratedSections != null) {
+        data['sections'] = hydratedSections;
+      }
+
+      final dto = FormDto.fromJson(data);
 
       return FormMapper.fromDto(dto);
     } catch (e, s) {
@@ -40,9 +44,61 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     }
   }
 
+  Future<List<dynamic>?> _loadSections(
+    String projectId,
+    String formId,
+    Map<String, dynamic> formData,
+  ) async {
+    final rawSections = formData['sections'];
+    if (rawSections is! List || rawSections.isEmpty) {
+      return null;
+    }
+
+    final sectionIds = rawSections.whereType<String>().toList();
+    if (sectionIds.isEmpty) {
+      return null;
+    }
+
+    final response = await _apiClient.get(
+      ApiEndpoints.listSections(projectId, formId),
+    );
+    final data = response.data;
+    final sections = data is Map<String, dynamic>
+        ? (data['data'] as List<dynamic>? ??
+              data['items'] as List<dynamic>? ??
+              const [])
+        : (data as List<dynamic>? ?? const []);
+
+    if (sections.isEmpty) {
+      return null;
+    }
+
+    final byId = <String, Map<String, dynamic>>{};
+    for (final item in sections) {
+      if (item is Map) {
+        final section = Map<String, dynamic>.from(item);
+        final sectionId = section['id']?.toString();
+        if (sectionId != null && sectionId.isNotEmpty) {
+          byId[sectionId] = section;
+        }
+      }
+    }
+
+    final hydrated = <Map<String, dynamic>>[];
+    for (final sectionId in sectionIds) {
+      final section = byId[sectionId];
+      if (section != null) {
+        hydrated.add(section);
+      }
+    }
+
+    return hydrated.isEmpty ? null : hydrated;
+  }
+
   @override
   Future<BuilderForm> saveForm(
     BuilderForm form, {
+    required String projectId,
     String versionType = 'patch',
   }) async {
     try {
@@ -59,7 +115,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         );
         final data = response.data;
         final newFormId = _extractFormId(data);
-        return getForm(newFormId);
+        return getForm(projectId, newFormId);
       } else {
         // ── Update existing form ─────────────────────────────────────────
         // Backend: PUT /forms/<id> for metadata
@@ -67,7 +123,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         await _apiClient.put(ApiEndpoints.updateForm(form.id), data: metadata);
 
         // Fetch the updated form to return consistent state
-        return getForm(form.id);
+        return getForm(projectId, form.id);
       }
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
@@ -284,13 +340,19 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<FormSection> createSection(String formId, FormSection section) async {
+  Future<FormSection> createSection(
+    String projectId,
+    String formId,
+    FormSection section,
+  ) async {
     try {
       // Backend: POST /forms/<form_id>/sections → 201 returns the created section
+      _logger.i('url : ${ApiEndpoints.createSection(projectId, formId)}');
       final response = await _apiClient.post(
-        ApiEndpoints.createSection(formId),
+        ApiEndpoints.createSection(projectId, formId),
         data: section.toJson(),
       );
+      _logger.i('response : $response');
       final data = response.data;
       if (data is Map<String, dynamic>) {
         // Some backends wrap the section in a key
@@ -307,11 +369,15 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<FormSection> updateSection(String formId, FormSection section) async {
+  Future<FormSection> updateSection(
+    String projectId,
+    String formId,
+    FormSection section,
+  ) async {
     try {
       // Backend: PUT /forms/<form_id>/sections/<section_id>
       final response = await _apiClient.put(
-        ApiEndpoints.updateSection(formId, section.id),
+        ApiEndpoints.updateSection(projectId, formId, section.id),
         data: section.toJson(),
       );
       final data = response.data;
@@ -329,10 +395,16 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<void> deleteSection(String formId, String sectionId) async {
+  Future<void> deleteSection(
+    String projectId,
+    String formId,
+    String sectionId,
+  ) async {
     try {
       // Backend: DELETE /forms/<form_id>/sections/<section_id>
-      await _apiClient.delete(ApiEndpoints.deleteSection(formId, sectionId));
+      await _apiClient.delete(
+        ApiEndpoints.deleteSection(projectId, formId, sectionId),
+      );
     } catch (e, s) {
       _logger.e('Failed to delete section', error: e, stackTrace: s);
       throw NetworkException('Failed to delete section: $e');
@@ -340,12 +412,16 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<void> reorderSections(String formId, List<String> sectionIds) async {
+  Future<void> reorderSections(
+    String projectId,
+    String formId,
+    List<String> sectionIds,
+  ) async {
     try {
       // Backend: PUT /forms/<form_id>/sections/reorder
       // Body: { "section_ids": [...] }
       await _apiClient.put(
-        ApiEndpoints.reorderSections(formId),
+        ApiEndpoints.reorderSections(projectId, formId),
         data: {'section_ids': sectionIds},
       );
     } catch (e, s) {
@@ -394,6 +470,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
 
   @override
   Future<BuilderForm> cloneForm(
+    String projectId,
     String formId, {
     String? title,
     String? slug,
@@ -416,15 +493,15 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       if (data is Map && data.containsKey('task_id')) {
         _logger.i('Clone accepted with task_id: ${data['task_id']}');
         // Return current form as a fallback since clone is async
-        return getForm(formId);
+        return getForm(projectId, formId);
       }
 
       // If backend returns the cloned form directly
       if (data is Map && (data['form_id'] != null || data['id'] != null)) {
-        return getForm(_extractFormId(data));
+        return getForm(projectId, _extractFormId(data));
       }
 
-      return getForm(formId);
+      return getForm(projectId, formId);
     } catch (e, s) {
       _logger.e('Failed to clone form', error: e, stackTrace: s);
       throw FormSaveException(formId, originalError: e);
