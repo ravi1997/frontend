@@ -78,7 +78,7 @@ final class VersionHistoryControllerProvider
 }
 
 String _$versionHistoryControllerHash() =>
-    r'f7ae6320770439765cd233cbdabdc7bfb6b1168e';
+    r'a157b4cf38e29c8456f4643341931a99320202fe';
 
 /// Controller for managing version history using Riverpod.
 ///
@@ -112,8 +112,8 @@ final class VersionHistoryControllerFamily extends $Family
   /// - Selected version details
   /// - Version restoration functionality
 
-  VersionHistoryControllerProvider call(String formId) =>
-      VersionHistoryControllerProvider._(argument: formId, from: this);
+  VersionHistoryControllerProvider call(String formKey) =>
+      VersionHistoryControllerProvider._(argument: formKey, from: this);
 
   @override
   String toString() => r'versionHistoryControllerProvider';
@@ -129,9 +129,9 @@ final class VersionHistoryControllerFamily extends $Family
 abstract class _$VersionHistoryController
     extends $Notifier<VersionHistoryState> {
   late final _$args = ref.$arg as String;
-  String get formId => _$args;
+  String get formKey => _$args;
 
-  VersionHistoryState build(String formId);
+  VersionHistoryState build(String formKey);
   @$mustCallSuper
   @override
   void runBuild() {

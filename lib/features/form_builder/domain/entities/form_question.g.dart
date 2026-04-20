@@ -9,19 +9,19 @@ part of 'form_question.dart';
 _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
     _FormQuestion(
       id: IdReader.readIdCallback(json, 'id') as String,
-      variableName: (json['variable_name'] ?? json['variableName']) as String?,
+      variableName: json['variable_name'] as String?,
       label: json['label'],
       type: $enumDecode(_$QuestionTypeEnumMap, json['field_type']),
-      helperText: json['help_text'] ?? json['helperText'],
+      helperText: json['help_text'],
       placeholder: json['placeholder'],
-      defaultValue: json['default_value'] ?? json['defaultValue'],
+      defaultValue: json['default_value'],
       validation: json['validation'] as Map<String, dynamic>?,
-      isRequired: json['is_required'] as bool? ?? json['isRequired'] as bool? ?? false,
+      isRequired: json['is_required'] as bool? ?? false,
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => FormQuestionOption.fromJson(e as Map<String, dynamic>))
           .toList(),
-      isReadOnly: json['is_read_only'] as bool? ?? json['isReadOnly'] as bool? ?? false,
-      isHidden: json['is_hidden'] as bool? ?? json['isHidden'] as bool? ?? false,
+      isReadOnly: json['is_read_only'] as bool? ?? false,
+      isHidden: json['is_hidden'] as bool? ?? false,
       validationRegex: json['validationRegex'] as String?,
       minLength: (json['minLength'] as num?)?.toInt(),
       maxLength: (json['maxLength'] as num?)?.toInt(),
@@ -49,9 +49,9 @@ _FormQuestion _$FormQuestionFromJson(Map<String, dynamic> json) =>
       disablePastDates: json['disablePastDates'] as bool?,
       disableFutureDates: json['disableFutureDates'] as bool?,
       disableWeekends: json['disableWeekends'] as bool?,
-      conditionalLogic: json['conditional_logic'] as Map<String, dynamic>? ?? json['conditionalLogic'] as Map<String, dynamic>?,
-      actionConfig: json['action_config'] as Map<String, dynamic>? ?? json['actionConfig'] as Map<String, dynamic>?,
-      metadata: json['meta_data'] as Map<String, dynamic>? ?? json['metadata'] as Map<String, dynamic>?,
+      conditionalLogic: json['conditional_logic'] as Map<String, dynamic>?,
+      actionConfig: json['action_config'] as Map<String, dynamic>?,
+      metadata: json['meta_data'] as Map<String, dynamic>?,
       style: json['style'] == null
           ? const QuestionStyle()
           : QuestionStyle.fromJson(json['style'] as Map<String, dynamic>),
@@ -65,11 +65,9 @@ Map<String, dynamic> _$FormQuestionToJson(_FormQuestion instance) =>
       'field_type': _$QuestionTypeEnumMap[instance.type]!,
       'help_text': instance.helperText,
       'default_value': instance.defaultValue,
-      'is_required': instance.isRequired,
       'options': instance.options,
       'is_read_only': instance.isReadOnly,
       'is_hidden': instance.isHidden,
-      'validation': instance.validation,
       'meta_data': instance.metadata,
     };
 

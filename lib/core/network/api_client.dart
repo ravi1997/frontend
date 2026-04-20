@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
@@ -22,7 +23,7 @@ Dio dio(Ref ref) {
       baseUrl: ApiEndpoints.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
-      sendTimeout: const Duration(seconds: 15),
+      sendTimeout: kIsWeb ? Duration.zero : const Duration(seconds: 15),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -38,9 +39,7 @@ Dio dio(Ref ref) {
 
   // Add unified network interceptor (handles retry, error, and envelope parsing)
   dio.interceptors.add(
-    UnifiedNetworkInterceptor(
-      snackbarService: snackbarService,
-    ),
+    UnifiedNetworkInterceptor(snackbarService: snackbarService),
   );
 
   // Add authentication interceptor
