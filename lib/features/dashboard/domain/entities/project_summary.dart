@@ -6,6 +6,7 @@ class ProjectSummary {
   final int forms;
   final int responses;
   final int members;
+  final List<String> collaborators;
   final String? helpText;
   final List<String> tags;
   final String? updatedAt;
@@ -18,12 +19,35 @@ class ProjectSummary {
     this.forms = 0,
     this.responses = 0,
     this.members = 0,
+    this.collaborators = const [],
     this.helpText,
     this.tags = const [],
     this.updatedAt,
   });
 
   factory ProjectSummary.fromJson(Map<String, dynamic> json) {
+    final List<String> extractedMembers = [];
+
+    // 1. Check explicit members/collaborators list
+    final rawMembers = json['members'] ?? json['collaborators'];
+    if (rawMembers is List) {
+      extractedMembers.addAll(rawMembers.map((e) => e.toString()));
+    }
+
+    // 2. Check role-based lists (editors, viewers, submitters)
+    final roleFields = ['editors', 'viewers', 'submitters'];
+    for (final field in roleFields) {
+      final roleList = json[field];
+      if (roleList is List) {
+        for (final item in roleList) {
+          final member = item.toString();
+          if (!extractedMembers.contains(member)) {
+            extractedMembers.add(member);
+          }
+        }
+      }
+    }
+
     return ProjectSummary(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled Project',
@@ -34,7 +58,8 @@ class ProjectSummary {
               json['responses_count'] as num? ??
               0)
           .toInt(),
-      members: (json['members'] is List) ? (json['members'] as List).length : 0,
+      collaborators: extractedMembers,
+      members: extractedMembers.length,
       helpText: json['help_text']?.toString(),
       tags: (json['tags'] is List)
           ? (json['tags'] as List).map((e) => e.toString()).toList()
@@ -52,6 +77,7 @@ class ProjectSummary {
       'forms': forms,
       'responses': responses,
       'members': members,
+      'collaborators': collaborators,
       'help_text': helpText,
       'tags': tags,
       'updated_at': updatedAt,
@@ -66,6 +92,7 @@ class ProjectSummary {
     int? forms,
     int? responses,
     int? members,
+    List<String>? collaborators,
     String? helpText,
     List<String>? tags,
     String? updatedAt,
@@ -78,6 +105,7 @@ class ProjectSummary {
       forms: forms ?? this.forms,
       responses: responses ?? this.responses,
       members: members ?? this.members,
+      collaborators: collaborators ?? this.collaborators,
       helpText: helpText ?? this.helpText,
       tags: tags ?? this.tags,
       updatedAt: updatedAt ?? this.updatedAt,

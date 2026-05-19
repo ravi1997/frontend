@@ -8,6 +8,7 @@ import '../../../../core/network/api_endpoints.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../domain/entities/project_summary.dart';
+import '../../../../core/widgets/error_state_widget.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -78,6 +79,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   forms: 0,
                   responses: 0,
                   members: 1,
+                  collaborators: const [],
                   tags: const [],
                   updatedAt: DateTime.now().toIso8601String(),
                 ),
@@ -229,11 +231,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 responseCount: data.stats.totalResponses,
                               ),
                               loading: () => const _StatsSkeleton(),
-                              error: (error, _) => _ErrorBanner(
-                                error: error.toString(),
-                                onRetry: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .refresh(),
+                              error: (error, _) => Padding(
+                                padding: const EdgeInsets.only(bottom: 24),
+                                child: _ErrorBanner(
+                                  error: error.toString(),
+                                  onRetry: () => ref
+                                      .read(dashboardControllerProvider.notifier)
+                                      .refresh(),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -289,7 +294,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Scaffold(
+          body: ErrorStateWidget(
+            message: 'Failed to load user profile.',
+            error: error.toString(),
+            onRetry: () => ref.refresh(authControllerProvider),
+          ),
+        ),
       ),
     );
   }

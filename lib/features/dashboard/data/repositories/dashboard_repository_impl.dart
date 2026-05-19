@@ -32,23 +32,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     final List<ProjectSummary> projects = projectsJson.map((json) {
       final map = Map<String, dynamic>.from(json as Map);
-      return ProjectSummary(
-        id: map['id']?.toString() ?? map['_id']?.toString() ?? '',
-        title: map['title']?.toString() ?? 'Untitled Project',
-        description: map['description']?.toString() ?? '',
-        status: map['status']?.toString() ?? 'draft',
-        forms: (map['forms'] is List ? (map['forms'] as List).length : 0),
-        responses: (map['response_count'] as num? ??
-                map['responses_count'] as num? ??
-                0)
-            .toInt(),
-        members: (map['members'] is List ? (map['members'] as List).length : 0),
-        helpText: map['help_text']?.toString(),
-        tags: (map['tags'] is List)
-            ? (map['tags'] as List).map((e) => e.toString()).toList()
-            : const [],
-        updatedAt: map['updated_at']?.toString(),
-      );
+      return ProjectSummary.fromJson(map);
     }).toList();
 
     projects.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));

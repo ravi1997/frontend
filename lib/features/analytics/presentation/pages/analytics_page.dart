@@ -7,8 +7,13 @@ import '../../domain/entities/analytics_summary.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   final String formId;
+  final String projectId;
 
-  const AnalyticsPage({super.key, required this.formId});
+  const AnalyticsPage({
+    super.key,
+    required this.formId,
+    required this.projectId,
+  });
 
   @override
   ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
@@ -209,5 +214,4 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       ),
     );
   }
-
 }

@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/widgets/error_state_widget.dart';
 
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../domain/entities/project_summary.dart';
 
 class ProjectDashboardPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -25,6 +27,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
   List<dynamic> _forms = const [];
   bool _loading = true;
   bool _formsLoading = true;
+  bool _memberDataMismatch = false;
   String? _error;
   String? _formsError;
 
@@ -52,13 +55,20 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
       final api = ref.read(apiClientProvider);
       final response = await api.get(ApiEndpoints.getProject(widget.projectId));
       final data = response.data;
+      Map<String, dynamic> projectData;
       if (data is Map<String, dynamic>) {
-        _project = data;
+        projectData = data;
       } else if (data is Map) {
-        _project = Map<String, dynamic>.from(data);
+        projectData = Map<String, dynamic>.from(data);
       } else {
-        _project = {};
+        projectData = {};
       }
+
+      _project = projectData;
+
+      // Sanity check for member data shape
+      final rawMembers = projectData['members'] ?? projectData['collaborators'];
+      _memberDataMismatch = rawMembers != null && rawMembers is! List;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -153,25 +163,9 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
   }
 
   List<String> _extractProjectMembers() {
-    final raw = _project?['members'];
-    if (raw is List) {
-      return raw.map((e) => e.toString()).toList();
-    }
-
-    final candidates = <dynamic>[
-      _project?['editors'],
-      _project?['viewers'],
-      _project?['submitters'],
-    ];
-    final members = <String>{};
-    for (final candidate in candidates) {
-      if (candidate is List) {
-        for (final item in candidate) {
-          members.add(item.toString());
-        }
-      }
-    }
-    return members.toList();
+    if (_project == null) return [];
+    final summary = ProjectSummary.fromJson(_project!);
+    return summary.collaborators;
   }
 
   Future<void> _editProject() async {
@@ -601,10 +595,14 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-            ? _ErrorState(
-                error: _error!,
-                onBack: () => context.pop(),
-                onRetry: _loadProject,
+            ? Scaffold(
+                body: ErrorStateWidget(
+                  title: 'Failed to load project',
+                  message: 'We couldn\'t load the project details from the server.',
+                  error: _error!,
+                  onBack: () => context.pop(),
+                  onRetry: _loadProject,
+                ),
               )
             : SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -920,6 +918,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                               ),
                               _MembersTab(
                                 members: _extractProjectMembers(),
+                                hasMismatch: _memberDataMismatch,
                                 onInvite: _inviteMember,
                                 onManageAccess: _manageAccess,
                                 onCopyShareLink: _copyShareLink,
@@ -1038,12 +1037,14 @@ class _FormsTab extends StatelessWidget {
 
 class _MembersTab extends StatelessWidget {
   final List<String> members;
+  final bool hasMismatch;
   final VoidCallback onInvite;
   final VoidCallback onManageAccess;
   final VoidCallback onCopyShareLink;
 
   const _MembersTab({
     required this.members,
+    this.hasMismatch = false,
     required this.onInvite,
     required this.onManageAccess,
     required this.onCopyShareLink,
@@ -1080,9 +1081,39 @@ class _MembersTab extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
+              if (hasMismatch)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded,
+                          color: Colors.amber.shade800, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'The collaborator data from the API has an unexpected format. Showing a simplified view.',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (members.isEmpty)
-                const Text(
-                  'No collaborators found yet. Invite teammates to start managing this project together.',
+                Text(
+                  'No collaborators found yet. Teammates added here will be able to edit or view this project.',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF64748B),
+                    fontSize: 14,
+                  ),
                 )
               else
                 Wrap(
@@ -1954,53 +1985,4 @@ class _RecentFormTile extends StatelessWidget {
   }
 }
 
-class _ErrorState extends StatelessWidget {
-  final String error;
-  final VoidCallback onBack;
-  final VoidCallback onRetry;
-
-  const _ErrorState({
-    required this.error,
-    required this.onBack,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Could not load project',
-              style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              error,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: const Color(0xFF64748B),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              children: [
-                OutlinedButton(onPressed: onBack, child: const Text('Back')),
-                FilledButton(onPressed: onRetry, child: const Text('Retry')),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// _ErrorState was replaced by global ErrorStateWidget
