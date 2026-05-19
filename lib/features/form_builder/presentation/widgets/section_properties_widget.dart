@@ -61,12 +61,14 @@ class _SectionPropertiesWidgetState
 
         if (section == null) return const SizedBox();
 
+        final activeSection = section;
+
         final locale = state.editingLocale;
-        final translatedTitle = section.title.translate(locale);
+        final translatedTitle = activeSection.title.translate(locale);
         if (_titleController.text != translatedTitle) {
           _titleController.text = translatedTitle;
         }
-        final translatedDescription = section.description.translate(locale);
+        final translatedDescription = activeSection.description.translate(locale);
         if (_descriptionController.text != translatedDescription) {
           _descriptionController.text = translatedDescription;
         }
@@ -152,9 +154,16 @@ class _SectionPropertiesWidgetState
                         child: SectionGeneralSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,
-                          section: section,
+                          section: activeSection,
                           titleController: _titleController,
                           descriptionController: _descriptionController,
+                          onSectionChanged: (updatedSection) => ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .updateSection(updatedSection),
                         ),
                       ),
                       SingleChildScrollView(
@@ -162,7 +171,14 @@ class _SectionPropertiesWidgetState
                         child: SectionLayoutSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,
-                          section: section,
+                          section: activeSection,
+                          onSectionChanged: (updatedSection) => ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .updateSection(updatedSection),
                         ),
                       ),
                       SingleChildScrollView(
@@ -170,7 +186,14 @@ class _SectionPropertiesWidgetState
                         child: SectionStyleSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,
-                          section: section,
+                          section: activeSection,
+                          onSectionChanged: (updatedSection) => ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .updateSection(updatedSection),
                         ),
                       ),
                       SingleChildScrollView(
@@ -178,8 +201,15 @@ class _SectionPropertiesWidgetState
                         child: SectionLogicSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,
-                          section: section,
+                          section: activeSection,
                           allSections: state.form.sections,
+                          onSectionChanged: (updatedSection) => ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .updateSection(updatedSection),
                         ),
                       ),
                     ],

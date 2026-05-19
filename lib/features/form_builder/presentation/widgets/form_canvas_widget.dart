@@ -170,12 +170,15 @@ class FormCanvasWidget extends ConsumerWidget {
                                   final sectionWidget = SizedBox(
                                     width: itemWidth,
                                     child: SectionWidget(
+                                      controllerKey: controllerKey,
                                       projectId: projectId,
                                       formId: formId,
                                       section: section,
                                       sectionIndex: index,
                                       selectedQuestionId:
                                           state.selectedQuestionId,
+                                      selectedQuestionIds:
+                                          state.selectedQuestionIds,
                                       selectedSectionId:
                                           state.selectedSectionId,
                                       locale: state.editingLocale,
@@ -190,7 +193,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                       ref
                                           .read(
                                             formBuilderControllerProvider(
-                                              formId,
+                                              controllerKey,
                                             ).notifier,
                                           )
                                           .reorderSections(

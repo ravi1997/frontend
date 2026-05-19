@@ -3,31 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
-import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
 
 class SectionStyleSettings extends ConsumerWidget {
   final String projectId;
   final String formId;
   final FormSection section;
+  final ValueChanged<FormSection> onSectionChanged;
 
   const SectionStyleSettings({
     super.key,
     required this.projectId,
     required this.formId,
     required this.section,
+    required this.onSectionChanged,
   });
 
-  void _updateStyle(WidgetRef ref, SectionStyle newStyle) {
-    ref
-        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-        .updateSection(section.copyWith(style: newStyle));
+  void _updateStyle(SectionStyle newStyle) {
+    onSectionChanged(section.copyWith(style: newStyle));
   }
 
-  void _updateMetadata(WidgetRef ref, String key, dynamic value) {
-    ref
-        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-        .updateSectionMetadata(section.id, {key: value});
+  void _updateMetadata(String key, dynamic value) {
+    onSectionChanged(
+      section.copyWith(metaData: {...section.metaData, key: value}),
+    );
   }
 
   @override
@@ -55,10 +54,9 @@ class SectionStyleSettings extends ConsumerWidget {
                   PropertyBuilderUtils.buildColorPicker(
                     label: 'Background Color',
                     value: section.style.backgroundColor,
-                    onChanged: (val) => _updateStyle(
-                      ref,
-                      section.style.copyWith(backgroundColor: val),
-                    ),
+                    showHexInput: false,
+                    onChanged: (val) =>
+                        _updateStyle(section.style.copyWith(backgroundColor: val)),
                   ),
                   const SizedBox(height: 12),
                   PropertyBuilderUtils.buildNumberSlider(
@@ -66,10 +64,8 @@ class SectionStyleSettings extends ConsumerWidget {
                     value: section.style.borderRadius,
                     min: 0,
                     max: 40,
-                    onChanged: (val) => _updateStyle(
-                      ref,
-                      section.style.copyWith(borderRadius: val),
-                    ),
+                    onChanged: (val) =>
+                        _updateStyle(section.style.copyWith(borderRadius: val)),
                   ),
                   const SizedBox(height: 12),
                   PropertyBuilderUtils.buildNumberSlider(
@@ -77,17 +73,15 @@ class SectionStyleSettings extends ConsumerWidget {
                     value: section.style.elevation,
                     min: 0,
                     max: 12,
-                    onChanged: (val) => _updateStyle(
-                      ref,
-                      section.style.copyWith(elevation: val),
-                    ),
+                    onChanged: (val) =>
+                        _updateStyle(section.style.copyWith(elevation: val)),
                   ),
                   if (section.style.elevation > 0)
                     PropertyBuilderUtils.buildColorPicker(
                       label: 'Shadow Color',
                       value: metadata['shadowColor'] ?? '#000000',
-                      onChanged: (val) =>
-                          _updateMetadata(ref, 'shadowColor', val),
+                      showHexInput: false,
+                      onChanged: (val) => _updateMetadata('shadowColor', val),
                     ),
                 ],
               ),
@@ -111,18 +105,16 @@ class SectionStyleSettings extends ConsumerWidget {
                   PropertyBuilderUtils.buildSwitch(
                     label: 'Show Header',
                     value: section.style.showHeader,
-                    onChanged: (val) => _updateStyle(
-                      ref,
-                      section.style.copyWith(showHeader: val),
-                    ),
+                    onChanged: (val) =>
+                        _updateStyle(section.style.copyWith(showHeader: val)),
                   ),
                   if (section.style.showHeader) ...[
                     const SizedBox(height: 12),
                     PropertyBuilderUtils.buildColorPicker(
                       label: 'Header Background',
                       value: section.style.headerBackgroundColor,
+                      showHexInput: false,
                       onChanged: (val) => _updateStyle(
-                        ref,
                         section.style.copyWith(headerBackgroundColor: val),
                       ),
                     ),
@@ -163,8 +155,8 @@ class SectionStyleSettings extends ConsumerWidget {
                   PropertyBuilderUtils.buildColorPicker(
                     label: 'Border Color',
                     value: metadata['borderColor'] ?? '#E0E0E0',
-                    onChanged: (val) =>
-                        _updateMetadata(ref, 'borderColor', val),
+                    showHexInput: false,
+                    onChanged: (val) => _updateMetadata('borderColor', val),
                   ),
                   const SizedBox(height: 12),
                   PropertyBuilderUtils.buildNumberSlider(
@@ -172,8 +164,7 @@ class SectionStyleSettings extends ConsumerWidget {
                     value: (metadata['borderWidth'] ?? 1.0).toDouble(),
                     min: 0,
                     max: 10,
-                    onChanged: (val) =>
-                        _updateMetadata(ref, 'borderWidth', val),
+                    onChanged: (val) => _updateMetadata('borderWidth', val),
                   ),
                   const SizedBox(height: 12),
                   PropertyBuilderUtils.buildDropdown<String>(
@@ -184,8 +175,7 @@ class SectionStyleSettings extends ConsumerWidget {
                       DropdownMenuItem(value: 'dashed', child: Text('Dashed')),
                       DropdownMenuItem(value: 'dotted', child: Text('Dotted')),
                     ],
-                    onChanged: (val) =>
-                        _updateMetadata(ref, 'borderStyle', val),
+                    onChanged: (val) => _updateMetadata('borderStyle', val),
                   ),
                 ],
               ),
@@ -222,8 +212,7 @@ class SectionStyleSettings extends ConsumerWidget {
                 value: (metadata['${keyPrefix}Size'] ?? 16.0).toDouble(),
                 min: 10,
                 max: 48,
-                onChanged: (val) =>
-                    _updateMetadata(ref, '${keyPrefix}Size', val),
+                onChanged: (val) => _updateMetadata('${keyPrefix}Size', val),
               ),
             ),
           ],
@@ -235,8 +224,8 @@ class SectionStyleSettings extends ConsumerWidget {
               child: PropertyBuilderUtils.buildColorPicker(
                 label: 'Color',
                 value: metadata['${keyPrefix}Color'] ?? '#212121',
-                onChanged: (val) =>
-                    _updateMetadata(ref, '${keyPrefix}Color', val),
+                showHexInput: false,
+                onChanged: (val) => _updateMetadata('${keyPrefix}Color', val),
               ),
             ),
           ],
@@ -250,7 +239,7 @@ class SectionStyleSettings extends ConsumerWidget {
             DropdownMenuItem(value: 'medium', child: Text('Medium')),
             DropdownMenuItem(value: 'bold', child: Text('Bold')),
           ],
-          onChanged: (val) => _updateMetadata(ref, '${keyPrefix}Weight', val),
+          onChanged: (val) => _updateMetadata('${keyPrefix}Weight', val),
         ),
       ],
     );

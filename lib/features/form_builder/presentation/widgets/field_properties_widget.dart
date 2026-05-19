@@ -168,57 +168,73 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                 // Header
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    alignment: WrapAlignment.spaceBetween,
                     children: [
-                      const Icon(
-                        FontAwesomeIcons.sliders,
-                        size: 16,
-                        color: AppColors.textGrey,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Field Properties',
-                        style: TextStyle(
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(customFieldsProvider.notifier)
-                              .saveAsTemplate(
-                                question!.label.translate(state.editingLocale),
-                                'My Fields',
-                                question,
-                              );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Field saved as template!'),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            FontAwesomeIcons.sliders,
+                            size: 16,
+                            color: AppColors.textGrey,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Field Properties',
+                            style: TextStyle(
+                              color: AppColors.textDark,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.star_border, size: 16),
-                        label: const Text(
-                          'Save Template',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: AppColors.textGrey,
-                          size: 20,
-                        ),
-                        onPressed: () => ref
-                            .read(
-                              formBuilderControllerProvider(
-                                widget.controllerKey,
-                              ).notifier,
-                            )
-                            .selectQuestion(null, null),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () {
+                              ref
+                                  .read(customFieldsProvider.notifier)
+                                  .saveAsTemplate(
+                                    question!.label.translate(
+                                      state.editingLocale,
+                                    ),
+                                    'My Fields',
+                                    question,
+                                  );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Field saved as template!'),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.star_border, size: 16),
+                            label: const Text(
+                              'Save Template',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.close,
+                              color: AppColors.textGrey,
+                              size: 20,
+                            ),
+                            onPressed: () => ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.controllerKey,
+                                  ).notifier,
+                                )
+                                .selectQuestion(null, null),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -257,7 +273,8 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       // General Tab
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
-                        child: FieldGeneralSettings(
+                      child: FieldGeneralSettings(
+                          controllerKey: widget.controllerKey,
                           projectId: widget.projectId,
                           formId: widget.formId,
                           question: question,
@@ -281,7 +298,8 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       // Validation Tab
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
-                        child: FieldValidationSettings(
+                      child: FieldValidationSettings(
+                          controllerKey: widget.controllerKey,
                           formId: widget.formId,
                           question: question,
                           regexController: _regexController,

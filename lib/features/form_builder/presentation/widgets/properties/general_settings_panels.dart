@@ -69,6 +69,7 @@ class SectionGeneralSettings extends ConsumerStatefulWidget {
   final FormSection section;
   final TextEditingController titleController;
   final TextEditingController descriptionController;
+  final ValueChanged<FormSection> onSectionChanged;
 
   const SectionGeneralSettings({
     super.key,
@@ -77,6 +78,7 @@ class SectionGeneralSettings extends ConsumerStatefulWidget {
     required this.section,
     required this.titleController,
     required this.descriptionController,
+    required this.onSectionChanged,
   });
 
   @override
@@ -119,23 +121,15 @@ class _SectionGeneralSettingsState
   }
 
   void _updateSection(FormSection updatedSection) {
-    ref
-        .read(
-          formBuilderControllerProvider(
-            '${widget.projectId}::${widget.formId}',
-          ).notifier,
-        )
-        .updateSection(updatedSection);
+    widget.onSectionChanged(updatedSection);
   }
 
   void _updateMetadata(String key, dynamic value) {
-    ref
-        .read(
-          formBuilderControllerProvider(
-            '${widget.projectId}::${widget.formId}',
-          ).notifier,
-        )
-        .updateSectionMetadata(widget.section.id, {key: value});
+    widget.onSectionChanged(
+      widget.section.copyWith(
+        metaData: {...widget.section.metaData, key: value},
+      ),
+    );
   }
 
   @override
@@ -148,13 +142,7 @@ class _SectionGeneralSettingsState
           label: 'Section Title',
           controller: _titleController,
           onChanged: (val) {
-            ref
-                .read(
-                  formBuilderControllerProvider(
-                    '${widget.projectId}::${widget.formId}',
-                  ).notifier,
-                )
-                .updateSectionTitle(widget.section.id, val);
+            widget.onSectionChanged(widget.section.copyWith(title: val));
           },
         ),
         const SizedBox(height: 20),
@@ -163,13 +151,7 @@ class _SectionGeneralSettingsState
           placeholder: 'Section description (optional)',
           controller: _descriptionController,
           onChanged: (val) {
-            ref
-                .read(
-                  formBuilderControllerProvider(
-                    '${widget.projectId}::${widget.formId}',
-                  ).notifier,
-                )
-                .updateSectionDescription(widget.section.id, val);
+            widget.onSectionChanged(widget.section.copyWith(description: val));
           },
         ),
         const SizedBox(height: 24),
@@ -189,6 +171,77 @@ class _SectionGeneralSettingsState
           onChanged: (val) =>
               _updateSection(widget.section.copyWith(isHidden: val)),
         ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Repeatable Section',
+          description: 'Allow users to add multiple copies of this section.',
+          value: widget.section.isRepeatable,
+          onChanged: (val) => _updateSection(
+            widget.section.copyWith(
+              isRepeatable: val,
+              repeatMin: val ? (widget.section.repeatMin ?? 1) : null,
+              repeatMax: val ? widget.section.repeatMax : null,
+            ),
+          ),
+        ),
+        if (widget.section.isRepeatable) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  initialValue: (widget.section.repeatMin ?? 1).toString(),
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Minimum repeats',
+                    labelStyle: TextStyle(color: AppColors.textDark),
+                    filled: true,
+                    fillColor: AppColors.builderElement,
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.borderLight),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  style: const TextStyle(color: AppColors.textDark),
+                  onChanged: (val) => _updateSection(
+                    widget.section.copyWith(repeatMin: int.tryParse(val) ?? 1),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  initialValue: widget.section.repeatMax?.toString() ?? '',
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Maximum repeats',
+                    hintText: 'Unlimited',
+                    labelStyle: TextStyle(color: AppColors.textDark),
+                    hintStyle: TextStyle(color: AppColors.textGrey),
+                    filled: true,
+                    fillColor: AppColors.builderElement,
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.borderLight),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  style: const TextStyle(color: AppColors.textDark),
+                  onChanged: (val) => _updateSection(
+                    widget.section.copyWith(
+                      repeatMax: val.trim().isEmpty ? null : int.tryParse(val),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildSwitch(
           label: 'Allow Collapsing',

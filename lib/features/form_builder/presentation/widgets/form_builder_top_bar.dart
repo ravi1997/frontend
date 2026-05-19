@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
+import '../../domain/entities/form_section.dart';
 import '../controllers/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
 
@@ -12,7 +14,7 @@ import 'publish_success_dialog.dart';
 
 class FormBuilderTopBar extends ConsumerWidget {
   final String controllerKey;
-  final String? projectId;
+  final String projectId;
   final String formId;
   final String? mode;
 
@@ -41,6 +43,21 @@ class FormBuilderTopBar extends ConsumerWidget {
       formBuilderControllerProvider(
         controllerKey,
       ).select((state) => state.value?.isSaving ?? false),
+    );
+    final isDirty = ref.watch(
+      formBuilderControllerProvider(
+        controllerKey,
+      ).select((state) => state.value?.isDirty ?? false),
+    );
+    final canUndo = ref.watch(
+      formBuilderControllerProvider(
+        controllerKey,
+      ).select((state) => state.value?.canUndo ?? false),
+    );
+    final canRedo = ref.watch(
+      formBuilderControllerProvider(
+        controllerKey,
+      ).select((state) => state.value?.canRedo ?? false),
     );
     final editingLocale = ref.watch(
       formBuilderControllerProvider(
@@ -88,7 +105,9 @@ class FormBuilderTopBar extends ConsumerWidget {
                 children: [
                   InkWell(
                     onTap: () => ref
-                        .read(formBuilderControllerProvider(controllerKey).notifier)
+                        .read(
+                          formBuilderControllerProvider(controllerKey).notifier,
+                        )
                         .selectForm(),
                     child: Text(
                       formTitle.translate(editingLocale),
@@ -125,14 +144,6 @@ class FormBuilderTopBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           _TopBarActionButton(
-            icon: FontAwesomeIcons.users,
-            label: 'Access',
-            onTap: () {
-              context.push('/forms/$formId/access');
-            },
-          ),
-          const SizedBox(width: 8),
-          _TopBarActionButton(
             icon: FontAwesomeIcons.eye,
             label: 'Preview',
             onTap: () {
@@ -148,53 +159,61 @@ class FormBuilderTopBar extends ConsumerWidget {
             },
           ),
           const SizedBox(width: 8),
-          _TopBarActionButton(
-            icon: FontAwesomeIcons.chartLine,
-            label: 'Analytics',
-            onTap: () {
-              context.push('/forms/$formId/analysis-builder');
-            },
-          ),
-          const SizedBox(width: 8),
-          _TopBarActionButton(
-            icon: FontAwesomeIcons.clockRotateLeft,
-            label: 'History',
-            onTap: () async {
-              await context.push(
-                '/forms/$formId/versions?title=${formTitle.translate('en')}${projectId != null ? '&projectId=$projectId' : ''}',
-              );
-              ref.invalidate(formBuilderControllerProvider(controllerKey));
-            },
-          ),
-          const SizedBox(width: 8),
-          _TopBarActionButton(
-            icon: Icons.translate,
-            label: 'Translate',
-            onTap: () {
-              context.push('/forms/$formId/translate');
-            },
-          ),
-          const SizedBox(width: 8),
-          _TopBarActionButton(
-            icon: FontAwesomeIcons.shareNodes,
-            label: 'Workflows',
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (context) => WorkflowConfigurationDialog(
-                  initialWorkflows: workflows,
-                  sections: sections,
-                  locale: editingLocale,
-                  onSave: (config) {
-                    ref
-                        .read(formBuilderControllerProvider(controllerKey).notifier)
-                        .updateWorkflows(config);
-                  },
-                ),
-              );
-            },
+          _TopBarOverflowMenu(
+            projectId: projectId,
+            formId: formId,
+            controllerKey: controllerKey,
+            formTitle: formTitle.translate('en'),
+            workflows: workflows,
+            sections: sections,
+            editingLocale: editingLocale,
           ),
           const SizedBox(width: 16),
+          if (isDirty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: Colors.orange.withValues(alpha: 0.35),
+                ),
+              ),
+              child: const Text(
+                'Unsaved changes',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            TextButton.icon(
+              onPressed: canUndo
+                  ? () => ref
+                      .read(
+                        formBuilderControllerProvider(controllerKey).notifier,
+                      )
+                      .undo()
+                  : null,
+              icon: const Icon(Icons.undo, size: 18),
+              label: const Text('Undo'),
+            ),
+            const SizedBox(width: 4),
+            TextButton.icon(
+              onPressed: canRedo
+                  ? () => ref
+                      .read(
+                        formBuilderControllerProvider(controllerKey).notifier,
+                      )
+                      .redo()
+                  : null,
+              icon: const Icon(Icons.redo, size: 18),
+              label: const Text('Redo'),
+            ),
+            const SizedBox(width: 8),
+          ],
           _SaveButton(
             controllerKey: controllerKey,
             formId: formId,
@@ -339,6 +358,121 @@ class _TopBarActionButton extends StatelessWidget {
   }
 }
 
+class _TopBarOverflowMenu extends ConsumerWidget {
+  final String projectId;
+  final String formId;
+  final String controllerKey;
+  final String formTitle;
+  final Map<String, dynamic> workflows;
+  final List<FormSection> sections;
+  final String editingLocale;
+
+  const _TopBarOverflowMenu({
+    required this.projectId,
+    required this.formId,
+    required this.controllerKey,
+    required this.formTitle,
+    required this.workflows,
+    required this.sections,
+    required this.editingLocale,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PopupMenuButton<String>(
+      tooltip: 'More actions',
+      icon: const Icon(Icons.more_horiz, color: AppColors.textGrey),
+      onSelected: (value) {
+        switch (value) {
+          case 'access':
+            context.push('/projects/$projectId/forms/$formId/access');
+            break;
+          case 'analytics':
+            context.push('/projects/$projectId/forms/$formId/analysis-builder');
+            break;
+          case 'history':
+            context.push(
+              '/projects/$projectId/forms/$formId/versions?title=${Uri.encodeComponent(formTitle)}&projectId=$projectId',
+            );
+            break;
+          case 'translate':
+            context.push('/projects/$projectId/forms/$formId/translate');
+            break;
+          case 'workflows':
+            showDialog(
+              context: context,
+              builder: (context) => WorkflowConfigurationDialog(
+                initialWorkflows: workflows,
+                sections: sections,
+                locale: editingLocale,
+                onSave: (config) {
+                  ref
+                      .read(
+                        formBuilderControllerProvider(controllerKey).notifier,
+                      )
+                      .updateWorkflows(config);
+                },
+              ),
+            );
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'access',
+          child: Row(
+            children: [
+              Icon(FontAwesomeIcons.users, size: 16),
+              SizedBox(width: 10),
+              Text('Access'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'analytics',
+          child: Row(
+            children: [
+              Icon(FontAwesomeIcons.chartLine, size: 16),
+              SizedBox(width: 10),
+              Text('Analytics'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'history',
+          child: Row(
+            children: [
+              Icon(FontAwesomeIcons.clockRotateLeft, size: 16),
+              SizedBox(width: 10),
+              Text('History'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'translate',
+          child: Row(
+            children: [
+              Icon(Icons.translate, size: 16),
+              SizedBox(width: 10),
+              Text('Translate'),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'workflows',
+          child: Row(
+            children: [
+              Icon(FontAwesomeIcons.shareNodes, size: 16),
+              SizedBox(width: 10),
+              Text('Workflows'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _SaveButton extends ConsumerWidget {
   final String controllerKey;
   final String formId;
@@ -356,6 +490,8 @@ class _SaveButton extends ConsumerWidget {
     String type = 'patch',
   }) async {
     final wasNew = formId == 'new';
+
+    Logger().i('controllerKey: $controllerKey');
 
     final success = await ref
         .read(formBuilderControllerProvider(controllerKey).notifier)

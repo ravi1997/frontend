@@ -6,16 +6,23 @@ import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../controllers/custom_fields_controller.dart';
+import '../controllers/form_builder_controller.dart';
 import '../../domain/services/field_registry.dart';
-import 'ai_assistant_dialog.dart'; // Added import
+import 'ai_assistant_dialog.dart';
 
 class FieldLibraryWidget extends ConsumerStatefulWidget {
-  final String formId; // Added formId
+  /// The controller key used by [FormBuilderController]. This is either just
+  /// the formId (when there is no project context) or "projectId::formId".
+  final String controllerKey;
+
+  /// The plain formId, used only for the AI Assistant dialog.
+  final String formId;
 
   const FieldLibraryWidget({
     super.key,
+    required this.controllerKey,
     required this.formId,
-  }); // Modified constructor
+  });
 
   @override
   ConsumerState<FieldLibraryWidget> createState() => _FieldLibraryWidgetState();
@@ -56,6 +63,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       'amount',
       'numeric',
     ],
+    QuestionType.password: ['secret', 'masked', 'login', 'credential'],
     QuestionType.email: ['mail', 'address'],
     QuestionType.mobile: [
       'phone',
@@ -65,6 +73,8 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       'contact',
       'call',
     ],
+    QuestionType.tel: ['telephone', 'landline', 'phone'],
+    QuestionType.calculate: ['calc', 'formula', 'computed', 'derived'],
     QuestionType.url: ['link', 'website', 'address', 'http', 'https'],
     QuestionType.dropdown: [
       'select',
@@ -81,6 +91,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       'box',
       'multi-select',
     ],
+    QuestionType.multiSelect: ['multi select', 'multi-select', 'tags'],
     QuestionType.multipleChoice: ['radio', 'option', 'single selection'],
     QuestionType.date: [
       'calendar',
@@ -100,13 +111,48 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       'upload',
       'file',
     ],
+    QuestionType.multiFileUpload: ['multiple files', 'attachments', 'bulk upload'],
+    QuestionType.filePicker: ['file picker', 'browse files'],
+    QuestionType.fileList: ['uploaded files', 'file list'],
     QuestionType.rating: ['star', 'rate', 'score', 'feedback'],
     QuestionType.signature: ['sign', 'draw', 'handwriting', 'approve'],
+    QuestionType.signaturePad: ['signature pad', 'draw signature'],
     QuestionType.slider: ['range', 'volume', 'level', 'adjust'],
     QuestionType.image: ['photo', 'picture', 'gallery', 'camera'],
+    QuestionType.imageGallery: ['gallery', 'image gallery', 'album'],
     QuestionType.divider: ['line', 'separator', 'break', 'horizontal'],
     QuestionType.spacer: ['empty', 'gap', 'margin', 'padding'],
     QuestionType.matrixChoice: ['grid', 'table', 'multiple', 'rows', 'columns'],
+    QuestionType.mapLocation: ['map', 'location', 'geo', 'gps'],
+    QuestionType.address: ['address', 'street', 'city', 'zip'],
+    QuestionType.addressLookup: ['places', 'autocomplete', 'address search'],
+    QuestionType.otp: ['otp', 'code', 'verification'],
+    QuestionType.richText: ['rich text', 'formatted text', 'editor'],
+    QuestionType.markdownEditor: ['markdown', 'md', 'editor'],
+    QuestionType.booleanValue: ['boolean', 'yes no', 'toggle'],
+    QuestionType.calculated: ['calculated', 'derived', 'formula'],
+    QuestionType.customField: ['custom', 'plugin', 'extension'],
+    QuestionType.colorPicker: ['color', 'palette', 'picker'],
+    QuestionType.range: ['range', 'interval'],
+    QuestionType.dateRange: ['date range', 'period'],
+    QuestionType.timeRange: ['time range', 'hours range'],
+    QuestionType.stepper: ['stepper', 'wizard', 'steps'],
+    QuestionType.countrySelect: ['country', 'nation'],
+    QuestionType.stateSelect: ['state', 'province'],
+    QuestionType.citySelect: ['city', 'town'],
+    QuestionType.socialMediaHandle: ['handle', 'username', 'social'],
+    QuestionType.websiteUrl: ['website', 'url', 'web'],
+    QuestionType.phoneNumber: ['phone number', 'phone', 'tel'],
+    QuestionType.captcha: ['captcha', 'robot', 'verification'],
+    QuestionType.unitSelect: ['unit', 'kg', 'lb', 'measure'],
+    QuestionType.price: ['price', 'currency', 'cost'],
+    QuestionType.age: ['age', 'years'],
+    QuestionType.toggle: ['toggle', 'switch', 'on off'],
+    QuestionType.multiCheckbox: ['multi checkbox', 'multi check'],
+    QuestionType.emailList: ['email list', 'multiple emails'],
+    QuestionType.qrCodeScan: ['qr', 'scan', 'barcode'],
+    QuestionType.search: ['search', 'find', 'lookup'],
+    QuestionType.file: ['generic file', 'attachment'],
   };
 
   bool _matchesSearch(QuestionType type, String query) {
@@ -134,26 +180,68 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
         QuestionType.shortText,
         QuestionType.paragraph,
         QuestionType.number,
+        QuestionType.password,
         QuestionType.email,
         QuestionType.mobile,
+        QuestionType.tel,
         QuestionType.url,
+        QuestionType.phoneNumber,
       ],
       'Advanced Fields': [
         QuestionType.dropdown,
         QuestionType.checkboxes,
+        QuestionType.multiSelect,
         QuestionType.multipleChoice,
         QuestionType.date,
         QuestionType.time,
+        QuestionType.dateRange,
+        QuestionType.timeRange,
         QuestionType.rating,
         QuestionType.matrixChoice,
         QuestionType.slider,
+        QuestionType.calculate,
+        QuestionType.calculated,
+        QuestionType.otp,
+        QuestionType.richText,
+        QuestionType.markdownEditor,
+        QuestionType.booleanValue,
       ],
       'Media & Input': [
         QuestionType.fileUpload,
+        QuestionType.multiFileUpload,
+        QuestionType.filePicker,
+        QuestionType.fileList,
         QuestionType.image,
+        QuestionType.imageGallery,
         QuestionType.signature,
+        QuestionType.signaturePad,
+        QuestionType.mapLocation,
+        QuestionType.address,
+        QuestionType.addressLookup,
       ],
-      'Layout Elements': [QuestionType.divider, QuestionType.spacer],
+      'Layout Elements': [
+        QuestionType.divider,
+        QuestionType.spacer,
+        QuestionType.customField,
+        QuestionType.colorPicker,
+        QuestionType.range,
+        QuestionType.stepper,
+        QuestionType.countrySelect,
+        QuestionType.stateSelect,
+        QuestionType.citySelect,
+        QuestionType.socialMediaHandle,
+        QuestionType.websiteUrl,
+        QuestionType.captcha,
+        QuestionType.unitSelect,
+        QuestionType.price,
+        QuestionType.age,
+        QuestionType.toggle,
+        QuestionType.multiCheckbox,
+        QuestionType.emailList,
+        QuestionType.qrCodeScan,
+        QuestionType.search,
+        QuestionType.file,
+      ],
     };
 
     final systemTemplates = customFields
@@ -513,6 +601,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
   }
 
   Widget _buildFieldButton(BuildContext context, QuestionType type) {
+    final card = _FieldButtonCard(type: type, width: 105);
     return Draggable<Object>(
       data: type,
       feedback: Material(
@@ -522,7 +611,19 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
           child: _FieldButtonCard(type: type, width: 110),
         ),
       ),
-      child: _FieldButtonCard(type: type, width: 105),
+      // InkWell on the child (non-dragging) triggers the insert action.
+      // Dragging still works — the drag starts before the tap gesture fires.
+      child: InkWell(
+        onTap: () {
+          ref
+              .read(
+                formBuilderControllerProvider(widget.controllerKey).notifier,
+              )
+              .addQuestionToActiveSection(type);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: card,
+      ),
     );
   }
 
@@ -544,6 +645,20 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       }
     }
 
+    final iconOverride = template.template_type == 'workflow'
+        ? Icons.account_tree_outlined
+        : (template.template_type == 'section'
+              ? Icons.dashboard_customize
+              : null);
+
+    final card = _FieldButtonCard(
+      type: type,
+      label: template.name,
+      width: 105,
+      isCustom: true,
+      iconOverride: iconOverride,
+    );
+
     return Draggable<Object>(
       data: template,
       feedback: Material(
@@ -555,24 +670,21 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
             label: template.name,
             width: 110,
             isCustom: true,
-            iconOverride: template.template_type == 'workflow'
-                ? Icons.account_tree_outlined
-                : (template.template_type == 'section'
-                      ? Icons.dashboard_customize
-                      : null),
+            iconOverride: iconOverride,
           ),
         ),
       ),
-      child: _FieldButtonCard(
-        type: type,
-        label: template.name,
-        width: 105,
-        isCustom: true,
-        iconOverride: template.template_type == 'workflow'
-            ? Icons.account_tree_outlined
-            : (template.template_type == 'section'
-                  ? Icons.dashboard_customize
-                  : null),
+      // InkWell on the child triggers the insert action on tap.
+      child: InkWell(
+        onTap: () {
+          ref
+              .read(
+                formBuilderControllerProvider(widget.controllerKey).notifier,
+              )
+              .addTemplateToActiveSection(template);
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: card,
       ),
     );
   }

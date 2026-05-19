@@ -11,26 +11,80 @@ import 'builder_field_widget.dart';
 import 'form_drag_data.dart';
 
 class SectionWidget extends ConsumerWidget {
+  final String controllerKey;
   final String projectId;
   final String formId;
   final FormSection section;
   final int sectionIndex;
   final String? selectedQuestionId;
+  final List<String> selectedQuestionIds;
   final String? selectedSectionId;
   final String locale;
   final String? mode;
 
   const SectionWidget({
     super.key,
+    required this.controllerKey,
     required this.projectId,
     required this.formId,
     required this.section,
     required this.sectionIndex,
     required this.selectedQuestionId,
+    required this.selectedQuestionIds,
     required this.selectedSectionId,
     required this.locale,
     this.mode,
   });
+
+  int _sectionCrossAxisCount(SectionLayoutType layout, int gridColumns) {
+    switch (layout) {
+      case SectionLayoutType.grid:
+        return gridColumns;
+      case SectionLayoutType.threeColumns:
+        return 3;
+      case SectionLayoutType.fullWidth:
+      case SectionLayoutType.list:
+      case SectionLayoutType.sidebar:
+      case SectionLayoutType.custom:
+      case SectionLayoutType.overlay:
+      case SectionLayoutType.dashboard:
+      case SectionLayoutType.centered:
+      case SectionLayoutType.wizard:
+      case SectionLayoutType.masonry:
+      case SectionLayoutType.fixed:
+      case SectionLayoutType.standard:
+      case SectionLayoutType.accordion:
+      case SectionLayoutType.tabbed:
+      case SectionLayoutType.card:
+        return 1;
+    }
+  }
+
+  TextStyle _sectionTypographyStyle({
+    required String baseColor,
+    required Color fallbackColor,
+    required String sizeKey,
+    required String weightKey,
+    required double fallbackSize,
+    required Map<String, dynamic> metadata,
+  }) {
+    final color = _parseColor(baseColor, fallbackColor);
+    final size = (metadata[sizeKey] as num?)?.toDouble() ?? fallbackSize;
+    final weight = switch (metadata[weightKey]?.toString()) {
+      'medium' => FontWeight.w500,
+      'bold' => FontWeight.bold,
+      _ => FontWeight.normal,
+    };
+    return TextStyle(color: color, fontSize: size, fontWeight: weight);
+  }
+
+  Color _parseColor(String value, Color fallback) {
+    try {
+      return Color(int.parse(value.replaceAll('#', '0xFF')));
+    } catch (_) {
+      return fallback;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,7 +114,7 @@ class SectionWidget extends ConsumerWidget {
       },
       onAcceptWithDetails: (details) {
         final notifier = ref.read(
-          formBuilderControllerProvider('$projectId::$formId').notifier,
+          formBuilderControllerProvider(controllerKey).notifier,
         );
         if (details.data is QuestionType) {
           notifier.addQuestion(section.id, details.data as QuestionType);
@@ -90,7 +144,7 @@ class SectionWidget extends ConsumerWidget {
       builder: (context, candidateData, rejectedData) {
         final isHovered = candidateData.isNotEmpty;
 
-        return Container(
+        final sectionShell = Container(
           margin: const EdgeInsets.only(bottom: 24),
           child: Material(
             elevation: sectionStyle.elevation,
@@ -115,7 +169,7 @@ class SectionWidget extends ConsumerWidget {
                       onTap: () => ref
                           .read(
                             formBuilderControllerProvider(
-                              '$projectId::$formId',
+                              controllerKey,
                             ).notifier,
                           )
                           .selectSection(section.id),
@@ -145,10 +199,13 @@ class SectionWidget extends ConsumerWidget {
                                 Expanded(
                                   child: Text(
                                     (section.title?.translate(locale) ?? ''),
-                                    style: const TextStyle(
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                                    style: _sectionTypographyStyle(
+                                      baseColor: sectionStyle.titleColor,
+                                      fallbackColor: AppColors.textDark,
+                                      sizeKey: 'titleSize',
+                                      weightKey: 'titleWeight',
+                                      fallbackSize: 18,
+                                      metadata: section.metaData,
                                     ),
                                   ),
                                 ),
@@ -162,7 +219,7 @@ class SectionWidget extends ConsumerWidget {
                                     ref
                                         .read(
                                           formBuilderControllerProvider(
-                                            '$projectId::$formId',
+                                            controllerKey,
                                           ).notifier,
                                         )
                                         .removeSection(section.id);
@@ -177,11 +234,15 @@ class SectionWidget extends ConsumerWidget {
                                   onSelected: (value) {
                                     final notifier = ref.read(
                                       formBuilderControllerProvider(
-                                        '$projectId::$formId',
+                                        controllerKey,
                                       ).notifier,
                                     );
                                     if (value == 'duplicate') {
                                       // notifier.duplicateSection(section.id);
+                                    } else if (value == 'add_child') {
+                                      notifier.addSection(
+                                        parentSectionId: section.id,
+                                      );
                                     } else if (value == 'move_up') {
                                       if (sectionIndex > 0) {
                                         notifier.reorderSections(
@@ -204,6 +265,19 @@ class SectionWidget extends ConsumerWidget {
                                           Icon(Icons.copy, size: 18),
                                           SizedBox(width: 8),
                                           Text('Duplicate'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'add_child',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.subdirectory_arrow_right,
+                                            size: 18,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text('Add Sub-section'),
                                         ],
                                       ),
                                     ),
@@ -231,14 +305,49 @@ class SectionWidget extends ConsumerWidget {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _SectionMetaChip(
+                                  icon: Icons.view_agenda_outlined,
+                                  label: section.layout.name,
+                                ),
+                                _SectionMetaChip(
+                                  icon: Icons.format_list_bulleted,
+                                  label:
+                                      '${section.questions.length} question${section.questions.length == 1 ? '' : 's'}',
+                                ),
+                                if (isSectionSelected)
+                                  const _SectionMetaChip(
+                                    icon: Icons.radio_button_checked,
+                                    label: 'Selected',
+                                    selected: true,
+                                  ),
+                                if (section.sections.isNotEmpty)
+                                  _SectionMetaChip(
+                                    icon: Icons.subdirectory_arrow_right,
+                                    label:
+                                        '${section.sections.length} sub-section${section.sections.length == 1 ? '' : 's'}',
+                                  ),
+                              ],
+                            ),
                             if ((section.description?.translate(locale) ?? '')
-                                .isNotEmpty)
+                                .isNotEmpty) ...[
+                              const SizedBox(height: 10),
                               Text(
                                 section.description?.translate(locale) ?? '',
-                                style: const TextStyle(
-                                  color: AppColors.textGrey,
+                                style: _sectionTypographyStyle(
+                                  baseColor: sectionStyle.descriptionColor,
+                                  fallbackColor: AppColors.textGrey,
+                                  sizeKey: 'descSize',
+                                  weightKey: 'descWeight',
+                                  fallbackSize: 14,
+                                  metadata: section.metaData,
                                 ),
                               ),
+                            ],
                           ],
                         ),
                       ),
@@ -251,7 +360,7 @@ class SectionWidget extends ConsumerWidget {
                       builder: (context, constraints) {
                         final availableWidth = constraints.maxWidth;
                         final builderState = ref.watch(
-                          formBuilderControllerProvider('$projectId::$formId'),
+                          formBuilderControllerProvider(controllerKey),
                         );
                         final questionSpacing = builderState.when(
                           data: (s) => s.form.style.questionSpacing,
@@ -259,10 +368,10 @@ class SectionWidget extends ConsumerWidget {
                           error: (e, s) => 16.0,
                         );
 
-                        int crossAxisCount = 1;
-                        if (section.layout == SectionLayoutType.grid) {
-                          crossAxisCount = section.gridColumns;
-                        }
+                        int crossAxisCount = _sectionCrossAxisCount(
+                          section.layout,
+                          section.gridColumns,
+                        );
 
                         if (availableWidth < 400 && crossAxisCount > 1) {
                           crossAxisCount = 1;
@@ -293,7 +402,9 @@ class SectionWidget extends ConsumerWidget {
                             ...section.questions.asMap().entries.map((entry) {
                               final qIndex = entry.key;
                               final q = entry.value;
-                              final isSelected = q.id == selectedQuestionId;
+                              final isSelected =
+                                  selectedQuestionIds.contains(q.id) ||
+                                  q.id == selectedQuestionId;
 
                               // Calculate width based on span or fixed mode
                               double width = itemWidth; // Default to 1 column
@@ -343,16 +454,28 @@ class SectionWidget extends ConsumerWidget {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          '$projectId::$formId',
+                                          controllerKey,
                                         ).notifier,
                                       )
                                       .selectQuestion(section.id, q.id);
+                                },
+                                onLongPress: () {
+                                  ref
+                                      .read(
+                                        formBuilderControllerProvider(
+                                          controllerKey,
+                                        ).notifier,
+                                      )
+                                      .toggleQuestionSelection(
+                                        section.id,
+                                        q.id,
+                                      );
                                 },
                                 onDelete: () {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          '$projectId::$formId',
+                                          controllerKey,
                                         ).notifier,
                                       )
                                       .removeQuestion(section.id, q.id);
@@ -361,7 +484,7 @@ class SectionWidget extends ConsumerWidget {
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
-                                          '$projectId::$formId',
+                                          controllerKey,
                                         ).notifier,
                                       )
                                       .duplicateQuestion(section.id, q);
@@ -376,7 +499,7 @@ class SectionWidget extends ConsumerWidget {
                                   onAcceptWithDetails: (details) {
                                     final notifier = ref.read(
                                       formBuilderControllerProvider(
-                                        formId,
+                                        controllerKey,
                                       ).notifier,
                                     );
                                     if (details.data.sectionId == section.id) {
@@ -445,12 +568,204 @@ class SectionWidget extends ConsumerWidget {
                       },
                     ),
                   ),
+
+                  if (section.sections.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 24,
+                        right: 24,
+                        bottom: 24,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: section.sections.asMap().entries.map((entry) {
+                          final childIndex = entry.key;
+                          final childSection = entry.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: SectionWidget(
+                              controllerKey: controllerKey,
+                              projectId: projectId,
+                              formId: formId,
+                              section: childSection,
+                              sectionIndex: childIndex,
+                              selectedQuestionId: selectedQuestionId,
+                              selectedQuestionIds: selectedQuestionIds,
+                              selectedSectionId: selectedSectionId,
+                              locale: locale,
+                              mode: mode,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
         );
+
+        return _wrapSectionByLayout(
+          section.layout,
+          sectionShell,
+          sectionStyle,
+          sectionBg,
+        );
       },
+    );
+  }
+
+  Widget _wrapSectionByLayout(
+    SectionLayoutType layout,
+    Widget child,
+    dynamic sectionStyle,
+    Color sectionBg,
+  ) {
+    switch (layout) {
+      case SectionLayoutType.card:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius + 4),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: child,
+        );
+      case SectionLayoutType.centered:
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: child,
+          ),
+        );
+      case SectionLayoutType.sidebar:
+        return Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.55),
+                width: 4,
+              ),
+            ),
+          ),
+          child: child,
+        );
+      case SectionLayoutType.dashboard:
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primary.withValues(alpha: 0.10), sectionBg],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+          ),
+          child: child,
+        );
+      case SectionLayoutType.overlay:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.28),
+              width: 2,
+            ),
+          ),
+          child: child,
+        );
+      case SectionLayoutType.wizard:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.14),
+            ),
+          ),
+          child: child,
+        );
+      case SectionLayoutType.masonry:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.10),
+            ),
+          ),
+          child: child,
+        );
+      case SectionLayoutType.tabbed:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.primary.withValues(alpha: 0.55),
+                width: 4,
+              ),
+            ),
+          ),
+          child: child,
+        );
+      default:
+        return child;
+    }
+  }
+}
+
+class _SectionMetaChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
+
+  const _SectionMetaChip({
+    required this.icon,
+    required this.label,
+    this.selected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = selected ? AppColors.primary : AppColors.textGrey;
+    final bg = selected
+        ? AppColors.primary.withValues(alpha: 0.08)
+        : AppColors.builderElement.withValues(alpha: 0.12);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.25)
+              : AppColors.borderLight,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: fg),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -11,6 +11,7 @@ class BuilderFieldWidget extends StatelessWidget {
   final FormQuestion question;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback onLongPress;
   final VoidCallback onDelete;
   final VoidCallback onDuplicate;
   final String locale;
@@ -20,6 +21,7 @@ class BuilderFieldWidget extends StatelessWidget {
     required this.question,
     required this.isSelected,
     required this.onTap,
+    required this.onLongPress,
     required this.onDelete,
     required this.onDuplicate,
     required this.locale,
@@ -45,6 +47,7 @@ class BuilderFieldWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         margin: EdgeInsets.only(bottom: style.verticalMargin),
         decoration: BoxDecoration(
@@ -115,9 +118,11 @@ class BuilderFieldWidget extends StatelessWidget {
     return Row(
       children: [
         Icon(
-          FontAwesomeIcons.gripVertical,
+          isSelected ? Icons.check_circle : FontAwesomeIcons.gripVertical,
           size: 14,
-          color: AppColors.textGrey.withValues(alpha: 0.5),
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.textGrey.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 8),
         if (!isLeftAligned)
@@ -290,11 +295,13 @@ class BuilderFieldWidget extends StatelessWidget {
 
     switch (q.type) {
       case QuestionType.shortText:
+      case QuestionType.password:
       case QuestionType.number:
       case QuestionType.date:
       case QuestionType.time:
       case QuestionType.email:
       case QuestionType.mobile:
+      case QuestionType.tel:
       case QuestionType.url:
         return Container(
           height: q.style.height ?? 42,
@@ -618,6 +625,8 @@ class BuilderFieldWidget extends StatelessWidget {
             ],
           ),
         );
+      default:
+        return const SizedBox.shrink();
     }
   }
 

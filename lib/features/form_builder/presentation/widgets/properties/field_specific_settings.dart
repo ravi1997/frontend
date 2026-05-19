@@ -58,6 +58,26 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
           _buildSignatureSettings(metadata),
         if (widget.question.type == QuestionType.shortText)
           _buildShortTextSettings(metadata),
+        if (widget.question.type == QuestionType.multiSelect ||
+            widget.question.type == QuestionType.multiCheckbox)
+          _buildMultiSelectSettings(metadata),
+        if (widget.question.type == QuestionType.otp)
+          _buildOtpSettings(metadata),
+        if (widget.question.type == QuestionType.richText ||
+            widget.question.type == QuestionType.markdownEditor)
+          _buildRichTextSettings(metadata),
+        if (widget.question.type == QuestionType.address ||
+            widget.question.type == QuestionType.addressLookup ||
+            widget.question.type == QuestionType.mapLocation)
+          _buildLocationSettings(metadata),
+        if (widget.question.type == QuestionType.fileUpload ||
+            widget.question.type == QuestionType.multiFileUpload ||
+            widget.question.type == QuestionType.filePicker ||
+            widget.question.type == QuestionType.fileList)
+          _buildFileSettings(metadata),
+        if (widget.question.type == QuestionType.booleanValue ||
+            widget.question.type == QuestionType.toggle)
+          _buildToggleSettings(metadata),
         if (![
           QuestionType.image,
           QuestionType.rating,
@@ -66,6 +86,20 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
           QuestionType.date,
           QuestionType.signature,
           QuestionType.shortText,
+          QuestionType.multiSelect,
+          QuestionType.multiCheckbox,
+          QuestionType.otp,
+          QuestionType.richText,
+          QuestionType.markdownEditor,
+          QuestionType.address,
+          QuestionType.addressLookup,
+          QuestionType.mapLocation,
+          QuestionType.fileUpload,
+          QuestionType.multiFileUpload,
+          QuestionType.filePicker,
+          QuestionType.fileList,
+          QuestionType.booleanValue,
+          QuestionType.toggle,
         ].contains(widget.question.type))
           const Center(
             child: Padding(
@@ -147,6 +181,157 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
           label: 'Obscure Text (Password)',
           value: metadata['obscureText'] ?? false,
           onChanged: (val) => _updateMetadata('obscureText', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMultiSelectSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Maximum Selections',
+          value: (metadata['maxSelections'] ?? 0).toDouble(),
+          min: 0,
+          max: 20,
+          onChanged: (val) => _updateMetadata('maxSelections', val.toInt()),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Allow Other Option',
+          value: metadata['allowOther'] ?? false,
+          onChanged: (val) => _updateMetadata('allowOther', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        _MetadataNumberField(
+          label: 'Code Length',
+          initialValue: metadata['codeLength'] ?? 6,
+          onChanged: (val) => _updateMetadata('codeLength', val),
+        ),
+        const SizedBox(height: 12),
+        _MetadataNumberField(
+          label: 'Resend Delay (sec)',
+          initialValue: metadata['resendDelay'] ?? 30,
+          onChanged: (val) => _updateMetadata('resendDelay', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Auto Submit',
+          value: metadata['autoSubmit'] ?? true,
+          onChanged: (val) => _updateMetadata('autoSubmit', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRichTextSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Editor Toolbar',
+          value: metadata['toolbar'] ?? 'full',
+          items: const [
+            DropdownMenuItem(value: 'minimal', child: Text('Minimal')),
+            DropdownMenuItem(value: 'full', child: Text('Full')),
+          ],
+          onChanged: (val) => _updateMetadata('toolbar', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Allow Markdown',
+          value: metadata['allowMarkdown'] ?? true,
+          onChanged: (val) => _updateMetadata('allowMarkdown', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        _MetadataTextField(
+          label: 'Default Country',
+          initialValue: metadata['defaultCountry']?.toString() ?? '',
+          onChanged: (val) => _updateMetadata('defaultCountry', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Use Current Location',
+          value: metadata['useCurrentLocation'] ?? false,
+          onChanged: (val) => _updateMetadata('useCurrentLocation', val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFileSettings(Map<String, dynamic> metadata) {
+    final allowedTypes =
+        (metadata['allowedTypes'] as List?)?.map((e) => e.toString()).toList() ??
+        const ['pdf', 'jpg', 'png'];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Maximum Files',
+          value: (metadata['maxFiles'] ?? 1).toDouble(),
+          min: 1,
+          max: 20,
+          onChanged: (val) => _updateMetadata('maxFiles', val.toInt()),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Allowed Types',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: allowedTypes
+              .map(
+                (type) => Chip(
+                  label: Text(type),
+                  onDeleted: () {
+                    final next = List<String>.from(allowedTypes)..remove(type);
+                    _updateMetadata('allowedTypes', next);
+                  },
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 8),
+        _MetadataTextField(
+          label: 'Add File Type',
+          initialValue: '',
+          onChanged: (val) {
+            final trimmed = val.trim();
+            if (trimmed.isEmpty) return;
+            final next = List<String>.from(allowedTypes)..add(trimmed);
+            _updateMetadata('allowedTypes', next);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleSettings(Map<String, dynamic> metadata) {
+    return Column(
+      children: [
+        _MetadataTextField(
+          label: 'On Label',
+          initialValue: metadata['onLabel']?.toString() ?? 'Yes',
+          onChanged: (val) => _updateMetadata('onLabel', val),
+        ),
+        const SizedBox(height: 12),
+        _MetadataTextField(
+          label: 'Off Label',
+          initialValue: metadata['offLabel']?.toString() ?? 'No',
+          onChanged: (val) => _updateMetadata('offLabel', val),
         ),
       ],
     );

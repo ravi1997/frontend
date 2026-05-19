@@ -4,11 +4,13 @@ import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_question_option.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
+import 'package:frontend/features/form_builder/domain/services/field_registry.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:uuid/uuid.dart';
 import 'property_builder_utils.dart';
 
 class FieldGeneralSettings extends ConsumerStatefulWidget {
+  final String controllerKey;
   final String projectId;
   final String formId;
   final FormQuestion question;
@@ -19,6 +21,7 @@ class FieldGeneralSettings extends ConsumerStatefulWidget {
 
   const FieldGeneralSettings({
     super.key,
+    required this.controllerKey,
     required this.projectId,
     required this.formId,
     required this.question,
@@ -122,6 +125,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final compatibleTypes = FieldRegistry.getCompatibleTypes(
+      widget.question.type,
+    );
+
     return Form(
       key: _formKey,
       child: Column(
@@ -140,25 +147,74 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 ),
               ),
               const SizedBox(height: 8),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.builderElement.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.borderLight),
-                ),
-                child: Text(
-                  widget.question.type.label,
+              if (compatibleTypes.length == 1)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.builderElement.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: Text(
+                    widget.question.type.label,
+                    style: const TextStyle(
+                      color: AppColors.textGrey,
+                      fontSize: 14,
+                    ),
+                  ),
+                )
+              else
+                DropdownButtonFormField<QuestionType>(
+                  initialValue: widget.question.type,
+                  decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: AppColors.builderElement,
+                    border: OutlineInputBorder(),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.borderLight),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  dropdownColor: Colors.white,
                   style: const TextStyle(
-                    color: AppColors.textGrey,
+                    color: AppColors.textDark,
                     fontSize: 14,
                   ),
+                  items: compatibleTypes
+                      .map(
+                        (type) => DropdownMenuItem<QuestionType>(
+                          value: type,
+                          child: Text(
+                            type.label,
+                            style: const TextStyle(color: AppColors.textDark),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == null || value == widget.question.type) return;
+                    ref
+                        .read(
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
+                        )
+                        .convertQuestionType(widget.question.id, value);
+                  },
                 ),
-              ),
+              if (compatibleTypes.length > 1) ...[
+                const SizedBox(height: 6),
+                const Text(
+                  'You can only switch to compatible types to preserve field settings.',
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 11),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 20),
@@ -178,7 +234,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 if (_formKey.currentState!.validate()) {
                   ref
                       .read(
-                        formBuilderControllerProvider(widget.formId).notifier,
+                        formBuilderControllerProvider(
+                          widget.controllerKey,
+                        ).notifier,
                       )
                       .updateQuestionLabel(widget.question.id, val);
                 }
@@ -191,7 +249,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               placeholder: 'my_custom_field',
               onChanged: (val) {
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestion(
                       widget.question.copyWith(variableName: val),
                     );
@@ -208,7 +270,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               controller: _dividerTextController,
               onChanged: (val) {
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestionMetadata(widget.question.id, {
                       'dividerText': val,
                     });
@@ -229,7 +295,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   onChanged: (val) {
                     ref
                         .read(
-                          formBuilderControllerProvider(widget.formId).notifier,
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
                         )
                         .updateQuestionHelperText(widget.question.id, val);
                   },
@@ -262,7 +330,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               controller: widget.placeholderController,
               onChanged: (val) {
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestionPlaceholder(widget.question.id, val);
               },
             ),
@@ -293,12 +365,131 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ref
                   .read(
                     formBuilderControllerProvider(
-                      '${widget.projectId}::${widget.formId}',
+                      widget.controllerKey,
                     ).notifier,
                   )
                   .updateQuestion(widget.question.copyWith(isHidden: val));
             },
           ),
+          const SizedBox(height: 12),
+          PropertyBuilderUtils.buildSwitch(
+            label: 'Repeatable Question',
+            description: 'Allow users to enter this question multiple times.',
+            value: widget.question.isRepeatable,
+            onChanged: (val) {
+              ref
+                  .read(
+                    formBuilderControllerProvider(
+                      widget.controllerKey,
+                    ).notifier,
+                  )
+                  .updateQuestion(
+                    widget.question.copyWith(
+                      isRepeatable: val,
+                      repeatMin: val ? (widget.question.repeatMin ?? 1) : null,
+                      repeatMax: val ? widget.question.repeatMax : null,
+                    ),
+                  );
+            },
+          ),
+          if (widget.question.isRepeatable) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    key: ValueKey('${widget.question.id}-repeat-min'),
+                    initialValue: (widget.question.repeatMin ?? 1).toString(),
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Minimum repeats',
+                      labelStyle: TextStyle(color: AppColors.textDark),
+                      filled: true,
+                      fillColor: AppColors.builderElement,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.borderLight),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    style: const TextStyle(color: AppColors.textDark),
+                    onChanged: (val) {
+                      ref
+                          .read(
+                            formBuilderControllerProvider(
+                              widget.controllerKey,
+                            ).notifier,
+                          )
+                          .updateQuestion(
+                            widget.question.copyWith(
+                              repeatMin: int.tryParse(val) ?? 1,
+                            ),
+                          );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    key: ValueKey('${widget.question.id}-repeat-max'),
+                    initialValue: widget.question.repeatMax?.toString() ?? '',
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Maximum repeats',
+                      hintText: 'Unlimited',
+                      labelStyle: TextStyle(color: AppColors.textDark),
+                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      filled: true,
+                      fillColor: AppColors.builderElement,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.borderLight),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                    style: const TextStyle(color: AppColors.textDark),
+                    onChanged: (val) {
+                      ref
+                          .read(
+                            formBuilderControllerProvider(
+                              widget.controllerKey,
+                            ).notifier,
+                          )
+                          .updateQuestion(
+                            widget.question.copyWith(
+                              repeatMax: val.trim().isEmpty
+                                  ? null
+                                  : int.tryParse(val),
+                            ),
+                          );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            PropertyBuilderUtils.buildSwitch(
+              label: 'Keep Last Value',
+              description:
+                  'Prefill new question copies using the previous answer.',
+              value: widget.question.keepLastValue,
+              onChanged: (val) {
+                ref
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
+                    .updateQuestion(
+                      widget.question.copyWith(keepLastValue: val),
+                    );
+              },
+            ),
+          ],
           const SizedBox(height: 20),
 
           // Options Editor
@@ -332,7 +523,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         const Text(
           'INTERACTIVE FIELD ACTIONS',
           style: TextStyle(
-            color: AppColors.textGrey,
+            color: AppColors.textDark,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
@@ -342,10 +533,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.brandBlue.withValues(alpha: 0.05),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: AppColors.brandBlue.withValues(alpha: 0.2),
+              color: AppColors.brandBlue.withValues(alpha: 0.18),
             ),
           ),
           child: Column(
@@ -358,7 +549,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   newConfig['hasButton'] = val;
                   ref
                       .read(
-                        formBuilderControllerProvider(widget.formId).notifier,
+                        formBuilderControllerProvider(
+                          widget.controllerKey,
+                        ).notifier,
                       )
                       .updateQuestion(
                         widget.question.copyWith(actionConfig: newConfig),
@@ -370,12 +563,17 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 PropertyBuilderUtils.buildTextField(
                   label: 'Button Label',
                   controller: TextEditingController(text: buttonLabel),
+                  textStyle: const TextStyle(color: AppColors.textDark),
+                  labelStyle: const TextStyle(color: AppColors.textDark),
+                  hintStyle: const TextStyle(color: AppColors.textGrey),
                   onChanged: (val) {
                     final newConfig = Map<String, dynamic>.from(actionConfig);
                     newConfig['buttonLabel'] = val;
                     ref
                         .read(
-                          formBuilderControllerProvider(widget.formId).notifier,
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
                         )
                         .updateQuestion(
                           widget.question.copyWith(actionConfig: newConfig),
@@ -383,20 +581,39 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = constraints.maxWidth < 420;
+                    final methodField = SizedBox(
+                      width: isNarrow ? double.infinity : 140,
                       child: DropdownButtonFormField<String>(
                         initialValue: webhookMethod,
                         decoration: const InputDecoration(
                           labelText: 'Method',
                           isDense: true,
                           border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelStyle: TextStyle(color: AppColors.textDark),
                         ),
+                        style: const TextStyle(color: AppColors.textDark),
+                        dropdownColor: Colors.white,
+                        iconEnabledColor: AppColors.textDark,
                         items: const [
-                          DropdownMenuItem(value: 'GET', child: Text('GET')),
-                          DropdownMenuItem(value: 'POST', child: Text('POST')),
+                          DropdownMenuItem(
+                            value: 'GET',
+                            child: Text(
+                              'GET',
+                              style: TextStyle(color: AppColors.textDark),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'POST',
+                            child: Text(
+                              'POST',
+                              style: TextStyle(color: AppColors.textDark),
+                            ),
+                          ),
                         ],
                         onChanged: (v) {
                           final newConfig = Map<String, dynamic>.from(
@@ -406,7 +623,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           ref
                               .read(
                                 formBuilderControllerProvider(
-                                  widget.formId,
+                                  widget.controllerKey,
                                 ).notifier,
                               )
                               .updateQuestion(
@@ -416,10 +633,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               );
                         },
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 5,
+                    );
+                    final urlField = SizedBox(
+                      width: double.infinity,
                       child: TextFormField(
                         initialValue: webhookUrl,
                         decoration: const InputDecoration(
@@ -427,7 +643,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           hintText: 'https://api.example.com/search',
                           isDense: true,
                           border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.white,
+                          labelStyle: TextStyle(color: AppColors.textDark),
+                          hintStyle: TextStyle(color: AppColors.textGrey),
                         ),
+                        style: const TextStyle(color: AppColors.textDark),
                         onChanged: (val) {
                           final newConfig = Map<String, dynamic>.from(
                             actionConfig,
@@ -436,7 +657,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           ref
                               .read(
                                 formBuilderControllerProvider(
-                                  widget.formId,
+                                  widget.controllerKey,
                                 ).notifier,
                               )
                               .updateQuestion(
@@ -446,8 +667,26 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               );
                         },
                       ),
-                    ),
-                  ],
+                    );
+
+                    if (isNarrow) {
+                      return Column(
+                        children: [
+                          methodField,
+                          const SizedBox(height: 8),
+                          urlField,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      children: [
+                        methodField,
+                        const SizedBox(width: 8),
+                        Expanded(child: urlField),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -455,7 +694,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -478,7 +717,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               ref
                                   .read(
                                     formBuilderControllerProvider(
-                                      widget.formId,
+                                      widget.controllerKey,
                                     ).notifier,
                                   )
                                   .updateQuestion(
@@ -491,7 +730,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               hintText: 'JSON Key',
                               isDense: true,
                               border: OutlineInputBorder(),
+                              filled: true,
+                              fillColor: Colors.white,
+                              labelStyle: TextStyle(color: AppColors.textDark),
+                              hintStyle: TextStyle(color: AppColors.textGrey),
                             ),
+                            style: const TextStyle(color: AppColors.textDark),
                           ),
                         ),
                         const Icon(Icons.arrow_forward, size: 14),
@@ -507,7 +751,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                             ref
                                 .read(
                                   formBuilderControllerProvider(
-                                    widget.formId,
+                                    widget.controllerKey,
                                   ).notifier,
                                 )
                                 .updateQuestion(
@@ -534,7 +778,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                             ref
                                 .read(
                                   formBuilderControllerProvider(
-                                    widget.formId,
+                                    widget.controllerKey,
                                   ).notifier,
                                 )
                                 .updateQuestion(
@@ -556,7 +800,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     newConfig['mappings'] = newList;
                     ref
                         .read(
-                          formBuilderControllerProvider(widget.formId).notifier,
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
                         )
                         .updateQuestion(
                           widget.question.copyWith(actionConfig: newConfig),
@@ -565,7 +811,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   icon: const Icon(Icons.add, size: 14),
                   label: const Text(
                     'Add Mapping',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12, color: AppColors.brandBlue),
                   ),
                 ),
               ],
@@ -577,7 +823,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   }
 
   Widget _buildFieldTargetDropdown(String? value, Function(String?) onChanged) {
-    final state = ref.read(formBuilderControllerProvider(widget.formId)).value;
+    final state = ref
+        .read(formBuilderControllerProvider(widget.controllerKey))
+        .value;
     if (state == null) return const SizedBox();
 
     final allQuestions = state.form.sections
@@ -592,6 +840,15 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         hintText: 'Target Field',
         isDense: true,
         border: OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      style: const TextStyle(color: AppColors.textDark),
+      dropdownColor: Colors.white,
+      iconEnabledColor: AppColors.textDark,
+      hint: const Text(
+        'Target Field',
+        style: TextStyle(color: AppColors.textGrey),
       ),
       items: allQuestions.map((q) {
         return DropdownMenuItem(
@@ -599,7 +856,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           child: Text(
             '${q.label is String ? q.label as String : (q.label as Map?)?['en'] ?? 'Untitled'} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12, color: AppColors.textDark),
           ),
         );
       }).toList(),
@@ -659,7 +916,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             }
 
             final notifier = ref.read(
-              formBuilderControllerProvider(widget.formId).notifier,
+              formBuilderControllerProvider(widget.controllerKey).notifier,
             );
 
             var q = widget.question;
@@ -697,7 +954,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               );
               if (picked != null) {
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestionDefaultValue(
                       widget.question.id,
                       picked.toIso8601String().split('T').first,
@@ -760,7 +1021,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 final formatted =
                     '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestionDefaultValue(widget.question.id, formatted);
               }
             },
@@ -822,18 +1087,36 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 borderSide: const BorderSide(color: AppColors.borderLight),
               ),
               filled: true,
-              fillColor: AppColors.builderElement,
+              fillColor: Colors.white,
             ),
+            style: const TextStyle(color: AppColors.textDark),
+            dropdownColor: Colors.white,
+            iconEnabledColor: AppColors.textDark,
             items: [
-              const DropdownMenuItem(value: null, child: Text('None')),
+              const DropdownMenuItem(
+                value: null,
+                child: Text(
+                  'None',
+                  style: TextStyle(color: AppColors.textDark),
+                ),
+              ),
               ...{for (var opt in options) opt.value: opt}.values.map(
-                (opt) =>
-                    DropdownMenuItem(value: opt.value, child: Text(opt.label)),
+                (opt) => DropdownMenuItem(
+                  value: opt.value,
+                  child: Text(
+                    opt.label,
+                    style: const TextStyle(color: AppColors.textDark),
+                  ),
+                ),
               ),
             ],
             onChanged: (val) {
               ref
-                  .read(formBuilderControllerProvider(widget.formId).notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      widget.controllerKey,
+                    ).notifier,
+                  )
                   .updateQuestionDefaultValue(widget.question.id, val);
             },
           ),
@@ -847,7 +1130,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
       controller: _defaultValueController,
       onChanged: (val) {
         ref
-            .read(formBuilderControllerProvider(widget.formId).notifier)
+            .read(formBuilderControllerProvider(widget.controllerKey).notifier)
             .updateQuestionDefaultValue(widget.question.id, val);
       },
     );
@@ -902,7 +1185,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             }).toList();
 
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(
+                  formBuilderControllerProvider(widget.controllerKey).notifier,
+                )
                 .updateQuestion(question.copyWith(options: orderedOptions));
           },
           itemBuilder: (context, index) {
@@ -922,14 +1207,22 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   value: newValue,
                 );
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestion(question.copyWith(options: newOptions));
               },
               onDelete: () {
                 final newOptions = List<FormQuestionOption>.from(options);
                 newOptions.removeAt(index);
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
                     .updateQuestion(question.copyWith(options: newOptions));
               },
             );
@@ -948,7 +1241,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ),
             );
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(
+                  formBuilderControllerProvider(widget.controllerKey).notifier,
+                )
                 .updateQuestion(question.copyWith(options: newOptions));
           },
           icon: const Icon(Icons.add, size: 16),
@@ -966,7 +1261,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           value: hasOtherOption,
           onChanged: (val) {
             ref
-                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .read(
+                  formBuilderControllerProvider(widget.controllerKey).notifier,
+                )
                 .updateQuestionMetadata(widget.question.id, {
                   'hasOtherOption': val,
                 });
@@ -1014,10 +1311,27 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   .toList();
 
               if (lines.isNotEmpty) {
+                final liveState = ref
+                    .read(formBuilderControllerProvider(widget.controllerKey))
+                    .value;
+                final liveQuestion = liveState == null
+                    ? widget.question
+                    : liveState.form.sections
+                              .expand((s) => s.questions)
+                              .where((q) => q.id == widget.question.id)
+                              .firstOrNull ??
+                          widget.question;
+
                 final newOptions = List<FormQuestionOption>.from(
-                  currentOptions,
+                  liveQuestion.options ?? currentOptions,
                 );
                 for (var line in lines) {
+                  final exists = newOptions.any(
+                    (opt) =>
+                        opt.value.trim().toLowerCase() ==
+                        line.trim().toLowerCase(),
+                  );
+                  if (exists) continue;
                   newOptions.add(
                     FormQuestionOption(
                       id: const Uuid().v4(),
@@ -1028,10 +1342,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   );
                 }
                 ref
-                    .read(formBuilderControllerProvider(widget.formId).notifier)
-                    .updateQuestion(
-                      widget.question.copyWith(options: newOptions),
-                    );
+                    .read(
+                      formBuilderControllerProvider(
+                        widget.controllerKey,
+                      ).notifier,
+                    )
+                    .updateQuestion(liveQuestion.copyWith(options: newOptions));
               }
               Navigator.pop(context);
             },
@@ -1111,7 +1427,7 @@ class _OptionRowState extends State<_OptionRow> {
                       horizontal: 12,
                       vertical: 10,
                     ),
-                    fillColor: AppColors.builderElement,
+                    fillColor: Colors.white,
                     filled: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
@@ -1124,7 +1440,10 @@ class _OptionRowState extends State<_OptionRow> {
                       color: Colors.transparent,
                     ),
                   ),
-                  style: const TextStyle(fontSize: 14),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textDark,
+                  ),
                   onChanged: widget.onChanged,
                 ),
               ),

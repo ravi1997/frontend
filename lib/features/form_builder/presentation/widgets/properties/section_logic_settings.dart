@@ -11,6 +11,7 @@ class SectionLogicSettings extends ConsumerWidget {
   final String formId;
   final FormSection section;
   final List<FormSection> allSections;
+  final ValueChanged<FormSection> onSectionChanged;
 
   const SectionLogicSettings({
     super.key,
@@ -18,6 +19,7 @@ class SectionLogicSettings extends ConsumerWidget {
     required this.formId,
     required this.section,
     required this.allSections,
+    required this.onSectionChanged,
   });
 
   @override
@@ -89,11 +91,14 @@ class SectionLogicSettings extends ConsumerWidget {
           label: 'Disable Section when hidden',
           value: section.metaData['disableWhenHidden'] ?? true,
           onChanged: (val) {
-            ref
-                .read(
-                  formBuilderControllerProvider('$projectId::$formId').notifier,
-                )
-                .updateSectionMetadata(section.id, {'disableWhenHidden': val});
+            onSectionChanged(
+              section.copyWith(
+                metaData: {
+                  ...section.metaData,
+                  'disableWhenHidden': val,
+                },
+              ),
+            );
           },
         ),
       ],
@@ -219,11 +224,9 @@ class SectionLogicSettings extends ConsumerWidget {
         newRules.add(result);
       }
 
-      ref
-          .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-          .updateSection(
-            section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
-          );
+      onSectionChanged(
+        section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+      );
     }
   }
 
@@ -231,10 +234,8 @@ class SectionLogicSettings extends ConsumerWidget {
     final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
     final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? [])
       ..removeAt(index);
-    ref
-        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-        .updateSection(
-          section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
-        );
+    onSectionChanged(
+      section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+    );
   }
 }

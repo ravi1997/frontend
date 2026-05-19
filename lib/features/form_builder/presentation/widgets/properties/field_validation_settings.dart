@@ -7,6 +7,7 @@ import 'package:frontend/features/form_builder/presentation/controllers/form_bui
 import 'property_builder_utils.dart';
 
 class FieldValidationSettings extends ConsumerStatefulWidget {
+  final String controllerKey;
   final String formId;
   final FormQuestion question;
   final TextEditingController regexController;
@@ -19,6 +20,7 @@ class FieldValidationSettings extends ConsumerStatefulWidget {
 
   const FieldValidationSettings({
     super.key,
+    required this.controllerKey,
     required this.formId,
     required this.question,
     required this.regexController,
@@ -51,13 +53,13 @@ class _FieldValidationSettingsState
 
   void _updateQuestion(FormQuestion updatedQuestion) {
     ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
+        .read(formBuilderControllerProvider(widget.controllerKey).notifier)
         .updateQuestion(updatedQuestion);
   }
 
   void _updateMetadata(String key, dynamic value) {
     ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
+        .read(formBuilderControllerProvider(widget.controllerKey).notifier)
         .updateQuestionMetadata(widget.question.id, {key: value});
   }
 
