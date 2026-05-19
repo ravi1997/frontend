@@ -42,6 +42,7 @@ dependencies:
   web: ^1.1.1
   mobile_scanner: ^7.2.0
   expressions: ^0.2.5+3
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

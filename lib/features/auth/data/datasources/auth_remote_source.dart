@@ -35,7 +35,8 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await _apiClient.post(
       ApiEndpoints.login,
-      data: {'email': email, 'password': password},
+      // Backend LoginSchema uses `identifier` (accepts username or email).
+      data: {'identifier': email, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }

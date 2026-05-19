@@ -1,13 +1,18 @@
+import 'app_config.dart';
+
 /// Centralized API endpoint constants for the application.
 ///
 /// This file contains all API endpoints used throughout the application,
 /// organized by feature area for easy maintenance and updates.
+///
+/// The backend origin is configured through [AppConfig.apiServerUrl], which
+/// reads the `API_BASE_URL` dart-define at build time and falls back to
+/// `http://localhost:8051` for local development.
 class ApiEndpoints {
-  // Base configuration
-  static const String serverBaseUrl = 'http://localhost:8051';
-  // static const String serverBaseUrl = 'http://192.168.1.51:8051';
+  // Base configuration — driven by AppConfig (dart-define or default)
+  static String get serverBaseUrl => AppConfig.apiServerUrl;
 
-  static const String baseUrl = '$serverBaseUrl/form/api/v1';
+  static String get baseUrl => AppConfig.apiBaseUrl;
 
   // ============================================================================
   // Authentication Endpoints (§3)
@@ -186,6 +191,13 @@ class ApiEndpoints {
   /// Returns: { "id": string, "title": string, ... }
   static String updateForm(String formId) => '/forms/$formId';
 
+  /// PUT - Update existing form within a project
+  /// Headers: { "Authorization": "Bearer {token}" }
+  /// Body: { ... full form canvas ... }
+  /// Returns: { "id": string, "title": string, ... }
+  static String updateProjectForm(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId';
+
   /// DELETE - Delete form (soft delete)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
@@ -237,25 +249,33 @@ class ApiEndpoints {
   /// GET - List all versions for a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "version": string, "created_at": string, ... }]
-  static String getFormVersions(String formId) => '/forms/$formId/versions';
+  static String getFormVersions(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/versions';
 
   /// GET - Get a specific version of a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "title": string, "sections": [...], ... }
-  static String getFormVersion(String formId, String version) =>
-      '/forms/$formId/versions/$version';
+  static String getFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  ) => '/projects/$projectId/forms/$formId/versions/$version';
 
   /// PUT - Update a specific version of a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { ... form fields ... }
-  static String updateFormVersion(String formId, String version) =>
-      '/forms/$formId/versions/$version';
+  static String updateFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  ) => '/projects/$projectId/forms/$formId/versions/$version';
 
   /// POST - Create a new version of a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "type": string, "activate": bool, ... }
   /// Returns: { "version": string, ... }
-  static String createFormVersion(String formId) => '/forms/$formId/versions';
+  static String createFormVersion(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/versions';
 
   /// GET - Check slug availability
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -282,22 +302,6 @@ class ApiEndpoints {
 
   static String listSections(String projectId, String formId) =>
       '/projects/$projectId/forms/$formId/sections';
-  static String createSection(String projectId, String formId) {
-    return '/projects/$projectId/forms/$formId/sections';
-  }
-
-  static String updateSection(
-    String projectId,
-    String formId,
-    String sectionId,
-  ) => '/projects/$projectId/forms/$formId/sections/$sectionId';
-  static String deleteSection(
-    String projectId,
-    String formId,
-    String sectionId,
-  ) => '/projects/$projectId/forms/$formId/sections/$sectionId';
-  static String reorderSections(String projectId, String formId) =>
-      '/projects/$projectId/forms/$formId/sections/reorder';
 
   // ============================================================================
   // Response Submission Endpoints (§8)

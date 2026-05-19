@@ -14,13 +14,9 @@ class AuthController extends _$AuthController with BaseControllerMixin {
 
   @override
   FutureOr<User?> build() async {
-    final tokenState = ref.watch(tokenServiceProvider);
+    final tokens = await ref.watch(tokenServiceProvider.future);
 
-    if (tokenState.isLoading) return null;
-    if (tokenState.hasError) return null;
-
-    final tokens = tokenState.value;
-    if (tokens == null || tokens.accessToken == null) return null;
+    if (tokens.accessToken == null) return null;
 
     if (_cachedAccessToken == tokens.accessToken && _cachedUser != null) {
       return _cachedUser;

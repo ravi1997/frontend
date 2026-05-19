@@ -6,6 +6,7 @@ import 'auth_interceptor.dart';
 import 'unified_network_interceptor.dart';
 import '../widgets/snackbar_service.dart';
 import 'api_endpoints.dart';
+import 'app_config.dart';
 
 part 'api_client.g.dart';
 
@@ -23,10 +24,22 @@ Dio dio(Ref ref) {
       baseUrl: ApiEndpoints.baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
+      // sendTimeout is a no-op on the web platform; kept for parity on native.
       sendTimeout: kIsWeb ? Duration.zero : const Duration(seconds: 15),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+      },
+      // For browser fetch requests:
+      //   - withCredentials: only set to true when cookie-based session auth is
+      //     in use.  When bearer-token auth is the primary mode (default), leave
+      //     this false so the browser sends simple-mode requests and avoids the
+      //     extra preflight round-trip for most endpoints.
+      //
+      // Controlled by AppConfig.useCookieCredentials (dart-define:
+      // USE_COOKIE_CREDENTIALS=true/false, default false).
+      extra: {
+        if (kIsWeb) 'withCredentials': AppConfig.useCookieCredentials,
       },
       validateStatus: (status) {
         return status != null && status >= 200 && status < 400;

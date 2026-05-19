@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
@@ -45,6 +47,19 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     try {
       await _remoteSource.logout();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        // The session is already invalid or expired on the server — treat this
+        // as successful revocation and proceed with local sign-out.
+        debugPrint('logout: session already invalid (401), clearing locally.');
+      } else {
+        // Log other network / server errors but do not surface them to the UI;
+        // the product contract is "client-side logout always succeeds".
+        debugPrint('logout: backend call failed (${e.type}), clearing locally. $e');
+      }
+    } catch (e) {
+      // Catch any unexpected error so local sign-out is never blocked.
+      debugPrint('logout: unexpected error, clearing locally. $e');
     } finally {
       await _tokenService.clearTokens();
     }

@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Flutter Web (8080)",
+            "name": "Flutter Web (9600)",
             "type": "dart",
             "request": "launch",
             "program": "lib/main.dart",
@@ -10,7 +10,7 @@
                 "-d",
                 "chrome",
                 "--web-port",
-                "8080"
+                "9600"
             ]
         }
     ]

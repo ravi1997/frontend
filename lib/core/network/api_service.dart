@@ -38,7 +38,8 @@ class ApiService {
   }) async {
     final response = await _client.post(
       ApiEndpoints.login,
-      data: {'email': email, 'password': password},
+      // Backend LoginSchema uses `identifier` (accepts username or email).
+      data: {'identifier': email, 'password': password},
     );
     return response.data as Map<String, dynamic>;
   }
@@ -247,18 +248,21 @@ class ApiService {
   }
 
   /// Get form version history
-  Future<List<dynamic>> getFormVersions(String formId) async {
-    final response = await _client.get(ApiEndpoints.getFormVersions(formId));
+  Future<List<dynamic>> getFormVersions(String projectId, String formId) async {
+    final response = await _client.get(
+      ApiEndpoints.getFormVersions(projectId, formId),
+    );
     return response.data as List<dynamic>;
   }
 
   /// Get specific form version
   Future<Map<String, dynamic>> getFormVersion({
+    required String projectId,
     required String formId,
     required String version,
   }) async {
     final response = await _client.get(
-      ApiEndpoints.getFormVersion(formId, version),
+      ApiEndpoints.getFormVersion(projectId, formId, version),
     );
     return response.data as Map<String, dynamic>;
   }
