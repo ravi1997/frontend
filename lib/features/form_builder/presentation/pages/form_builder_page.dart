@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 
@@ -31,8 +32,66 @@ class FormBuilderPage extends ConsumerStatefulWidget {
 }
 
 class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
+  static const String _layoutBoxName = 'form_builder_layout_preferences';
+  static const String _leftPanelWidthKey = 'left_panel_width';
+  static const String _rightPanelWidthKey = 'right_panel_width';
+  static const double _defaultLeftPanelWidth = 300;
+  static const double _defaultRightPanelWidth = 320;
+  static const double _minLeftPanelWidth = 200;
+  static const double _maxLeftPanelWidth = 500;
+  static const double _minRightPanelWidth = 250;
+  static const double _maxRightPanelWidth = 600;
+
   double _leftPanelWidth = 300;
   double _rightPanelWidth = 320;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreLayoutPreferences();
+  }
+
+  Future<void> _restoreLayoutPreferences() async {
+    final box = await Hive.openBox(_layoutBoxName);
+    final leftWidth = _readStoredWidth(
+      box,
+      _leftPanelWidthKey,
+      fallback: _defaultLeftPanelWidth,
+      min: _minLeftPanelWidth,
+      max: _maxLeftPanelWidth,
+    );
+    final rightWidth = _readStoredWidth(
+      box,
+      _rightPanelWidthKey,
+      fallback: _defaultRightPanelWidth,
+      min: _minRightPanelWidth,
+      max: _maxRightPanelWidth,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _leftPanelWidth = leftWidth;
+      _rightPanelWidth = rightWidth;
+    });
+  }
+
+  double _readStoredWidth(
+    Box<dynamic> box,
+    String key, {
+    required double fallback,
+    required double min,
+    required double max,
+  }) {
+    final value = box.get(key);
+    final width = value is num ? value.toDouble() : fallback;
+    return width.clamp(min, max).toDouble();
+  }
+
+  Future<void> _saveLayoutPreferences() async {
+    final box = await Hive.openBox(_layoutBoxName);
+    await box.put(_leftPanelWidthKey, _leftPanelWidth);
+    await box.put(_rightPanelWidthKey, _rightPanelWidth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,14 +203,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                               onHorizontalDragUpdate: (details) {
                                 setState(() {
                                   _leftPanelWidth += details.delta.dx;
-                                  if (_leftPanelWidth < 200) {
-                                    _leftPanelWidth = 200;
-                                  }
-                                  if (_leftPanelWidth > 500) {
-                                    _leftPanelWidth = 500;
-                                  }
+                                  _leftPanelWidth = _leftPanelWidth
+                                      .clamp(
+                                        _minLeftPanelWidth,
+                                        _maxLeftPanelWidth,
+                                      )
+                                      .toDouble();
                                 });
                               },
+                              onHorizontalDragEnd: (_) =>
+                                  _saveLayoutPreferences(),
                               child: Container(
                                 width: 1,
                                 color: AppColors.builderBorder,
@@ -177,14 +238,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 onHorizontalDragUpdate: (details) {
                                   setState(() {
                                     _rightPanelWidth -= details.delta.dx;
-                                    if (_rightPanelWidth < 250) {
-                                      _rightPanelWidth = 250;
-                                    }
-                                    if (_rightPanelWidth > 600) {
-                                      _rightPanelWidth = 600;
-                                    }
+                                    _rightPanelWidth = _rightPanelWidth
+                                        .clamp(
+                                          _minRightPanelWidth,
+                                          _maxRightPanelWidth,
+                                        )
+                                        .toDouble();
                                   });
                                 },
+                                onHorizontalDragEnd: (_) =>
+                                    _saveLayoutPreferences(),
                                 child: Container(
                                   width: 1,
                                   color: AppColors.builderBorder,
