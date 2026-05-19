@@ -35,6 +35,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final hydratedSections = await _loadSections(projectId, id, data);
       if (hydratedSections != null) {
         data['sections'] = hydratedSections;
+        _hydrateActiveVersionSections(data, hydratedSections);
       }
 
       final dto = FormDto.fromJson(data);
@@ -95,6 +96,37 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     }
 
     return hydrated.isEmpty ? null : hydrated;
+  }
+
+  void _hydrateActiveVersionSections(
+    Map<String, dynamic> formData,
+    List<dynamic> sections,
+  ) {
+    final versions = formData['versions'];
+    if (versions is! List || versions.isEmpty) {
+      return;
+    }
+
+    final activeVersion = formData['active_version']?.toString();
+    final hydratedVersions = versions.map((version) {
+      if (version is! Map) {
+        return version;
+      }
+
+      final versionMap = Map<String, dynamic>.from(version);
+      final versionName = versionMap['version']?.toString();
+      final isActive =
+          activeVersion == null ||
+          activeVersion.isEmpty ||
+          versionName == activeVersion;
+
+      if (isActive) {
+        versionMap['sections'] = sections;
+      }
+      return versionMap;
+    }).toList();
+
+    formData['versions'] = hydratedVersions;
   }
 
   @override
