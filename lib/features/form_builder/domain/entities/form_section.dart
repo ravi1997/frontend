@@ -19,6 +19,7 @@ abstract class FormSection with _$FormSection {
     @JsonKey(name: 'help_text') Object? helpText,
     @Default(0) int order,
     required List<FormQuestion> questions,
+    @JsonKey(name: 'layout', fromJson: _sectionLayoutTypeFromJson)
     @Default(SectionLayoutType.standard) SectionLayoutType layout,
     @JsonKey(name: 'grid_columns') @Default(2) int gridColumns,
     @JsonKey(name: 'is_hidden') @Default(false) bool isHidden,
@@ -38,4 +39,52 @@ abstract class FormSection with _$FormSection {
 
   factory FormSection.fromJson(Map<String, dynamic> json) =>
       _$FormSectionFromJson(json);
+}
+
+SectionLayoutType _sectionLayoutTypeFromJson(Object? value) {
+  final raw = value?.toString().trim().toLowerCase();
+  switch (raw) {
+    case null:
+    case '':
+    case 'flex':
+    case 'standard':
+      return SectionLayoutType.standard;
+    case 'grid':
+    case 'grid-cols-2':
+      return SectionLayoutType.grid;
+    case 'grid-cols-3':
+      return SectionLayoutType.threeColumns;
+    case 'full-width':
+      return SectionLayoutType.fullWidth;
+    case 'list':
+      return SectionLayoutType.list;
+    case 'sidebar':
+      return SectionLayoutType.sidebar;
+    case 'accordion':
+    case 'split':
+      return SectionLayoutType.accordion;
+    case 'tabbed':
+      return SectionLayoutType.tabbed;
+    case 'custom':
+      return SectionLayoutType.custom;
+    case 'overlay':
+      return SectionLayoutType.overlay;
+    case 'dashboard':
+      return SectionLayoutType.dashboard;
+    case 'centered':
+      return SectionLayoutType.centered;
+    case 'wizard':
+    case 'stacked':
+      return SectionLayoutType.wizard;
+    case 'masonry':
+      return SectionLayoutType.masonry;
+    case 'fixed':
+      return SectionLayoutType.fixed;
+    case 'card':
+      return SectionLayoutType.card;
+    default:
+      throw ArgumentError(
+        '`layout` is not one of the supported values: $raw',
+      );
+  }
 }

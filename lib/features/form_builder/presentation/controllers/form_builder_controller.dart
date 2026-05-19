@@ -8,6 +8,7 @@ import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_builder_state.dart';
 import '../../domain/entities/form_question.dart';
 import '../../domain/entities/form_section.dart';
+import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 import '../../domain/entities/form_version_history.dart';
@@ -22,6 +23,10 @@ class FormBuilderController extends _$FormBuilderController {
   final _uuid = const Uuid();
   String _projectId = '';
   String _formId = '';
+  BuilderForm? _savedFormSnapshot;
+  final List<BuilderForm> _undoStack = [];
+  final List<BuilderForm> _redoStack = [];
+  BuilderForm? _lastHistoryForm;
 
   @override
   FutureOr<FormBuilderState> build(String formKey) async {
@@ -31,25 +36,104 @@ class FormBuilderController extends _$FormBuilderController {
 
     // For now, let's create an empty form if formId is 'new'
     if (_formId == 'new') {
-      return FormBuilderState(
-        form: BuilderForm(
-          id: _uuid.v4(),
-          title: 'Untitled Form',
-          sections: [
-            FormSection(
-              id: _uuid.v4(),
-              title: 'Untitled Section',
-              questions: [],
-            ),
-          ],
-        ),
+      final initialForm = BuilderForm(
+        id: _uuid.v4(),
+        title: 'Untitled Form',
+        sections: [
+          FormSection(id: _uuid.v4(), title: 'Untitled Section', questions: []),
+        ],
       );
+      _savedFormSnapshot = initialForm;
+      _lastHistoryForm = initialForm;
+      return FormBuilderState(form: initialForm);
     }
 
     // Otherwise fetch from repository
     final repository = ref.read(formBuilderRepositoryProvider);
     final form = await repository.getForm(_projectId, _formId);
+    _savedFormSnapshot = form;
+    _lastHistoryForm = form;
     return FormBuilderState(form: form);
+  }
+
+  void _captureHistorySnapshot() {
+    if (state.value == null) return;
+    final currentForm = state.value!.form;
+    if (_lastHistoryForm != null && _lastHistoryForm == currentForm) return;
+    if (_lastHistoryForm != null) {
+      _undoStack.add(_lastHistoryForm!);
+    }
+    _lastHistoryForm = currentForm;
+    _redoStack.clear();
+  }
+
+  void _setState(FormBuilderState nextState, {bool markDirty = false}) {
+    state = AsyncValue.data(
+      nextState.copyWith(
+        isDirty: markDirty ? true : nextState.isDirty,
+        canUndo: _undoStack.isNotEmpty,
+        canRedo: _redoStack.isNotEmpty,
+      ),
+    );
+  }
+
+  void _markDirty() {
+    if (state.value == null) return;
+    _captureHistorySnapshot();
+    _setState(state.value!, markDirty: true);
+  }
+
+  bool get canUndo => _undoStack.isNotEmpty;
+  bool get canRedo => _redoStack.isNotEmpty;
+
+  void undo() {
+    if (state.value == null || _undoStack.isEmpty) return;
+    final current = state.value!.form;
+    final previous = _undoStack.removeLast();
+    _redoStack.add(current);
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: previous,
+        isDirty: _savedFormSnapshot != previous,
+        canUndo: _undoStack.isNotEmpty,
+        canRedo: _redoStack.isNotEmpty,
+      ),
+    );
+    _lastHistoryForm = previous;
+  }
+
+  void redo() {
+    if (state.value == null || _redoStack.isEmpty) return;
+    final current = state.value!.form;
+    final next = _redoStack.removeLast();
+    _undoStack.add(current);
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: next,
+        isDirty: _savedFormSnapshot != next,
+        canUndo: _undoStack.isNotEmpty,
+        canRedo: _redoStack.isNotEmpty,
+      ),
+    );
+    _lastHistoryForm = next;
+  }
+
+  void discardChanges() {
+    if (state.value == null || _savedFormSnapshot == null) return;
+    _undoStack.clear();
+    _redoStack.clear();
+    _lastHistoryForm = _savedFormSnapshot;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: _savedFormSnapshot!,
+        selectedSectionId: null,
+        selectedQuestionId: null,
+        isFormSelected: false,
+        isDirty: false,
+        canUndo: false,
+        canRedo: false,
+      ),
+    );
   }
 
   dynamic _updateLocalizedField(
@@ -81,6 +165,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
     return updatedSection;
   }
 
@@ -104,6 +189,7 @@ class FormBuilderController extends _$FormBuilderController {
         ),
       ),
     );
+    _markDirty();
   }
 
   void updateLocalizedSectionTitle(
@@ -117,6 +203,7 @@ class FormBuilderController extends _$FormBuilderController {
         title: _updateLocalizedField(section.title, title, locale),
       ),
     );
+    _markDirty();
   }
 
   void updateLocalizedSectionDescription(
@@ -134,6 +221,7 @@ class FormBuilderController extends _$FormBuilderController {
         ),
       ),
     );
+    _markDirty();
   }
 
   void updateLocalizedQuestionLabel(
@@ -145,6 +233,7 @@ class FormBuilderController extends _$FormBuilderController {
       questionId,
       (q) => q.copyWith(label: _updateLocalizedField(q.label, label, locale)),
     );
+    _markDirty();
   }
 
   void updateLocalizedQuestionHelperText(
@@ -158,6 +247,7 @@ class FormBuilderController extends _$FormBuilderController {
         helperText: _updateLocalizedField(q.helperText, text, locale),
       ),
     );
+    _markDirty();
   }
 
   void updateLocalizedQuestionPlaceholder(
@@ -171,6 +261,7 @@ class FormBuilderController extends _$FormBuilderController {
         placeholder: _updateLocalizedField(q.placeholder, text, locale),
       ),
     );
+    _markDirty();
   }
 
   /// Generic helper to search for and update a question across all sections.
@@ -193,35 +284,40 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void updateQuestionRequired(String questionId, bool required) {
     _updateQuestion(questionId, (q) => q.copyWith(isRequired: required));
   }
 
-  Future<void> addSection() async {
+  Future<void> addSection({String? parentSectionId}) async {
     if (state.value == null) return;
 
     FormSection newSection = FormSection(
       id: _uuid.v4(),
       title: 'Untitled Section',
       questions: [],
+      layout: SectionLayoutType.standard,
     );
 
-    // If form is persisted, call backend
-    if (_formId != 'new') {
-      try {
-        final repository = ref.read(formBuilderRepositoryProvider);
-        newSection = await repository.createSection(
-          _projectId,
-          _formId,
-          newSection,
-        );
-      } catch (e) {
-        final error = ErrorHandler.handle(e);
-        state = AsyncValue.data(state.value!.copyWith(error: error));
-        return;
-      }
+    if (parentSectionId != null) {
+      final sections = _addNestedSection(
+        state.value!.form.sections,
+        parentSectionId,
+        newSection,
+      );
+      if (sections == null) return;
+      state = AsyncValue.data(
+        state.value!.copyWith(
+          form: state.value!.form.copyWith(sections: sections),
+          selectedSectionId: newSection.id,
+          selectedQuestionId: null,
+          isFormSelected: false,
+        ),
+      );
+      _markDirty();
+      return;
     }
 
     state = AsyncValue.data(
@@ -234,35 +330,59 @@ class FormBuilderController extends _$FormBuilderController {
         isFormSelected: false,
       ),
     );
+    _markDirty();
+  }
+
+  List<FormSection>? _addNestedSection(
+    List<FormSection> sections,
+    String parentSectionId,
+    FormSection newSection,
+  ) {
+    return sections.map((section) {
+      if (section.id == parentSectionId) {
+        return section.copyWith(sections: [...section.sections, newSection]);
+      }
+      if (section.sections.isEmpty) return section;
+      final nested = _addNestedSection(
+        section.sections,
+        parentSectionId,
+        newSection,
+      );
+      return nested == null ? section : section.copyWith(sections: nested);
+    }).toList();
   }
 
   Future<void> removeSection(String sectionId) async {
     if (state.value == null) return;
 
-    // If form is persisted, call backend
-    if (_formId != 'new') {
-      try {
-        final repository = ref.read(formBuilderRepositoryProvider);
-        await repository.deleteSection(_projectId, _formId, sectionId);
-      } catch (e) {
-        final error = ErrorHandler.handle(e);
-        state = AsyncValue.data(state.value!.copyWith(error: error));
-        return;
-      }
-    }
+    final sections = _removeSectionRecursive(
+      state.value!.form.sections,
+      sectionId,
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(
-          sections: state.value!.form.sections
-              .where((s) => s.id != sectionId)
-              .toList(),
-        ),
+        form: state.value!.form.copyWith(sections: sections),
         selectedSectionId: state.value!.selectedSectionId == sectionId
             ? null
             : state.value!.selectedSectionId,
       ),
     );
+    _markDirty();
+  }
+
+  List<FormSection> _removeSectionRecursive(
+    List<FormSection> sections,
+    String sectionId,
+  ) {
+    return sections.where((section) => section.id != sectionId).map((section) {
+      if (section.sections.isEmpty) return section;
+      final nested = _removeSectionRecursive(section.sections, sectionId);
+      if (nested.length == section.sections.length) {
+        return section;
+      }
+      return section.copyWith(sections: nested);
+    }).toList();
   }
 
   void addQuestion(String sectionId, QuestionType type) {
@@ -284,6 +404,7 @@ class FormBuilderController extends _$FormBuilderController {
         isFormSelected: false,
       ),
     );
+    _markDirty();
   }
 
   void addFromTemplate(String? sectionId, CustomFieldTemplate template) {
@@ -308,6 +429,7 @@ class FormBuilderController extends _$FormBuilderController {
           isFormSelected: false,
         ),
       );
+      _markDirty();
     } else if (template.template_type == 'section') {
       final section = FormSection.fromJson(template.data);
       final newSection = section.copyWith(id: _uuid.v4());
@@ -322,6 +444,7 @@ class FormBuilderController extends _$FormBuilderController {
           isFormSelected: false,
         ),
       );
+      _markDirty();
     } else if (template.template_type == 'workflow') {
       final currentWorkflows = Map<String, dynamic>.from(
         state.value!.form.workflows,
@@ -332,7 +455,38 @@ class FormBuilderController extends _$FormBuilderController {
           form: state.value!.form.copyWith(workflows: currentWorkflows),
         ),
       );
+      _markDirty();
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Library click helpers — resolve insertion target from active state
+  // ---------------------------------------------------------------------------
+
+  /// Resolves the insertion section (selected → first → no-op) and calls
+  /// [addQuestion].  Called by the field library on tile tap.
+  void addQuestionToActiveSection(QuestionType type) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections;
+    if (sections.isEmpty) {
+      debugPrint(
+        'addQuestionToActiveSection: no sections exist — add a section first.',
+      );
+      return;
+    }
+    final targetId = state.value!.selectedSectionId ?? sections.first.id;
+    addQuestion(targetId, type);
+  }
+
+  /// Resolves the insertion section and calls [addFromTemplate].
+  /// Section-type and workflow-type templates ignore the section target.
+  void addTemplateToActiveSection(CustomFieldTemplate template) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections;
+    final targetId = sections.isNotEmpty
+        ? (state.value!.selectedSectionId ?? sections.first.id)
+        : null;
+    addFromTemplate(targetId, template);
   }
 
   void updateQuestionMetadata(
@@ -358,6 +512,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void removeQuestion(String sectionId, String questionId) {
@@ -377,8 +532,12 @@ class FormBuilderController extends _$FormBuilderController {
         selectedQuestionId: state.value!.selectedQuestionId == questionId
             ? null
             : state.value!.selectedQuestionId,
+        selectedQuestionIds: state.value!.selectedQuestionIds
+            .where((id) => id != questionId)
+            .toList(),
       ),
     );
+    _markDirty();
   }
 
   void selectQuestion(String? sectionId, String? questionId) {
@@ -387,7 +546,37 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.copyWith(
         selectedSectionId: sectionId,
         selectedQuestionId: questionId,
+        selectedQuestionIds: questionId == null ? const [] : [questionId],
         isFormSelected: false,
+      ),
+    );
+  }
+
+  void toggleQuestionSelection(String sectionId, String questionId) {
+    if (state.value == null) return;
+    final selected = [...state.value!.selectedQuestionIds];
+    if (selected.contains(questionId)) {
+      selected.remove(questionId);
+    } else {
+      selected.add(questionId);
+    }
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        selectedSectionId: selected.isEmpty ? sectionId : null,
+        selectedQuestionId: selected.length == 1 ? selected.first : null,
+        selectedQuestionIds: selected,
+        isFormSelected: false,
+      ),
+    );
+  }
+
+  void clearQuestionSelections() {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        selectedQuestionId: null,
+        selectedQuestionIds: const [],
       ),
     );
   }
@@ -410,6 +599,62 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.copyWith(
         form: state.value!.form.copyWith(sections: sections),
       ),
+    );
+    _markDirty();
+  }
+
+  void convertQuestionType(String questionId, QuestionType newType) {
+    if (state.value == null) return;
+
+    final sections = state.value!.form.sections.map((s) {
+      final questionIndex = s.questions.indexWhere((q) => q.id == questionId);
+      if (questionIndex == -1) return s;
+
+      final currentQuestion = s.questions[questionIndex];
+      final convertedQuestion = FieldRegistry.convertQuestionType(
+        currentQuestion,
+        newType,
+      );
+
+      final newQuestions = [...s.questions];
+      newQuestions[questionIndex] = convertedQuestion;
+      return s.copyWith(questions: newQuestions);
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+    _markDirty();
+  }
+
+  void updateQuestionsBulk(
+    List<String> questionIds,
+    FormQuestion Function(FormQuestion question) updater,
+  ) {
+    if (state.value == null || questionIds.isEmpty) return;
+    final ids = questionIds.toSet();
+    final sections = state.value!.form.sections.map((s) {
+      final newQuestions = s.questions.map((q) {
+        if (!ids.contains(q.id)) return q;
+        return updater(q);
+      }).toList();
+      return s.copyWith(questions: newQuestions);
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: sections),
+      ),
+    );
+    _markDirty();
+  }
+
+  void convertQuestionsBulk(List<String> questionIds, QuestionType newType) {
+    updateQuestionsBulk(
+      questionIds,
+      (question) => FieldRegistry.convertQuestionType(question, newType),
     );
   }
 
@@ -437,6 +682,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void updateQuestionHelperText(String questionId, String helperText) {
@@ -463,6 +709,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void updateQuestionPlaceholder(String questionId, String placeholder) {
@@ -489,6 +736,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void updateQuestionDefaultValue(String questionId, dynamic defaultValue) {
@@ -510,6 +758,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void selectForm() {
@@ -518,6 +767,7 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.copyWith(
         selectedSectionId: null,
         selectedQuestionId: null,
+        selectedQuestionIds: const [],
         isFormSelected: true,
       ),
     );
@@ -529,48 +779,27 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.copyWith(
         selectedSectionId: sectionId,
         selectedQuestionId: null,
+        selectedQuestionIds: const [],
         isFormSelected: false,
       ),
     );
   }
 
-  Timer? _sectionDebounceTimer;
-
-  void _syncSectionWithBackend(FormSection section) {
-    if (_formId == 'new') return;
-    _sectionDebounceTimer?.cancel();
-    _sectionDebounceTimer = Timer(const Duration(milliseconds: 1000), () async {
-      try {
-        final repository = ref.read(formBuilderRepositoryProvider);
-        await repository.updateSection(_projectId, _formId, section);
-      } catch (e) {
-        debugPrint('Failed to sync section: $e');
-      }
-    });
-  }
-
   void updateSection(FormSection updatedSection) {
     _updateSectionById(updatedSection.id, (_) => updatedSection);
-
-    _syncSectionWithBackend(updatedSection);
   }
 
   void updateSectionTitle(String sectionId, String title) {
     if (state.value == null) return;
-    final updatedSection = _updateSectionById(
-      sectionId,
-      (section) => section.copyWith(title: title),
-    );
-    if (updatedSection != null) _syncSectionWithBackend(updatedSection);
+    _updateSectionById(sectionId, (section) => section.copyWith(title: title));
   }
 
   void updateSectionDescription(String sectionId, String description) {
     if (state.value == null) return;
-    final updatedSection = _updateSectionById(
+    _updateSectionById(
       sectionId,
       (section) => section.copyWith(description: description),
     );
-    if (updatedSection != null) _syncSectionWithBackend(updatedSection);
   }
 
   void updateForm(BuilderForm updatedForm) {
@@ -580,6 +809,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: updatedForm.copyWith(sections: state.value!.form.sections),
       ),
     );
+    _markDirty();
   }
 
   void updateWorkflows(Map<String, dynamic> workflows) {
@@ -589,9 +819,10 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(workflows: workflows),
       ),
     );
+    _markDirty();
   }
 
-  Future<void> reorderSections(int oldIndex, int newIndex) async {
+  void reorderSections(int oldIndex, int newIndex) {
     if (state.value == null) return;
 
     final sections = [...state.value!.form.sections];
@@ -601,28 +832,12 @@ class FormBuilderController extends _$FormBuilderController {
     final item = sections.removeAt(oldIndex);
     sections.insert(newIndex, item);
 
-    // If form is persisted, call backend
-    if (_formId != 'new') {
-      try {
-        final repository = ref.read(formBuilderRepositoryProvider);
-        await repository.reorderSections(
-          _projectId,
-          _formId,
-          sections.map((s) => s.id).toList(),
-        );
-      } catch (e) {
-        final error = ErrorHandler.handle(e);
-        state = AsyncValue.data(state.value!.copyWith(error: error));
-        // We might want to revert local state if it fails,
-        // but for now we'll just keep local state and show error.
-      }
-    }
-
     state = AsyncValue.data(
       state.value!.copyWith(
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void reorderQuestions(String sectionId, int oldIndex, int newIndex) {
@@ -646,6 +861,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
+    _markDirty();
   }
 
   void moveQuestion(
@@ -692,6 +908,7 @@ class FormBuilderController extends _$FormBuilderController {
         selectedQuestionId: questionId,
       ),
     );
+    _markDirty();
   }
 
   void duplicateQuestion(String sectionId, FormQuestion question) {
@@ -721,21 +938,33 @@ class FormBuilderController extends _$FormBuilderController {
         selectedSectionId: sectionId,
       ),
     );
+    _markDirty();
   }
 
   Future<bool> saveForm({String versionType = 'patch'}) async {
     if (state.value == null) return false;
+    final currentForm = state.value!.form;
     state = AsyncValue.data(state.value!.copyWith(isSaving: true));
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final savedForm = await repository.saveForm(
-        state.value!.form,
+      await repository.saveForm(
+        currentForm,
         projectId: _projectId,
         versionType: versionType,
       );
       state = AsyncValue.data(
-        state.value!.copyWith(form: savedForm, isSaving: false),
+        state.value!.copyWith(
+          form: currentForm,
+          isSaving: false,
+          isDirty: false,
+          canUndo: false,
+          canRedo: false,
+        ),
       );
+      _savedFormSnapshot = currentForm;
+      _undoStack.clear();
+      _redoStack.clear();
+      _lastHistoryForm = currentForm;
       return true;
     } catch (e) {
       final error = ErrorHandler.handle(e);
@@ -782,8 +1011,18 @@ class FormBuilderController extends _$FormBuilderController {
       );
 
       state = AsyncValue.data(
-        state.value!.copyWith(form: updatedForm, isSaving: false),
+        state.value!.copyWith(
+          form: updatedForm,
+          isSaving: false,
+          isDirty: false,
+          canUndo: false,
+          canRedo: false,
+        ),
       );
+      _savedFormSnapshot = updatedForm;
+      _undoStack.clear();
+      _redoStack.clear();
+      _lastHistoryForm = updatedForm;
       return true;
     } catch (e) {
       final error = ErrorHandler.handle(e);
@@ -814,6 +1053,7 @@ class FormBuilderController extends _$FormBuilderController {
           form: state.value!.form.copyWith(sections: updatedSections),
         ),
       );
+      _markDirty();
     } catch (e) {
       final error = ErrorHandler.handle(e);
       state = AsyncValue.data(state.value!.copyWith(error: error));
@@ -848,11 +1088,9 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateSectionMetadata(String sectionId, Map<String, dynamic> metadata) {
     if (state.value == null) return;
-    FormSection? updatedSection;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        updatedSection = s.copyWith(metaData: {...s.metaData, ...metadata});
-        return updatedSection!;
+        return s.copyWith(metaData: {...s.metaData, ...metadata});
       }
       return s;
     }).toList();
@@ -862,8 +1100,7 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(sections: sections),
       ),
     );
-
-    if (updatedSection != null) _syncSectionWithBackend(updatedSection!);
+    _markDirty();
   }
 
   void updateFormMetadata(Map<String, dynamic> metadata) {
@@ -875,6 +1112,7 @@ class FormBuilderController extends _$FormBuilderController {
         ),
       ),
     );
+    _markDirty();
   }
 
   void updateAccessPolicy(AccessPolicy policy) {
@@ -884,5 +1122,6 @@ class FormBuilderController extends _$FormBuilderController {
         form: state.value!.form.copyWith(accessPolicy: policy),
       ),
     );
+    _markDirty();
   }
 }

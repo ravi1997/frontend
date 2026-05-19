@@ -15,8 +15,7 @@ _FormQuestionOption _$FormQuestionOptionFromJson(Map<String, dynamic> json) =>
       label: json['option_label'] as String,
       value: json['option_value'] as String,
       order: (json['order'] as num?)?.toInt() ?? 0,
-      followupVisibilityCondition:
-          json['followup_visibility_condition'] as String?,
+      visibilityCondition: json['visibility_condition'] as String?,
     );
 
 Map<String, dynamic> _$FormQuestionOptionToJson(_FormQuestionOption instance) =>
@@ -28,5 +27,5 @@ Map<String, dynamic> _$FormQuestionOptionToJson(_FormQuestionOption instance) =>
       'option_label': instance.label,
       'option_value': instance.value,
       'order': instance.order,
-      'followup_visibility_condition': instance.followupVisibilityCondition,
+      'visibility_condition': instance.visibilityCondition,
     };

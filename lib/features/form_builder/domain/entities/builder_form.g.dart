@@ -54,7 +54,7 @@ Map<String, dynamic> _$BuilderFormToJson(_BuilderForm instance) =>
     };
 
 const _$FormLayoutTypeEnumMap = {
-  FormLayoutType.singleColumn: 'single_column',
-  FormLayoutType.twoColumns: 'two_columns',
-  FormLayoutType.threeColumns: 'three_columns',
+  FormLayoutType.singleColumn: 'flex',
+  FormLayoutType.twoColumns: 'grid-cols-2',
+  FormLayoutType.threeColumns: 'grid-cols-3',
 };

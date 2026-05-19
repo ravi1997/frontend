@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BuilderForm {
 
- String get id; Object? get title; String get status; bool get isPublished; String get version; bool get isLatest; List<FormSection> get sections; FormLayoutType get layout;// ignore: invalid_annotation_target
-@JsonKey(fromJson: AppDateUtils.parse) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows; Map<String, dynamic> get metadata; AccessPolicy get accessPolicy;
+ String get id; Object? get title; String get status; bool get isPublished; String get version; bool get isLatest; List<FormSection> get sections; FormLayoutType get layout;@JsonKey(fromJson: AppDateUtils.parse) DateTime? get updatedAt; FormStyle get style; List<FormVersionHistory> get versionHistory; Map<String, dynamic> get workflows; Map<String, dynamic> get metadata; AccessPolicy get accessPolicy;
 /// Create a copy of BuilderForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -257,7 +256,6 @@ class _BuilderForm extends BuilderForm {
 }
 
 @override@JsonKey() final  FormLayoutType layout;
-// ignore: invalid_annotation_target
 @override@JsonKey(fromJson: AppDateUtils.parse) final  DateTime? updatedAt;
 @override@JsonKey() final  FormStyle style;
  final  List<FormVersionHistory> _versionHistory;

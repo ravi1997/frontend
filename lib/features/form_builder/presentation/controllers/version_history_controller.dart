@@ -74,7 +74,6 @@ class VersionHistoryController extends _$VersionHistoryController {
     return const VersionHistoryState(isLoading: true);
   }
 
-  @override
   late String formId;
 
   Future<void> _loadVersionHistory() async {
@@ -83,7 +82,7 @@ class VersionHistoryController extends _$VersionHistoryController {
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final versions = await repository.getVersionHistory(formId);
+      final versions = await repository.getVersionHistory(_projectId, formId);
       final sortedVersions = List<FormVersionHistory>.from(versions)
         ..sort((a, b) => b.created_at.compareTo(a.created_at));
 
@@ -103,7 +102,7 @@ class VersionHistoryController extends _$VersionHistoryController {
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final versions = await repository.getVersionHistory(formId);
+      final versions = await repository.getVersionHistory(_projectId, formId);
       final sortedVersions = List<FormVersionHistory>.from(versions)
         ..sort((a, b) => b.created_at.compareTo(a.created_at));
 
@@ -128,7 +127,11 @@ class VersionHistoryController extends _$VersionHistoryController {
     // Load the form data for this version
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final form = await repository.getFormVersion(formId, version.version);
+      final form = await repository.getFormVersion(
+        _projectId,
+        formId,
+        version.version,
+      );
 
       state = state.copyWith(selectedForm: form);
     } catch (e) {
@@ -167,7 +170,7 @@ class VersionHistoryController extends _$VersionHistoryController {
       await repository.saveForm(updatedForm, projectId: _projectId);
 
       // Refresh the version history
-      final versions = await repository.getVersionHistory(formId);
+      final versions = await repository.getVersionHistory(_projectId, formId);
       final sortedVersions = List<FormVersionHistory>.from(versions)
         ..sort((a, b) => b.created_at.compareTo(a.created_at));
 

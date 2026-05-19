@@ -3,10 +3,10 @@ import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 import '../../domain/entities/custom_field_template.dart';
+import '../../domain/entities/form_section.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
-import '../../domain/entities/form_section.dart';
 import '../dto/form_dto.dart';
 import '../mappers/form_mapper.dart';
 
@@ -30,6 +30,8 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       _logger.i('projectId: $projectId Endpoint: $endpoint');
       final response = await _apiClient.get(endpoint);
       final data = Map<String, dynamic>.from(response.data as Map);
+      data['id'] ??= id;
+      data['form_id'] ??= id;
       final hydratedSections = await _loadSections(projectId, id, data);
       if (hydratedSections != null) {
         data['sections'] = hydratedSections;
@@ -105,22 +107,34 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final bool isNewForm =
           form.id.isEmpty || form.id == 'new' || form.updatedAt == null;
 
+      _logger.i('isNewForm: $isNewForm');
+
       if (isNewForm) {
         // ── Create new form ──────────────────────────────────────────────
-        // Backend: POST /forms/ → 201 { "form_id": "uuid" }
-        final payload = FormMapper.toCreatePayload(form);
+        // Backend: POST /projects/<projectId>/forms/ → 201 { "form_id": "uuid" }
+        final payload = FormMapper.toBackendJson(form);
+        payload['project'] = projectId;
         final response = await _apiClient.post(
-          ApiEndpoints.createForm,
+          ApiEndpoints.createProjectForm(projectId),
           data: payload,
         );
         final data = response.data;
         final newFormId = _extractFormId(data);
         return getForm(projectId, newFormId);
       } else {
+        _logger.i('Updating existing form');
+        _logger.i('form: ${form.id}');
+        _logger.i('projectId: $projectId');
+        _logger.i(
+          'endpoint: ${ApiEndpoints.updateProjectForm(projectId, form.id)}',
+        );
         // ── Update existing form ─────────────────────────────────────────
-        // Backend: PUT /forms/<id> for metadata
-        final metadata = FormMapper.toUpdatePayload(form);
-        await _apiClient.put(ApiEndpoints.updateForm(form.id), data: metadata);
+        // Backend: PUT /projects/<projectId>/forms/<id> for full canvas
+        final payload = FormMapper.toBackendJson(form);
+        await _apiClient.put(
+          ApiEndpoints.updateProjectForm(projectId, form.id),
+          data: payload,
+        );
 
         // Fetch the updated form to return consistent state
         return getForm(projectId, form.id);
@@ -153,13 +167,14 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
 
   @override
   Future<void> updateFormVersion(
+    String projectId,
     String formId,
     String version,
     Map<String, dynamic> data,
   ) async {
     try {
       await _apiClient.put(
-        ApiEndpoints.updateFormVersion(formId, version),
+        ApiEndpoints.updateFormVersion(projectId, formId, version),
         data: data,
       );
     } catch (e, s) {
@@ -174,6 +189,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
 
   @override
   Future<void> createFormVersion(
+    String projectId,
     String formId,
     Map<String, dynamic> data, {
     String type = 'patch',
@@ -185,7 +201,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       payload['activate'] = activate;
 
       await _apiClient.post(
-        ApiEndpoints.createFormVersion(formId),
+        ApiEndpoints.createFormVersion(projectId, formId),
         data: payload,
       );
     } catch (e, s) {
@@ -211,10 +227,13 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<List<FormVersionHistory>> getVersionHistory(String formId) async {
+  Future<List<FormVersionHistory>> getVersionHistory(
+    String projectId,
+    String formId,
+  ) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.getFormVersions(formId),
+        ApiEndpoints.getFormVersions(projectId, formId),
       );
       final data = response.data;
       if (data is List) {
@@ -232,10 +251,14 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<BuilderForm> getFormVersion(String formId, String version) async {
+  Future<BuilderForm> getFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  ) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.getFormVersion(formId, version),
+        ApiEndpoints.getFormVersion(projectId, formId, version),
       );
       final data = response.data;
       final dto = FormDto.fromJson(data as Map<String, dynamic>);
@@ -336,97 +359,6 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       );
     } catch (e, s) {
       _logger.e('Failed to save template', error: e, stackTrace: s);
-    }
-  }
-
-  @override
-  Future<FormSection> createSection(
-    String projectId,
-    String formId,
-    FormSection section,
-  ) async {
-    try {
-      // Backend: POST /forms/<form_id>/sections → 201 returns the created section
-      _logger.i('url : ${ApiEndpoints.createSection(projectId, formId)}');
-      final response = await _apiClient.post(
-        ApiEndpoints.createSection(projectId, formId),
-        data: section.toJson(),
-      );
-      _logger.i('response : $response');
-      final data = response.data;
-      if (data is Map<String, dynamic>) {
-        // Some backends wrap the section in a key
-        if (data.containsKey('section')) {
-          return FormSection.fromJson(data['section'] as Map<String, dynamic>);
-        }
-        return FormSection.fromJson(data);
-      }
-      throw NetworkException('Unexpected create section response');
-    } catch (e, s) {
-      _logger.e('Failed to create section', error: e, stackTrace: s);
-      throw NetworkException('Failed to create section: $e');
-    }
-  }
-
-  @override
-  Future<FormSection> updateSection(
-    String projectId,
-    String formId,
-    FormSection section,
-  ) async {
-    try {
-      // Backend: PUT /forms/<form_id>/sections/<section_id>
-      final response = await _apiClient.put(
-        ApiEndpoints.updateSection(projectId, formId, section.id),
-        data: section.toJson(),
-      );
-      final data = response.data;
-      if (data is Map<String, dynamic>) {
-        if (data.containsKey('section')) {
-          return FormSection.fromJson(data['section'] as Map<String, dynamic>);
-        }
-        return FormSection.fromJson(data);
-      }
-      throw NetworkException('Unexpected update section response');
-    } catch (e, s) {
-      _logger.e('Failed to update section', error: e, stackTrace: s);
-      throw NetworkException('Failed to update section: $e');
-    }
-  }
-
-  @override
-  Future<void> deleteSection(
-    String projectId,
-    String formId,
-    String sectionId,
-  ) async {
-    try {
-      // Backend: DELETE /forms/<form_id>/sections/<section_id>
-      await _apiClient.delete(
-        ApiEndpoints.deleteSection(projectId, formId, sectionId),
-      );
-    } catch (e, s) {
-      _logger.e('Failed to delete section', error: e, stackTrace: s);
-      throw NetworkException('Failed to delete section: $e');
-    }
-  }
-
-  @override
-  Future<void> reorderSections(
-    String projectId,
-    String formId,
-    List<String> sectionIds,
-  ) async {
-    try {
-      // Backend: PUT /forms/<form_id>/sections/reorder
-      // Body: { "section_ids": [...] }
-      await _apiClient.put(
-        ApiEndpoints.reorderSections(projectId, formId),
-        data: {'section_ids': sectionIds},
-      );
-    } catch (e, s) {
-      _logger.e('Failed to reorder sections', error: e, stackTrace: s);
-      throw NetworkException('Failed to reorder sections: $e');
     }
   }
 

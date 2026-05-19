@@ -15,9 +15,9 @@ _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
   questions: (json['questions'] as List<dynamic>)
       .map((e) => FormQuestion.fromJson(e as Map<String, dynamic>))
       .toList(),
-  layout:
-      $enumDecodeNullable(_$SectionLayoutTypeEnumMap, json['layout']) ??
-      SectionLayoutType.standard,
+  layout: json['layout'] == null
+      ? SectionLayoutType.standard
+      : _sectionLayoutTypeFromJson(json['layout']),
   gridColumns: (json['grid_columns'] as num?)?.toInt() ?? 2,
   isHidden: json['is_hidden'] as bool? ?? false,
   isRepeatable: json['is_repeatable'] as bool? ?? false,
@@ -69,9 +69,19 @@ Map<String, dynamic> _$FormSectionToJson(_FormSection instance) =>
 
 const _$SectionLayoutTypeEnumMap = {
   SectionLayoutType.standard: 'flex',
-  SectionLayoutType.grid: 'grid',
-  SectionLayoutType.accordion: 'accordion',
+  SectionLayoutType.grid: 'grid-cols-2',
+  SectionLayoutType.threeColumns: 'grid-cols-3',
+  SectionLayoutType.fullWidth: 'full-width',
+  SectionLayoutType.list: 'list',
+  SectionLayoutType.sidebar: 'sidebar',
+  SectionLayoutType.accordion: 'split',
   SectionLayoutType.tabbed: 'tabbed',
-  SectionLayoutType.wizard: 'wizard',
+  SectionLayoutType.custom: 'custom',
+  SectionLayoutType.overlay: 'overlay',
+  SectionLayoutType.dashboard: 'dashboard',
+  SectionLayoutType.centered: 'centered',
+  SectionLayoutType.wizard: 'stacked',
+  SectionLayoutType.masonry: 'masonry',
+  SectionLayoutType.fixed: 'fixed',
   SectionLayoutType.card: 'card',
 };

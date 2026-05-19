@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
@@ -16,12 +17,22 @@ import '../../features/analytics/presentation/pages/analytics_page.dart';
 import '../../features/auth/presentation/screens/otp_verification_screen.dart';
 import '../../features/form_builder/presentation/pages/form_submit_page.dart';
 
+import '../../core/widgets/error_state_widget.dart';
+
 part 'app_router.g.dart';
 
 @riverpod
 Raw<GoRouter> appRouter(Ref ref) {
   final router = GoRouter(
     initialLocation: '/',
+    errorBuilder: (context, state) => Scaffold(
+      body: ErrorStateWidget(
+        title: 'Page not found',
+        message: 'The page you are looking for doesn\'t exist or was moved.',
+        error: state.error?.toString(),
+        onBack: () => context.go('/'),
+      ),
+    ),
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
 
@@ -156,17 +167,19 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        path: '/f/:formId',
+        path: '/projects/:projectId/f/:formId',
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
-          return FormSubmitPage(formId: formId);
+          final projectId = state.pathParameters['projectId']!;
+          return FormSubmitPage(formId: formId, projectId: projectId);
         },
       ),
       GoRoute(
-        path: '/forms/:formId/analytics',
+        path: '/projects/:projectId/forms/:formId/analytics',
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
-          return AnalyticsPage(formId: formId);
+          final projectId = state.pathParameters['projectId']!;
+          return AnalyticsPage(formId: formId, projectId: projectId);
         },
       ),
     ],

@@ -4,6 +4,14 @@ import '../../../../core/exceptions/app_exception.dart';
 import '../dto/form_dto.dart';
 
 class FormMapper {
+  /// Build the canonical save payload for the form builder.
+  ///
+  /// Important: this keeps both forms of section persistence that the current
+  /// backend understands:
+  /// - top-level `sections` for direct canvas sync
+  /// - `versions[0].sections` for the version snapshot contract
+  ///
+  /// The goal is compatibility, not two separate sources of truth.
   static BuilderForm fromDto(FormDto dto) {
     String activeVersion = dto.activeVersion ?? '1.0';
 
@@ -17,7 +25,7 @@ class FormMapper {
     }
 
     // Extract sections from the version
-    List<Map<String, dynamic>> sections = versionData?.sections ?? [];
+    final sections = _normalizeSections(versionData?.sections ?? const []);
 
     // Transform to frontend format
     final Map<String, dynamic> transformedData = {
@@ -81,10 +89,10 @@ class FormMapper {
       'isPublished': mapData['status'] == 'published',
       'version': activeVersion,
       'isLatest': true,
-      'sections': sections.cast<Map<String, dynamic>>().toList(),
+      'sections': _normalizeSections(sections),
       'updatedAt': mapData['updated_at'],
       'workflows': mapData['workflows'] ?? <String, dynamic>{},
-      'accessPolicy': mapData['access_policy'],
+      'accessPolicy': mapData['access_policy'] ?? mapData['accessPolicy'],
       'versionHistory': versions.map((v) {
         return {
           'version': v['version'],
@@ -125,26 +133,34 @@ class FormMapper {
 
   // ── Legacy full payload (used for backwards compat) ──────────────────────
   static Map<String, dynamic> toBackendJson(BuilderForm form) {
+    final sectionJson = form.sections.map((s) => s.toJson()).toList();
+    final workflowJson = _normalizeWorkflowMap(form.workflows);
     return {
       'title': form.title is Map
           ? (form.title as Map)['en'] ?? 'Untitled Form'
           : form.title?.toString() ?? 'Untitled Form',
       'status': form.status,
       'slug': form.id,
+      'sections': sectionJson,
       'versions': [
         {
           'version': form.version,
-          'sections': form.sections.map((s) => s.toJson()).toList(),
+          'sections': sectionJson,
           'created_at': DateTime.now().toIso8601String(),
         },
       ],
       'active_version': form.version,
-      'workflows': form.workflows,
+      'workflows': workflowJson,
+      'metadata': {...form.metadata, 'workflowSettings': workflowJson},
       'access_policy': form.accessPolicy.toJson(),
+      'accessPolicy': form.accessPolicy.toJson(),
+      'style': form.style.toJson(),
+      'ui_type': 'flex',
     };
   }
 
   static Map<String, dynamic> toFormMetadataJson(BuilderForm form) {
+    final workflowJson = _normalizeWorkflowMap(form.workflows);
     return {
       'title': form.title is Map
           ? (form.title as Map)['en'] ?? 'Untitled Form'
@@ -152,8 +168,12 @@ class FormMapper {
       'status': form.status,
       'slug': form.id,
       'active_version': form.version,
-      'workflows': form.workflows,
+      'workflows': workflowJson,
+      'metadata': {...form.metadata, 'workflowSettings': workflowJson},
       'access_policy': form.accessPolicy.toJson(),
+      'accessPolicy': form.accessPolicy.toJson(),
+      'style': form.style.toJson(),
+      'ui_type': 'flex',
       // 'is_template': form.isTemplate, // If applicable
       // versions are EXCLUDED to prevent overwrite
     };
@@ -214,5 +234,123 @@ class FormMapper {
       return data.map((item) => _sanitizeData(item)).toList();
     }
     return data;
+  }
+
+  static Map<String, dynamic> _normalizeWorkflowMap(
+    Map<String, dynamic> workflows,
+  ) {
+    final normalized = <String, dynamic>{};
+    workflows.forEach((key, value) {
+      if (value is Map) {
+        final map = Map<String, dynamic>.from(value);
+        normalized[key.toString()] = {
+          ...map,
+          if (map.containsKey('email_notification'))
+            'email_notification': map['email_notification'],
+          if (map.containsKey('webhook')) 'webhook': map['webhook'],
+        };
+      } else {
+        normalized[key.toString()] = value;
+      }
+    });
+    return normalized;
+  }
+
+  static List<Map<String, dynamic>> _normalizeSections(List<dynamic> sections) {
+    return sections.map((section) {
+      if (section is Map<String, dynamic>) {
+        return _normalizeSectionTree(section);
+      }
+      if (section is Map) {
+        return _normalizeSectionTree(Map<String, dynamic>.from(section));
+      }
+      return _sectionStub(section.toString());
+    }).toList();
+  }
+
+  static Map<String, dynamic> _normalizeSectionTree(
+    Map<String, dynamic> section,
+  ) {
+    final normalized = Map<String, dynamic>.from(section);
+    final children = normalized['sections'];
+    if (children is List) {
+      normalized['sections'] = _normalizeSections(children);
+    } else {
+      normalized['sections'] = <Map<String, dynamic>>[];
+    }
+
+    final questions = normalized['questions'];
+    if (questions is List) {
+      normalized['questions'] = questions.map((q) {
+        final mapped = q is Map<String, dynamic>
+            ? Map<String, dynamic>.from(q)
+            : q is Map
+            ? Map<String, dynamic>.from(q)
+            : <String, dynamic>{
+                'id': q.toString(),
+                'label': 'Untitled Question',
+              };
+        if (mapped.containsKey('is_repeatable_question') &&
+            !mapped.containsKey('is_repeatable')) {
+          mapped['is_repeatable'] = mapped['is_repeatable_question'];
+        }
+        if (mapped.containsKey('keepLastValue') &&
+            !mapped.containsKey('keep_last_value')) {
+          mapped['keep_last_value'] = mapped['keepLastValue'];
+        }
+        if (mapped.containsKey('repeatMin') &&
+            !mapped.containsKey('repeat_min')) {
+          mapped['repeat_min'] = mapped['repeatMin'];
+        }
+        if (mapped.containsKey('repeatMax') &&
+            !mapped.containsKey('repeat_max')) {
+          mapped['repeat_max'] = mapped['repeatMax'];
+        }
+        return mapped;
+      }).toList();
+    } else {
+      normalized['questions'] = <Map<String, dynamic>>[];
+    }
+
+    if (normalized.containsKey('is_repeatable_section') &&
+        !normalized.containsKey('is_repeatable')) {
+      normalized['is_repeatable'] = normalized['is_repeatable_section'];
+    }
+
+    normalized.putIfAbsent('title', () => 'Untitled Section');
+    normalized.putIfAbsent('description', () => null);
+    normalized.putIfAbsent('help_text', () => null);
+    normalized.putIfAbsent('style', () => <String, dynamic>{});
+    normalized.putIfAbsent('meta_data', () => <String, dynamic>{});
+    normalized.putIfAbsent('tags', () => <String>[]);
+    normalized.putIfAbsent(
+      'response_templates',
+      () => <Map<String, dynamic>>[],
+    );
+    return normalized;
+  }
+
+  static Map<String, dynamic> _sectionStub(String id) {
+    return {
+      'id': id,
+      'title': 'Untitled Section',
+      'description': null,
+      'help_text': null,
+      'order': 0,
+      'questions': <Map<String, dynamic>>[],
+      'layout': 'flex',
+      'grid_columns': 2,
+      'is_hidden': false,
+      'is_repeatable': false,
+      'repeat_min': null,
+      'repeat_max': null,
+      'conditional_logic': null,
+      'logic': null,
+      'sections': <Map<String, dynamic>>[],
+      'response_templates': <Map<String, dynamic>>[],
+      'tags': <String>[],
+      'style': <String, dynamic>{},
+      'meta_data': <String, dynamic>{},
+    };
   }
 }

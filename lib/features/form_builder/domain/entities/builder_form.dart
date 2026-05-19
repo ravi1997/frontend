@@ -22,7 +22,6 @@ abstract class BuilderForm with _$BuilderForm {
     @Default(true) bool isLatest,
     required List<FormSection> sections,
     @Default(FormLayoutType.singleColumn) FormLayoutType layout,
-    // ignore: invalid_annotation_target
     @JsonKey(fromJson: AppDateUtils.parse) DateTime? updatedAt,
     @Default(FormStyle()) FormStyle style,
     @Default([]) List<FormVersionHistory> versionHistory,

@@ -10,19 +10,28 @@ part 'form_builder_repository.g.dart';
 
 abstract class FormBuilderRepository {
   Future<BuilderForm> getForm(String projectId, String id);
-  Future<List<FormVersionHistory>> getVersionHistory(String formId);
-  Future<BuilderForm> getFormVersion(String formId, String version);
+  Future<List<FormVersionHistory>> getVersionHistory(
+    String projectId,
+    String formId,
+  );
+  Future<BuilderForm> getFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  );
   Future<BuilderForm> saveForm(
     BuilderForm form, {
     required String projectId,
     String versionType = 'patch',
   });
   Future<void> updateFormVersion(
+    String projectId,
     String formId,
     String version,
     Map<String, dynamic> data,
   );
   Future<void> createFormVersion(
+    String projectId,
     String formId,
     Map<String, dynamic> data, {
     String type = 'patch',
@@ -39,24 +48,6 @@ abstract class FormBuilderRepository {
   // Templates
   Future<List<CustomFieldTemplate>> getTemplates();
   Future<void> saveTemplate(CustomFieldTemplate template);
-
-  // Section CRUD
-  Future<FormSection> createSection(
-    String projectId,
-    String formId,
-    FormSection section,
-  );
-  Future<FormSection> updateSection(
-    String projectId,
-    String formId,
-    FormSection section,
-  );
-  Future<void> deleteSection(String projectId, String formId, String sectionId);
-  Future<void> reorderSections(
-    String projectId,
-    String formId,
-    List<String> sectionIds,
-  );
 
   // Translations
   Future<Map<String, dynamic>> getTranslations(

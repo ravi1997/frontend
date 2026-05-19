@@ -9,17 +9,18 @@ class IdReader {
     return map['id'] ?? map['_id'];
   }
 
-  /// Read an ID value from a JSON map with a fallback to `slug`.
-  /// Used for FormDto which may use slug as an identifier.
+  /// Read an ID value from a JSON map with a fallback to `_id`.
+  /// Keep identifiers UUID-based for API calls; slug is not a stable id.
   static Object? readIdWithSlug(Map<String, dynamic> map) {
-    return map['id'] ?? map['_id'] ?? map['slug'];
+    return map['id'] ?? map['_id'];
   }
 
   /// Freezed-compatible `readValue` callback for `@JsonKey` with slug fallback.
   /// Matches the required signature: `Object? Function(Map<dynamic, dynamic>, String)`
   /// Usage: `@JsonKey(readValue: IdReader.readIdWithSlugCallback)`
   static Object? readIdWithSlugCallback(Map json, String key) {
-    return json['id'] ?? json['_id'] ?? json['slug'];
+    final id = json['id'] ?? json['_id'] ?? json['form_id'];
+    return id ?? '';
   }
 
   /// Freezed-compatible `readValue` callback for `@JsonKey`.

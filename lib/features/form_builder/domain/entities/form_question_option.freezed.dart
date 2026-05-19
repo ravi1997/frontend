@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormQuestionOption {
 
-@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String get id; String? get description;@JsonKey(name: 'is_default') bool get isDefault;@JsonKey(name: 'is_disabled') bool get isDisabled;@JsonKey(name: 'option_label') String get label;@JsonKey(name: 'option_value') String get value; int get order;@JsonKey(name: 'followup_visibility_condition') String? get followupVisibilityCondition;
+@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String get id; String? get description;@JsonKey(name: 'is_default') bool get isDefault;@JsonKey(name: 'is_disabled') bool get isDisabled;@JsonKey(name: 'option_label') String get label;@JsonKey(name: 'option_value') String get value; int get order;@JsonKey(name: 'visibility_condition') String? get visibilityCondition;
 /// Create a copy of FormQuestionOption
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FormQuestionOptionCopyWith<FormQuestionOption> get copyWith => _$FormQuestionOp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormQuestionOption&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.isDisabled, isDisabled) || other.isDisabled == isDisabled)&&(identical(other.label, label) || other.label == label)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order)&&(identical(other.followupVisibilityCondition, followupVisibilityCondition) || other.followupVisibilityCondition == followupVisibilityCondition));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormQuestionOption&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.isDisabled, isDisabled) || other.isDisabled == isDisabled)&&(identical(other.label, label) || other.label == label)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order)&&(identical(other.visibilityCondition, visibilityCondition) || other.visibilityCondition == visibilityCondition));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,isDefault,isDisabled,label,value,order,followupVisibilityCondition);
+int get hashCode => Object.hash(runtimeType,id,description,isDefault,isDisabled,label,value,order,visibilityCondition);
 
 @override
 String toString() {
-  return 'FormQuestionOption(id: $id, description: $description, isDefault: $isDefault, isDisabled: $isDisabled, label: $label, value: $value, order: $order, followupVisibilityCondition: $followupVisibilityCondition)';
+  return 'FormQuestionOption(id: $id, description: $description, isDefault: $isDefault, isDisabled: $isDisabled, label: $label, value: $value, order: $order, visibilityCondition: $visibilityCondition)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FormQuestionOptionCopyWith<$Res>  {
   factory $FormQuestionOptionCopyWith(FormQuestionOption value, $Res Function(FormQuestionOption) _then) = _$FormQuestionOptionCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
+@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'visibility_condition') String? visibilityCondition
 });
 
 
@@ -65,7 +65,7 @@ class _$FormQuestionOptionCopyWithImpl<$Res>
 
 /// Create a copy of FormQuestionOption
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = freezed,Object? isDefault = null,Object? isDisabled = null,Object? label = null,Object? value = null,Object? order = null,Object? followupVisibilityCondition = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? description = freezed,Object? isDefault = null,Object? isDisabled = null,Object? label = null,Object? value = null,Object? order = null,Object? visibilityCondition = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,7 @@ as bool,isDisabled: null == isDisabled ? _self.isDisabled : isDisabled // ignore
 as bool,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as int,followupVisibilityCondition: freezed == followupVisibilityCondition ? _self.followupVisibilityCondition : followupVisibilityCondition // ignore: cast_nullable_to_non_nullable
+as int,visibilityCondition: freezed == visibilityCondition ? _self.visibilityCondition : visibilityCondition // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -160,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'visibility_condition')  String? visibilityCondition)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormQuestionOption() when $default != null:
-return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
+return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.visibilityCondition);case _:
   return orElse();
 
 }
@@ -181,10 +181,10 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'visibility_condition')  String? visibilityCondition)  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestionOption():
-return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
+return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.visibilityCondition);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +201,10 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'followup_visibility_condition')  String? followupVisibilityCondition)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: IdReader.readIdCallback)  String id,  String? description, @JsonKey(name: 'is_default')  bool isDefault, @JsonKey(name: 'is_disabled')  bool isDisabled, @JsonKey(name: 'option_label')  String label, @JsonKey(name: 'option_value')  String value,  int order, @JsonKey(name: 'visibility_condition')  String? visibilityCondition)?  $default,) {final _that = this;
 switch (_that) {
 case _FormQuestionOption() when $default != null:
-return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.followupVisibilityCondition);case _:
+return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_that.label,_that.value,_that.order,_that.visibilityCondition);case _:
   return null;
 
 }
@@ -216,7 +216,7 @@ return $default(_that.id,_that.description,_that.isDefault,_that.isDisabled,_tha
 @JsonSerializable()
 
 class _FormQuestionOption implements FormQuestionOption {
-  const _FormQuestionOption({@JsonKey(name: 'id', readValue: IdReader.readIdCallback) required this.id, this.description, @JsonKey(name: 'is_default') this.isDefault = false, @JsonKey(name: 'is_disabled') this.isDisabled = false, @JsonKey(name: 'option_label') required this.label, @JsonKey(name: 'option_value') required this.value, this.order = 0, @JsonKey(name: 'followup_visibility_condition') this.followupVisibilityCondition});
+  const _FormQuestionOption({@JsonKey(name: 'id', readValue: IdReader.readIdCallback) required this.id, this.description, @JsonKey(name: 'is_default') this.isDefault = false, @JsonKey(name: 'is_disabled') this.isDisabled = false, @JsonKey(name: 'option_label') required this.label, @JsonKey(name: 'option_value') required this.value, this.order = 0, @JsonKey(name: 'visibility_condition') this.visibilityCondition});
   factory _FormQuestionOption.fromJson(Map<String, dynamic> json) => _$FormQuestionOptionFromJson(json);
 
 @override@JsonKey(name: 'id', readValue: IdReader.readIdCallback) final  String id;
@@ -226,7 +226,7 @@ class _FormQuestionOption implements FormQuestionOption {
 @override@JsonKey(name: 'option_label') final  String label;
 @override@JsonKey(name: 'option_value') final  String value;
 @override@JsonKey() final  int order;
-@override@JsonKey(name: 'followup_visibility_condition') final  String? followupVisibilityCondition;
+@override@JsonKey(name: 'visibility_condition') final  String? visibilityCondition;
 
 /// Create a copy of FormQuestionOption
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormQuestionOption&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.isDisabled, isDisabled) || other.isDisabled == isDisabled)&&(identical(other.label, label) || other.label == label)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order)&&(identical(other.followupVisibilityCondition, followupVisibilityCondition) || other.followupVisibilityCondition == followupVisibilityCondition));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormQuestionOption&&(identical(other.id, id) || other.id == id)&&(identical(other.description, description) || other.description == description)&&(identical(other.isDefault, isDefault) || other.isDefault == isDefault)&&(identical(other.isDisabled, isDisabled) || other.isDisabled == isDisabled)&&(identical(other.label, label) || other.label == label)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order)&&(identical(other.visibilityCondition, visibilityCondition) || other.visibilityCondition == visibilityCondition));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,description,isDefault,isDisabled,label,value,order,followupVisibilityCondition);
+int get hashCode => Object.hash(runtimeType,id,description,isDefault,isDisabled,label,value,order,visibilityCondition);
 
 @override
 String toString() {
-  return 'FormQuestionOption(id: $id, description: $description, isDefault: $isDefault, isDisabled: $isDisabled, label: $label, value: $value, order: $order, followupVisibilityCondition: $followupVisibilityCondition)';
+  return 'FormQuestionOption(id: $id, description: $description, isDefault: $isDefault, isDisabled: $isDisabled, label: $label, value: $value, order: $order, visibilityCondition: $visibilityCondition)';
 }
 
 
@@ -261,7 +261,7 @@ abstract mixin class _$FormQuestionOptionCopyWith<$Res> implements $FormQuestion
   factory _$FormQuestionOptionCopyWith(_FormQuestionOption value, $Res Function(_FormQuestionOption) _then) = __$FormQuestionOptionCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'followup_visibility_condition') String? followupVisibilityCondition
+@JsonKey(name: 'id', readValue: IdReader.readIdCallback) String id, String? description,@JsonKey(name: 'is_default') bool isDefault,@JsonKey(name: 'is_disabled') bool isDisabled,@JsonKey(name: 'option_label') String label,@JsonKey(name: 'option_value') String value, int order,@JsonKey(name: 'visibility_condition') String? visibilityCondition
 });
 
 
@@ -278,7 +278,7 @@ class __$FormQuestionOptionCopyWithImpl<$Res>
 
 /// Create a copy of FormQuestionOption
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = freezed,Object? isDefault = null,Object? isDisabled = null,Object? label = null,Object? value = null,Object? order = null,Object? followupVisibilityCondition = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? description = freezed,Object? isDefault = null,Object? isDisabled = null,Object? label = null,Object? value = null,Object? order = null,Object? visibilityCondition = freezed,}) {
   return _then(_FormQuestionOption(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -287,7 +287,7 @@ as bool,isDisabled: null == isDisabled ? _self.isDisabled : isDisabled // ignore
 as bool,label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as int,followupVisibilityCondition: freezed == followupVisibilityCondition ? _self.followupVisibilityCondition : followupVisibilityCondition // ignore: cast_nullable_to_non_nullable
+as int,visibilityCondition: freezed == visibilityCondition ? _self.visibilityCondition : visibilityCondition // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

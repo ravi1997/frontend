@@ -78,7 +78,7 @@ final class VersionHistoryControllerProvider
 }
 
 String _$versionHistoryControllerHash() =>
-    r'a157b4cf38e29c8456f4643341931a99320202fe';
+    r'f15f005f18f6d9189be1cee09cd431b15cd8251b';
 
 /// Controller for managing version history using Riverpod.
 ///

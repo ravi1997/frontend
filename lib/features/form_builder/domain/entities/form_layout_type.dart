@@ -1,11 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 enum FormLayoutType {
-  @JsonValue('single_column')
+  @JsonValue('flex')
   singleColumn,
-  @JsonValue('two_columns')
+  @JsonValue('grid-cols-2')
   twoColumns,
-  @JsonValue('three_columns')
+  @JsonValue('grid-cols-3')
   threeColumns,
 }
 

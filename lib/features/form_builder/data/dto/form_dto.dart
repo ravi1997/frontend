@@ -11,7 +11,7 @@ abstract class FormDto with _$FormDto {
   const FormDto._();
 
   const factory FormDto({
-    // Handle both 'id' and '_id' from backend
+    // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
     @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)
     required String id,
     @Default('Untitled Form') String title,

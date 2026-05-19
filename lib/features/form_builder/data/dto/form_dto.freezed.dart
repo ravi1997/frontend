@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormDto {
 
-// Handle both 'id' and '_id' from backend
+// Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
 @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String get id; String get title; String get status;@JsonKey(name: 'active_version') String? get activeVersion;// The backend returns a list of version objects under 'versions'
  List<FormVersionDto> get versions;@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get createdAt;@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get updatedAt;// Workflows might be a Map or dynamic
  Map<String, dynamic> get workflows;// Access Policy
@@ -224,7 +224,7 @@ class _FormDto extends FormDto {
   const _FormDto({@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) required this.id, this.title = 'Untitled Form', this.status = 'draft', @JsonKey(name: 'active_version') this.activeVersion, final  List<FormVersionDto> versions = const <FormVersionDto>[], @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.updatedAt, final  Map<String, dynamic> workflows = const <String, dynamic>{}, @JsonKey(name: 'accessPolicy') final  Map<String, dynamic>? accessPolicy}): _versions = versions,_workflows = workflows,_accessPolicy = accessPolicy,super._();
   factory _FormDto.fromJson(Map<String, dynamic> json) => _$FormDtoFromJson(json);
 
-// Handle both 'id' and '_id' from backend
+// Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
 @override@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) final  String id;
 @override@JsonKey() final  String title;
 @override@JsonKey() final  String status;

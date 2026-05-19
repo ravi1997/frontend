@@ -15,8 +15,8 @@ abstract class FormQuestionOption with _$FormQuestionOption {
     @JsonKey(name: 'option_label') required String label,
     @JsonKey(name: 'option_value') required String value,
     @Default(0) int order,
-    @JsonKey(name: 'followup_visibility_condition')
-    String? followupVisibilityCondition,
+    @JsonKey(name: 'visibility_condition')
+    String? visibilityCondition,
   }) = _FormQuestionOption;
 
   factory FormQuestionOption.fromJson(Map<String, dynamic> json) =>
