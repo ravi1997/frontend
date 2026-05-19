@@ -16,7 +16,7 @@ class ResponseMapper {
       if (key.contains('[') && key.contains('].')) {
         final parts = key.split('[');
         final sectionId = parts[0];
-        
+
         // Skip if the entire section is hidden
         if (visibilityMap[sectionId] == false) return;
 
@@ -27,23 +27,69 @@ class ResponseMapper {
         // Prune deleted repeat instances
         if (repeatInstances != null) {
           final maxInstances = repeatInstances[sectionId] ?? 1;
-          if (index >= maxInstances) return; // Discard data for removed instances
+          if (index >= maxInstances) {
+            return; // Discard data for removed instances
+          }
         }
 
         // Skip if the specific field is hidden
-        // Note: Logic engine currently uses fieldId for visibility, 
+        // Note: Logic engine currently uses fieldId for visibility,
         // regardless of which repeat instance it is in.
         if (visibilityMap[fieldId] == false) return;
 
         if (!nested.containsKey(sectionId)) {
           nested[sectionId] = <Map<String, dynamic>>[];
         }
-        
+
         final list = nested[sectionId] as List<Map<String, dynamic>>;
         while (list.length <= index) {
           list.add(<String, dynamic>{});
         }
-        list[index][fieldId] = value;
+        if (fieldId.contains('[') && fieldId.endsWith(']')) {
+          final questionParts = fieldId.split('[');
+          final questionId = questionParts[0];
+          final questionIndex = int.tryParse(
+            questionParts[1].replaceAll(']', ''),
+          );
+          if (questionIndex == null) return;
+
+          if (visibilityMap[questionId] == false) {
+            return;
+          }
+          if (!list[index].containsKey(questionId)) {
+            list[index][questionId] = <dynamic>[];
+          }
+
+          final repeatedValues = list[index][questionId] as List<dynamic>;
+          while (repeatedValues.length <= questionIndex) {
+            repeatedValues.add(null);
+          }
+          repeatedValues[questionIndex] = value;
+        } else {
+          list[index][fieldId] = value;
+        }
+      } else if (key.contains('[') && key.endsWith(']')) {
+        final parts = key.split('[');
+        final fieldId = parts[0];
+        final index = int.tryParse(parts[1].replaceAll(']', ''));
+        if (index == null) return;
+
+        if (visibilityMap[fieldId] == false) return;
+
+        if (repeatInstances != null) {
+          final maxInstances = repeatInstances[fieldId] ?? 1;
+          if (index >= maxInstances) return;
+        }
+
+        if (!nested.containsKey(fieldId)) {
+          nested[fieldId] = <dynamic>[];
+        }
+
+        final list = nested[fieldId] as List<dynamic>;
+        while (list.length <= index) {
+          list.add(null);
+        }
+        list[index] = value;
       } else {
         // 3. Regular field
         // Skip if hidden
@@ -58,7 +104,9 @@ class ResponseMapper {
     nested.forEach((key, value) {
       if (value is List) {
         // Only keep if the list has data
-        final nonEmptyInstances = value.where((inst) => inst.isNotEmpty).toList();
+        final nonEmptyInstances = value
+            .where((inst) => inst.isNotEmpty)
+            .toList();
         if (nonEmptyInstances.isNotEmpty) {
           result[key] = nonEmptyInstances;
         }

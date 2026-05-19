@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:frontend/core/exceptions/app_exception.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:js_interop';
 import 'package:web/web.dart' as web;
@@ -29,15 +29,17 @@ import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 
 final submitFormProvider = FutureProvider.autoDispose
-    .family<BuilderForm, ({String formId, String? projectId})>((ref, args) {
+    .family<BuilderForm, ({String formId, String projectId})>((ref, args) {
       return ref
           .watch(formBuilderRepositoryProvider)
-          .getForm(args.projectId ?? '', args.formId);
+          .getForm(args.projectId, args.formId);
     });
 
 final submitFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
 );
+final Map<String, List<TextEditingController>> _submitOtpControllers = {};
+final Map<String, bool> _submitRichPreviewMode = {};
 
 final repeatInstancesProvider = StateProvider.autoDispose<Map<String, int>>(
   (ref) => {},
@@ -45,9 +47,13 @@ final repeatInstancesProvider = StateProvider.autoDispose<Map<String, int>>(
 
 class FormSubmitPage extends ConsumerStatefulWidget {
   final String formId;
-  final String? projectId;
+  final String projectId;
 
-  const FormSubmitPage({super.key, required this.formId, this.projectId});
+  const FormSubmitPage({
+    super.key,
+    required this.formId,
+    required this.projectId,
+  });
 
   @override
   ConsumerState<FormSubmitPage> createState() => _FormSubmitPageState();
@@ -74,15 +80,32 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   String _interpolateUrl(String url, Map<String, dynamic> formData) {
     var finalUrl = url;
     formData.forEach((key, value) {
-      finalUrl = finalUrl.replaceAll('{$key}', Uri.encodeComponent(value?.toString() ?? ''));
+      finalUrl = finalUrl.replaceAll(
+        '{$key}',
+        Uri.encodeComponent(value?.toString() ?? ''),
+      );
     });
     return finalUrl;
   }
 
+  int _defaultRepeatCount(int? repeatMin) {
+    if (repeatMin != null && repeatMin > 1) {
+      return repeatMin;
+    }
+    return 1;
+  }
+
+  String _questionRepeatKey(
+    FormSection section,
+    FormQuestion question, {
+    bool inRepeatedSection = false,
+  }) {
+    return inRepeatedSection ? '${section.id}.${question.id}' : question.id;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final effectiveProjectId =
-        widget.projectId ?? GoRouterState.of(context).uri.queryParameters['projectId'];
+    final effectiveProjectId = widget.projectId;
     final asyncForm = ref.watch(
       submitFormProvider((
         formId: widget.formId,
@@ -199,7 +222,12 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         ),
         body: Form(
           key: _formKey,
-          child: _buildBody(form, locale, visibilityMap, _logicResult!.requiredStatus),
+          child: _buildBody(
+            form,
+            locale,
+            visibilityMap,
+            _logicResult!.requiredStatus,
+          ),
         ),
       ),
     );
@@ -235,11 +263,11 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         if (!mounted) return;
         setState(() {
           _dynamicOptions.addAll(result.optionOverrides);
-          
+
           // Reset invalid selections
           final currentData = ref.read(submitFormDataProvider);
           final updates = <String, dynamic>{};
-          
+
           result.optionOverrides.forEach((fieldId, options) {
             final val = currentData[fieldId];
             if (val != null) {
@@ -249,9 +277,11 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               }
             }
           });
-          
+
           if (updates.isNotEmpty) {
-            ref.read(submitFormDataProvider.notifier).update((s) => {...s, ...updates});
+            ref
+                .read(submitFormDataProvider.notifier)
+                .update((s) => {...s, ...updates});
           }
         });
       });
@@ -275,11 +305,19 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     }
   }
 
-  Future<void> _triggerWebhook(Map<String, dynamic> config, String resolvedUrl) async {
+  Future<void> _triggerWebhook(
+    Map<String, dynamic> config,
+    String resolvedUrl,
+  ) async {
     final mappings = config['mappings'] as List?;
-    
+
     // Identify target fields for loading state
-    final targetFieldIds = mappings?.map((m) => m['targetFieldId'] as String?).whereType<String>().toList() ?? [];
+    final targetFieldIds =
+        mappings
+            ?.map((m) => m['targetFieldId'] as String?)
+            .whereType<String>()
+            .toList() ??
+        [];
 
     try {
       setState(() {
@@ -323,12 +361,14 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     )
                     .toList();
                 optUpdates[targetId] = newOptions;
-                
+
                 // Clear current value if not in new options
                 final currentData = ref.read(submitFormDataProvider);
                 final currentVal = currentData[targetId];
                 if (currentVal != null) {
-                  final exists = newOptions.any((o) => o.value == currentVal.toString());
+                  final exists = newOptions.any(
+                    (o) => o.value == currentVal.toString(),
+                  );
                   if (!exists) {
                     updates[targetId] = null;
                   }
@@ -347,7 +387,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               .read(submitFormDataProvider.notifier)
               .update((s) => {...s, ...updates});
         }
-        
+
         setState(() {
           if (optUpdates.isNotEmpty) {
             _dynamicOptions.addAll(optUpdates);
@@ -523,7 +563,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 if (visibleQuestions.isEmpty) return [const SizedBox.shrink()];
 
                 final repeatCount = section.isRepeatable
-                    ? (ref.watch(repeatInstancesProvider)[section.id] ?? 1)
+                    ? (ref.watch(repeatInstancesProvider)[section.id] ??
+                          _defaultRepeatCount(section.repeatMin))
                     : 1;
 
                 final widgets = <Widget>[];
@@ -544,34 +585,55 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           ),
                         ),
                         const Divider(height: 24),
-                        ...visibleQuestions.map((q) {
-                          final fieldId = section.isRepeatable
-                              ? '${section.id}[$i].${q.id}'
-                              : q.id;
-                          final val = formData[fieldId];
-                          String displayVal = val?.toString() ?? '—';
-                          if (val is List) displayVal = val.join(', ');
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  q.label.translate(locale),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textDark,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  displayVal,
-                                  style: const TextStyle(color: AppColors.textGrey),
-                                ),
-                              ],
-                            ),
+                        ...visibleQuestions.expand((q) {
+                          final repeatKey = _questionRepeatKey(
+                            section,
+                            q,
+                            inRepeatedSection: section.isRepeatable,
                           );
+                          final questionRepeatCount = q.isRepeatable
+                              ? (ref.watch(
+                                      repeatInstancesProvider,
+                                    )[repeatKey] ??
+                                    _defaultRepeatCount(q.repeatMin))
+                              : 1;
+
+                          return List.generate(questionRepeatCount, (qIndex) {
+                            final fieldId = section.isRepeatable
+                                ? (q.isRepeatable
+                                      ? '${section.id}[$i].${q.id}[$qIndex]'
+                                      : '${section.id}[$i].${q.id}')
+                                : (q.isRepeatable ? '${q.id}[$qIndex]' : q.id);
+                            final val = formData[fieldId];
+                            String displayVal = val?.toString() ?? '—';
+                            if (val is List) displayVal = val.join(', ');
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    q.label.translate(locale) +
+                                        (q.isRepeatable
+                                            ? ' (${qIndex + 1})'
+                                            : ''),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    displayVal,
+                                    style: const TextStyle(
+                                      color: AppColors.textGrey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          });
                         }),
                         const SizedBox(height: 24),
                       ],
@@ -678,7 +740,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
           runSpacing: spacing,
           children: visibleSections.expand((section) {
             final repeatCount = section.isRepeatable
-                ? (ref.watch(repeatInstancesProvider)[section.id] ?? 1)
+                ? (ref.watch(repeatInstancesProvider)[section.id] ??
+                      _defaultRepeatCount(section.repeatMin))
                 : 1;
 
             final widgets = <Widget>[];
@@ -695,7 +758,13 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     dynamicOptions: _dynamicOptions,
                     loadingFields: _loadingFields,
                     fieldErrors: _fieldErrors,
-                    onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(submitFormDataProvider))),
+                    onTriggerAction: (config) => _triggerWebhook(
+                      config,
+                      _interpolateUrl(
+                        config['url'] ?? '',
+                        ref.read(submitFormDataProvider),
+                      ),
+                    ),
                     instanceIndex: section.isRepeatable ? i : null,
                   ),
                 ),
@@ -703,7 +772,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             }
 
             if (section.isRepeatable &&
-                (section.repeatMax == null || repeatCount < section.repeatMax!)) {
+                (section.repeatMax == null ||
+                    repeatCount < section.repeatMax!)) {
               widgets.add(
                 SizedBox(
                   width: itemWidth,
@@ -711,13 +781,19 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     alignment: Alignment.centerLeft,
                     child: TextButton.icon(
                       onPressed: () {
-                        ref.read(repeatInstancesProvider.notifier).update((state) {
-                          final current = state[section.id] ?? 1;
+                        ref.read(repeatInstancesProvider.notifier).update((
+                          state,
+                        ) {
+                          final current =
+                              state[section.id] ??
+                              _defaultRepeatCount(section.repeatMin);
                           return {...state, section.id: current + 1};
                         });
                       },
                       icon: const Icon(Icons.add),
-                      label: Text('Add another ${section.title.translate(locale)}'),
+                      label: Text(
+                        'Add another ${section.title.translate(locale)}',
+                      ),
                     ),
                   ),
                 ),
@@ -789,7 +865,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     Builder(
                       builder: (context) {
                         final repeatCount = currentSection.isRepeatable
-                            ? (ref.watch(repeatInstancesProvider)[currentSection.id] ?? 1)
+                            ? (ref.watch(
+                                    repeatInstancesProvider,
+                                  )[currentSection.id] ??
+                                  _defaultRepeatCount(currentSection.repeatMin))
                             : 1;
 
                         final widgets = <Widget>[];
@@ -805,8 +884,16 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                                 dynamicOptions: _dynamicOptions,
                                 loadingFields: _loadingFields,
                                 fieldErrors: _fieldErrors,
-                                onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(submitFormDataProvider))),
-                                instanceIndex: currentSection.isRepeatable ? i : null,
+                                onTriggerAction: (config) => _triggerWebhook(
+                                  config,
+                                  _interpolateUrl(
+                                    config['url'] ?? '',
+                                    ref.read(submitFormDataProvider),
+                                  ),
+                                ),
+                                instanceIndex: currentSection.isRepeatable
+                                    ? i
+                                    : null,
                               ),
                             ),
                           );
@@ -820,13 +907,24 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                               alignment: Alignment.centerLeft,
                               child: TextButton.icon(
                                 onPressed: () {
-                                  ref.read(repeatInstancesProvider.notifier).update((state) {
-                                    final current = state[currentSection.id] ?? 1;
-                                    return {...state, currentSection.id: current + 1};
-                                  });
+                                  ref
+                                      .read(repeatInstancesProvider.notifier)
+                                      .update((state) {
+                                        final current =
+                                            state[currentSection.id] ??
+                                            _defaultRepeatCount(
+                                              currentSection.repeatMin,
+                                            );
+                                        return {
+                                          ...state,
+                                          currentSection.id: current + 1,
+                                        };
+                                      });
                                 },
                                 icon: const Icon(Icons.add),
-                                label: Text('Add another ${currentSection.title.translate(locale)}'),
+                                label: Text(
+                                  'Add another ${currentSection.title.translate(locale)}',
+                                ),
                               ),
                             ),
                           );
@@ -836,7 +934,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: widgets,
                         );
-                      }
+                      },
                     ),
                     const SizedBox(height: 32),
                     Row(
@@ -947,8 +1045,12 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                     _isReviewing = false;
                   });
                 } else {
-                  final errorState = ref.read(formSubmissionControllerProvider).error;
-                  if (errorState is ApiException && errorState.details != null && mounted) {
+                  final errorState = ref
+                      .read(formSubmissionControllerProvider)
+                      .error;
+                  if (errorState is ApiException &&
+                      errorState.details != null &&
+                      mounted) {
                     setState(() {
                       if (errorState.details is Map) {
                         (errorState.details as Map).forEach((key, value) {
@@ -956,16 +1058,19 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         });
                       } else if (errorState.details is List) {
                         for (final err in (errorState.details as List)) {
-                          if (err is Map && err.containsKey('field') && err.containsKey('message')) {
-                            _fieldErrors[err['field'].toString()] = err['message'].toString();
+                          if (err is Map &&
+                              err.containsKey('field') &&
+                              err.containsKey('message')) {
+                            _fieldErrors[err['field'].toString()] =
+                                err['message'].toString();
                           }
                         }
                       }
                     });
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(errorState.message)),
-                    );
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(errorState.message)));
                   }
                 }
               },
@@ -1063,6 +1168,17 @@ class _SubmitSectionWidget extends ConsumerWidget {
     this.instanceIndex,
   });
 
+  int _defaultRepeatCount(int? repeatMin) {
+    if (repeatMin != null && repeatMin > 1) {
+      return repeatMin;
+    }
+    return 1;
+  }
+
+  String _questionRepeatKey(FormQuestion question) {
+    return instanceIndex != null ? '${section.id}.${question.id}' : question.id;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final style = section.style;
@@ -1092,7 +1208,8 @@ class _SubmitSectionWidget extends ConsumerWidget {
           children: [
             if (section.title.translate(locale).isNotEmpty) ...[
               Text(
-                section.title.translate(locale) + (instanceIndex != null ? ' (${instanceIndex! + 1})' : ''),
+                section.title.translate(locale) +
+                    (instanceIndex != null ? ' (${instanceIndex! + 1})' : ''),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -1125,6 +1242,7 @@ class _SubmitSectionWidget extends ConsumerWidget {
   }
 
   Widget _buildQuestionsGrid(Map<String, bool> visibilityMap, WidgetRef ref) {
+    final locale = ref.watch(localeControllerProvider).languageCode;
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
@@ -1174,20 +1292,63 @@ class _SubmitSectionWidget extends ConsumerWidget {
             }
             if (width > availableWidth) width = availableWidth;
 
+            final repeatKey = _questionRepeatKey(q);
+            final repeatCount = q.isRepeatable
+                ? (ref.watch(repeatInstancesProvider)[repeatKey] ??
+                      _defaultRepeatCount(q.repeatMin))
+                : 1;
+
             return AnimatedSize(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
               child: SizedBox(
                 width: width,
-                child: _SubmitFieldWidget(
-                  question: q,
-                  dynamicOptions: dynamicOptions[q.id],
-                  isLoading: loadingFields[q.id] ?? false,
-                  error: fieldErrors[q.id],
-                  onTriggerAction: (config) => onTriggerAction(config),
-                  instanceIndex: instanceIndex,
-                  sectionId: section.id,
-                  isRequired: requiredMap[q.id] ?? q.isRequired,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ...List.generate(repeatCount, (qIndex) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: qIndex == repeatCount - 1 ? 0 : 12,
+                        ),
+                        child: _SubmitFieldWidget(
+                          question: q,
+                          dynamicOptions: dynamicOptions[q.id],
+                          isLoading: loadingFields[q.id] ?? false,
+                          error: fieldErrors[q.id],
+                          onTriggerAction: (config) => onTriggerAction(config),
+                          instanceIndex: instanceIndex,
+                          questionInstanceIndex: q.isRepeatable ? qIndex : null,
+                          sectionId: section.id,
+                          isRequired: requiredMap[q.id] ?? q.isRequired,
+                        ),
+                      );
+                    }),
+                    if (q.isRepeatable &&
+                        (q.repeatMax == null ||
+                            repeatCount < q.repeatMax!)) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            ref.read(repeatInstancesProvider.notifier).update((
+                              state,
+                            ) {
+                              final current =
+                                  state[repeatKey] ??
+                                  _defaultRepeatCount(q.repeatMin);
+                              return {...state, repeatKey: current + 1};
+                            });
+                          },
+                          icon: const Icon(Icons.add, size: 18),
+                          label: Text(
+                            'Add another ${q.label.translate(locale)}',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             );
@@ -1205,6 +1366,7 @@ class _SubmitFieldWidget extends ConsumerStatefulWidget {
   final String? error;
   final Future<void> Function(Map<String, dynamic>)? onTriggerAction;
   final int? instanceIndex;
+  final int? questionInstanceIndex;
   final String? sectionId;
   final bool isRequired;
 
@@ -1215,6 +1377,7 @@ class _SubmitFieldWidget extends ConsumerStatefulWidget {
     this.error,
     this.onTriggerAction,
     this.instanceIndex,
+    this.questionInstanceIndex,
     this.sectionId,
     this.isRequired = false,
   });
@@ -1229,7 +1392,13 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
   String get _fieldId {
     if (widget.instanceIndex != null && widget.sectionId != null) {
+      if (widget.questionInstanceIndex != null) {
+        return '${widget.sectionId}[${widget.instanceIndex}].${widget.question.id}[${widget.questionInstanceIndex}]';
+      }
       return '${widget.sectionId}[${widget.instanceIndex}].${widget.question.id}';
+    }
+    if (widget.questionInstanceIndex != null) {
+      return '${widget.question.id}[${widget.questionInstanceIndex}]';
     }
     return widget.question.id;
   }
@@ -1277,7 +1446,10 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           child: Text(
             q.label.translate(locale).isEmpty
                 ? 'Untitled ${q.type.label}'
-                : q.label.translate(locale),
+                : q.label.translate(locale) +
+                      (widget.questionInstanceIndex != null
+                          ? ' (${widget.questionInstanceIndex! + 1})'
+                          : ''),
             style: TextStyle(
               color: labelColor,
               fontSize: style.labelFontSize,
@@ -1444,7 +1616,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               ),
             )
           : null,
-      suffixIcon: widget.isLoading 
+      suffixIcon: widget.isLoading
           ? Container(
               padding: const EdgeInsets.all(12),
               width: 20,
@@ -1467,9 +1639,11 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
     switch (q.type) {
       case QuestionType.shortText:
+      case QuestionType.password:
       case QuestionType.number:
       case QuestionType.email:
       case QuestionType.mobile:
+      case QuestionType.tel:
       case QuestionType.url:
         return TextFormField(
           controller: _controller,
@@ -1526,7 +1700,8 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               child: Text(opt.label, style: textStyle),
             );
           }).toList(),
-          validator: (val) => widget.isRequired && val == null ? 'Required' : null,
+          validator: (val) =>
+              widget.isRequired && val == null ? 'Required' : null,
           onChanged: (val) {
             if (val != null) {
               ref
@@ -1769,7 +1944,8 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.rating:
         final formData = ref.watch(submitFormDataProvider);
-        final rating = double.tryParse(formData[_fieldId]?.toString() ?? '0') ?? 0;
+        final rating =
+            double.tryParse(formData[_fieldId]?.toString() ?? '0') ?? 0;
         return Row(
           children: List.generate(5, (index) {
             final isSelected = index < rating;
@@ -1861,7 +2037,537 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.image:
         return _buildImageUploadField(q, ref);
+      case QuestionType.otp:
+        return _buildOtpField(q, inputDecoration, textStyle, ref);
+      case QuestionType.richText:
+      case QuestionType.markdownEditor:
+        return _buildRichTextField(q, inputDecoration, textStyle, ref);
+      case QuestionType.address:
+      case QuestionType.addressLookup:
+        return _buildSingleLineSpecialField(
+          q,
+          inputDecoration,
+          textStyle,
+          ref,
+          hint: 'Enter address',
+        );
+      case QuestionType.mapLocation:
+        return _buildMultiLineSpecialField(
+          q,
+          inputDecoration,
+          textStyle,
+          ref,
+          hint: 'Enter location coordinates or address',
+        );
+      case QuestionType.booleanValue:
+      case QuestionType.toggle:
+        return _buildToggleField(q, ref, textStyle);
+      case QuestionType.multiSelect:
+      case QuestionType.multiCheckbox:
+        return _buildMultiSelectField(q, ref, textStyle);
+      case QuestionType.multiFileUpload:
+      case QuestionType.filePicker:
+      case QuestionType.fileList:
+      case QuestionType.file:
+        return _buildFileFamilyField(q, ref, textStyle);
+      case QuestionType.imageGallery:
+        return _buildImageGalleryField(q, ref, textStyle);
+      case QuestionType.signaturePad:
+        return _buildSignaturePadField(q, ref, fillColor, borderColor);
+      case QuestionType.calculate:
+      case QuestionType.calculated:
+        return _buildCalculatedField(q, ref, textStyle);
+      case QuestionType.colorPicker:
+      case QuestionType.customField:
+      case QuestionType.countrySelect:
+      case QuestionType.stateSelect:
+      case QuestionType.citySelect:
+      case QuestionType.socialMediaHandle:
+      case QuestionType.websiteUrl:
+      case QuestionType.phoneNumber:
+      case QuestionType.captcha:
+      case QuestionType.unitSelect:
+      case QuestionType.price:
+      case QuestionType.age:
+      case QuestionType.emailList:
+      case QuestionType.qrCodeScan:
+      case QuestionType.search:
+        return _buildReadableSpecialField(
+          q,
+          textStyle,
+          fillColor,
+          borderColor,
+          ref,
+        );
+      case QuestionType.range:
+        return _buildRangeField(q, ref, textStyle);
+      case QuestionType.dateRange:
+        return _buildDateRangeField(q, ref, textStyle);
+      case QuestionType.timeRange:
+        return _buildTimeRangeField(q, ref, textStyle);
+      case QuestionType.stepper:
+        return _buildStepperField(q, ref, textStyle);
     }
+  }
+
+  Widget _buildReadableSpecialField(
+    FormQuestion q,
+    TextStyle textStyle,
+    Color fillColor,
+    Color borderColor,
+    WidgetRef ref,
+  ) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    if (q.type == QuestionType.captcha) {
+      final checked = ref.watch(submitFormDataProvider)[_fieldId] == true;
+      return CheckboxListTile(
+        value: checked,
+        onChanged: (val) {
+          ref
+              .read(submitFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val == true});
+          setState(() {});
+        },
+        title: Text('I am not a robot', style: textStyle),
+        contentPadding: EdgeInsets.zero,
+      );
+    }
+
+    if (q.type == QuestionType.colorPicker) {
+      final value =
+          ref.watch(submitFormDataProvider)[_fieldId]?.toString() ?? '#000000';
+      return TextFormField(
+        initialValue: value,
+        decoration: InputDecoration(
+          labelText: q.label.translate(locale),
+          hintText: '#RRGGBB',
+          suffixIcon: Container(
+            margin: const EdgeInsets.all(10),
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: _tryParseColor(value) ?? Colors.transparent,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        onChanged: (val) {
+          ref
+              .read(submitFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val});
+          setState(() {});
+        },
+      );
+    }
+
+    if (q.type == QuestionType.countrySelect ||
+        q.type == QuestionType.stateSelect ||
+        q.type == QuestionType.citySelect) {
+      final options = (q.options ?? [])
+          .map(
+            (o) => o.label.translate(locale).isNotEmpty
+                ? o.label.translate(locale)
+                : o.value,
+          )
+          .where((v) => v.isNotEmpty)
+          .toList();
+      final current = ref.watch(submitFormDataProvider)[_fieldId]?.toString();
+      if (options.isNotEmpty) {
+        return DropdownButtonFormField<String>(
+          initialValue: options.contains(current) ? current : null,
+          decoration: InputDecoration(
+            labelText: q.label.translate(locale),
+            border: const OutlineInputBorder(),
+          ),
+          items: options
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
+          onChanged: (val) {
+            ref
+                .read(submitFormDataProvider.notifier)
+                .update((state) => {...state, _fieldId: val});
+            setState(() {});
+          },
+        );
+      }
+    }
+
+    if (q.type == QuestionType.qrCodeScan) {
+      return _buildSingleLineSpecialField(
+        q,
+        InputDecoration(
+          labelText: q.label.translate(locale),
+          border: const OutlineInputBorder(),
+        ),
+        textStyle,
+        ref,
+        hint: 'Scan or paste code',
+      );
+    }
+
+    if (q.type == QuestionType.price ||
+        q.type == QuestionType.age ||
+        q.type == QuestionType.unitSelect) {
+      return _buildSingleLineSpecialField(
+        q,
+        InputDecoration(
+          labelText: q.label.translate(locale),
+          border: const OutlineInputBorder(),
+        ),
+        textStyle,
+        ref,
+        hint: q.type == QuestionType.price ? 'Enter price' : 'Enter value',
+      );
+    }
+
+    return _buildSingleLineSpecialField(
+      q,
+      InputDecoration(
+        labelText: q.label.translate(locale),
+        border: const OutlineInputBorder(),
+      ),
+      textStyle,
+      ref,
+      hint: q.type == QuestionType.websiteUrl
+          ? 'Enter website URL'
+          : q.type == QuestionType.socialMediaHandle
+          ? 'Enter handle'
+          : q.type == QuestionType.phoneNumber
+          ? 'Enter phone number'
+          : q.type == QuestionType.emailList
+          ? 'Enter comma-separated emails'
+          : 'Enter value',
+    );
+  }
+
+  Color? _tryParseColor(String value) {
+    final normalized = value.trim().replaceFirst('#', '');
+    if (normalized.length == 6) {
+      try {
+        return Color(int.parse('FF$normalized', radix: 16));
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  Widget _buildOtpField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+  ) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    final codeLength = (q.metadata?['codeLength'] as num?)?.toInt() ?? 6;
+    final currentValue =
+        ref.watch(submitFormDataProvider)[_fieldId]?.toString() ?? '';
+    final controllers = _submitOtpControllers.putIfAbsent(
+      q.id,
+      () => List.generate(codeLength, (index) {
+        final controller = TextEditingController();
+        if (index < currentValue.length) {
+          controller.text = currentValue[index];
+        }
+        return controller;
+      }),
+    );
+    if (controllers.length != codeLength) {
+      for (final c in controllers) {
+        c.dispose();
+      }
+      _submitOtpControllers[q.id] = List.generate(codeLength, (index) {
+        final controller = TextEditingController();
+        if (index < currentValue.length) {
+          controller.text = currentValue[index];
+        }
+        return controller;
+      });
+    }
+    final otpFields = _submitOtpControllers[q.id]!;
+
+    void syncOtp() {
+      final value = otpFields.map((c) => c.text).join();
+      ref
+          .read(submitFormDataProvider.notifier)
+          .update((state) => {...state, _fieldId: value});
+      setState(() {});
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          q.placeholder.translate(locale).isEmpty
+              ? 'Enter $codeLength-digit code'
+              : q.placeholder.translate(locale),
+          style: textStyle.copyWith(color: AppColors.textGrey),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: List.generate(codeLength, (index) {
+            return SizedBox(
+              width: 48,
+              child: TextFormField(
+                controller: otpFields[index],
+                style: textStyle.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(1),
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: inputDecoration.copyWith(
+                  counterText: '',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                validator: (val) {
+                  if (widget.isRequired && (val == null || val.isEmpty)) {
+                    return 'Required';
+                  }
+                  return null;
+                },
+                onChanged: (val) {
+                  if (val.isNotEmpty) {
+                    if (index < codeLength - 1) {
+                      FocusScope.of(context).nextFocus();
+                    } else {
+                      FocusScope.of(context).unfocus();
+                    }
+                  } else if (index > 0) {
+                    FocusScope.of(context).previousFocus();
+                  }
+                  syncOtp();
+                },
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRichTextField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+  ) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    final isMarkdown = q.type == QuestionType.markdownEditor;
+    final previewMode = _submitRichPreviewMode[q.id] ?? false;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _editorChip('Bold', Icons.format_bold),
+            _editorChip('Italic', Icons.format_italic),
+            if (isMarkdown) _editorChip('Heading', Icons.title),
+            if (isMarkdown) _editorChip('List', Icons.format_list_bulleted),
+            if (isMarkdown) _editorChip('Link', Icons.link),
+            if (isMarkdown)
+              ActionChip(
+                avatar: Icon(
+                  previewMode ? Icons.edit : Icons.visibility,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: Text(previewMode ? 'Edit' : 'Preview'),
+                backgroundColor: Colors.white,
+                side: BorderSide(color: AppColors.borderLight),
+                onPressed: () {
+                  setState(() {
+                    _submitRichPreviewMode[q.id] = !previewMode;
+                  });
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (previewMode && isMarkdown)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              ref
+                          .watch(submitFormDataProvider)[_fieldId]
+                          ?.toString()
+                          .isNotEmpty ==
+                      true
+                  ? ref.watch(submitFormDataProvider)[_fieldId].toString()
+                  : 'Markdown preview will appear here.',
+              style: textStyle.copyWith(fontFamily: 'monospace', height: 1.4),
+            ),
+          )
+        else
+          TextFormField(
+            controller: _controller,
+            style: textStyle,
+            decoration: inputDecoration.copyWith(
+              hintText: q.placeholder.translate(locale).isEmpty
+                  ? (isMarkdown
+                        ? 'Write markdown...'
+                        : 'Write your response...')
+                  : q.placeholder.translate(locale),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            maxLines: isMarkdown ? 10 : 8,
+            minLines: isMarkdown ? 5 : 4,
+            textInputAction: TextInputAction.newline,
+            validator: (val) => PreviewUtils.validateField(
+              val,
+              isRequired: widget.isRequired,
+              regex: q.validationRegex,
+              minLength: q.minLength,
+              maxLength: q.maxLength,
+              minValue: q.minValue?.toDouble(),
+              maxValue: q.maxValue?.toDouble(),
+              customError: q.customErrorMessage,
+            ),
+            onChanged: (val) {
+              ref
+                  .read(submitFormDataProvider.notifier)
+                  .update((state) => {...state, _fieldId: val});
+              setState(() {});
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _editorChip(String label, IconData icon) {
+    return Chip(
+      avatar: Icon(icon, size: 16, color: AppColors.primary),
+      label: Text(label),
+      backgroundColor: AppColors.builderElement.withValues(alpha: 0.35),
+      side: BorderSide(color: AppColors.borderLight),
+    );
+  }
+
+  Widget _buildSingleLineSpecialField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref, {
+    required String hint,
+  }) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    return TextFormField(
+      controller: _controller,
+      style: textStyle,
+      decoration: inputDecoration.copyWith(
+        hintText: q.placeholder.translate(locale).isEmpty
+            ? hint
+            : q.placeholder.translate(locale),
+      ),
+      onChanged: (val) {
+        ref
+            .read(submitFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildMultiLineSpecialField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref, {
+    required String hint,
+  }) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    return TextFormField(
+      controller: _controller,
+      style: textStyle,
+      decoration: inputDecoration.copyWith(
+        hintText: q.placeholder.translate(locale).isEmpty
+            ? hint
+            : q.placeholder.translate(locale),
+      ),
+      maxLines: 3,
+      minLines: 2,
+      onChanged: (val) {
+        ref
+            .read(submitFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildToggleField(FormQuestion q, WidgetRef ref, TextStyle textStyle) {
+    final current = ref.read(submitFormDataProvider)[_fieldId] == true;
+    return SwitchListTile(
+      value: current,
+      onChanged: (val) {
+        ref
+            .read(submitFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+      title: Text(
+        q.label.translate(ref.read(localeControllerProvider).languageCode),
+      ),
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  Widget _buildMultiSelectField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final options = q.options ?? [];
+    final currentValue = ref.read(submitFormDataProvider)[_fieldId];
+    final current = currentValue is List
+        ? currentValue.cast<String>()
+        : <String>[];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: options.map((opt) {
+        final selected = current.contains(opt.value);
+        return CheckboxListTile(
+          value: selected,
+          onChanged: (val) {
+            final next = List<String>.from(current);
+            if (val == true) {
+              if (!next.contains(opt.value)) next.add(opt.value);
+            } else {
+              next.remove(opt.value);
+            }
+            ref
+                .read(submitFormDataProvider.notifier)
+                .update((state) => {...state, _fieldId: next});
+            setState(() {});
+          },
+          title: Text(opt.label, style: textStyle),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        );
+      }).toList(),
+    );
   }
 
   bool get hasActionButton =>
@@ -2293,6 +2999,431 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildFileFamilyField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final formData = ref.watch(submitFormDataProvider);
+    final value = formData[_fieldId];
+    final isMulti =
+        q.type == QuestionType.multiFileUpload ||
+        q.type == QuestionType.fileList;
+    final isGallery = q.type == QuestionType.imageGallery;
+    final allowedTypes = q.allowedFileTypes ?? [];
+    final List<String>? extensions = allowedTypes.isNotEmpty
+        ? _extensionsForTypes(allowedTypes)
+        : null;
+
+    Future<void> pickFiles() async {
+      final accept = isGallery
+          ? 'image/*'
+          : (extensions != null ? extensions.map((e) => '.$e').join(',') : '');
+      final input = web.HTMLInputElement()
+        ..type = 'file'
+        ..multiple = isMulti
+        ..accept = accept;
+
+      input.addEventListener(
+        'change',
+        (web.Event _) {
+          final files = input.files;
+          if (files == null || files.length == 0) return;
+          final picked = <Map<String, dynamic>>[];
+          int remaining = files.length;
+
+          void commit() {
+            if (!mounted) return;
+            ref.read(submitFormDataProvider.notifier).update((state) {
+              final next = Map<String, dynamic>.from(state);
+              next[_fieldId] = isMulti
+                  ? picked
+                  : (picked.isNotEmpty ? picked.first : null);
+              return next;
+            });
+          }
+
+          for (var i = 0; i < files.length; i++) {
+            final file = files.item(i);
+            if (file == null) continue;
+            final reader = web.FileReader();
+            reader.addEventListener(
+              'load',
+              (web.Event _) {
+                Uint8List? bytes;
+                try {
+                  bytes = (reader.result as JSArrayBuffer).toDart.asUint8List();
+                } catch (_) {
+                  bytes = null;
+                }
+                picked.add({
+                  'name': file.name,
+                  'size': file.size,
+                  'bytes': bytes,
+                });
+                remaining -= 1;
+                if (remaining == 0) commit();
+              }.toJS,
+            );
+            reader.readAsArrayBuffer(file);
+          }
+        }.toJS,
+      );
+      input.click();
+    }
+
+    final files = isMulti && value is List
+        ? value.cast<Map>()
+        : (value is Map ? [value] : <Map>[]);
+
+    return InkWell(
+      onTap: pickFiles,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          border: Border.all(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: files.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isGallery
+                        ? Icons.photo_library_outlined
+                        : Icons.upload_file,
+                    size: 40,
+                    color: AppColors.textGrey,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isMulti ? 'Tap to upload files' : 'Tap to upload file',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isGallery
+                        ? 'Image gallery upload'
+                        : 'Allowed file types will be enforced by the browser',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final f in files)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.insert_drive_file, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              f['name']?.toString() ?? '',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () {
+                              ref.read(submitFormDataProvider.notifier).update((
+                                state,
+                              ) {
+                                final next = Map<String, dynamic>.from(state);
+                                if (isMulti && value is List) {
+                                  final updated = List<Map>.from(value);
+                                  updated.removeWhere(
+                                    (e) => e['name'] == f['name'],
+                                  );
+                                  next[_fieldId] = updated;
+                                } else {
+                                  next[_fieldId] = null;
+                                }
+                                return next;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  TextButton.icon(
+                    onPressed: pickFiles,
+                    icon: const Icon(Icons.swap_horiz),
+                    label: Text(
+                      isMulti ? 'Add more' : 'Change file',
+                      style: textStyle,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildImageGalleryField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    return _buildFileFamilyField(q, ref, textStyle);
+  }
+
+  Widget _buildSignaturePadField(
+    FormQuestion q,
+    WidgetRef ref,
+    Color fillColor,
+    Color borderColor,
+  ) {
+    return _buildSignatureField(q, ref, fillColor, borderColor);
+  }
+
+  Widget _buildRangeField(FormQuestion q, WidgetRef ref, TextStyle textStyle) {
+    final formData = ref.watch(submitFormDataProvider);
+    final current =
+        (formData[_fieldId] as num?)?.toDouble() ??
+        (q.minValue?.toDouble() ?? 0.0);
+    final min = q.minValue?.toDouble() ?? 0.0;
+    final max = q.maxValue?.toDouble() ?? 100.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Slider(
+          value: current.clamp(min, max),
+          min: min,
+          max: max,
+          divisions: ((max - min).abs() >= 1) ? ((max - min).toInt()) : null,
+          label: current.round().toString(),
+          onChanged: (v) {
+            ref
+                .read(submitFormDataProvider.notifier)
+                .update((state) => {...state, _fieldId: v});
+            setState(() {});
+          },
+        ),
+        Text(
+          '${current.toStringAsFixed(0)} / ${max.toStringAsFixed(0)}',
+          style: textStyle,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateRangeField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final current =
+        ref.watch(submitFormDataProvider)[_fieldId] as Map<String, dynamic>?;
+    final label = current == null
+        ? 'Select date range'
+        : '${current['start'] ?? ''} - ${current['end'] ?? ''}';
+    return _buildPicker(
+      text: label,
+      icon: Icons.date_range,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      onTap: () async {
+        final picked = await showDateRangePicker(
+          context: context,
+          firstDate: q.dateMin ?? DateTime(1900),
+          lastDate: q.dateMax ?? DateTime(2100),
+          initialDateRange: current == null
+              ? null
+              : DateTimeRange(
+                  start:
+                      DateTime.tryParse(current['start']?.toString() ?? '') ??
+                      DateTime.now(),
+                  end:
+                      DateTime.tryParse(current['end']?.toString() ?? '') ??
+                      DateTime.now(),
+                ),
+        );
+        if (picked != null) {
+          ref
+              .read(submitFormDataProvider.notifier)
+              .update(
+                (state) => {
+                  ...state,
+                  _fieldId: {
+                    'start': DateFormat('yyyy-MM-dd').format(picked.start),
+                    'end': DateFormat('yyyy-MM-dd').format(picked.end),
+                  },
+                },
+              );
+          setState(() {});
+        }
+      },
+    );
+  }
+
+  Widget _buildTimeRangeField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final current =
+        ref.watch(submitFormDataProvider)[_fieldId] as Map<String, dynamic>?;
+    final startText = current?['start']?.toString() ?? 'Start time';
+    final endText = current?['end']?.toString() ?? 'End time';
+    Future<void> pick(bool isStart) async {
+      final picked = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (picked != null) {
+        ref
+            .read(submitFormDataProvider.notifier)
+            .update(
+              (state) => {
+                ...state,
+                _fieldId: {
+                  ...?current,
+                  if (isStart)
+                    'start':
+                        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}'
+                  else
+                    'end':
+                        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+                },
+              },
+            );
+        setState(() {});
+      }
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildPicker(
+            text: startText,
+            icon: Icons.schedule,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onTap: () => pick(true),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildPicker(
+            text: endText,
+            icon: Icons.schedule,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onTap: () => pick(false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepperField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final current =
+        (ref.watch(submitFormDataProvider)[_fieldId] as int?) ??
+        (q.minValue?.toInt() ?? 0);
+    final min = q.minValue?.toInt() ?? 0;
+    final max = q.maxValue?.toInt() ?? 10;
+    return Row(
+      children: [
+        IconButton(
+          onPressed: current > min
+              ? () {
+                  ref
+                      .read(submitFormDataProvider.notifier)
+                      .update((state) => {...state, _fieldId: current - 1});
+                  setState(() {});
+                }
+              : null,
+          icon: const Icon(Icons.remove_circle_outline),
+        ),
+        Text(
+          '$current',
+          style: textStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        IconButton(
+          onPressed: current < max
+              ? () {
+                  ref
+                      .read(submitFormDataProvider.notifier)
+                      .update((state) => {...state, _fieldId: current + 1});
+                  setState(() {});
+                }
+              : null,
+          icon: const Icon(Icons.add_circle_outline),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalculatedField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+  ) {
+    final formula = q.metadata?['formula']?.toString();
+    final current = ref.watch(submitFormDataProvider)[_fieldId]?.toString();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.functions, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  formula?.isNotEmpty == true
+                      ? 'Formula: $formula'
+                      : 'Auto-calculated field',
+                  style: textStyle.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            current?.isNotEmpty == true ? current! : 'Result will appear here',
+            style: textStyle.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Read-only derived value',
+            style: textStyle.copyWith(fontSize: 11, color: AppColors.textGrey),
+          ),
+        ],
       ),
     );
   }

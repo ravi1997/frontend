@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:js_interop';
 import 'package:web/web.dart' as web;
@@ -28,6 +28,14 @@ import '../../../../core/network/api_client_wrapper.dart';
 final previewFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
 );
+final previewRepeatInstancesProvider =
+    StateProvider.autoDispose<Map<String, int>>((ref) => {});
+final previewCommittedSectionRowsProvider =
+    StateProvider.autoDispose<Map<String, List<Map<String, dynamic>>>>(
+      (ref) => {},
+    );
+final Map<String, List<TextEditingController>> _previewOtpControllers = {};
+final Map<String, bool> _previewRichPreviewMode = {};
 
 class FormPreviewPage extends ConsumerStatefulWidget {
   final BuilderForm form;
@@ -107,6 +115,8 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             TextButton.icon(
               onPressed: () {
                 ref.invalidate(previewFormDataProvider);
+                ref.invalidate(previewRepeatInstancesProvider);
+                ref.invalidate(previewCommittedSectionRowsProvider);
                 setState(() {
                   _currentStep = 0;
                   _showSubmitted = false;
@@ -153,7 +163,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   String _interpolateUrl(String url, Map<String, dynamic> formData) {
     var finalUrl = url;
     formData.forEach((key, value) {
-      finalUrl = finalUrl.replaceAll('{$key}', Uri.encodeComponent(value?.toString() ?? ''));
+      finalUrl = finalUrl.replaceAll(
+        '{$key}',
+        Uri.encodeComponent(value?.toString() ?? ''),
+      );
     });
     return finalUrl;
   }
@@ -192,11 +205,11 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         }
         setState(() {
           _dynamicOptions.addAll(result.optionOverrides);
-          
+
           // Reset invalid selections
           final currentData = ref.read(previewFormDataProvider);
           final updates = <String, dynamic>{};
-          
+
           result.optionOverrides.forEach((fieldId, options) {
             final val = currentData[fieldId];
             if (val != null) {
@@ -206,9 +219,11 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
               }
             }
           });
-          
+
           if (updates.isNotEmpty) {
-            ref.read(previewFormDataProvider.notifier).update((s) => {...s, ...updates});
+            ref
+                .read(previewFormDataProvider.notifier)
+                .update((s) => {...s, ...updates});
           }
         });
       });
@@ -225,7 +240,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     }
   }
 
-  Future<void> _triggerWebhook(Map<String, dynamic> config, String resolvedUrl) async {
+  Future<void> _triggerWebhook(
+    Map<String, dynamic> config,
+    String resolvedUrl,
+  ) async {
     if (resolvedUrl.isEmpty) return;
 
     final mappings = config['mappings'] as List?;
@@ -270,7 +288,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 final currentData = ref.read(previewFormDataProvider);
                 final currentVal = currentData[targetId];
                 if (currentVal != null) {
-                  final exists = newOptions.any((o) => o.value == currentVal.toString());
+                  final exists = newOptions.any(
+                    (o) => o.value == currentVal.toString(),
+                  );
                   if (!exists) {
                     updates[targetId] = null;
                   }
@@ -589,7 +609,13 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 questionSpacing: widget.form.style.questionSpacing,
                 visibilityMap: visibilityMap,
                 dynamicOptions: _dynamicOptions,
-                onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(previewFormDataProvider))),
+                onTriggerAction: (config) => _triggerWebhook(
+                  config,
+                  _interpolateUrl(
+                    config['url'] ?? '',
+                    ref.read(previewFormDataProvider),
+                  ),
+                ),
               ),
             );
           }).toList(),
@@ -659,7 +685,13 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       questionSpacing: widget.form.style.questionSpacing,
                       visibilityMap: visibilityMap,
                       dynamicOptions: _dynamicOptions,
-                      onTriggerAction: (config) => _triggerWebhook(config, _interpolateUrl(config['url'] ?? '', ref.read(previewFormDataProvider))),
+                      onTriggerAction: (config) => _triggerWebhook(
+                        config,
+                        _interpolateUrl(
+                          config['url'] ?? '',
+                          ref.read(previewFormDataProvider),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 32),
                     Row(
@@ -843,7 +875,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   }
 }
 
-class _PreviewSectionWidget extends ConsumerWidget {
+class _PreviewSectionWidget extends ConsumerStatefulWidget {
   final FormSection section;
   final double questionSpacing;
   final Map<String, bool> visibilityMap;
@@ -859,9 +891,68 @@ class _PreviewSectionWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PreviewSectionWidget> createState() =>
+      _PreviewSectionWidgetState();
+}
+
+class _PreviewSectionWidgetState extends ConsumerState<_PreviewSectionWidget> {
+  bool _isExpanded = true;
+  late final ScrollController _repeatTableScrollController;
+
+  int _defaultRepeatCount(int? repeatMin) {
+    if (repeatMin != null && repeatMin > 1) {
+      return repeatMin;
+    }
+    return 1;
+  }
+
+  String _questionRepeatKey(FormQuestion question) {
+    return '${widget.section.id}.${question.id}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final metadata = widget.section.metaData;
+    _isExpanded = metadata['startCollapsed'] == true ? false : true;
+    _repeatTableScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _repeatTableScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final section = widget.section;
     final style = section.style;
     final locale = ref.watch(localeControllerProvider).languageCode;
+    final metadata = section.metaData;
+    final canCollapse = metadata['allowCollapsing'] != false;
+    final sectionIcon = metadata['icon'] as String?;
+    final titleStyle = _sectionTypographyStyle(
+      baseColor: metadata['titleColor']?.toString() ?? style.titleColor,
+      fallbackColor: AppColors.textDark,
+      sizeKey: 'titleSize',
+      weightKey: 'titleWeight',
+      fallbackSize: 18,
+      metadata: metadata,
+    );
+    final descriptionStyle = _sectionTypographyStyle(
+      baseColor: metadata['descColor']?.toString() ?? style.descriptionColor,
+      fallbackColor: AppColors.textGrey,
+      sizeKey: 'descSize',
+      weightKey: 'descWeight',
+      fallbackSize: 14,
+      metadata: metadata,
+    );
+    final visibleQuestions = section.questions
+        .where((q) => widget.visibilityMap[q.id] ?? true)
+        .toList();
+    final hasRepeatableContent =
+        section.isRepeatable || visibleQuestions.any((q) => q.isRepeatable);
 
     return Card(
       elevation: 0,
@@ -885,47 +976,429 @@ class _PreviewSectionWidget extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (section.title.translate(locale).isNotEmpty) ...[
-              Text(
-                section.title.translate(locale),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: PreviewUtils.parseColor(
-                    style.titleColor,
-                    AppColors.textDark,
-                  ),
+            InkWell(
+              onTap: canCollapse
+                  ? () => setState(() => _isExpanded = !_isExpanded)
+                  : null,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    if (sectionIcon != null && sectionIcon.isNotEmpty) ...[
+                      Icon(
+                        _iconForName(sectionIcon),
+                        size: 20,
+                        color: titleStyle.color ?? AppColors.textDark,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (section.title.translate(locale).isNotEmpty)
+                            Text(
+                              section.title.translate(locale),
+                              style: titleStyle,
+                            ),
+                          if (section.description.translate(locale).isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                section.description.translate(locale),
+                                style: descriptionStyle,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (canCollapse)
+                      Icon(
+                        _isExpanded ? Icons.expand_less : Icons.expand_more,
+                        color: AppColors.textGrey,
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
+            ),
+            if (_isExpanded) ...[
+              if (hasRepeatableContent) ...[
+                _buildRepeatablePreviewTable(visibleQuestions, locale),
+                const SizedBox(height: 16),
+              ],
+              _buildQuestionsGrid(visibleQuestions, widget.questionSpacing),
             ],
-            if (section.description.translate(locale).isNotEmpty) ...[
-              Text(
-                section.description.translate(locale),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: PreviewUtils.parseColor(
-                    style.descriptionColor,
-                    AppColors.textGrey,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            _buildQuestionsGrid(visibilityMap, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuestionsGrid(Map<String, bool> visibilityMap, WidgetRef ref) {
+  IconData _iconForName(String iconName) {
+    switch (iconName.toLowerCase()) {
+      case 'person':
+      case 'user':
+        return Icons.person_outline;
+      case 'location':
+        return Icons.location_on_outlined;
+      case 'payment':
+        return Icons.payment;
+      case 'contact':
+        return Icons.contact_mail_outlined;
+      case 'settings':
+        return Icons.settings_outlined;
+      case 'list':
+        return Icons.list_alt;
+      case 'help':
+        return Icons.help_outline;
+      case 'info':
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  TextStyle _sectionTypographyStyle({
+    required String baseColor,
+    required Color fallbackColor,
+    required String sizeKey,
+    required String weightKey,
+    required double fallbackSize,
+    required Map<String, dynamic> metadata,
+  }) {
+    final color = PreviewUtils.parseColor(baseColor, fallbackColor);
+    final size = (metadata[sizeKey] as num?)?.toDouble() ?? fallbackSize;
+    final weight = switch (metadata[weightKey]?.toString()) {
+      'medium' => FontWeight.w500,
+      'bold' => FontWeight.bold,
+      _ => FontWeight.normal,
+    };
+    return TextStyle(color: color, fontSize: size, fontWeight: weight);
+  }
+
+  Widget _buildRepeatablePreviewTable(
+    List<FormQuestion> visibleQuestions,
+    String locale,
+  ) {
+    final repeatableQuestions = visibleQuestions
+        .where((q) => q.isRepeatable)
+        .toList();
+    final repeatInstances = ref.watch(previewRepeatInstancesProvider);
+    final questionRepeatCounts = {
+      for (final question in repeatableQuestions)
+        question.id:
+            repeatInstances[_questionRepeatKey(question)] ??
+            _defaultRepeatCount(question.repeatMin),
+    };
+    final committedRows =
+        ref.watch(previewCommittedSectionRowsProvider)[widget.section.id] ??
+        <Map<String, dynamic>>[];
+    final orderedTableQuestions = widget.section.isRepeatable
+        ? (() {
+            final questions = [...visibleQuestions];
+            questions.sort((a, b) {
+              int groupScore(FormQuestion q) {
+                final label = q.label.translate(locale).toLowerCase();
+                final id = q.id.toLowerCase();
+                final text = '$label $id';
+                final isLeft = text.contains('left');
+                final isRight = text.contains('right');
+                if (isLeft && !isRight) return 0;
+                if (isRight && !isLeft) return 1;
+                return 2;
+              }
+
+              final left = groupScore(a).compareTo(groupScore(b));
+              if (left != 0) return left;
+              return a.label
+                  .translate(locale)
+                  .compareTo(b.label.translate(locale));
+            });
+            return questions;
+          })()
+        : repeatableQuestions;
+    final rowCount = widget.section.isRepeatable
+        ? committedRows.length
+        : questionRepeatCounts.values.fold<int>(
+            1,
+            (current, value) => value > current ? value : current,
+          );
+
+    final canAddSectionRow =
+        widget.section.isRepeatable &&
+        (widget.section.repeatMax == null ||
+            committedRows.length < widget.section.repeatMax!);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.section.isRepeatable
+                ? 'Repeatable Section Preview'
+                : 'Repeatable Question Preview',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            widget.section.isRepeatable
+                ? 'Each row represents one section entry.'
+                : 'Each row represents one repeat of the repeatable questions in this section.',
+            style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Scrollbar(
+                  controller: _repeatTableScrollController,
+                  thumbVisibility: true,
+                  trackVisibility: true,
+                  notificationPredicate: (notification) =>
+                      notification.depth == 0,
+                  child: SingleChildScrollView(
+                    controller: _repeatTableScrollController,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: DataTable(
+                      horizontalMargin: 8,
+                      columnSpacing: 8,
+                      headingRowColor: WidgetStateProperty.all(Colors.white),
+                      columns: [
+                        const DataColumn(
+                          label: SizedBox(
+                            width: 32,
+                            child: Text(
+                              '#',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        ...orderedTableQuestions.map(
+                          (q) => DataColumn(
+                            label: SizedBox(
+                              width: 110,
+                              child: Text(
+                                q.label.translate(locale),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const DataColumn(
+                          label: SizedBox(
+                            width: 64,
+                            child: Text(
+                              'Action',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                      rows: List.generate(rowCount, (index) {
+                        final row = committedRows[index];
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                              SizedBox(width: 32, child: Text('${index + 1}')),
+                            ),
+                            ...orderedTableQuestions.map((q) {
+                              final value = row[q.id];
+                              final cellText =
+                                  value == null || value.toString().isEmpty
+                                  ? '—'
+                                  : (value is List
+                                        ? value.join(', ')
+                                        : value.toString());
+                              return DataCell(
+                                SizedBox(
+                                  width: 110,
+                                  child: Text(
+                                    cellText,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textDark,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                            DataCell(
+                              SizedBox(
+                                width: 64,
+                                child: Row(
+                                  children: [
+                                    if (widget.section.isRepeatable)
+                                      IconButton(
+                                        tooltip: 'Remove row',
+                                        icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          size: 18,
+                                          color: Colors.red,
+                                        ),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () {
+                                          ref
+                                              .read(
+                                                previewCommittedSectionRowsProvider
+                                                    .notifier,
+                                              )
+                                              .update((state) {
+                                                final rows =
+                                                    List<
+                                                      Map<String, dynamic>
+                                                    >.from(
+                                                      state[widget
+                                                              .section
+                                                              .id] ??
+                                                          const [],
+                                                    );
+                                                if (index < rows.length) {
+                                                  rows.removeAt(index);
+                                                }
+                                                return {
+                                                  ...state,
+                                                  widget.section.id: rows,
+                                                };
+                                              });
+                                        },
+                                      )
+                                    else if (index == rowCount - 1 &&
+                                        canAddSectionRow)
+                                      IconButton(
+                                        tooltip: 'Add row',
+                                        icon: const Icon(
+                                          Icons.add_circle_outline,
+                                          size: 18,
+                                          color: AppColors.primary,
+                                        ),
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () => _commitSectionRow(
+                                          orderedTableQuestions,
+                                        ),
+                                      )
+                                    else
+                                      const SizedBox(width: 40),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Text(
+                    'Scroll horizontally to see all repeatable columns.',
+                    style: TextStyle(fontSize: 11, color: AppColors.textGrey),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (widget.section.isRepeatable && canAddSectionRow)
+                TextButton.icon(
+                  onPressed: () => _commitSectionRow(orderedTableQuestions),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(
+                    'Add another ${widget.section.title.translate(locale)}',
+                  ),
+                ),
+              ...repeatableQuestions
+                  .where((q) {
+                    final currentCount = questionRepeatCounts[q.id] ?? 1;
+                    return q.repeatMax == null || currentCount < q.repeatMax!;
+                  })
+                  .map((q) {
+                    return TextButton.icon(
+                      onPressed: () {
+                        final key = _questionRepeatKey(q);
+                        ref
+                            .read(previewRepeatInstancesProvider.notifier)
+                            .update((state) {
+                              final current =
+                                  state[key] ??
+                                  _defaultRepeatCount(q.repeatMin);
+                              return {...state, key: current + 1};
+                            });
+                      },
+                      icon: const Icon(Icons.add, size: 18),
+                      label: Text('Add another ${q.label.translate(locale)}'),
+                    );
+                  }),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _commitSectionRow(List<FormQuestion> visibleQuestions) {
+    final currentData = ref.read(previewFormDataProvider);
+    final nextRow = <String, dynamic>{};
+    for (final q in visibleQuestions) {
+      nextRow[q.id] = currentData[q.id];
+    }
+
+    ref.read(previewCommittedSectionRowsProvider.notifier).update((state) {
+      final rows = List<Map<String, dynamic>>.from(
+        state[widget.section.id] ?? const [],
+      );
+      rows.add(nextRow);
+      return {...state, widget.section.id: rows};
+    });
+
+    ref.read(previewFormDataProvider.notifier).update((state) {
+      final next = Map<String, dynamic>.from(state);
+      for (final q in visibleQuestions) {
+        next.remove(q.id);
+      }
+      return next;
+    });
+  }
+
+  Widget _buildQuestionsGrid(
+    List<FormQuestion> visibleQuestions,
+    double questionSpacing,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         int crossAxisCount = 1;
-        if (section.layout == SectionLayoutType.grid) {
-          crossAxisCount = section.gridColumns;
+        if (widget.section.layout == SectionLayoutType.grid) {
+          crossAxisCount = widget.section.gridColumns;
         }
 
         if (availableWidth < 400) {
@@ -938,14 +1411,11 @@ class _PreviewSectionWidget extends ConsumerWidget {
             (availableWidth - (questionSpacing * (crossAxisCount - 1))) /
             crossAxisCount;
 
-        final visibleQuestions = section.questions
-            .where((q) => visibilityMap[q.id] ?? true)
-            .toList();
-
+        final repeatInstances = ref.watch(previewRepeatInstancesProvider);
         return Wrap(
           spacing: questionSpacing,
           runSpacing: questionSpacing,
-          children: visibleQuestions.map((q) {
+          children: visibleQuestions.expand((q) {
             double width = itemWidth;
             if (q.style.widthMode == 'fixed') {
               switch (q.style.fixedWidth) {
@@ -975,18 +1445,29 @@ class _PreviewSectionWidget extends ConsumerWidget {
               width = availableWidth;
             }
 
-            return AnimatedSize(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: SizedBox(
-                width: width,
-                child: _PreviewFieldWidget(
-                  question: q,
-                  dynamicOptions: dynamicOptions[q.id],
-                  onTriggerAction: (config) => onTriggerAction(config),
+            final repeatKey = _questionRepeatKey(q);
+            final questionRepeatCount = q.isRepeatable
+                ? (repeatInstances[repeatKey] ??
+                      _defaultRepeatCount(q.repeatMin))
+                : 1;
+
+            return List.generate(questionRepeatCount, (questionIndex) {
+              return AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: SizedBox(
+                  width: width,
+                  child: _PreviewFieldWidget(
+                    question: q,
+                    dynamicOptions: widget.dynamicOptions[q.id],
+                    onTriggerAction: (config) => widget.onTriggerAction(config),
+                    questionInstanceIndex: q.isRepeatable
+                        ? questionIndex
+                        : null,
+                  ),
                 ),
-              ),
-            );
+              );
+            });
           }).toList(),
         );
       },
@@ -998,11 +1479,13 @@ class _PreviewFieldWidget extends ConsumerStatefulWidget {
   final FormQuestion question;
   final List<FormQuestionOption>? dynamicOptions;
   final Future<void> Function(Map<String, dynamic>)? onTriggerAction;
+  final int? questionInstanceIndex;
 
   const _PreviewFieldWidget({
     required this.question,
     this.dynamicOptions,
     this.onTriggerAction,
+    this.questionInstanceIndex,
   });
 
   @override
@@ -1014,17 +1497,24 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   late TextEditingController _controller;
   bool _isActionRunning = false;
 
+  String get _fieldId {
+    if (widget.questionInstanceIndex != null) {
+      return '${widget.question.id}[${widget.questionInstanceIndex}]';
+    }
+    return widget.question.id;
+  }
+
   @override
   void initState() {
     super.initState();
-    final initialValue = ref.read(previewFormDataProvider)[widget.question.id];
+    final initialValue = ref.read(previewFormDataProvider)[_fieldId];
     _controller = TextEditingController(text: initialValue?.toString() ?? '');
   }
 
   @override
   void didUpdateWidget(_PreviewFieldWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final val = ref.read(previewFormDataProvider)[widget.question.id];
+    final val = ref.read(previewFormDataProvider)[_fieldId];
     if (val?.toString() != _controller.text) {
       _controller.text = val?.toString() ?? '';
     }
@@ -1057,7 +1547,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           child: Text(
             q.label.translate(locale).isEmpty
                 ? 'Untitled ${q.type.label}'
-                : q.label.translate(locale),
+                : q.label.translate(locale) +
+                      (widget.questionInstanceIndex != null
+                          ? ' (${widget.questionInstanceIndex! + 1})'
+                          : ''),
             style: TextStyle(
               color: labelColor,
               fontSize: style.labelFontSize,
@@ -1241,9 +1734,11 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
     switch (q.type) {
       case QuestionType.shortText:
+      case QuestionType.password:
       case QuestionType.number:
       case QuestionType.email:
       case QuestionType.mobile:
+      case QuestionType.tel:
       case QuestionType.url:
         return TextFormField(
           controller: _controller,
@@ -1265,7 +1760,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           onChanged: (val) {
             ref
                 .read(previewFormDataProvider.notifier)
-                .update((state) => {...state, q.id: val});
+                .update((state) => {...state, _fieldId: val});
             setState(() {});
           },
         );
@@ -1282,7 +1777,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           onChanged: (val) {
             ref
                 .read(previewFormDataProvider.notifier)
-                .update((state) => {...state, q.id: val});
+                .update((state) => {...state, _fieldId: val});
             setState(() {});
           },
         );
@@ -1290,14 +1785,21 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
       case QuestionType.dropdown:
         final options = widget.dynamicOptions ?? q.options ?? [];
         final formData = ref.watch(previewFormDataProvider);
+        const dropdownMenuTextStyle = TextStyle(
+          color: AppColors.textDark,
+          fontSize: 14,
+        );
         return DropdownButtonFormField<String>(
-          initialValue: formData[q.id]?.toString(),
+          initialValue: formData[_fieldId]?.toString(),
           style: textStyle,
           decoration: inputDecoration,
+          dropdownColor: Colors.white,
+          iconEnabledColor: AppColors.textGrey,
+          menuMaxHeight: 360,
           items: options.map((opt) {
             return DropdownMenuItem(
               value: opt.value,
-              child: Text(opt.label, style: textStyle),
+              child: Text(opt.label, style: dropdownMenuTextStyle),
             );
           }).toList(),
           validator: (val) => q.isRequired && val == null ? 'Required' : null,
@@ -1305,7 +1807,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
             if (val != null) {
               ref
                   .read(previewFormDataProvider.notifier)
-                  .update((state) => {...state, q.id: val});
+                  .update((state) => {...state, _fieldId: val});
             }
           },
         );
@@ -1315,7 +1817,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         final options = q.options ?? [];
         final isRadio = q.type == QuestionType.multipleChoice;
         final formData = ref.watch(previewFormDataProvider);
-        final currentValue = formData[q.id];
+        final currentValue = formData[_fieldId];
 
         // Check if these are image choices (enhanced UI)
         final isImageChoice = options.any(
@@ -1352,7 +1854,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                           if (isRadio) {
                             ref
                                 .read(previewFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: opt.value});
+                                .update((s) => {...s, _fieldId: opt.value});
                             state.didChange(opt.value);
                           } else {
                             final currentList = List<String>.from(
@@ -1365,7 +1867,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                             }
                             ref
                                 .read(previewFormDataProvider.notifier)
-                                .update((s) => {...s, q.id: currentList});
+                                .update((s) => {...s, _fieldId: currentList});
                             state.didChange(currentList);
                           }
                         },
@@ -1474,7 +1976,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                           }
                           ref
                               .read(previewFormDataProvider.notifier)
-                              .update((s) => {...s, q.id: newValue});
+                              .update((s) => {...s, _fieldId: newValue});
                           state.didChange(newValue);
                         },
                       );
@@ -1496,7 +1998,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.date:
         final formData = ref.watch(previewFormDataProvider);
-        final dateStr = formData[q.id]?.toString() ?? '';
+        final dateStr = formData[_fieldId]?.toString() ?? '';
         return _buildPicker(
           text: dateStr.isEmpty ? 'Select Date' : dateStr,
           icon: Icons.calendar_today,
@@ -1512,7 +2014,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
               final val = DateFormat('yyyy-MM-dd').format(date);
               ref
                   .read(previewFormDataProvider.notifier)
-                  .update((s) => {...s, q.id: val});
+                  .update((s) => {...s, _fieldId: val});
               _controller.text = val;
             }
           },
@@ -1520,7 +2022,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.time:
         final formData = ref.watch(previewFormDataProvider);
-        final timeStr = formData[q.id]?.toString() ?? '';
+        final timeStr = formData[_fieldId]?.toString() ?? '';
         return _buildPicker(
           text: timeStr.isEmpty ? 'Select Time' : timeStr,
           icon: Icons.access_time,
@@ -1535,7 +2037,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                   '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
               ref
                   .read(previewFormDataProvider.notifier)
-                  .update((s) => {...s, q.id: val});
+                  .update((s) => {...s, _fieldId: val});
               _controller.text = val;
             }
           },
@@ -1543,7 +2045,8 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.rating:
         final formData = ref.watch(previewFormDataProvider);
-        final rating = double.tryParse(formData[q.id]?.toString() ?? '0') ?? 0;
+        final rating =
+            double.tryParse(formData[_fieldId]?.toString() ?? '0') ?? 0;
         return Row(
           children: List.generate(5, (index) {
             final isSelected = index < rating;
@@ -1556,7 +2059,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
               onPressed: () {
                 ref
                     .read(previewFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: index + 1});
+                    .update((s) => {...s, _fieldId: index + 1});
               },
             );
           }),
@@ -1566,7 +2069,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         final formData = ref.watch(previewFormDataProvider);
         final val =
             double.tryParse(
-              formData[q.id]?.toString() ?? (q.minValue?.toString() ?? '0'),
+              formData[_fieldId]?.toString() ?? (q.minValue?.toString() ?? '0'),
             ) ??
             0.0;
         return Column(
@@ -1584,7 +2087,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
               onChanged: (newVal) {
                 ref
                     .read(previewFormDataProvider.notifier)
-                    .update((s) => {...s, q.id: newVal});
+                    .update((s) => {...s, _fieldId: newVal});
               },
             ),
             Row(
@@ -1635,7 +2138,511 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.image:
         return _buildImageUploadField(q, ref);
+      case QuestionType.otp:
+        return _buildOtpField(q, inputDecoration, textStyle, ref);
+      case QuestionType.richText:
+      case QuestionType.markdownEditor:
+        return _buildRichTextField(q, inputDecoration, textStyle, ref);
+      case QuestionType.address:
+      case QuestionType.addressLookup:
+        return _buildSingleLineSpecialField(
+          q,
+          inputDecoration,
+          textStyle,
+          ref,
+          locale,
+          hint: 'Enter address',
+        );
+      case QuestionType.mapLocation:
+        return _buildMultiLineSpecialField(
+          q,
+          inputDecoration,
+          textStyle,
+          ref,
+          locale,
+          hint: 'Enter location coordinates or address',
+        );
+      case QuestionType.booleanValue:
+      case QuestionType.toggle:
+        return _buildToggleField(q, ref, locale);
+      case QuestionType.multiSelect:
+      case QuestionType.multiCheckbox:
+        return _buildMultiSelectField(q, ref, locale, textStyle);
+      case QuestionType.multiFileUpload:
+      case QuestionType.filePicker:
+      case QuestionType.fileList:
+      case QuestionType.file:
+        return _buildFileFamilyField(q, ref, textStyle, locale);
+      case QuestionType.imageGallery:
+        return _buildImageGalleryField(q, ref, locale);
+      case QuestionType.signaturePad:
+        return _buildSignaturePadField(q, ref, locale);
+      case QuestionType.colorPicker:
+      case QuestionType.customField:
+      case QuestionType.countrySelect:
+      case QuestionType.stateSelect:
+      case QuestionType.citySelect:
+      case QuestionType.socialMediaHandle:
+      case QuestionType.websiteUrl:
+      case QuestionType.phoneNumber:
+      case QuestionType.captcha:
+      case QuestionType.unitSelect:
+      case QuestionType.price:
+      case QuestionType.age:
+      case QuestionType.emailList:
+      case QuestionType.qrCodeScan:
+      case QuestionType.search:
+        return _buildReadableSpecialField(q, textStyle, ref, locale);
+      case QuestionType.calculate:
+      case QuestionType.calculated:
+        return _buildCalculatedField(q, ref, locale);
+      case QuestionType.range:
+        return _buildRangeField(q, ref, locale);
+      case QuestionType.dateRange:
+        return _buildDateRangeField(q, ref, locale);
+      case QuestionType.timeRange:
+        return _buildTimeRangeField(q, ref, locale);
+      case QuestionType.stepper:
+        return _buildStepperField(q, ref, locale);
     }
+  }
+
+  Widget _buildReadableSpecialField(
+    FormQuestion q,
+    TextStyle textStyle,
+    WidgetRef ref,
+    String locale,
+  ) {
+    if (q.type == QuestionType.captcha) {
+      final checked = ref.watch(previewFormDataProvider)[_fieldId] == true;
+      return CheckboxListTile(
+        value: checked,
+        onChanged: (val) {
+          ref
+              .read(previewFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val == true});
+        },
+        title: Text('I am not a robot', style: textStyle),
+        contentPadding: EdgeInsets.zero,
+      );
+    }
+
+    if (q.type == QuestionType.colorPicker) {
+      final value =
+          ref.watch(previewFormDataProvider)[_fieldId]?.toString() ?? '#000000';
+      return TextFormField(
+        initialValue: value,
+        decoration: InputDecoration(
+          labelText: q.label.translate(locale),
+          hintText: '#RRGGBB',
+          suffixIcon: Container(
+            margin: const EdgeInsets.all(10),
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: _tryParseColor(value) ?? Colors.transparent,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        onChanged: (val) => ref
+            .read(previewFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val}),
+      );
+    }
+
+    if (q.type == QuestionType.countrySelect ||
+        q.type == QuestionType.stateSelect ||
+        q.type == QuestionType.citySelect) {
+      final options = (q.options ?? [])
+          .map(
+            (o) => o.label.translate(locale).isNotEmpty
+                ? o.label.translate(locale)
+                : o.value,
+          )
+          .where((v) => v.isNotEmpty)
+          .toList();
+      final current = ref.watch(previewFormDataProvider)[_fieldId]?.toString();
+      if (options.isNotEmpty) {
+        return DropdownButtonFormField<String>(
+          initialValue: options.contains(current) ? current : null,
+          decoration: InputDecoration(
+            labelText: q.label.translate(locale),
+            border: const OutlineInputBorder(),
+          ),
+          items: options
+              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+              .toList(),
+          onChanged: (val) => ref
+              .read(previewFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val}),
+        );
+      }
+    }
+
+    if (q.type == QuestionType.qrCodeScan) {
+      return _buildSingleLineSpecialField(
+        q,
+        InputDecoration(
+          labelText: q.label.translate(locale),
+          border: const OutlineInputBorder(),
+        ),
+        textStyle,
+        ref,
+        locale,
+        hint: 'Scan or paste code',
+      );
+    }
+
+    if (q.type == QuestionType.price ||
+        q.type == QuestionType.age ||
+        q.type == QuestionType.unitSelect) {
+      return _buildSingleLineSpecialField(
+        q,
+        InputDecoration(
+          labelText: q.label.translate(locale),
+          border: const OutlineInputBorder(),
+        ),
+        textStyle,
+        ref,
+        locale,
+        hint: q.type == QuestionType.price ? 'Enter price' : 'Enter value',
+      );
+    }
+
+    return _buildSingleLineSpecialField(
+      q,
+      InputDecoration(
+        labelText: q.label.translate(locale),
+        border: const OutlineInputBorder(),
+      ),
+      textStyle,
+      ref,
+      locale,
+      hint: q.type == QuestionType.websiteUrl
+          ? 'Enter website URL'
+          : q.type == QuestionType.socialMediaHandle
+          ? 'Enter handle'
+          : q.type == QuestionType.phoneNumber
+          ? 'Enter phone number'
+          : q.type == QuestionType.emailList
+          ? 'Enter comma-separated emails'
+          : 'Enter value',
+    );
+  }
+
+  Color? _tryParseColor(String value) {
+    final normalized = value.trim().replaceFirst('#', '');
+    if (normalized.length == 6) {
+      try {
+        return Color(int.parse('FF$normalized', radix: 16));
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  Widget _buildOtpField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+  ) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    final codeLength = (q.metadata?['codeLength'] as num?)?.toInt() ?? 6;
+    final currentValue =
+        ref.watch(previewFormDataProvider)[_fieldId]?.toString() ?? '';
+    final controllers = _previewOtpControllers.putIfAbsent(
+      _fieldId,
+      () => List.generate(codeLength, (index) {
+        final controller = TextEditingController();
+        if (index < currentValue.length) {
+          controller.text = currentValue[index];
+        }
+        return controller;
+      }),
+    );
+
+    if (controllers.length != codeLength) {
+      for (final c in controllers) {
+        c.dispose();
+      }
+      _previewOtpControllers[_fieldId] = List.generate(codeLength, (index) {
+        final controller = TextEditingController();
+        if (index < currentValue.length) {
+          controller.text = currentValue[index];
+        }
+        return controller;
+      });
+    }
+
+    final otpFields = _previewOtpControllers[_fieldId]!;
+
+    void syncOtp() {
+      final value = otpFields.map((c) => c.text).join();
+      ref
+          .read(previewFormDataProvider.notifier)
+          .update((state) => {...state, _fieldId: value});
+      setState(() {});
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          q.placeholder.translate(locale).isEmpty
+              ? 'Enter $codeLength-digit code'
+              : q.placeholder.translate(locale),
+          style: textStyle.copyWith(color: AppColors.textGrey),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: List.generate(codeLength, (index) {
+            return SizedBox(
+              width: 48,
+              child: TextFormField(
+                controller: otpFields[index],
+                style: textStyle.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(1),
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: inputDecoration.copyWith(
+                  counterText: '',
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onChanged: (val) {
+                  if (val.isNotEmpty) {
+                    if (index < codeLength - 1) {
+                      FocusScope.of(context).nextFocus();
+                    } else {
+                      FocusScope.of(context).unfocus();
+                    }
+                  } else if (index > 0) {
+                    FocusScope.of(context).previousFocus();
+                  }
+                  syncOtp();
+                },
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRichTextField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+  ) {
+    final locale = ref.read(localeControllerProvider).languageCode;
+    final isMarkdown = q.type == QuestionType.markdownEditor;
+    final previewMode = _previewRichPreviewMode[_fieldId] ?? false;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _editorChip('Bold', Icons.format_bold),
+            _editorChip('Italic', Icons.format_italic),
+            if (isMarkdown) _editorChip('Heading', Icons.title),
+            if (isMarkdown) _editorChip('List', Icons.format_list_bulleted),
+            if (isMarkdown) _editorChip('Link', Icons.link),
+            if (isMarkdown)
+              ActionChip(
+                avatar: Icon(
+                  previewMode ? Icons.edit : Icons.visibility,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: Text(previewMode ? 'Edit' : 'Preview'),
+                backgroundColor: Colors.white,
+                side: BorderSide(color: AppColors.borderLight),
+                onPressed: () {
+                  setState(() {
+                    _previewRichPreviewMode[_fieldId] = !previewMode;
+                  });
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (previewMode && isMarkdown)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              ref
+                          .watch(previewFormDataProvider)[_fieldId]
+                          ?.toString()
+                          .isNotEmpty ==
+                      true
+                  ? ref.watch(previewFormDataProvider)[_fieldId].toString()
+                  : 'Markdown preview will appear here.',
+              style: textStyle.copyWith(fontFamily: 'monospace', height: 1.4),
+            ),
+          )
+        else
+          TextFormField(
+            controller: _controller,
+            style: textStyle,
+            decoration: inputDecoration.copyWith(
+              hintText: q.placeholder.translate(locale).isEmpty
+                  ? (isMarkdown
+                        ? 'Write markdown...'
+                        : 'Write your response...')
+                  : q.placeholder.translate(locale),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            maxLines: isMarkdown ? 10 : 8,
+            minLines: isMarkdown ? 5 : 4,
+            textInputAction: TextInputAction.newline,
+            onChanged: (val) {
+              ref
+                  .read(previewFormDataProvider.notifier)
+                  .update((state) => {...state, _fieldId: val});
+              setState(() {});
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _editorChip(String label, IconData icon) {
+    return Chip(
+      avatar: Icon(icon, size: 16, color: AppColors.primary),
+      label: Text(label),
+      backgroundColor: AppColors.builderElement.withValues(alpha: 0.35),
+      side: BorderSide(color: AppColors.borderLight),
+    );
+  }
+
+  Widget _buildSingleLineSpecialField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+    String locale, {
+    required String hint,
+  }) {
+    return TextFormField(
+      controller: _controller,
+      style: textStyle,
+      decoration: inputDecoration.copyWith(
+        hintText: q.placeholder.translate(locale).isEmpty
+            ? hint
+            : q.placeholder.translate(locale),
+      ),
+      onChanged: (val) {
+        ref
+            .read(previewFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildMultiLineSpecialField(
+    FormQuestion q,
+    InputDecoration inputDecoration,
+    TextStyle textStyle,
+    WidgetRef ref,
+    String locale, {
+    required String hint,
+  }) {
+    return TextFormField(
+      controller: _controller,
+      style: textStyle,
+      decoration: inputDecoration.copyWith(
+        hintText: q.placeholder.translate(locale).isEmpty
+            ? hint
+            : q.placeholder.translate(locale),
+      ),
+      maxLines: 3,
+      minLines: 2,
+      onChanged: (val) {
+        ref
+            .read(previewFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+    );
+  }
+
+  Widget _buildToggleField(FormQuestion q, WidgetRef ref, String locale) {
+    final current = ref.read(previewFormDataProvider)[_fieldId] == true;
+    return SwitchListTile(
+      value: current,
+      onChanged: (val) {
+        ref
+            .read(previewFormDataProvider.notifier)
+            .update((state) => {...state, _fieldId: val});
+        setState(() {});
+      },
+      title: Text(
+        q.placeholder.translate(locale).isEmpty
+            ? q.type.label
+            : q.placeholder.translate(locale),
+      ),
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  Widget _buildMultiSelectField(
+    FormQuestion q,
+    WidgetRef ref,
+    String locale,
+    TextStyle textStyle,
+  ) {
+    final options = q.options ?? [];
+    final currentValue = ref.read(previewFormDataProvider)[_fieldId];
+    final current = currentValue is List
+        ? currentValue.cast<String>()
+        : <String>[];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: options.map((opt) {
+        final selected = current.contains(opt.value);
+        return CheckboxListTile(
+          value: selected,
+          onChanged: (val) {
+            final next = List<String>.from(current);
+            if (val == true) {
+              if (!next.contains(opt.value)) next.add(opt.value);
+            } else {
+              next.remove(opt.value);
+            }
+            ref
+                .read(previewFormDataProvider.notifier)
+                .update((state) => {...state, _fieldId: next});
+            setState(() {});
+          },
+          title: Text(opt.label, style: textStyle),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        );
+      }).toList(),
+    );
   }
 
   bool get hasActionButton =>
@@ -2060,6 +3067,450 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     );
   }
 
+  Widget _buildFileFamilyField(
+    FormQuestion q,
+    WidgetRef ref,
+    TextStyle textStyle,
+    String locale,
+  ) {
+    final formData = ref.watch(previewFormDataProvider);
+    final value = formData[q.id];
+    final isMulti =
+        q.type == QuestionType.multiFileUpload ||
+        q.type == QuestionType.fileList;
+    final isGallery = q.type == QuestionType.imageGallery;
+    final allowedTypes = q.allowedFileTypes ?? [];
+    final List<String>? extensions = allowedTypes.isNotEmpty
+        ? _extensionsForTypes(allowedTypes)
+        : null;
+
+    Future<void> pickFiles() async {
+      final input = web.HTMLInputElement()
+        ..type = 'file'
+        ..multiple = isMulti
+        ..accept = isGallery
+            ? 'image/*'
+            : (extensions != null
+                  ? extensions.map((e) => '.$e').join(',')
+                  : '');
+
+      input.addEventListener(
+        'change',
+        (web.Event _) {
+          final files = input.files;
+          if (files == null || files.length == 0) return;
+          final picked = <Map<String, dynamic>>[];
+          int remaining = files.length;
+
+          void writeValue() {
+            if (!mounted) return;
+            ref.read(previewFormDataProvider.notifier).update((state) {
+              final next = Map<String, dynamic>.from(state);
+              next[q.id] = isMulti
+                  ? picked
+                  : (picked.isNotEmpty ? picked.first : null);
+              return next;
+            });
+          }
+
+          for (var i = 0; i < files.length; i++) {
+            final file = files.item(i);
+            if (file == null) continue;
+            final reader = web.FileReader();
+            reader.addEventListener(
+              'load',
+              (web.Event _) {
+                Uint8List? bytes;
+                try {
+                  bytes = (reader.result as JSArrayBuffer).toDart.asUint8List();
+                } catch (_) {
+                  bytes = null;
+                }
+                picked.add({
+                  'name': file.name,
+                  'size': file.size,
+                  'bytes': bytes,
+                });
+                remaining -= 1;
+                if (remaining == 0) {
+                  writeValue();
+                }
+              }.toJS,
+            );
+            reader.readAsArrayBuffer(file);
+          }
+        }.toJS,
+      );
+      input.click();
+    }
+
+    final files = isMulti && value is List
+        ? value.cast<Map>()
+        : (value is Map ? [value] : <Map>[]);
+
+    return InkWell(
+      onTap: pickFiles,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          border: Border.all(color: AppColors.borderLight),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: files.isEmpty
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isGallery
+                        ? Icons.photo_library_outlined
+                        : Icons.upload_file,
+                    size: 40,
+                    color: AppColors.textGrey,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isGallery ? 'Tap to add images' : 'Tap to upload file',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isMulti ? 'Multiple files allowed' : 'Single file',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final f in files)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.insert_drive_file, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              f['name']?.toString() ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () {
+                              ref.read(previewFormDataProvider.notifier).update(
+                                (state) {
+                                  final next = Map<String, dynamic>.from(state);
+                                  if (isMulti && value is List) {
+                                    final updated = List<Map>.from(value);
+                                    updated.removeWhere(
+                                      (e) => e['name'] == f['name'],
+                                    );
+                                    next[q.id] = updated;
+                                  } else {
+                                    next[q.id] = null;
+                                  }
+                                  return next;
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  TextButton.icon(
+                    onPressed: pickFiles,
+                    icon: const Icon(Icons.swap_horiz),
+                    label: Text(
+                      isMulti ? 'Add more' : 'Change file',
+                      style: textStyle,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildImageGalleryField(FormQuestion q, WidgetRef ref, String locale) {
+    return _buildFileFamilyField(q, ref, const TextStyle(), locale);
+  }
+
+  Widget _buildSignaturePadField(FormQuestion q, WidgetRef ref, String locale) {
+    final formData = ref.watch(previewFormDataProvider);
+    final current = formData[q.id];
+    if (current is Uint8List && current.isNotEmpty) {
+      return Stack(
+        children: [
+          Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(child: Image.memory(current)),
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () =>
+                  ref.read(previewFormDataProvider.notifier).update((state) {
+                    final next = Map<String, dynamic>.from(state);
+                    next[q.id] = null;
+                    return next;
+                  }),
+            ),
+          ),
+        ],
+      );
+    }
+    return SignaturePadWidget(
+      onSigned: (data) {
+        if (data.isNotEmpty) {
+          try {
+            ref.read(previewFormDataProvider.notifier).update((state) {
+              final next = Map<String, dynamic>.from(state);
+              next[q.id] = base64Decode(data);
+              return next;
+            });
+          } catch (_) {}
+        }
+      },
+    );
+  }
+
+  Widget _buildRangeField(FormQuestion q, WidgetRef ref, String locale) {
+    final current =
+        (ref.watch(previewFormDataProvider)[q.id] as num?)?.toDouble() ??
+        (q.minValue?.toDouble() ?? 0.0);
+    final min = q.minValue?.toDouble() ?? 0.0;
+    final max = q.maxValue?.toDouble() ?? 100.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Slider(
+          value: current.clamp(min, max),
+          min: min,
+          max: max,
+          divisions: ((max - min).abs() >= 1) ? ((max - min).toInt()) : null,
+          label: current.round().toString(),
+          onChanged: (v) =>
+              ref.read(previewFormDataProvider.notifier).update((state) {
+                final next = Map<String, dynamic>.from(state);
+                next[q.id] = v;
+                return next;
+              }),
+        ),
+        Text('${current.toStringAsFixed(0)} / ${max.toStringAsFixed(0)}'),
+      ],
+    );
+  }
+
+  Widget _buildDateRangeField(FormQuestion q, WidgetRef ref, String locale) {
+    final formData = ref.watch(previewFormDataProvider);
+    final current = formData[q.id] as Map<String, dynamic>?;
+    final label = current == null
+        ? 'Select date range'
+        : '${current['start'] ?? ''} - ${current['end'] ?? ''}';
+    return _buildPicker(
+      text: label,
+      icon: Icons.date_range,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      onTap: () async {
+        final picked = await showDateRangePicker(
+          context: context,
+          firstDate: q.dateMin ?? DateTime(1900),
+          lastDate: q.dateMax ?? DateTime(2100),
+          initialDateRange: current == null
+              ? null
+              : DateTimeRange(
+                  start:
+                      DateTime.tryParse(current['start']?.toString() ?? '') ??
+                      DateTime.now(),
+                  end:
+                      DateTime.tryParse(current['end']?.toString() ?? '') ??
+                      DateTime.now(),
+                ),
+        );
+        if (picked != null) {
+          ref.read(previewFormDataProvider.notifier).update((state) {
+            final next = Map<String, dynamic>.from(state);
+            next[q.id] = {
+              'start': DateFormat('yyyy-MM-dd').format(picked.start),
+              'end': DateFormat('yyyy-MM-dd').format(picked.end),
+            };
+            return next;
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildTimeRangeField(FormQuestion q, WidgetRef ref, String locale) {
+    final formData = ref.watch(previewFormDataProvider);
+    final current = formData[q.id] as Map<String, dynamic>?;
+    final startText = current?['start']?.toString() ?? 'Start time';
+    final endText = current?['end']?.toString() ?? 'End time';
+    return Row(
+      children: [
+        Expanded(
+          child: _buildPicker(
+            text: startText,
+            icon: Icons.schedule,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (picked != null) {
+                ref.read(previewFormDataProvider.notifier).update((state) {
+                  final next = Map<String, dynamic>.from(state);
+                  next[q.id] = {
+                    ...?current,
+                    'start':
+                        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+                  };
+                  return next;
+                });
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildPicker(
+            text: endText,
+            icon: Icons.schedule,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (picked != null) {
+                ref.read(previewFormDataProvider.notifier).update((state) {
+                  final next = Map<String, dynamic>.from(state);
+                  next[q.id] = {
+                    ...?current,
+                    'end':
+                        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+                  };
+                  return next;
+                });
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStepperField(FormQuestion q, WidgetRef ref, String locale) {
+    final current =
+        (ref.watch(previewFormDataProvider)[q.id] as int?) ??
+        (q.minValue?.toInt() ?? 0);
+    final min = q.minValue?.toInt() ?? 0;
+    final max = q.maxValue?.toInt() ?? 10;
+    return Row(
+      children: [
+        IconButton(
+          onPressed: current > min
+              ? () =>
+                    ref.read(previewFormDataProvider.notifier).update((state) {
+                      final next = Map<String, dynamic>.from(state);
+                      next[q.id] = current - 1;
+                      return next;
+                    })
+              : null,
+          icon: const Icon(Icons.remove_circle_outline),
+        ),
+        Text(
+          '$current',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        IconButton(
+          onPressed: current < max
+              ? () =>
+                    ref.read(previewFormDataProvider.notifier).update((state) {
+                      final next = Map<String, dynamic>.from(state);
+                      next[q.id] = current + 1;
+                      return next;
+                    })
+              : null,
+          icon: const Icon(Icons.add_circle_outline),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalculatedField(FormQuestion q, WidgetRef ref, String locale) {
+    final formula = q.metadata?['formula']?.toString();
+    final current = ref.watch(previewFormDataProvider)[q.id]?.toString();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border.all(color: AppColors.borderLight),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.functions, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  formula?.isNotEmpty == true
+                      ? 'Formula: $formula'
+                      : 'Auto-calculated field',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            current?.isNotEmpty == true ? current! : 'Result will appear here',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'This value is read-only and expected to be derived from other answers.',
+            style: TextStyle(fontSize: 11, color: AppColors.textGrey),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<String> _extensionsForTypes(List<String> types) {
     final res = <String>[];
     for (final t in types) {
@@ -2081,15 +3532,18 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
       borderRadius: decoration.border is OutlineInputBorder
           ? (decoration.border as OutlineInputBorder).borderRadius
           : decoration.border is UnderlineInputBorder
-              ? (decoration.border as UnderlineInputBorder).borderRadius
-              : BorderRadius.circular(8),
-      child: InputDecorator(decoration: decoration, child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(text),
-          Icon(icon, size: 20, color: AppColors.textGrey),
-        ],
-      )),
+          ? (decoration.border as UnderlineInputBorder).borderRadius
+          : BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: decoration,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(text),
+            Icon(icon, size: 20, color: AppColors.textGrey),
+          ],
+        ),
+      ),
     );
   }
 
@@ -2181,7 +3635,9 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           rows: rows.map((r) {
             return DataRow(
               cells: [
-                DataCell(Text(r, style: style.copyWith(fontWeight: FontWeight.bold))),
+                DataCell(
+                  Text(r, style: style.copyWith(fontWeight: FontWeight.bold)),
+                ),
                 ...cols.map((c) {
                   return DataCell(
                     RadioGroup<String>(

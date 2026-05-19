@@ -9,6 +9,32 @@ import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
 
+TextStyle _sectionTypographyStyle({
+  required String baseColor,
+  required Color fallbackColor,
+  required String sizeKey,
+  required String weightKey,
+  required double fallbackSize,
+  required Map<String, dynamic> metadata,
+}) {
+  final color = _parseColor(baseColor, fallbackColor);
+  final size = (metadata[sizeKey] as num?)?.toDouble() ?? fallbackSize;
+  final weight = switch (metadata[weightKey]?.toString()) {
+    'medium' => FontWeight.w500,
+    'bold' => FontWeight.bold,
+    _ => FontWeight.normal,
+  };
+  return TextStyle(color: color, fontSize: size, fontWeight: weight);
+}
+
+Color _parseColor(String value, Color fallback) {
+  try {
+    return Color(int.parse(value.replaceAll('#', '0xFF')));
+  } catch (_) {
+    return fallback;
+  }
+}
+
 class FormRenderWidget extends ConsumerWidget {
   final BuilderForm form;
 
@@ -69,7 +95,11 @@ class FormRenderWidget extends ConsumerWidget {
                       children: form.sections.map((section) {
                         return SizedBox(
                           width: itemWidth,
-                          child: _buildSection(context, section, locale),
+                          child: _buildSection(
+                            context,
+                            section,
+                            locale,
+                          ),
                         );
                       }).toList(),
                     );
@@ -99,6 +129,30 @@ class FormRenderWidget extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  int _sectionCrossAxisCount(SectionLayoutType layout, int gridColumns) {
+    switch (layout) {
+      case SectionLayoutType.grid:
+        return gridColumns;
+      case SectionLayoutType.threeColumns:
+        return 3;
+      case SectionLayoutType.fullWidth:
+      case SectionLayoutType.list:
+      case SectionLayoutType.sidebar:
+      case SectionLayoutType.custom:
+      case SectionLayoutType.overlay:
+      case SectionLayoutType.dashboard:
+      case SectionLayoutType.centered:
+      case SectionLayoutType.wizard:
+      case SectionLayoutType.masonry:
+      case SectionLayoutType.fixed:
+      case SectionLayoutType.standard:
+      case SectionLayoutType.accordion:
+      case SectionLayoutType.tabbed:
+      case SectionLayoutType.card:
+        return 1;
+    }
   }
 
   Widget _buildFormHeader(Object? title, String locale) {
@@ -133,8 +187,10 @@ class FormRenderWidget extends ConsumerWidget {
   }
 
   Widget _buildSection(BuildContext context, dynamic section, String locale) {
-    // section is FormSection
     final sectionStyle = section.style;
+    final metadata = (section.metaData is Map)
+        ? Map<String, dynamic>.from(section.metaData)
+        : <String, dynamic>{};
 
     Color sectionBg;
     Color headerBg;
@@ -150,115 +206,149 @@ class FormRenderWidget extends ConsumerWidget {
       headerBg = AppColors.builderElement.withValues(alpha: 0.5);
     }
 
-    return Material(
-      elevation: sectionStyle.elevation,
-      borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-      color: sectionBg,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          if (sectionStyle.showHeader)
-            Container(
-              padding: const EdgeInsets.all(24),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: headerBg,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(sectionStyle.borderRadius),
-                ),
-                border: Border(
-                  bottom: BorderSide(color: AppColors.borderLight),
-                ),
+    final sectionContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (sectionStyle.showHeader)
+          Container(
+            padding: const EdgeInsets.all(24),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: headerBg,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(sectionStyle.borderRadius),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              border: Border(
+                bottom: BorderSide(color: AppColors.borderLight),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  section.title.translate(locale),
+                  style: _sectionTypographyStyle(
+                    baseColor:
+                        metadata['titleColor']?.toString() ??
+                        sectionStyle.titleColor,
+                    fallbackColor: AppColors.textDark,
+                    sizeKey: 'titleSize',
+                    weightKey: 'titleWeight',
+                    fallbackSize: 18,
+                    metadata: metadata,
+                  ),
+                ),
+                if (section.description.translate(locale).isNotEmpty) ...[
+                  const SizedBox(height: 4),
                   Text(
-                    section.title.translate(locale),
-                    style: const TextStyle(
-                      color: AppColors.textDark,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                    section.description.translate(locale),
+                    style: _sectionTypographyStyle(
+                      baseColor:
+                          metadata['descColor']?.toString() ??
+                          sectionStyle.descriptionColor,
+                      fallbackColor: AppColors.textGrey,
+                      sizeKey: 'descSize',
+                      weightKey: 'descWeight',
+                      fallbackSize: 14,
+                      metadata: metadata,
                     ),
                   ),
-                  if (section.description.translate(locale).isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      section.description.translate(locale),
-                      style: const TextStyle(color: AppColors.textGrey),
-                    ),
-                  ],
                 ],
-              ),
-            ),
-
-          // Questions List
-          Padding(
-            padding: EdgeInsets.all(sectionStyle.padding),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final availableWidth = constraints.maxWidth;
-                final questionSpacing = 16.0; // Default or from style
-
-                int crossAxisCount = 1;
-                if (section.layout == SectionLayoutType.grid) {
-                  crossAxisCount = section.gridColumns;
-                }
-
-                if (availableWidth < 400 && crossAxisCount > 1) {
-                  crossAxisCount = 1;
-                } else if (availableWidth < 700 && crossAxisCount > 2) {
-                  crossAxisCount = 2;
-                }
-
-                final itemWidth =
-                    (availableWidth -
-                        (questionSpacing * (crossAxisCount - 1))) /
-                    crossAxisCount;
-
-                return Wrap(
-                  spacing: questionSpacing,
-                  runSpacing: questionSpacing,
-                  children: (section.questions as List).map<Widget>((q) {
-                    // Calculate width based on span or fixed mode
-                    double width = itemWidth;
-
-                    if (q.style.widthMode == 'fixed') {
-                      switch (q.style.fixedWidth) {
-                        case 'small':
-                          width = 200.0;
-                          break;
-                        case 'medium':
-                          width = 400.0;
-                          break;
-                        case 'large':
-                          width = 600.0;
-                          break;
-                        default:
-                          width = 400.0;
-                      }
-                    } else {
-                      int span = q.style.columnSpan;
-                      if (span > crossAxisCount) span = crossAxisCount;
-                      if (span < 1) span = 1;
-                      width =
-                          (itemWidth * span) + (questionSpacing * (span - 1));
-                    }
-
-                    if (width > availableWidth) width = availableWidth;
-
-                    return SizedBox(
-                      width: width,
-                      child: _RenderFieldWidget(question: q, locale: locale),
-                    );
-                  }).toList(),
-                );
-              },
+              ],
             ),
           ),
+        Padding(
+          padding: EdgeInsets.all(sectionStyle.padding),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final questionSpacing = 16.0;
+
+              int crossAxisCount = _sectionCrossAxisCount(
+                section.layout,
+                section.gridColumns,
+              );
+
+              if (availableWidth < 400 && crossAxisCount > 1) {
+                crossAxisCount = 1;
+              } else if (availableWidth < 700 && crossAxisCount > 2) {
+                crossAxisCount = 2;
+              }
+
+              final itemWidth =
+                  (availableWidth - (questionSpacing * (crossAxisCount - 1))) /
+                  crossAxisCount;
+
+              return Wrap(
+                spacing: questionSpacing,
+                runSpacing: questionSpacing,
+                children: (section.questions as List).map<Widget>((q) {
+                  double width = itemWidth;
+
+                  if (q.style.widthMode == 'fixed') {
+                    switch (q.style.fixedWidth) {
+                      case 'small':
+                        width = 200.0;
+                        break;
+                      case 'medium':
+                        width = 400.0;
+                        break;
+                      case 'large':
+                        width = 600.0;
+                        break;
+                      default:
+                        width = 400.0;
+                    }
+                  } else {
+                    int span = q.style.columnSpan;
+                    if (span > crossAxisCount) span = crossAxisCount;
+                    if (span < 1) span = 1;
+                    width =
+                        (itemWidth * span) + (questionSpacing * (span - 1));
+                  }
+
+                  if (width > availableWidth) width = availableWidth;
+
+                  return SizedBox(
+                    width: width,
+                    child: _RenderFieldWidget(question: q, locale: locale),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+        if (section.sections.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: section.sections.map((childSection) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: _buildSection(context, childSection, locale),
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: sectionBg,
+        borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
+        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.9)),
       ),
+      child: sectionContent,
     );
   }
 }
@@ -463,11 +553,13 @@ class _RenderFieldWidget extends StatelessWidget {
 
     switch (q.type) {
       case QuestionType.shortText:
+      case QuestionType.password:
       case QuestionType.number:
       case QuestionType.date:
       case QuestionType.time:
       case QuestionType.email:
       case QuestionType.mobile:
+      case QuestionType.tel:
       case QuestionType.url:
         return Container(
           height: q.style.height ?? 48,
@@ -720,6 +812,43 @@ class _RenderFieldWidget extends StatelessWidget {
             ),
           ),
         );
+      case QuestionType.otp:
+      case QuestionType.richText:
+      case QuestionType.markdownEditor:
+      case QuestionType.address:
+      case QuestionType.addressLookup:
+      case QuestionType.mapLocation:
+      case QuestionType.multiFileUpload:
+      case QuestionType.filePicker:
+      case QuestionType.fileList:
+      case QuestionType.imageGallery:
+      case QuestionType.signaturePad:
+      case QuestionType.calculate:
+      case QuestionType.calculated:
+      case QuestionType.booleanValue:
+      case QuestionType.multiSelect:
+      case QuestionType.colorPicker:
+      case QuestionType.range:
+      case QuestionType.dateRange:
+      case QuestionType.timeRange:
+      case QuestionType.stepper:
+      case QuestionType.countrySelect:
+      case QuestionType.stateSelect:
+      case QuestionType.citySelect:
+      case QuestionType.socialMediaHandle:
+      case QuestionType.websiteUrl:
+      case QuestionType.phoneNumber:
+      case QuestionType.captcha:
+      case QuestionType.unitSelect:
+      case QuestionType.price:
+      case QuestionType.age:
+      case QuestionType.toggle:
+      case QuestionType.multiCheckbox:
+      case QuestionType.emailList:
+      case QuestionType.qrCodeScan:
+      case QuestionType.search:
+      case QuestionType.file:
+        return _buildSpecialFieldCard(q, textStyle, locale);
       case QuestionType.divider:
         return Divider(
           height: 32,
@@ -786,6 +915,8 @@ class _RenderFieldWidget extends StatelessWidget {
             ],
           ),
         );
+      default:
+        return const SizedBox.shrink();
     }
   }
 
@@ -809,4 +940,54 @@ class _RenderFieldWidget extends StatelessWidget {
         return '';
     }
   }
+
+  Widget _buildSpecialFieldCard(
+    FormQuestion q,
+    TextStyle textStyle,
+    String locale,
+  ) {
+    return Container(
+      height: q.style.height ?? 120,
+      decoration: BoxDecoration(
+        color: AppColors.fieldBackground,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.auto_fix_high, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                q.type.label,
+                style: textStyle.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            q.placeholder.translate(locale).isEmpty
+                ? 'Specialized input preview'
+                : q.placeholder.translate(locale),
+            style: textStyle.copyWith(
+              color: textStyle.color?.withValues(alpha: 0.65),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'This field type is supported in the catalog and save contract, and can be specialized further in the next UX pass.',
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.textGrey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
