@@ -13,7 +13,7 @@ enum SectionLayoutType {
   list,
   @JsonValue('sidebar')
   sidebar,
-  @JsonValue('split')
+  @JsonValue('accordion')
   accordion,
   @JsonValue('tabbed')
   tabbed,
@@ -25,7 +25,7 @@ enum SectionLayoutType {
   dashboard,
   @JsonValue('centered')
   centered,
-  @JsonValue('stacked')
+  @JsonValue('wizard')
   wizard,
   @JsonValue('masonry')
   masonry,

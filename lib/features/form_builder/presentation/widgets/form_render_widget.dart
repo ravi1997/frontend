@@ -8,6 +8,7 @@ import '../../domain/entities/form_question_option.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
+import 'section_layout_widgets.dart';
 
 TextStyle _sectionTypographyStyle({
   required String baseColor,
@@ -95,11 +96,7 @@ class FormRenderWidget extends ConsumerWidget {
                       children: form.sections.map((section) {
                         return SizedBox(
                           width: itemWidth,
-                          child: _buildSection(
-                            context,
-                            section,
-                            locale,
-                          ),
+                          child: _buildSection(context, section, locale),
                         );
                       }).toList(),
                     );
@@ -186,27 +183,89 @@ class FormRenderWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, dynamic section, String locale) {
-    final sectionStyle = section.style;
+  // ---------------------------------------------------------------------------
+  // Builds the question grid (shared by all layouts)
+  // ---------------------------------------------------------------------------
+  Widget _buildQuestionsGrid(
+    BuildContext context,
+    dynamic section,
+    String locale,
+    dynamic sectionStyle,
+  ) {
     final metadata = (section.metaData is Map)
-        ? Map<String, dynamic>.from(section.metaData)
+        ? Map<String, dynamic>.from(section.metaData as Map)
         : <String, dynamic>{};
+    final defaultPad = (sectionStyle.padding as num?)?.toDouble() ?? 16.0;
+    final vPad =
+        (metadata['verticalPadding'] as num?)?.toDouble() ?? defaultPad;
+    final hPad =
+        (metadata['horizontalPadding'] as num?)?.toDouble() ?? defaultPad;
+    final questionSpacing = (metadata['fieldGap'] as num?)?.toDouble() ?? 16.0;
 
-    Color sectionBg;
-    Color headerBg;
-    try {
-      sectionBg = Color(
-        int.parse(sectionStyle.backgroundColor.replaceAll('#', '0xFF')),
-      );
-      headerBg = Color(
-        int.parse(sectionStyle.headerBackgroundColor.replaceAll('#', '0xFF')),
-      );
-    } catch (_) {
-      sectionBg = Colors.white;
-      headerBg = AppColors.builderElement.withValues(alpha: 0.5);
-    }
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: vPad, horizontal: hPad),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableWidth = constraints.maxWidth;
 
-    final sectionContent = Column(
+          int crossAxisCount = _sectionCrossAxisCount(
+            section.layout,
+            section.gridColumns,
+          );
+          if (availableWidth < 400 && crossAxisCount > 1) crossAxisCount = 1;
+          if (availableWidth < 700 && crossAxisCount > 2) crossAxisCount = 2;
+
+          final itemWidth =
+              (availableWidth - (questionSpacing * (crossAxisCount - 1))) /
+              crossAxisCount;
+
+          return Wrap(
+            spacing: questionSpacing,
+            runSpacing: questionSpacing,
+            children: (section.questions as List).map<Widget>((q) {
+              double width = itemWidth;
+              if (q.style.widthMode == 'fixed') {
+                switch (q.style.fixedWidth) {
+                  case 'small':
+                    width = 200.0;
+                  case 'medium':
+                    width = 400.0;
+                  case 'large':
+                    width = 600.0;
+                  default:
+                    width = 400.0;
+                }
+              } else {
+                int span = q.style.columnSpan;
+                if (span > crossAxisCount) span = crossAxisCount;
+                if (span < 1) span = 1;
+                width = (itemWidth * span) + (questionSpacing * (span - 1));
+              }
+              if (width > availableWidth) width = availableWidth;
+              return SizedBox(
+                width: width,
+                child: _RenderFieldWidget(question: q, locale: locale),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Standard section shell (header + questions + children)
+  // ---------------------------------------------------------------------------
+  Widget _buildStandardSection(
+    BuildContext context,
+    dynamic section,
+    String locale,
+    Color sectionBg,
+    Color headerBg,
+    Map<String, dynamic> metadata,
+  ) {
+    final sectionStyle = section.style;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (sectionStyle.showHeader)
@@ -218,7 +277,7 @@ class FormRenderWidget extends ConsumerWidget {
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(sectionStyle.borderRadius),
               ),
-              border: Border(
+              border: const Border(
                 bottom: BorderSide(color: AppColors.borderLight),
               ),
             ),
@@ -238,7 +297,8 @@ class FormRenderWidget extends ConsumerWidget {
                     metadata: metadata,
                   ),
                 ),
-                if (section.description.translate(locale).isNotEmpty) ...[
+                if ((section.description?.translate(locale) ?? '')
+                    .isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     section.description.translate(locale),
@@ -257,98 +317,217 @@ class FormRenderWidget extends ConsumerWidget {
               ],
             ),
           ),
-        Padding(
-          padding: EdgeInsets.all(sectionStyle.padding),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final availableWidth = constraints.maxWidth;
-              final questionSpacing = 16.0;
-
-              int crossAxisCount = _sectionCrossAxisCount(
-                section.layout,
-                section.gridColumns,
-              );
-
-              if (availableWidth < 400 && crossAxisCount > 1) {
-                crossAxisCount = 1;
-              } else if (availableWidth < 700 && crossAxisCount > 2) {
-                crossAxisCount = 2;
-              }
-
-              final itemWidth =
-                  (availableWidth - (questionSpacing * (crossAxisCount - 1))) /
-                  crossAxisCount;
-
-              return Wrap(
-                spacing: questionSpacing,
-                runSpacing: questionSpacing,
-                children: (section.questions as List).map<Widget>((q) {
-                  double width = itemWidth;
-
-                  if (q.style.widthMode == 'fixed') {
-                    switch (q.style.fixedWidth) {
-                      case 'small':
-                        width = 200.0;
-                        break;
-                      case 'medium':
-                        width = 400.0;
-                        break;
-                      case 'large':
-                        width = 600.0;
-                        break;
-                      default:
-                        width = 400.0;
-                    }
-                  } else {
-                    int span = q.style.columnSpan;
-                    if (span > crossAxisCount) span = crossAxisCount;
-                    if (span < 1) span = 1;
-                    width =
-                        (itemWidth * span) + (questionSpacing * (span - 1));
-                  }
-
-                  if (width > availableWidth) width = availableWidth;
-
-                  return SizedBox(
-                    width: width,
-                    child: _RenderFieldWidget(question: q, locale: locale),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-        ),
+        _buildQuestionsGrid(context, section, locale, sectionStyle),
         if (section.sections.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: section.sections.map((childSection) {
+              children: section.sections.map<Widget>((child) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: _buildSection(context, childSection, locale),
+                  child: _buildSection(context, child, locale),
                 );
               }).toList(),
             ),
           ),
       ],
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Layout dispatcher
+  // ---------------------------------------------------------------------------
+  Widget _buildSection(BuildContext context, dynamic section, String locale) {
+    final sectionStyle = section.style;
+    final metadata = (section.metaData is Map)
+        ? Map<String, dynamic>.from(section.metaData as Map)
+        : <String, dynamic>{};
+
+    Color sectionBg;
+    Color headerBg;
+    try {
+      sectionBg = Color(
+        int.parse(sectionStyle.backgroundColor.replaceAll('#', '0xFF')),
+      );
+      headerBg = Color(
+        int.parse(sectionStyle.headerBackgroundColor.replaceAll('#', '0xFF')),
+      );
+    } catch (_) {
+      sectionBg = Colors.white;
+      headerBg = AppColors.builderElement.withValues(alpha: 0.5);
+    }
+
+    // ---- Layout-specific widgets (with conditions) ----
+    final layout = section.layout as SectionLayoutType;
+    final hasSubSections = (section.sections as List).isNotEmpty;
+    final hasEnoughSubSections = (section.sections as List).length >= 2;
+
+    // ACCORDION: works with just questions — no sub-section requirement.
+    if (layout == SectionLayoutType.accordion) {
+      return AccordionSection(
+        section: section,
+        locale: locale,
+        sectionBg: sectionBg,
+        metadata: metadata,
+        questionsGrid: _buildQuestionsGrid(
+          context,
+          section,
+          locale,
+          sectionStyle,
+        ),
+        childSections: (section.sections as List)
+            .map<Widget>((c) => _buildSection(context, c, locale))
+            .toList(),
+      );
+    }
+
+    // TABBED: requires at least 1 sub-section to use as tabs.
+    // Falls back to standard if no sub-sections.
+    if (layout == SectionLayoutType.tabbed && hasSubSections) {
+      return TabbedSection(
+        section: section,
+        tabs: section.sections as List,
+        locale: locale,
+        sectionBg: sectionBg,
+        headerBg: headerBg,
+        metadata: metadata,
+        sectionStyle: sectionStyle,
+        buildQuestionsGrid: (s) =>
+            _buildQuestionsGrid(context, s, locale, s.style),
+      );
+    }
+
+    // SIDEBAR: requires at least 1 sub-section as nav items.
+    // Falls back to standard if no sub-sections.
+    if (layout == SectionLayoutType.sidebar && hasSubSections) {
+      return SidebarSection(
+        section: section,
+        locale: locale,
+        sectionBg: sectionBg,
+        headerBg: headerBg,
+        metadata: metadata,
+        sectionStyle: sectionStyle,
+        buildQuestionsGrid: (s) =>
+            _buildQuestionsGrid(context, s, locale, s.style),
+        buildChildSection: (s) => _buildSection(context, s, locale),
+      );
+    }
+
+    // WIZARD: requires at least 1 sub-section as steps.
+    // Falls back to standard if no sub-sections.
+    if (layout == SectionLayoutType.wizard && hasSubSections) {
+      return WizardSection(
+        section: section,
+        steps: section.sections as List,
+        locale: locale,
+        sectionBg: sectionBg,
+        metadata: metadata,
+        sectionStyle: sectionStyle,
+        buildQuestionsGrid: (s) =>
+            _buildQuestionsGrid(context, s, locale, s.style),
+      );
+    }
+
+    // MASONRY: requires 2+ sub-sections for meaningful staggered columns.
+    // Falls back to standard if not enough sub-sections.
+    if (layout == SectionLayoutType.masonry && hasEnoughSubSections) {
+      return MasonrySection(
+        section: section,
+        locale: locale,
+        sectionBg: sectionBg,
+        headerBg: headerBg,
+        metadata: metadata,
+        sectionStyle: sectionStyle,
+        buildChildSection: (s) => _buildSection(context, s, locale),
+      );
+    }
+
+    // ---- Default: standard, grid, list, fullWidth, centered, card, etc. ----
+    Widget content = _buildStandardSection(
+      context,
+      section,
+      locale,
+      sectionBg,
+      headerBg,
+      metadata,
+    );
+
+    final alignStr = metadata['alignment']?.toString() ?? 'left';
+    AlignmentGeometry contentAlignment = Alignment.centerLeft;
+    if (alignStr == 'center') contentAlignment = Alignment.center;
+    if (alignStr == 'right') contentAlignment = Alignment.centerRight;
+
+    final defaultMaxWidth = layout == SectionLayoutType.centered
+        ? 760.0
+        : 1200.0;
+    final maxWidth =
+        (metadata['maxWidth'] as num?)?.toDouble() ?? defaultMaxWidth;
+
+    if (layout == SectionLayoutType.centered ||
+        layout == SectionLayoutType.fullWidth) {
+      content = Align(
+        alignment: contentAlignment,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: content,
+        ),
+      );
+    } else if (layout == SectionLayoutType.dashboard) {
+      content = Align(alignment: contentAlignment, child: content);
+    }
+
+    final extraShadow = (layout == SectionLayoutType.card)
+        ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 24,
+              offset: const Offset(0, 10),
+            ),
+          ]
+        : <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ];
+
+    Border? extraBorder;
+    if (layout == SectionLayoutType.sidebar) {
+      extraBorder = Border(
+        left: BorderSide(
+          color: AppColors.primary.withValues(alpha: 0.55),
+          width: 4,
+        ),
+      );
+    } else if (layout == SectionLayoutType.overlay) {
+      extraBorder = Border.all(
+        color: AppColors.primary.withValues(alpha: 0.28),
+        width: 2,
+      );
+    }
+
+    BoxDecoration decoration = BoxDecoration(
+      color: layout == SectionLayoutType.dashboard ? null : sectionBg,
+      gradient: layout == SectionLayoutType.dashboard
+          ? LinearGradient(
+              colors: [AppColors.primary.withValues(alpha: 0.10), sectionBg],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+          : null,
+      borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+      boxShadow: extraShadow,
+      border:
+          extraBorder ??
+          Border.all(color: AppColors.borderLight.withValues(alpha: 0.9)),
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: sectionBg,
-        borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: AppColors.borderLight.withValues(alpha: 0.9)),
-      ),
-      child: sectionContent,
+      decoration: decoration,
+      child: content,
     );
   }
 }
@@ -960,7 +1139,11 @@ class _RenderFieldWidget extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_fix_high, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.auto_fix_high,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 q.type.label,
@@ -980,14 +1163,10 @@ class _RenderFieldWidget extends StatelessWidget {
           const SizedBox(height: 6),
           const Text(
             'This field type is supported in the catalog and save contract, and can be specialized further in the next UX pass.',
-            style: TextStyle(
-              fontSize: 11,
-              color: AppColors.textGrey,
-            ),
+            style: TextStyle(fontSize: 11, color: AppColors.textGrey),
           ),
         ],
       ),
     );
   }
-
 }

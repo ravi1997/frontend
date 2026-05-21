@@ -32,6 +32,10 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       final data = Map<String, dynamic>.from(response.data as Map);
       data['id'] ??= id;
       data['form_id'] ??= id;
+      final resolvedSections = _resolvedTopLevelSections(data);
+      if (resolvedSections != null) {
+        _hydrateActiveVersionSections(data, resolvedSections);
+      }
       final hydratedSections = await _loadSections(projectId, id, data);
       if (hydratedSections != null) {
         data['sections'] = hydratedSections;
@@ -45,6 +49,14 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       _logger.e('Failed to load form', error: e, stackTrace: s);
       throw FormLoadException(id, originalError: e);
     }
+  }
+
+  List<dynamic>? _resolvedTopLevelSections(Map<String, dynamic> formData) {
+    final rawSections = formData['sections'];
+    if (rawSections is! List || rawSections.isEmpty) {
+      return null;
+    }
+    return rawSections.every((section) => section is Map) ? rawSections : null;
   }
 
   Future<List<dynamic>?> _loadSections(
@@ -62,12 +74,25 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       return null;
     }
 
-    final response = await _apiClient.get(
-      ApiEndpoints.listSections(projectId, formId),
-    );
-    final data = response.data;
+    final dynamic data;
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.listSections(projectId, formId),
+      );
+      data = response.data;
+    } catch (e, s) {
+      _logger.w(
+        'Skipping section hydration for form $formId',
+        error: e,
+        stackTrace: s,
+      );
+      return null;
+    }
+
     final sections = data is Map<String, dynamic>
-        ? (data['data'] as List<dynamic>? ??
+        ? (data['section'] as List<dynamic>? ??
+              data['sections'] as List<dynamic>? ??
+              data['data'] as List<dynamic>? ??
               data['items'] as List<dynamic>? ??
               const [])
         : (data as List<dynamic>? ?? const []);

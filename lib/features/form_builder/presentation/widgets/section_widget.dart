@@ -654,7 +654,21 @@ class SectionWidget extends ConsumerWidget {
               ),
             ),
           ),
-          child: child,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LayoutModeBanner(
+                icon: Icons.view_sidebar_outlined,
+                label: 'Sidebar Layout',
+                hint: section.sections.isEmpty
+                    ? 'Add sub-sections to activate sidebar navigation'
+                    : '${section.sections.length} sub-section(s) shown as nav items',
+                color: AppColors.primary,
+                isReady: section.sections.isNotEmpty,
+              ),
+              child,
+            ],
+          ),
         );
       case SectionLayoutType.dashboard:
         return Container(
@@ -680,6 +694,29 @@ class SectionWidget extends ConsumerWidget {
           ),
           child: child,
         );
+      case SectionLayoutType.accordion:
+        return Container(
+          decoration: BoxDecoration(
+            color: sectionBg,
+            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.22),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LayoutModeBanner(
+                icon: Icons.expand_more,
+                label: 'Accordion Layout',
+                hint: 'Section collapses/expands in the preview',
+                color: const Color(0xFF8B5CF6),
+                isReady: true,
+              ),
+              child,
+            ],
+          ),
+        );
       case SectionLayoutType.wizard:
         return Container(
           decoration: BoxDecoration(
@@ -689,7 +726,21 @@ class SectionWidget extends ConsumerWidget {
               color: AppColors.primary.withValues(alpha: 0.14),
             ),
           ),
-          child: child,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LayoutModeBanner(
+                icon: Icons.linear_scale,
+                label: 'Wizard / Multi-Step Layout',
+                hint: section.sections.isEmpty
+                    ? 'Add sub-sections — each becomes a step'
+                    : '${section.sections.length} step(s) with Next/Back navigation',
+                color: const Color(0xFF10B981),
+                isReady: section.sections.isNotEmpty,
+              ),
+              child,
+            ],
+          ),
         );
       case SectionLayoutType.masonry:
         return Container(
@@ -700,7 +751,21 @@ class SectionWidget extends ConsumerWidget {
               color: AppColors.primary.withValues(alpha: 0.10),
             ),
           ),
-          child: child,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LayoutModeBanner(
+                icon: Icons.dashboard_outlined,
+                label: 'Masonry Layout',
+                hint: section.sections.length < 2
+                    ? 'Add at least 2 sub-sections for staggered columns'
+                    : '${section.sections.length} sub-sections in 2 staggered columns',
+                color: const Color(0xFFF59E0B),
+                isReady: section.sections.length >= 2,
+              ),
+              child,
+            ],
+          ),
         );
       case SectionLayoutType.tabbed:
         return Container(
@@ -714,7 +779,21 @@ class SectionWidget extends ConsumerWidget {
               ),
             ),
           ),
-          child: child,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LayoutModeBanner(
+                icon: Icons.tab_outlined,
+                label: 'Tabbed Layout',
+                hint: section.sections.isEmpty
+                    ? 'Add sub-sections — each becomes a tab'
+                    : '${section.sections.length} sub-section(s) shown as tabs',
+                color: AppColors.primary,
+                isReady: section.sections.isNotEmpty,
+              ),
+              child,
+            ],
+          ),
         );
       default:
         return child;
@@ -762,6 +841,96 @@ class _SectionMetaChip extends StatelessWidget {
               color: fg,
               fontSize: 12,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Layout mode info banner shown in the builder canvas
+// isReady = false → shows an amber "setup needed" warning
+// isReady = true  → shows a green "active" badge
+// ---------------------------------------------------------------------------
+class _LayoutModeBanner extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String hint;
+  final Color color;
+  final bool isReady;
+
+  const _LayoutModeBanner({
+    required this.icon,
+    required this.label,
+    required this.hint,
+    required this.color,
+    required this.isReady,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bannerColor = isReady
+        ? color.withValues(alpha: 0.08)
+        : const Color(0xFFFFFBEB);
+    final borderColor = isReady
+        ? color.withValues(alpha: 0.25)
+        : const Color(0xFFFBBF24);
+    final iconColor = isReady ? color : const Color(0xFFD97706);
+    final labelColor = isReady ? color : const Color(0xFF92400E);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: bannerColor,
+        border: Border(bottom: BorderSide(color: borderColor)),
+      ),
+      child: Row(
+        children: [
+          Icon(isReady ? icon : Icons.info_outline, size: 15, color: iconColor),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label  ',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: labelColor,
+                    ),
+                  ),
+                  TextSpan(
+                    text: hint,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: labelColor.withValues(alpha: 0.75),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: isReady
+                  ? color.withValues(alpha: 0.12)
+                  : const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: borderColor),
+            ),
+            child: Text(
+              isReady ? 'Active' : 'Setup needed',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: iconColor,
+              ),
             ),
           ),
         ],

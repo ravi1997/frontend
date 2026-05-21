@@ -316,6 +316,14 @@ class FormMapper {
         !normalized.containsKey('is_repeatable')) {
       normalized['is_repeatable'] = normalized['is_repeatable_section'];
     }
+    if (normalized.containsKey('metaData') &&
+        !normalized.containsKey('meta_data')) {
+      normalized['meta_data'] = normalized['metaData'];
+    }
+    if (normalized.containsKey('metadata') &&
+        !normalized.containsKey('meta_data')) {
+      normalized['meta_data'] = normalized['metadata'];
+    }
 
     normalized.putIfAbsent('title', () => 'Untitled Section');
     normalized.putIfAbsent('description', () => null);
