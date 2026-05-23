@@ -34,7 +34,7 @@ The RIDP Form Platform Flutter frontend requires transformation from 75% feature
 | Gap ID | Description | Impact | Status |
 |--------|-------------|--------|--------|
 | G-01 | WCAG 2.1 AA compliance unknown | High - Legal risk | ❌ Not verified |
-| G-02 | No design system documented | Medium - Consistency risk | ❌ Not created |
+| G-02 | No design system documented | Medium - Consistency risk | ⚠️ Core tokens defined (`lib/core/design_system/`) |
 | G-03 | 12 feature gaps exist | High - User experience | ❌ Not implemented |
 | G-04 | No control panel UI | Critical - Admin capability | ❌ Not implemented |
 | G-05 | No keyboard navigation | High - Accessibility | ❌ Not implemented |
@@ -60,7 +60,7 @@ The RIDP Form Platform Flutter frontend requires transformation from 75% feature
 | Week | Task | Deliverable | Owner | Success Metric |
 |------|------|-------------|-------|----------------|
 | W1 | WCAG 2.1 AA audit | axe-core score | QA | AA achieved |
-| W2 | Design system | `lib/core/design_system/` | Frontend | Tokens defined |
+| W2 | Design system | `lib/core/design_system/` | Frontend | ✅ Tokens defined |
 | W3 | Test baseline | Coverage measurement | QA | Baseline recorded |
 | W4 | Performance baseline | FPS, load time | Frontend | Benchmarks set |
 | W5-16 | Codex Phase 1-4 completion | 12 gaps closed | Team | Checklist complete |

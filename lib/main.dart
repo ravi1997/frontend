@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/theme/app_theme.dart';
+import 'core/design_system/design_system.dart';
 import 'core/router/app_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/widgets/snackbar_service.dart';
@@ -49,7 +49,7 @@ class AgentOSApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'MahaSangrah Setu',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppDesignSystem.enterpriseDarkTheme,
       routerConfig: router,
       scaffoldMessengerKey: snackbarService.messengerKey,
     );
@@ -65,7 +65,7 @@ class InitializationErrorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppDesignSystem.enterpriseDarkTheme,
       home: Scaffold(
         body: Center(
           child: Padding(
