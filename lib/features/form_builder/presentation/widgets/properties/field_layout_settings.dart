@@ -77,110 +77,45 @@ class FieldLayoutSettings extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         PropertyBuilderUtils.buildDropdown<String>(
-          label: 'Width Mode',
-          value: question.style.widthMode,
+          label: 'Width Preset',
+          value: (question.metadata?['layout']?['widthPreset'] as String?) ?? 'auto',
           items: const [
-            DropdownMenuItem(value: 'auto', child: Text('Auto (Full Grid)')),
-            DropdownMenuItem(value: 'fixed', child: Text('Fixed Width')),
-            DropdownMenuItem(value: 'percentage', child: Text('Percentage')),
+            DropdownMenuItem(value: 'auto', child: Text('Auto (Smart Span)')),
+            DropdownMenuItem(value: 'small', child: Text('Small (1 Col)')),
+            DropdownMenuItem(value: 'medium', child: Text('Medium (2 Cols)')),
+            DropdownMenuItem(value: 'large', child: Text('Large (3 Cols)')),
+            DropdownMenuItem(value: 'full', child: Text('Full Width')),
           ],
           onChanged: (val) {
             if (val != null) {
-              _updateStyle(ref, question.style.copyWith(widthMode: val));
+              final layout = Map<String, dynamic>.from(question.metadata?['layout'] ?? {});
+              layout['widthPreset'] = val;
+              ref
+                  .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+                  .updateQuestionMetadata(question.id, {'layout': layout});
             }
           },
         ),
-        if (question.style.widthMode == 'fixed') ...[
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildDropdown<String>(
-            label: 'Fixed Width',
-            value: question.style.fixedWidth,
-            items: const [
-              DropdownMenuItem(value: 'small', child: Text('Small (200px)')),
-              DropdownMenuItem(value: 'medium', child: Text('Medium (400px)')),
-              DropdownMenuItem(value: 'large', child: Text('Large (600px)')),
-            ],
-            onChanged: (val) {
-              if (val != null) {
-                _updateStyle(ref, question.style.copyWith(fixedWidth: val));
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildDropdown<String>(
-            label: 'Alignment',
-            value: question.style.containerAlignment ?? 'left',
-            items: const [
-              DropdownMenuItem(value: 'left', child: Text('Left')),
-              DropdownMenuItem(value: 'center', child: Text('Center')),
-              DropdownMenuItem(value: 'right', child: Text('Right')),
-            ],
-            onChanged: (val) {
-              if (val != null) {
-                _updateStyle(
-                  ref,
-                  question.style.copyWith(containerAlignment: val),
-                );
-              }
-            },
-          ),
-        ],
-        if (question.style.widthMode == 'percentage') ...[
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildDropdown<int>(
-            label: 'Quick Columns',
-            value: null,
-            items: const [
-              DropdownMenuItem(value: 100, child: Text('Full Width (100%)')),
-              DropdownMenuItem(value: 66, child: Text('2/3 (66%)')),
-              DropdownMenuItem(value: 50, child: Text('1/2 (50%)')),
-              DropdownMenuItem(value: 33, child: Text('1/3 (33%)')),
-              DropdownMenuItem(value: 25, child: Text('1/4 (25%)')),
-            ],
-            onChanged: (val) {
-              if (val != null) {
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        '$projectId::$formId',
-                      ).notifier,
-                    )
-                    .updateQuestionMetadata(question.id, {
-                      'widthPercentage': val,
-                    });
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildNumberSlider(
-            label: 'Width (%)',
-            value: (question.metadata?['widthPercentage'] ?? 100).toDouble(),
-            min: 10,
-            max: 100,
-            onChanged: (val) {
-              ref
-                  .read(
-                    formBuilderControllerProvider(
-                      '$projectId::$formId',
-                    ).notifier,
-                  )
-                  .updateQuestionMetadata(question.id, {
-                    'widthPercentage': val.toInt(),
-                  });
-            },
-          ),
-        ],
         const SizedBox(height: 12),
-        // Force Full Width on Mobile
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Force Full Width on Mobile',
-          value: question.metadata?['mobileFullWidth'] ?? true,
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Manual Span (Optional Override)',
+          value: (question.metadata?['layout']?['span'] as String?) ?? 'auto',
+          items: const [
+            DropdownMenuItem(value: 'auto', child: Text('Auto')),
+            DropdownMenuItem(value: '1', child: Text('1 Column')),
+            DropdownMenuItem(value: '2', child: Text('2 Columns')),
+            DropdownMenuItem(value: '3', child: Text('3 Columns')),
+            DropdownMenuItem(value: '4', child: Text('4 Columns')),
+            DropdownMenuItem(value: 'full', child: Text('Full Width')),
+          ],
           onChanged: (val) {
-            ref
-                .read(
-                  formBuilderControllerProvider('$projectId::$formId').notifier,
-                )
-                .updateQuestionMetadata(question.id, {'mobileFullWidth': val});
+            if (val != null) {
+              final layout = Map<String, dynamic>.from(question.metadata?['layout'] ?? {});
+              layout['span'] = val;
+              ref
+                  .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+                  .updateQuestionMetadata(question.id, {'layout': layout});
+            }
           },
         ),
 

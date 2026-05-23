@@ -9,12 +9,7 @@ import 'property_builder_utils.dart';
 // 'custom' and 'fixed' are omitted — they are stubs with no distinct behaviour.
 const _exposedLayouts = [
   SectionLayoutType.standard,
-  SectionLayoutType.fullWidth,
-  SectionLayoutType.list,
   SectionLayoutType.grid,
-  SectionLayoutType.threeColumns,
-  SectionLayoutType.card,
-  SectionLayoutType.centered,
   SectionLayoutType.accordion,
   SectionLayoutType.tabbed,
   SectionLayoutType.sidebar,
@@ -78,16 +73,21 @@ class SectionLayoutSettings extends ConsumerWidget {
       children: [
         // ── Section Layout Picker ─────────────────────────────────────────
         const Text(
-          'Section Layout',
+          'Section layout',
           style: TextStyle(
             color: AppColors.textDark,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
         ),
+        const SizedBox(height: 4),
+        const Text(
+          'Controls questions and nested sub-sections inside this section.',
+          style: TextStyle(color: AppColors.textGrey, fontSize: 12),
+        ),
         const SizedBox(height: 8),
         DropdownButtonFormField<SectionLayoutType>(
-          value: _exposedLayouts.contains(layout)
+          initialValue: _exposedLayouts.contains(layout)
               ? layout
               : SectionLayoutType.standard,
           isExpanded: true,
@@ -229,29 +229,7 @@ class SectionLayoutSettings extends ConsumerWidget {
           ),
         ],
 
-        // ── threeColumns info (fixed, no slider) ──────────────────────
-        if (layout == SectionLayoutType.threeColumns) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.builderElement,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.info_outline, size: 14, color: AppColors.textGrey),
-                SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Fixed at 3 columns. Use "Grid (Multi-Column)" for 2 or 4 columns.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textGrey),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+
 
         // ── Layout-specific options ─────────────────────────────────────
         ..._buildLayoutSpecificOptions(layout, metadata),
@@ -288,34 +266,24 @@ class SectionLayoutSettings extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
 
-        // Alignment only makes sense for centered/fullWidth/dashboard
-        if (layout == SectionLayoutType.centered ||
-            layout == SectionLayoutType.fullWidth ||
-            layout == SectionLayoutType.dashboard) ...[
-          PropertyBuilderUtils.buildDropdown<String>(
-            label: 'Content Alignment',
-            value: metadata['alignment']?.toString() ?? 'left',
-            items: const [
-              DropdownMenuItem(value: 'left', child: Text('Left')),
-              DropdownMenuItem(value: 'center', child: Text('Center')),
-              DropdownMenuItem(value: 'right', child: Text('Right')),
-            ],
-            onChanged: (val) => _updateMetadata('alignment', val),
-          ),
-          const SizedBox(height: 12),
-        ],
-
-        // Max-width only for layouts that constrain width
-        if (layout == SectionLayoutType.centered ||
-            layout == SectionLayoutType.fullWidth) ...[
-          PropertyBuilderUtils.buildNumberSlider(
-            label: 'Max Width (px)',
-            value: (metadata['maxWidth'] as num?)?.toDouble() ?? 1200.0,
-            min: 400,
-            max: 2000,
-            onChanged: (val) => _updateMetadata('maxWidth', val),
-          ),
-        ],
+        PropertyBuilderUtils.buildDropdown<String>(
+          label: 'Content Alignment',
+          value: metadata['alignment']?.toString() ?? 'center',
+          items: const [
+            DropdownMenuItem(value: 'left', child: Text('Left')),
+            DropdownMenuItem(value: 'center', child: Text('Center')),
+            DropdownMenuItem(value: 'right', child: Text('Right')),
+          ],
+          onChanged: (val) => _updateMetadata('alignment', val),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildNumberSlider(
+          label: 'Max Width (px)',
+          value: (metadata['maxWidth'] as num?)?.toDouble() ?? 1200.0,
+          min: 400,
+          max: 2000,
+          onChanged: (val) => _updateMetadata('maxWidth', val),
+        ),
       ],
     );
   }

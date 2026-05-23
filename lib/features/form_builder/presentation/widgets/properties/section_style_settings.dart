@@ -59,6 +59,13 @@ class SectionStyleSettings extends ConsumerWidget {
                         _updateStyle(section.style.copyWith(backgroundColor: val)),
                   ),
                   const SizedBox(height: 12),
+                  PropertyBuilderUtils.buildSwitch(
+                    label: 'Show Card Background',
+                    description: 'Wraps the section in a distinctive card container with shadows.',
+                    value: metadata['isCardLayout'] as bool? ?? false,
+                    onChanged: (val) => _updateMetadata('isCardLayout', val),
+                  ),
+                  const SizedBox(height: 12),
                   PropertyBuilderUtils.buildNumberSlider(
                     label: 'Border Radius',
                     value: section.style.borderRadius,

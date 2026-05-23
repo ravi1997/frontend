@@ -24,7 +24,7 @@ class FormLayoutSettings extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         PropertyBuilderUtils.buildDropdown<FormLayoutType>(
-          label: 'Display Columns',
+          label: 'Form layout',
           value: form.layout,
           items: FormLayoutType.values.map((type) {
             return DropdownMenuItem(value: type, child: Text(type.label));
@@ -43,7 +43,7 @@ class FormLayoutSettings extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
         const Text(
-          'GLOBAL PAGE LAYOUT',
+          'WHOLE-FORM SECTION ARRANGEMENT',
           style: TextStyle(
             color: AppColors.textGrey,
             fontSize: 12,
