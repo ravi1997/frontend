@@ -37,6 +37,14 @@ abstract class FormBuilderRepository {
     String type = 'patch',
     bool activate = true,
   });
+  Future<Map<String, dynamic>> saveDraft(String projectId, BuilderForm form);
+  Future<Map<String, dynamic>> getBuilderMetadata();
+  Future<Map<String, dynamic>> exportSchema(String projectId, String formId);
+  Future<BuilderForm> restoreFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  );
   Future<Map<String, dynamic>> publishForm(String formId);
   Future<List<FormSection>> generateFieldsWithAI(
     String prompt, {

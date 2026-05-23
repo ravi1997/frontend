@@ -183,13 +183,13 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
         _logger.i('form: ${form.id}');
         _logger.i('projectId: $projectId');
         _logger.i(
-          'endpoint: ${ApiEndpoints.updateProjectForm(projectId, form.id)}',
+          'endpoint: ${ApiEndpoints.saveFormDraft(projectId, form.id)}',
         );
         // ── Update existing form ─────────────────────────────────────────
-        // Backend: PUT /projects/<projectId>/forms/<id> for full canvas
+        // Backend: PUT /projects/<projectId>/forms/<id>/draft for full canvas
         final payload = FormMapper.toBackendJson(form);
         await _apiClient.put(
-          ApiEndpoints.updateProjectForm(projectId, form.id),
+          ApiEndpoints.saveFormDraft(projectId, form.id),
           data: payload,
         );
 
@@ -198,6 +198,23 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       }
     } catch (e, s) {
       _logger.e('Failed to save form', error: e, stackTrace: s);
+      throw FormSaveException(form.id, originalError: e);
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> saveDraft(
+    String projectId,
+    BuilderForm form,
+  ) async {
+    try {
+      final response = await _apiClient.put(
+        ApiEndpoints.saveFormDraft(projectId, form.id),
+        data: FormMapper.toBackendJson(form),
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (e, s) {
+      _logger.e('Failed to save draft', error: e, stackTrace: s);
       throw FormSaveException(form.id, originalError: e);
     }
   }
@@ -268,6 +285,33 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> getBuilderMetadata() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.builderMetadata);
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (e, s) {
+      _logger.e('Failed to load builder metadata', error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> exportSchema(
+    String projectId,
+    String formId,
+  ) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.exportFormSchema(projectId, formId),
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    } catch (e, s) {
+      _logger.e('Failed to export schema', error: e, stackTrace: s);
+      throw FormLoadException(formId, originalError: e);
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>> publishForm(String formId) async {
     try {
       // Backend: POST /forms/<id>/publish → 202 { "task_id": "..." }
@@ -322,6 +366,23 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       return FormMapper.fromDto(dto);
     } catch (e, s) {
       _logger.e('Failed to load form version', error: e, stackTrace: s);
+      throw FormVersionException(formId, version, originalError: e);
+    }
+  }
+
+  @override
+  Future<BuilderForm> restoreFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  ) async {
+    try {
+      await _apiClient.post(
+        ApiEndpoints.restoreFormVersion(projectId, formId, version),
+      );
+      return getForm(projectId, formId);
+    } catch (e, s) {
+      _logger.e('Failed to restore form version', error: e, stackTrace: s);
       throw FormVersionException(formId, version, originalError: e);
     }
   }

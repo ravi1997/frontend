@@ -167,6 +167,9 @@ class ApiEndpoints {
   /// Returns: [{ "id": string, "title": string, "status": string, ... }]
   static const String listForms = '/forms/';
 
+  /// GET - Builder metadata used by schema-driven builder controls.
+  static const String builderMetadata = '/forms/builder-metadata';
+
   /// GET - Get form by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Optional: ?lang=string
@@ -197,6 +200,18 @@ class ApiEndpoints {
   /// Returns: { "id": string, "title": string, ... }
   static String updateProjectForm(String projectId, String formId) =>
       '/projects/$projectId/forms/$formId';
+
+  /// PUT - Save full builder draft canvas with debounce-friendly semantics.
+  static String saveFormDraft(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/draft';
+
+  /// GET - Export the current form schema.
+  static String exportFormSchema(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/schema';
+
+  /// POST - Import a full form schema into a project.
+  static String importFormSchema(String projectId) =>
+      '/projects/$projectId/forms/import/schema';
 
   /// DELETE - Delete form (soft delete)
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -260,6 +275,13 @@ class ApiEndpoints {
     String formId,
     String version,
   ) => '/projects/$projectId/forms/$formId/versions/$version';
+
+  /// POST - Restore a specific form version into the active draft.
+  static String restoreFormVersion(
+    String projectId,
+    String formId,
+    String version,
+  ) => '/projects/$projectId/forms/$formId/versions/$version/restore';
 
   /// PUT - Update a specific version of a form
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -401,6 +423,14 @@ class ApiEndpoints {
   /// Body: { "form_visibility": string, "response_visibility": string, ... }
   static String accessPolicy(String formId) => '/forms/$formId/access-policy';
 
+  /// GET - Form audit trail.
+  static String formAudit(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/audit';
+
+  /// POST - Apply a theme or form-level theme override.
+  static String applyFormTheme(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/theme';
+
   // ============================================================================
   // Workflow Integration (§12)
   // ============================================================================
@@ -456,6 +486,9 @@ class ApiEndpoints {
   /// Body: { "form_ids": string[] }
   /// Returns: { "job_id": string, "status": string }
   static const String bulkExport = '/forms/export/bulk';
+
+  /// GET - Generic async task status.
+  static String taskStatus(String taskId) => '/tasks/$taskId';
 
   /// GET - Check bulk export status
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -746,6 +779,16 @@ class ApiEndpoints {
   /// Body: { "name": string, "type": string, "config": {...} }
   /// Returns: { "id": string, "name": string, ... }
   static const String createFieldTemplate = '/custom-fields/';
+
+  // ============================================================================
+  // Theme API
+  // ============================================================================
+
+  /// GET/POST - Reusable organization themes.
+  static const String themes = '/themes/';
+
+  /// PUT/DELETE - Reusable organization theme by ID.
+  static String theme(String themeId) => '/themes/$themeId';
 
   // ============================================================================
   // Health Check
