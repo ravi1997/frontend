@@ -12,18 +12,18 @@ import '../../../../core/network/token_service.dart';
 // ─── Auth Design Tokens ───────────────────────────────────────────────────────
 abstract class _AuthTokens {
   // Palette
-  static const Color primary = Color(0xFF4F46E5); // Indigo 600
+  static const Color primary = Color(0xFF4338CA); // Darkened from 4F46E5 for contrast (Indigo 700)
   static const Color primaryLight = Color(0xFFEEF2FF); // Indigo 50
 
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color border = Color(0xFFE5E7EB);
-  static const Color borderFocus = Color(0xFF4F46E5);
-  static const Color borderError = Color(0xFFEF4444);
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderFocus = Color(0xFF4338CA);
+  static const Color borderError = Color(0xFFDC2626); // Darker red for contrast
 
   static const Color textPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color textSecondary = Color(0xFF475569); // Slate 600
-  static const Color textMuted = Color(0xFF94A3B8); // Slate 400
-  static const Color textLink = Color(0xFF4F46E5);
+  static const Color textSecondary = Color(0xFF334155); // Darkened from 475569 for contrast (Slate 700)
+  static const Color textMuted = Color(0xFF475569); // Darkened from 94A3B8 for contrast (Slate 600)
+  static const Color textLink = Color(0xFF4338CA);
 
   static const Color divider = Color(0xFFE2E8F0);
 
@@ -31,7 +31,7 @@ abstract class _AuthTokens {
   static const Gradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+    colors: [Color(0xFF3730A3), Color(0xFF5B21B6)], // Darkened for accessibility
   );
 
   // Spacing
@@ -311,7 +311,7 @@ class _HeroPanel extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white, // Full white for contrast
               letterSpacing: 0.2,
             ),
           ),
@@ -335,7 +335,7 @@ class _HeroPanel extends StatelessWidget {
             'and gain real-time insights — all from one platform.',
             style: GoogleFonts.inter(
               fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: Colors.white.withValues(alpha: 0.95), // Darkened for contrast
               height: 1.6,
             ),
           ),
@@ -371,9 +371,9 @@ class _TrustBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(_AuthTokens.radiusFull),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -382,7 +382,7 @@ class _TrustBadge extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: const BoxDecoration(
-              color: Color(0xFF34D399),
+              color: Color(0xFF10B981),
               shape: BoxShape.circle,
             ),
           ),
@@ -392,7 +392,7 @@ class _TrustBadge extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: Colors.white,
             ),
           ),
         ],
@@ -460,8 +460,8 @@ class _StatChip extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: Colors.white.withValues(alpha: 0.6),
-              fontWeight: FontWeight.w500,
+              color: Colors.white, // Pure white for contrast
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -661,8 +661,11 @@ class _LoginCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Remember + Forgot
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 8,
                   children: [
                     Semantics(
                       label: 'Remember me checkbox',
@@ -796,20 +799,22 @@ class _LoginCard extends StatelessWidget {
 
                 // Sign up link
                 Center(
-                  child: Semantics(
-                    label: 'Navigate to registration page',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: GoogleFonts.inter(
-                            fontSize: 13.5,
-                            color: _AuthTokens.textSecondary,
-                          ),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account? ",
+                        style: GoogleFonts.inter(
+                          fontSize: 13.5,
+                          color: _AuthTokens.textSecondary,
                         ),
-                        GestureDetector(
-                          onTap: onSignUp,
+                      ),
+                      GestureDetector(
+                        onTap: onSignUp,
+                        child: Semantics(
+                          label: 'Create account',
+                          button: true,
                           child: Text(
                             'Create account',
                             style: GoogleFonts.inter(
@@ -819,8 +824,8 @@ class _LoginCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -903,7 +908,7 @@ class _AnimatedSegmentedToggleState extends State<_AnimatedSegmentedToggle> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 44,
+      height: 48, // Increased height for better tap target
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: const Color(0xFFF1F5F9),
@@ -912,7 +917,7 @@ class _AnimatedSegmentedToggleState extends State<_AnimatedSegmentedToggle> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final tabWidth = (constraints.maxWidth - 8) / 2;
+          final tabWidth = constraints.maxWidth / 2;
           return Stack(
             children: [
               // Animated pill
@@ -999,14 +1004,18 @@ class _ToggleTab extends StatelessWidget {
                       : _AuthTokens.textMuted,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? _AuthTokens.textPrimary
-                        : _AuthTokens.textMuted,
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected
+                          ? _AuthTokens.textPrimary
+                          : _AuthTokens.textMuted,
+                    ),
                   ),
                 ),
               ],
@@ -1064,20 +1073,17 @@ class _EmailFields extends StatelessWidget {
             if (value == null || value.isEmpty) return 'Password is required';
             return null;
           },
-          suffixIcon: Semantics(
-            label: obscurePassword ? 'Show password' : 'Hide password',
-            button: true,
-            child: IconButton(
-              icon: Icon(
-                obscurePassword
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                color: _AuthTokens.textMuted,
-                size: 18,
-              ),
-              onPressed: onTogglePassword,
-              splashRadius: 18,
+          suffixIcon: IconButton(
+            tooltip: obscurePassword ? 'Show password' : 'Hide password',
+            icon: Icon(
+              obscurePassword
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: _AuthTokens.textMuted,
+              size: 18,
             ),
+            onPressed: onTogglePassword,
+            splashRadius: 18,
           ),
         ),
       ],
