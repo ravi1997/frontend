@@ -7,6 +7,7 @@ import 'package:frontend/features/form_builder/domain/entities/form_section.dart
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/domain/entities/section_layout_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
+import 'package:frontend/features/form_builder/presentation/utils/layout_engine.dart';
 import 'builder_field_widget.dart';
 import 'form_drag_data.dart';
 
@@ -425,14 +426,8 @@ class SectionWidget extends ConsumerWidget {
                                     width = 400.0;
                                 }
                               } else {
-                                // Auto mode (Grid Column Span)
-                                int span = q.style.columnSpan;
-                                if (span > crossAxisCount) {
-                                  span = crossAxisCount;
-                                }
-                                if (span < 1) {
-                                  span = 1;
-                                }
+                                // Auto mode (Smart Grid Span)
+                                int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
 
                                 // Calculate spanned width:
                                 // (single_col_width * span) + (spacing * (span - 1))

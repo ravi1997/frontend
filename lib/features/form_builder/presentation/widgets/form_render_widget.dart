@@ -8,6 +8,7 @@ import '../../domain/entities/form_question_option.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
+import '../utils/layout_engine.dart';
 import 'section_layout_widgets.dart';
 
 TextStyle _sectionTypographyStyle({
@@ -236,9 +237,7 @@ class FormRenderWidget extends ConsumerWidget {
                     width = 400.0;
                 }
               } else {
-                int span = q.style.columnSpan;
-                if (span > crossAxisCount) span = crossAxisCount;
-                if (span < 1) span = 1;
+                int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
                 width = (itemWidth * span) + (questionSpacing * (span - 1));
               }
               if (width > availableWidth) width = availableWidth;
@@ -477,7 +476,7 @@ class FormRenderWidget extends ConsumerWidget {
       content = Align(alignment: contentAlignment, child: content);
     }
 
-    final extraShadow = (layout == SectionLayoutType.card)
+    final extraShadow = (layout == SectionLayoutType.card || metadata['isCardLayout'] == true)
         ? [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.10),
