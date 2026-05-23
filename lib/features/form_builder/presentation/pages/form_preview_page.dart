@@ -22,6 +22,7 @@ import '../../../responses/presentation/controllers/form_submission_controller.d
 import '../../../../core/localization/locale_controller.dart';
 import '../utils/preview_utils.dart';
 import '../utils/form_logic_engine.dart';
+import '../utils/layout_engine.dart';
 import '../../domain/entities/form_question_option.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 
@@ -353,23 +354,32 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     } else {
       content = SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFormHeader(locale),
-                SizedBox(height: formStyle.sectionSpacing),
-                _buildSectionsList(locale, visibilityMap),
-                const SizedBox(height: 32),
-                _buildSubmitButton(),
-                const SizedBox(height: 16),
-                _buildPreviewFooter(),
-                const SizedBox(height: 60),
-              ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
+                child: _buildFormHeader(locale),
+              ),
             ),
-          ),
+            SizedBox(height: formStyle.sectionSpacing),
+            _buildSectionsList(locale, visibilityMap),
+            const SizedBox(height: 32),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
+                child: Column(
+                  children: [
+                    _buildSubmitButton(),
+                    const SizedBox(height: 16),
+                    _buildPreviewFooter(),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 60),
+          ],
         ),
       );
     }
@@ -433,37 +443,59 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
-              const SizedBox(height: 16),
-              Text(
-                'Review Your Answers',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
+              child: Column(
+                children: [
+                  const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Review Your Answers',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please double-check everything before submitting.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textGrey),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please double-check everything before submitting.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textGrey),
-              ),
-              const SizedBox(height: 32),
-              ...visibleSections.map((section) {
-                final visibleQuestions = section.questions
-                    .where((q) => visibilityMap[q.id] ?? true)
-                    .toList();
-                if (visibleQuestions.isEmpty) {
-                  return const SizedBox.shrink();
-                }
+            ),
+          ),
+          const SizedBox(height: 32),
+          ...visibleSections.map((section) {
+            final visibleQuestions = section.questions
+                .where((q) => visibilityMap[q.id] ?? true)
+                .toList();
+            if (visibleQuestions.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-                return Column(
+            final layout = section.layout;
+            final isFullWidth = layout == SectionLayoutType.fullWidth || layout == SectionLayoutType.dashboard || layout == SectionLayoutType.centered;
+            final metadata = section.metaData;
+            final sectionMaxWidth = isFullWidth 
+                ? ((metadata['maxWidth'] as num?)?.toDouble() ?? (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
+                : widget.form.style.maxWidth;
+                
+            final alignStr = metadata['alignment']?.toString() ?? 'left';
+            AlignmentGeometry alignment = Alignment.centerLeft;
+            if (alignStr == 'center') alignment = Alignment.center;
+            if (alignStr == 'right') alignment = Alignment.centerRight;
+
+            return Align(
+              alignment: isFullWidth ? alignment : Alignment.center,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -506,10 +538,15 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     }),
                     const SizedBox(height: 24),
                   ],
-                );
-              }),
-              const SizedBox(height: 32),
-              Row(
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 32),
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   OutlinedButton(
@@ -519,9 +556,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   _buildSubmitButton(small: true),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -602,18 +639,32 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           spacing: 24,
           runSpacing: spacing,
           children: visibleSections.map((section) {
+            final metadata = section.metaData;
+            final sectionMaxWidth = (metadata['maxWidth'] as num?)?.toDouble() ?? widget.form.style.maxWidth;
+                
+            final alignStr = metadata['alignment']?.toString() ?? 'center';
+            AlignmentGeometry alignment = Alignment.centerLeft;
+            if (alignStr == 'center') alignment = Alignment.center;
+            if (alignStr == 'right') alignment = Alignment.centerRight;
+
             return SizedBox(
               width: itemWidth,
-              child: _PreviewSectionWidget(
-                section: section,
-                questionSpacing: widget.form.style.questionSpacing,
-                visibilityMap: visibilityMap,
-                dynamicOptions: _dynamicOptions,
-                onTriggerAction: (config) => _triggerWebhook(
-                  config,
-                  _interpolateUrl(
-                    config['url'] ?? '',
-                    ref.read(previewFormDataProvider),
+              child: Align(
+                alignment: alignment,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                  child: _PreviewSectionWidget(
+                    section: section,
+                    questionSpacing: widget.form.style.questionSpacing,
+                    visibilityMap: visibilityMap,
+                    dynamicOptions: _dynamicOptions,
+                    onTriggerAction: (config) => _triggerWebhook(
+                      config,
+                      _interpolateUrl(
+                        config['url'] ?? '',
+                        ref.read(previewFormDataProvider),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -1399,6 +1450,8 @@ class _PreviewSectionWidgetState extends ConsumerState<_PreviewSectionWidget> {
         int crossAxisCount = 1;
         if (widget.section.layout == SectionLayoutType.grid) {
           crossAxisCount = widget.section.gridColumns;
+        } else if (widget.section.layout == SectionLayoutType.threeColumns) {
+          crossAxisCount = 3;
         }
 
         if (availableWidth < 400) {
@@ -1432,13 +1485,7 @@ class _PreviewSectionWidgetState extends ConsumerState<_PreviewSectionWidget> {
                   width = 200.0;
               }
             } else {
-              int span = q.style.columnSpan;
-              if (span > crossAxisCount) {
-                span = crossAxisCount;
-              }
-              if (span < 1) {
-                span = 1;
-              }
+              int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
               width = (itemWidth * span) + (questionSpacing * (span - 1));
             }
             if (width > availableWidth) {

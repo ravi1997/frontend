@@ -24,6 +24,7 @@ import '../../../responses/presentation/controllers/form_submission_controller.d
 import '../../../../core/localization/locale_controller.dart';
 import '../utils/preview_utils.dart';
 import '../utils/form_logic_engine.dart';
+import '../utils/layout_engine.dart';
 import '../../domain/entities/form_question_option.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/repositories/form_builder_repository.dart';
@@ -450,23 +451,32 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     } else {
       content = SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFormHeader(form, locale),
-                SizedBox(height: formStyle.sectionSpacing),
-                _buildSectionsList(form, locale, visibilityMap, requiredMap),
-                const SizedBox(height: 32),
-                _buildSubmitButton(form),
-                const SizedBox(height: 16),
-                _buildPreviewFooter(),
-                const SizedBox(height: 60),
-              ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
+                child: _buildFormHeader(form, locale),
+              ),
             ),
-          ),
+            SizedBox(height: formStyle.sectionSpacing),
+            _buildSectionsList(form, locale, visibilityMap, requiredMap),
+            const SizedBox(height: 32),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
+                child: Column(
+                  children: [
+                    _buildSubmitButton(form),
+                    const SizedBox(height: 16),
+                    _buildPreviewFooter(),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 60),
+          ],
         ),
       );
     }
@@ -534,44 +544,66 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: form.style.maxWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
-              const SizedBox(height: 16),
-              Text(
-                'Review Your Answers',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: form.style.maxWidth),
+              child: Column(
+                children: [
+                  const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Review Your Answers',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please double-check everything before submitting.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.textGrey),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please double-check everything before submitting.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.textGrey),
-              ),
-              const SizedBox(height: 32),
-              ...visibleSections.expand((section) {
-                final visibleQuestions = section.questions
-                    .where((q) => visibilityMap[q.id] ?? true)
-                    .toList();
-                if (visibleQuestions.isEmpty) return [const SizedBox.shrink()];
+            ),
+          ),
+          const SizedBox(height: 32),
+          ...visibleSections.expand((section) {
+            final visibleQuestions = section.questions
+                .where((q) => visibilityMap[q.id] ?? true)
+                .toList();
+            if (visibleQuestions.isEmpty) return [const SizedBox.shrink()];
 
-                final repeatCount = section.isRepeatable
-                    ? (ref.watch(repeatInstancesProvider)[section.id] ??
-                          _defaultRepeatCount(section.repeatMin))
-                    : 1;
+            final repeatCount = section.isRepeatable
+                ? (ref.watch(repeatInstancesProvider)[section.id] ??
+                      _defaultRepeatCount(section.repeatMin))
+                : 1;
 
-                final widgets = <Widget>[];
+            final layout = section.layout;
+            final isFullWidth = layout == SectionLayoutType.fullWidth || layout == SectionLayoutType.dashboard || layout == SectionLayoutType.centered;
+            final metadata = section.metaData;
+            final sectionMaxWidth = isFullWidth 
+                ? ((metadata['maxWidth'] as num?)?.toDouble() ?? (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
+                : form.style.maxWidth;
+                
+            final alignStr = metadata['alignment']?.toString() ?? 'left';
+            AlignmentGeometry alignment = Alignment.centerLeft;
+            if (alignStr == 'center') alignment = Alignment.center;
+            if (alignStr == 'right') alignment = Alignment.centerRight;
 
-                for (int i = 0; i < repeatCount; i++) {
-                  widgets.add(
-                    Column(
+            final widgets = <Widget>[];
+
+            for (int i = 0; i < repeatCount; i++) {
+              widgets.add(
+                Align(
+                  alignment: isFullWidth ? alignment : Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -638,12 +670,17 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         const SizedBox(height: 24),
                       ],
                     ),
-                  );
-                }
-                return widgets;
-              }),
-              const SizedBox(height: 32),
-              Row(
+                  ),
+                ),
+              );
+            }
+            return widgets;
+          }),
+          const SizedBox(height: 32),
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: form.style.maxWidth),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   OutlinedButton(
@@ -653,9 +690,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   _buildSubmitButton(form, small: true),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -744,28 +781,42 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                       _defaultRepeatCount(section.repeatMin))
                 : 1;
 
+            final metadata = section.metaData;
+            final sectionMaxWidth = (metadata['maxWidth'] as num?)?.toDouble() ?? form.style.maxWidth;
+                
+            final alignStr = metadata['alignment']?.toString() ?? 'center';
+            AlignmentGeometry alignment = Alignment.centerLeft;
+            if (alignStr == 'center') alignment = Alignment.center;
+            if (alignStr == 'right') alignment = Alignment.centerRight;
+
             final widgets = <Widget>[];
 
             for (int i = 0; i < repeatCount; i++) {
               widgets.add(
                 SizedBox(
                   width: itemWidth,
-                  child: _SubmitSectionWidget(
-                    section: section,
-                    questionSpacing: form.style.questionSpacing,
-                    visibilityMap: visibilityMap,
-                    requiredMap: requiredMap,
-                    dynamicOptions: _dynamicOptions,
-                    loadingFields: _loadingFields,
-                    fieldErrors: _fieldErrors,
-                    onTriggerAction: (config) => _triggerWebhook(
-                      config,
-                      _interpolateUrl(
-                        config['url'] ?? '',
-                        ref.read(submitFormDataProvider),
+                  child: Align(
+                    alignment: alignment,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                      child: _SubmitSectionWidget(
+                        section: section,
+                        questionSpacing: form.style.questionSpacing,
+                        visibilityMap: visibilityMap,
+                        requiredMap: requiredMap,
+                        dynamicOptions: _dynamicOptions,
+                        loadingFields: _loadingFields,
+                        fieldErrors: _fieldErrors,
+                        onTriggerAction: (config) => _triggerWebhook(
+                          config,
+                          _interpolateUrl(
+                            config['url'] ?? '',
+                            ref.read(submitFormDataProvider),
+                          ),
+                        ),
+                        instanceIndex: section.isRepeatable ? i : null,
                       ),
                     ),
-                    instanceIndex: section.isRepeatable ? i : null,
                   ),
                 ),
               );
@@ -1249,6 +1300,8 @@ class _SubmitSectionWidget extends ConsumerWidget {
         int crossAxisCount = 1;
         if (section.layout == SectionLayoutType.grid) {
           crossAxisCount = section.gridColumns;
+        } else if (section.layout == SectionLayoutType.threeColumns) {
+          crossAxisCount = 3;
         }
 
         if (availableWidth < 400) {
@@ -1285,9 +1338,7 @@ class _SubmitSectionWidget extends ConsumerWidget {
                   width = 200.0;
               }
             } else {
-              int span = q.style.columnSpan;
-              if (span > crossAxisCount) span = crossAxisCount;
-              if (span < 1) span = 1;
+              int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
               width = (itemWidth * span) + (questionSpacing * (span - 1));
             }
             if (width > availableWidth) width = availableWidth;
