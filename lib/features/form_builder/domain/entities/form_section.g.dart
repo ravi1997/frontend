@@ -15,9 +15,9 @@ _FormSection _$FormSectionFromJson(Map<String, dynamic> json) => _FormSection(
   questions: (json['questions'] as List<dynamic>)
       .map((e) => FormQuestion.fromJson(e as Map<String, dynamic>))
       .toList(),
-  layout: json['layout'] == null
+  layout: _readSectionLayout(json, 'layout') == null
       ? SectionLayoutType.standard
-      : _sectionLayoutTypeFromJson(json['layout']),
+      : _sectionLayoutTypeFromJson(_readSectionLayout(json, 'layout')),
   gridColumns: (json['grid_columns'] as num?)?.toInt() ?? 2,
   isHidden: json['is_hidden'] as bool? ?? false,
   isRepeatable: json['is_repeatable'] as bool? ?? false,
@@ -74,13 +74,13 @@ const _$SectionLayoutTypeEnumMap = {
   SectionLayoutType.fullWidth: 'full-width',
   SectionLayoutType.list: 'list',
   SectionLayoutType.sidebar: 'sidebar',
-  SectionLayoutType.accordion: 'split',
+  SectionLayoutType.accordion: 'accordion',
   SectionLayoutType.tabbed: 'tabbed',
   SectionLayoutType.custom: 'custom',
   SectionLayoutType.overlay: 'overlay',
   SectionLayoutType.dashboard: 'dashboard',
   SectionLayoutType.centered: 'centered',
-  SectionLayoutType.wizard: 'stacked',
+  SectionLayoutType.wizard: 'wizard',
   SectionLayoutType.masonry: 'masonry',
   SectionLayoutType.fixed: 'fixed',
   SectionLayoutType.card: 'card',

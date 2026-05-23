@@ -10,6 +10,7 @@ _FormDto _$FormDtoFromJson(Map<String, dynamic> json) => _FormDto(
   id: IdReader.readIdWithSlugCallback(json, 'id') as String,
   title: json['title'] as String? ?? 'Untitled Form',
   status: json['status'] as String? ?? 'draft',
+  uiType: json['ui_type'] as String?,
   activeVersion: json['active_version'] as String?,
   versions:
       (json['versions'] as List<dynamic>?)
@@ -27,6 +28,7 @@ Map<String, dynamic> _$FormDtoToJson(_FormDto instance) => <String, dynamic>{
   'id': instance.id,
   'title': instance.title,
   'status': instance.status,
+  'ui_type': instance.uiType,
   'active_version': instance.activeVersion,
   'versions': instance.versions,
   'created_at': AppDateUtils.toIso8601(instance.createdAt),

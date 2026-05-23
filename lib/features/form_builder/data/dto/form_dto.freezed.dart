@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$FormDto {
 
 // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
-@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String get id; String get title; String get status;@JsonKey(name: 'active_version') String? get activeVersion;// The backend returns a list of version objects under 'versions'
+@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String get id; String get title; String get status;@JsonKey(name: 'ui_type') String? get uiType;@JsonKey(name: 'active_version') String? get activeVersion;// The backend returns a list of version objects under 'versions'
  List<FormVersionDto> get versions;@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get createdAt;@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? get updatedAt;// Workflows might be a Map or dynamic
  Map<String, dynamic> get workflows;// Access Policy
 @JsonKey(name: 'accessPolicy') Map<String, dynamic>? get accessPolicy;
@@ -32,16 +32,16 @@ $FormDtoCopyWith<FormDto> get copyWith => _$FormDtoCopyWithImpl<FormDto>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other.versions, versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.workflows, workflows)&&const DeepCollectionEquality().equals(other.accessPolicy, accessPolicy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.uiType, uiType) || other.uiType == uiType)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other.versions, versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.workflows, workflows)&&const DeepCollectionEquality().equals(other.accessPolicy, accessPolicy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,activeVersion,const DeepCollectionEquality().hash(versions),createdAt,updatedAt,const DeepCollectionEquality().hash(workflows),const DeepCollectionEquality().hash(accessPolicy));
+int get hashCode => Object.hash(runtimeType,id,title,status,uiType,activeVersion,const DeepCollectionEquality().hash(versions),createdAt,updatedAt,const DeepCollectionEquality().hash(workflows),const DeepCollectionEquality().hash(accessPolicy));
 
 @override
 String toString() {
-  return 'FormDto(id: $id, title: $title, status: $status, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows, accessPolicy: $accessPolicy)';
+  return 'FormDto(id: $id, title: $title, status: $status, uiType: $uiType, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows, accessPolicy: $accessPolicy)';
 }
 
 
@@ -52,7 +52,7 @@ abstract mixin class $FormDtoCopyWith<$Res>  {
   factory $FormDtoCopyWith(FormDto value, $Res Function(FormDto) _then) = _$FormDtoCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String id, String title, String status,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? updatedAt, Map<String, dynamic> workflows,@JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy
+@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String id, String title, String status,@JsonKey(name: 'ui_type') String? uiType,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? updatedAt, Map<String, dynamic> workflows,@JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy
 });
 
 
@@ -69,12 +69,13 @@ class _$FormDtoCopyWithImpl<$Res>
 
 /// Create a copy of FormDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,Object? accessPolicy = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? status = null,Object? uiType = freezed,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,Object? accessPolicy = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
+as String,uiType: freezed == uiType ? _self.uiType : uiType // ignore: cast_nullable_to_non_nullable
+as String?,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
 as String?,versions: null == versions ? _self.versions : versions // ignore: cast_nullable_to_non_nullable
 as List<FormVersionDto>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'ui_type')  String? uiType, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormDto() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
+return $default(_that.id,_that.title,_that.status,_that.uiType,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.vers
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'ui_type')  String? uiType, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)  $default,) {final _that = this;
 switch (_that) {
 case _FormDto():
-return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
+return $default(_that.id,_that.title,_that.status,_that.uiType,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.vers
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)  String id,  String title,  String status, @JsonKey(name: 'ui_type')  String? uiType, @JsonKey(name: 'active_version')  String? activeVersion,  List<FormVersionDto> versions, @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601)  DateTime? updatedAt,  Map<String, dynamic> workflows, @JsonKey(name: 'accessPolicy')  Map<String, dynamic>? accessPolicy)?  $default,) {final _that = this;
 switch (_that) {
 case _FormDto() when $default != null:
-return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
+return $default(_that.id,_that.title,_that.status,_that.uiType,_that.activeVersion,_that.versions,_that.createdAt,_that.updatedAt,_that.workflows,_that.accessPolicy);case _:
   return null;
 
 }
@@ -221,13 +222,14 @@ return $default(_that.id,_that.title,_that.status,_that.activeVersion,_that.vers
 @JsonSerializable()
 
 class _FormDto extends FormDto {
-  const _FormDto({@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) required this.id, this.title = 'Untitled Form', this.status = 'draft', @JsonKey(name: 'active_version') this.activeVersion, final  List<FormVersionDto> versions = const <FormVersionDto>[], @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.updatedAt, final  Map<String, dynamic> workflows = const <String, dynamic>{}, @JsonKey(name: 'accessPolicy') final  Map<String, dynamic>? accessPolicy}): _versions = versions,_workflows = workflows,_accessPolicy = accessPolicy,super._();
+  const _FormDto({@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) required this.id, this.title = 'Untitled Form', this.status = 'draft', @JsonKey(name: 'ui_type') this.uiType, @JsonKey(name: 'active_version') this.activeVersion, final  List<FormVersionDto> versions = const <FormVersionDto>[], @JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.createdAt, @JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) this.updatedAt, final  Map<String, dynamic> workflows = const <String, dynamic>{}, @JsonKey(name: 'accessPolicy') final  Map<String, dynamic>? accessPolicy}): _versions = versions,_workflows = workflows,_accessPolicy = accessPolicy,super._();
   factory _FormDto.fromJson(Map<String, dynamic> json) => _$FormDtoFromJson(json);
 
 // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
 @override@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) final  String id;
 @override@JsonKey() final  String title;
 @override@JsonKey() final  String status;
+@override@JsonKey(name: 'ui_type') final  String? uiType;
 @override@JsonKey(name: 'active_version') final  String? activeVersion;
 // The backend returns a list of version objects under 'versions'
  final  List<FormVersionDto> _versions;
@@ -274,16 +276,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other._versions, _versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._workflows, _workflows)&&const DeepCollectionEquality().equals(other._accessPolicy, _accessPolicy));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormDto&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.status, status) || other.status == status)&&(identical(other.uiType, uiType) || other.uiType == uiType)&&(identical(other.activeVersion, activeVersion) || other.activeVersion == activeVersion)&&const DeepCollectionEquality().equals(other._versions, _versions)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._workflows, _workflows)&&const DeepCollectionEquality().equals(other._accessPolicy, _accessPolicy));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,title,status,activeVersion,const DeepCollectionEquality().hash(_versions),createdAt,updatedAt,const DeepCollectionEquality().hash(_workflows),const DeepCollectionEquality().hash(_accessPolicy));
+int get hashCode => Object.hash(runtimeType,id,title,status,uiType,activeVersion,const DeepCollectionEquality().hash(_versions),createdAt,updatedAt,const DeepCollectionEquality().hash(_workflows),const DeepCollectionEquality().hash(_accessPolicy));
 
 @override
 String toString() {
-  return 'FormDto(id: $id, title: $title, status: $status, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows, accessPolicy: $accessPolicy)';
+  return 'FormDto(id: $id, title: $title, status: $status, uiType: $uiType, activeVersion: $activeVersion, versions: $versions, createdAt: $createdAt, updatedAt: $updatedAt, workflows: $workflows, accessPolicy: $accessPolicy)';
 }
 
 
@@ -294,7 +296,7 @@ abstract mixin class _$FormDtoCopyWith<$Res> implements $FormDtoCopyWith<$Res> {
   factory _$FormDtoCopyWith(_FormDto value, $Res Function(_FormDto) _then) = __$FormDtoCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String id, String title, String status,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? updatedAt, Map<String, dynamic> workflows,@JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy
+@JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback) String id, String title, String status,@JsonKey(name: 'ui_type') String? uiType,@JsonKey(name: 'active_version') String? activeVersion, List<FormVersionDto> versions,@JsonKey(name: 'created_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? createdAt,@JsonKey(name: 'updated_at', fromJson: AppDateUtils.parse, toJson: AppDateUtils.toIso8601) DateTime? updatedAt, Map<String, dynamic> workflows,@JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy
 });
 
 
@@ -311,12 +313,13 @@ class __$FormDtoCopyWithImpl<$Res>
 
 /// Create a copy of FormDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,Object? accessPolicy = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? status = null,Object? uiType = freezed,Object? activeVersion = freezed,Object? versions = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? workflows = null,Object? accessPolicy = freezed,}) {
   return _then(_FormDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
+as String,uiType: freezed == uiType ? _self.uiType : uiType // ignore: cast_nullable_to_non_nullable
+as String?,activeVersion: freezed == activeVersion ? _self.activeVersion : activeVersion // ignore: cast_nullable_to_non_nullable
 as String?,versions: null == versions ? _self._versions : versions // ignore: cast_nullable_to_non_nullable
 as List<FormVersionDto>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable

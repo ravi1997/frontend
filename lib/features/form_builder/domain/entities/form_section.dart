@@ -19,7 +19,11 @@ abstract class FormSection with _$FormSection {
     @JsonKey(name: 'help_text') Object? helpText,
     @Default(0) int order,
     required List<FormQuestion> questions,
-    @JsonKey(name: 'layout', fromJson: _sectionLayoutTypeFromJson)
+    @JsonKey(
+      name: 'layout',
+      readValue: _readSectionLayout,
+      fromJson: _sectionLayoutTypeFromJson,
+    )
     @Default(SectionLayoutType.standard) SectionLayoutType layout,
     @JsonKey(name: 'grid_columns') @Default(2) int gridColumns,
     @JsonKey(name: 'is_hidden') @Default(false) bool isHidden,
@@ -39,6 +43,16 @@ abstract class FormSection with _$FormSection {
 
   factory FormSection.fromJson(Map<String, dynamic> json) =>
       _$FormSectionFromJson(json);
+}
+
+Object? _readSectionLayout(Map<dynamic, dynamic> json, String key) {
+  final layout = json[key];
+  if (layout != null) return layout;
+  final ui = json['ui'];
+  if (ui is Map) {
+    return ui['layout_type'] ?? ui['layoutType'];
+  }
+  return null;
 }
 
 SectionLayoutType _sectionLayoutTypeFromJson(Object? value) {

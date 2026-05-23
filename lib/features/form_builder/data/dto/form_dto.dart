@@ -16,6 +16,7 @@ abstract class FormDto with _$FormDto {
     required String id,
     @Default('Untitled Form') String title,
     @Default('draft') String status,
+    @JsonKey(name: 'ui_type') String? uiType,
     @JsonKey(name: 'active_version') String? activeVersion,
 
     // The backend returns a list of version objects under 'versions'
