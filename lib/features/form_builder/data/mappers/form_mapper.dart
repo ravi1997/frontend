@@ -36,6 +36,7 @@ class FormMapper {
       'version': activeVersion,
       'isLatest': true,
       'sections': sections,
+      'layout': dto.uiType ?? 'flex',
       'updatedAt': dto.updatedAt?.toIso8601String(),
       'workflows': dto.workflows,
       'accessPolicy': dto.accessPolicy,
@@ -79,7 +80,7 @@ class FormMapper {
     }
 
     // Extract sections from the version
-    List<dynamic> sections = versionData?['sections'] ?? [];
+    List<dynamic> sections = versionData?['sections'] ?? mapData['sections'] ?? [];
 
     // Transform to frontend format
     final Map<String, dynamic> transformedData = {
@@ -90,6 +91,7 @@ class FormMapper {
       'version': activeVersion,
       'isLatest': true,
       'sections': _normalizeSections(sections),
+      'layout': mapData['uiType'] ?? mapData['ui_type'] ?? 'flex',
       'updatedAt': mapData['updated_at'],
       'workflows': mapData['workflows'] ?? <String, dynamic>{},
       'accessPolicy': mapData['access_policy'] ?? mapData['accessPolicy'],
@@ -155,7 +157,7 @@ class FormMapper {
       'access_policy': form.accessPolicy.toJson(),
       'accessPolicy': form.accessPolicy.toJson(),
       'style': form.style.toJson(),
-      'ui_type': 'flex',
+      'ui_type': _formLayoutToApi(form.layout),
     };
   }
 
@@ -173,7 +175,7 @@ class FormMapper {
       'access_policy': form.accessPolicy.toJson(),
       'accessPolicy': form.accessPolicy.toJson(),
       'style': form.style.toJson(),
-      'ui_type': 'flex',
+      'ui_type': _formLayoutToApi(form.layout),
       // 'is_template': form.isTemplate, // If applicable
       // versions are EXCLUDED to prevent overwrite
     };
@@ -272,6 +274,19 @@ class FormMapper {
     Map<String, dynamic> section,
   ) {
     final normalized = Map<String, dynamic>.from(section);
+    final ui = normalized['ui'];
+    if (!normalized.containsKey('layout') && ui is Map) {
+      normalized['layout'] = ui['layout_type'] ?? ui['layoutType'] ?? 'standard';
+    }
+    normalized['layout'] ??= 'standard';
+    normalized['ui'] = {
+      if (ui is Map) ...Map<String, dynamic>.from(ui),
+      'layout_type': normalized['layout'],
+    };
+    if (normalized.containsKey('gridColumns') &&
+        !normalized.containsKey('grid_columns')) {
+      normalized['grid_columns'] = normalized['gridColumns'];
+    }
     final children = normalized['sections'];
     if (children is List) {
       normalized['sections'] = _normalizeSections(children);
@@ -329,6 +344,7 @@ class FormMapper {
     normalized.putIfAbsent('description', () => null);
     normalized.putIfAbsent('help_text', () => null);
     normalized.putIfAbsent('style', () => <String, dynamic>{});
+    normalized.putIfAbsent('grid_columns', () => 2);
     normalized.putIfAbsent('meta_data', () => <String, dynamic>{});
     normalized.putIfAbsent('tags', () => <String>[]);
     normalized.putIfAbsent(
@@ -360,5 +376,17 @@ class FormMapper {
       'style': <String, dynamic>{},
       'meta_data': <String, dynamic>{},
     };
+  }
+
+  static String _formLayoutToApi(dynamic layout) {
+    switch (layout.toString()) {
+      case 'FormLayoutType.twoColumns':
+        return 'grid-cols-2';
+      case 'FormLayoutType.threeColumns':
+        return 'grid-cols-3';
+      case 'FormLayoutType.singleColumn':
+      default:
+        return 'flex';
+    }
   }
 }
