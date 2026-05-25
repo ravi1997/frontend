@@ -8,6 +8,7 @@ part 'responses_controller.g.dart';
 @riverpod
 Future<List<FormResponse>> formResponses(
   Ref ref,
+  String projectId,
   String formId, {
   String? searchQuery,
 }) {
@@ -15,21 +16,27 @@ Future<List<FormResponse>> formResponses(
   if (searchQuery != null && searchQuery.isNotEmpty) {
     return repository.aiSearch(formId, searchQuery);
   }
-  return repository.getResponsesForForm(formId);
+  return repository.getProjectResponses(projectId, formId);
 }
 
 @riverpod
-Future<FormResponse> responseDetail(Ref ref, String formId, String responseId) {
+Future<FormResponse> responseDetail(
+  Ref ref,
+  String projectId,
+  String formId,
+  String responseId,
+) {
   final repository = ref.watch(responseRepositoryProvider);
-  return repository.getResponseDetail(formId, responseId);
+  return repository.getProjectResponseDetail(projectId, formId, responseId);
 }
 
 @riverpod
 Future<List<ResponseHistory>> responseHistory(
   Ref ref,
+  String projectId,
   String formId,
   String responseId,
 ) {
   final repository = ref.watch(responseRepositoryProvider);
-  return repository.getResponseHistory(formId, responseId);
+  return repository.getProjectResponseHistory(projectId, formId, responseId);
 }

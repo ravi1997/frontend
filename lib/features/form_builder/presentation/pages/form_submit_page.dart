@@ -1084,6 +1084,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 final success = await ref
                     .read(formSubmissionControllerProvider.notifier)
                     .submit(
+                      projectId: widget.projectId,
                       formId: form.id,
                       answers: submissionData,
                       visibilityMap: _logicResult!.visibility,

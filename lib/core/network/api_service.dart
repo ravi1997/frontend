@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 import 'api_client_wrapper.dart';
 import 'api_endpoints.dart';
 
@@ -24,6 +25,7 @@ part 'api_service.g.dart';
 /// ```
 class ApiService {
   final ApiClient _client;
+  static const _uuid = Uuid();
 
   ApiService(this._client);
 
@@ -221,6 +223,10 @@ class ApiService {
     await _client.delete(ApiEndpoints.deleteForm(formId));
   }
 
+  Future<void> deleteProjectForm(String projectId, String formId) async {
+    await _client.delete(ApiEndpoints.deleteProjectForm(projectId, formId));
+  }
+
   /// Publish form
   Future<Map<String, dynamic>> publishForm(
     String formId, {
@@ -234,6 +240,20 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> publishProjectForm(
+    String projectId,
+    String formId, {
+    bool major = false,
+    bool minor = true,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.publishProjectForm(projectId, formId),
+      data: {'major': major, 'minor': minor},
+      options: Options(headers: {'Idempotency-Key': _uuid.v4()}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Clone/duplicate form
   Future<Map<String, dynamic>> cloneForm({
     required String formId,
@@ -243,6 +263,20 @@ class ApiService {
     final response = await _client.post(
       ApiEndpoints.cloneForm(formId),
       data: {'title': newTitle, if (newSlug != null) 'slug': newSlug},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> cloneProjectForm({
+    required String projectId,
+    required String formId,
+    required String newTitle,
+    String? newSlug,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.cloneProjectForm(projectId, formId),
+      data: {'title': newTitle, if (newSlug != null) 'slug': newSlug},
+      options: Options(headers: {'Idempotency-Key': _uuid.v4()}),
     );
     return response.data as Map<String, dynamic>;
   }
@@ -289,6 +323,24 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> submitProjectResponse({
+    required String projectId,
+    required String formId,
+    required Map<String, dynamic> responses,
+    String? submittedBy,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.submitProjectResponse(projectId, formId),
+      data: {
+        'data': responses,
+        if (submittedBy != null) 'submitted_by': submittedBy,
+        if (metadata != null) 'metadata': metadata,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   /// List responses with optional filters
   Future<List<dynamic>> listResponses({
     String? formId,
@@ -307,6 +359,29 @@ class ApiService {
     return response.data as List<dynamic>;
   }
 
+  Future<List<dynamic>> listProjectResponses({
+    required String projectId,
+    required String formId,
+    int? page,
+    int? limit,
+    String? status,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.listProjectResponses(projectId, formId),
+      queryParameters: {
+        if (page != null) 'page': page,
+        if (limit != null) 'page_size': limit,
+        if (status != null) 'status': status,
+      },
+    );
+    final data = response.data;
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      return data['items'] as List<dynamic>? ?? const [];
+    }
+    return const [];
+  }
+
   /// Get single response by ID
   Future<Map<String, dynamic>> getResponse(
     String formId,
@@ -314,6 +389,17 @@ class ApiService {
   ) async {
     final response = await _client.get(
       ApiEndpoints.getResponse(formId, responseId),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getProjectResponse(
+    String projectId,
+    String formId,
+    String responseId,
+  ) async {
+    final response = await _client.get(
+      ApiEndpoints.getProjectResponse(projectId, formId, responseId),
     );
     return response.data as Map<String, dynamic>;
   }
@@ -337,9 +423,38 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> updateProjectResponse({
+    required String projectId,
+    required String responseId,
+    required String formId,
+    required Map<String, dynamic> responses,
+    String? submittedBy,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final response = await _client.put(
+      ApiEndpoints.updateProjectResponse(projectId, formId, responseId),
+      data: {
+        'responses': responses,
+        if (submittedBy != null) 'submitted_by': submittedBy,
+        if (metadata != null) 'metadata': metadata,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   /// Delete response
   Future<void> deleteResponse(String formId, String responseId) async {
     await _client.delete(ApiEndpoints.deleteResponse(formId, responseId));
+  }
+
+  Future<void> deleteProjectResponse(
+    String projectId,
+    String formId,
+    String responseId,
+  ) async {
+    await _client.delete(
+      ApiEndpoints.deleteProjectResponse(projectId, formId, responseId),
+    );
   }
 
   /// Export responses
@@ -349,6 +464,17 @@ class ApiService {
   }) async {
     final response = await _client.get(
       ApiEndpoints.exportResponses(formId, format: format),
+    );
+    return response.data;
+  }
+
+  Future<dynamic> exportProjectResponses({
+    required String projectId,
+    required String formId,
+    String format = 'json',
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.exportProjectResponses(projectId, formId, format: format),
     );
     return response.data;
   }
@@ -365,6 +491,22 @@ class ApiService {
   }) async {
     final response = await _client.get(
       ApiEndpoints.getAnalytics(formId!),
+      queryParameters: {
+        if (startDate != null) 'start_date': startDate,
+        if (endDate != null) 'end_date': endDate,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getProjectAnalytics({
+    required String projectId,
+    required String formId,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final response = await _client.get(
+      ApiEndpoints.getProjectAnalytics(projectId, formId),
       queryParameters: {
         if (startDate != null) 'start_date': startDate,
         if (endDate != null) 'end_date': endDate,

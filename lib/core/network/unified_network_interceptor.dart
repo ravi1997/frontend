@@ -45,17 +45,18 @@ class UnifiedNetworkInterceptor extends Interceptor {
             response.data = data['data'];
           }
         } else {
-          final errorStr =
-              (data['error'] ?? data['msg'] ?? data['message'])?.toString() ??
-              'Unknown API error';
-          final details = data['details'];
+          final parsed = _parseError(data);
 
           throw DioException(
             requestOptions: response.requestOptions,
             response: response,
             error: ApiException(
-              errorStr,
-              details: details,
+              parsed.message,
+              code: parsed.code,
+              details: parsed.details,
+              fieldErrors: parsed.fieldErrors,
+              requestId: parsed.requestId,
+              retryAfter: parsed.retryAfter,
               statusCode: response.statusCode,
             ),
             type: DioExceptionType.badResponse,
@@ -63,6 +64,43 @@ class UnifiedNetworkInterceptor extends Interceptor {
         }
       }
     }
+  }
+
+  _ParsedApiError _parseError(Map<String, dynamic> envelope) {
+    final rawError = envelope['error'];
+    final requestId = envelope['request_id']?.toString();
+
+    if (rawError is Map<String, dynamic>) {
+      final retryAfter = rawError['retry_after'];
+      final fieldErrors = rawError['field_errors'];
+      return _ParsedApiError(
+        message:
+            rawError['message']?.toString() ??
+            envelope['message']?.toString() ??
+            'Unknown API error',
+        code: rawError['code']?.toString(),
+        details: rawError['details'] ?? envelope['details'],
+        fieldErrors: fieldErrors is Map<String, dynamic>
+            ? fieldErrors
+            : fieldErrors is Map
+            ? Map<String, dynamic>.from(fieldErrors)
+            : null,
+        requestId: requestId,
+        retryAfter: retryAfter is int
+            ? retryAfter
+            : int.tryParse(retryAfter?.toString() ?? ''),
+      );
+    }
+
+    return _ParsedApiError(
+      message:
+          rawError?.toString() ??
+          envelope['msg']?.toString() ??
+          envelope['message']?.toString() ??
+          'Unknown API error',
+      details: envelope['details'],
+      requestId: requestId,
+    );
   }
 
   /// Check if error is from envelope parsing.
@@ -134,4 +172,22 @@ class UnifiedNetworkInterceptor extends Interceptor {
       _snackbarService.showError(message);
     }
   }
+}
+
+class _ParsedApiError {
+  final String message;
+  final String? code;
+  final dynamic details;
+  final Map<String, dynamic>? fieldErrors;
+  final String? requestId;
+  final int? retryAfter;
+
+  const _ParsedApiError({
+    required this.message,
+    this.code,
+    this.details,
+    this.fieldErrors,
+    this.requestId,
+    this.retryAfter,
+  });
 }

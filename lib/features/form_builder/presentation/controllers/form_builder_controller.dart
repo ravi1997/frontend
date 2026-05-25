@@ -986,7 +986,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final result = await repository.publishForm(state.value!.form.id);
+      final result = await repository.publishForm(_projectId, state.value!.form.id);
 
       final publishedVersion =
           result['published_version'] as String? ?? state.value!.form.version;

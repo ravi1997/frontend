@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 import '../network/token_service.dart';
 
 /// Auth interceptor that handles JWT token management.
@@ -14,6 +15,7 @@ import '../network/token_service.dart';
 /// credential-less paths (login, register, OTP, refresh, password-reset)
 /// bypass token injection.
 class AuthInterceptor extends QueuedInterceptor {
+  static const _uuid = Uuid();
   final AuthTokens? Function() _getTokens;
   final Future<void> Function() _clearTokens;
   final Function() _onNavigateToLogin;
@@ -28,6 +30,8 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers.putIfAbsent('X-Request-ID', () => _uuid.v4());
+
     final isAuthPath = _isAuthEndpoint(options.path);
 
     if (!isAuthPath) {

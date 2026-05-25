@@ -31,7 +31,7 @@ class ResponseListPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(_searchQueryProvider);
     final responsesAsync = ref.watch(
-      formResponsesProvider(formId, searchQuery: searchQuery),
+      formResponsesProvider(projectId, formId, searchQuery: searchQuery),
     );
     final authState = ref.watch(authControllerProvider);
 
@@ -49,6 +49,7 @@ class ResponseListPage extends ConsumerWidget {
               child: RefreshIndicator(
                 onRefresh: () => ref.refresh(
                   formResponsesProvider(
+                    projectId,
                     formId,
                     searchQuery: searchQuery,
                   ).future,
@@ -159,7 +160,7 @@ class _ActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final responsesAsync = ref.watch(
-      formResponsesProvider(formId, searchQuery: searchQuery),
+      formResponsesProvider(projectId, formId, searchQuery: searchQuery),
     );
 
     return responsesAsync.maybeWhen(

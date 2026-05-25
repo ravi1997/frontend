@@ -45,7 +45,7 @@ abstract class FormBuilderRepository {
     String formId,
     String version,
   );
-  Future<Map<String, dynamic>> publishForm(String formId);
+  Future<Map<String, dynamic>> publishForm(String projectId, String formId);
   Future<List<FormSection>> generateFieldsWithAI(
     String prompt, {
     BuilderForm? currentForm,

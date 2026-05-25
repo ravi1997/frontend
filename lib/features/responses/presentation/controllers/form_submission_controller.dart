@@ -17,6 +17,7 @@ class FormSubmissionController extends _$FormSubmissionController {
   }
 
   Future<bool> submit({
+    required String projectId,
     required String formId,
     required Map<String, dynamic> answers,
     required Map<String, bool> visibilityMap,
@@ -51,7 +52,7 @@ class FormSubmissionController extends _$FormSubmissionController {
 
     try {
       final repository = ref.read(responseRepositoryProvider);
-      await repository.submitResponse(response);
+      await repository.submitProjectResponse(projectId, response);
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {

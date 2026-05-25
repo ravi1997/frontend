@@ -4,7 +4,7 @@
 ///
 ///   flutter run -d chrome \
 ///     --dart-define=API_BASE_URL=http://localhost:8051 \
-///     --dart-define=FRONTEND_ORIGIN=http://localhost:8989
+///     --dart-define=FRONTEND_ORIGIN=http://localhost:9600
 ///
 /// Defaults point to the standard local development stack so plain
 /// `flutter run` still works without extra flags.
@@ -28,7 +28,7 @@ class AppConfig {
   /// actual CORS enforcement happens on the backend.
   static const String frontendOrigin = String.fromEnvironment(
     'FRONTEND_ORIGIN',
-    defaultValue: 'http://localhost:8989',
+    defaultValue: 'http://localhost:9600',
   );
 
   // ── Auth strategy ───────────────────────────────────────────────────────────

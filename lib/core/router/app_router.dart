@@ -163,7 +163,10 @@ Raw<GoRouter> appRouter(Ref ref) {
         path: '/form-preview',
         builder: (context, state) {
           final form = state.extra as BuilderForm;
-          return FormPreviewPage(form: form);
+          return FormPreviewPage(
+            form: form,
+            projectId: state.uri.queryParameters['projectId'] ?? '',
+          );
         },
       ),
       GoRoute(

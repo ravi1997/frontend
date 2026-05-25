@@ -1,0 +1,116 @@
+version: 1
+generated_at: 2026-05-25
+objective: production_ready_enterprise_delivery
+phases:
+  phase_0_discovery_baseline:
+    status: in_progress
+    deliverables:
+      - architecture_inventory
+      - route_inventory
+      - dto_schema_inventory
+      - infra_inventory
+      - security_gap_inventory
+      - task_graph
+      - dependency_graph
+      - implementation_tracker
+    exit_criteria:
+      - blockers_ranked
+      - phase_1_contract_work_items_defined
+  phase_1_contract_foundation:
+    status: pending
+    dependencies: [phase_0_discovery_baseline]
+    deliverables:
+      - canonical_api_envelope
+      - canonical_error_envelope
+      - pagination_contract
+      - auth_contract
+      - openapi_generation
+      - frontend_generated_dto_workflow
+      - contract_tests
+  phase_2_backend_frontend_alignment:
+    status: pending
+    dependencies: [phase_1_contract_foundation]
+    deliverables:
+      - project_scoped_form_client
+      - otp_route_alignment
+      - response_unwrap_alignment
+      - dto_naming_alignment
+      - async_contract_alignment
+  phase_3_security_tenancy:
+    status: pending
+    dependencies: [phase_2_backend_frontend_alignment]
+    deliverables:
+      - rbac_matrix
+      - tenant_enforcement_tests
+      - idempotency
+      - audit_logging
+      - rate_limits
+      - upload_security
+  phase_4_async_infrastructure:
+    status: pending
+    dependencies: [phase_3_security_tenancy]
+    deliverables:
+      - queue_partitioning
+      - retries
+      - dlq
+      - task_polling
+      - notifications
+      - webhook_delivery
+      - object_storage
+  phase_5_frontend_production_ux:
+    status: pending
+    dependencies: [phase_2_backend_frontend_alignment, phase_3_security_tenancy]
+    deliverables:
+      - error_boundaries
+      - skeleton_loading
+      - autosave_conflict_ux
+      - route_guards
+      - session_recovery
+      - accessibility
+  phase_6_observability_reliability:
+    status: pending
+    dependencies: [phase_4_async_infrastructure]
+    deliverables:
+      - metrics
+      - dashboards
+      - traces
+      - alerts
+      - health_readiness
+      - backup_restore_validation
+  phase_7_testing_completion:
+    status: pending
+    dependencies:
+      - phase_1_contract_foundation
+      - phase_2_backend_frontend_alignment
+      - phase_3_security_tenancy
+      - phase_4_async_infrastructure
+      - phase_5_frontend_production_ux
+      - phase_6_observability_reliability
+    deliverables:
+      - unit_coverage
+      - integration_coverage
+      - contract_coverage
+      - e2e_coverage
+      - accessibility_coverage
+      - security_coverage
+      - load_testing
+      - migration_testing
+  phase_8_production_readiness:
+    status: pending
+    dependencies: [phase_7_testing_completion]
+    deliverables:
+      - rollout_strategy
+      - rollback_strategy
+      - migration_safety
+      - feature_flag_validation
+      - runbooks
+      - readiness_score
+critical_path:
+  - phase_0_discovery_baseline
+  - phase_1_contract_foundation
+  - phase_2_backend_frontend_alignment
+  - phase_3_security_tenancy
+  - phase_4_async_infrastructure
+  - phase_6_observability_reliability
+  - phase_7_testing_completion
+  - phase_8_production_readiness

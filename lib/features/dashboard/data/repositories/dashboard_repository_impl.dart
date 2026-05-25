@@ -68,14 +68,14 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
   @override
   Future<void> deleteForm(String id) async {
-    await _apiClient.delete(ApiEndpoints.deleteForm(id));
+    // Dashboard cards are project summaries in the current API contract.
+    await _apiClient.delete(ApiEndpoints.deleteProject(id));
   }
 
   @override
   Future<void> duplicateForm(String originalFormId, String newTitle) async {
-    await _apiClient.post(
-      ApiEndpoints.cloneForm(originalFormId),
-      data: {'title': newTitle},
+    throw UnsupportedError(
+      'Duplicating a form requires project context and must use cloneProjectForm.',
     );
   }
 }

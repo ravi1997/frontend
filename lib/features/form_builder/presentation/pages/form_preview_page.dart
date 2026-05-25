@@ -40,8 +40,9 @@ final Map<String, bool> _previewRichPreviewMode = {};
 
 class FormPreviewPage extends ConsumerStatefulWidget {
   final BuilderForm form;
+  final String projectId;
 
-  const FormPreviewPage({super.key, required this.form});
+  const FormPreviewPage({super.key, required this.form, this.projectId = ''});
 
   @override
   ConsumerState<FormPreviewPage> createState() => _FormPreviewPageState();
@@ -841,6 +842,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                 final success = await ref
                     .read(formSubmissionControllerProvider.notifier)
                     .submit(
+                      projectId: widget.projectId,
                       formId: widget.form.id,
                       answers: Map<String, dynamic>.from(submissionData),
                       visibilityMap: result.visibility,

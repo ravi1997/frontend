@@ -25,7 +25,9 @@ class ResponseDetailPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final responseAsync = ref.watch(responseDetailProvider(formId, responseId));
+    final responseAsync = ref.watch(
+      responseDetailProvider(projectId, formId, responseId),
+    );
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
@@ -97,7 +99,11 @@ class _ResponseDetailView extends ConsumerWidget {
                   formId: formId,
                   response: response,
                 ),
-                _HistoryTab(formId: formId, responseId: response.id),
+                _HistoryTab(
+                  projectId: projectId,
+                  formId: formId,
+                  responseId: response.id,
+                ),
               ],
             ),
           ),
@@ -131,7 +137,7 @@ class _AnswersTab extends StatelessWidget {
             children: [
               _SubmissionHeader(response: response),
               const SizedBox(height: 32),
-              _AIInsightsSection(response: response),
+              _AIInsightsSection(projectId: projectId, response: response),
               const SizedBox(height: 32),
               Text(
                 'Submitted Data',
@@ -315,8 +321,9 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _AIInsightsSection extends ConsumerWidget {
+  final String projectId;
   final FormResponse response;
-  const _AIInsightsSection({required this.response});
+  const _AIInsightsSection({required this.projectId, required this.response});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -357,7 +364,7 @@ class _AIInsightsSection extends ConsumerWidget {
                       .read(aIControllerProvider.notifier)
                       .analyzeResponse(response.formId, response.id);
                   ref.invalidate(
-                    responseDetailProvider(response.formId, response.id),
+                    responseDetailProvider(projectId, response.formId, response.id),
                   );
                 },
                 icon: const Icon(Icons.psychology_outlined, size: 18),
@@ -623,13 +630,20 @@ class _AnswersFallback extends StatelessWidget {
 }
 
 class _HistoryTab extends ConsumerWidget {
+  final String projectId;
   final String formId;
   final String responseId;
-  const _HistoryTab({required this.formId, required this.responseId});
+  const _HistoryTab({
+    required this.projectId,
+    required this.formId,
+    required this.responseId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyAsync = ref.watch(responseHistoryProvider(formId, responseId));
+    final historyAsync = ref.watch(
+      responseHistoryProvider(projectId, formId, responseId),
+    );
 
     return historyAsync.when(
       data: (historyList) => historyList.isEmpty

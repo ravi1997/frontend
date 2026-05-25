@@ -1,5 +1,5 @@
 # Stage 1: Build Flutter Web App
-FROM flutter:3.24.5-web AS builder
+FROM ghcr.io/cirruslabs/flutter:stable AS builder
 
 # Set working directory
 WORKDIR /app
@@ -36,12 +36,12 @@ RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /
 # Switch to non-root user
 USER nginx
 
-# Expose port 80
-EXPOSE 80
+# Expose unprivileged port
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

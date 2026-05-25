@@ -26,12 +26,12 @@ class ApiEndpoints {
   /// POST - Login with mobile and OTP
   /// Body: { "mobile": string, "otp": string }
   /// Returns: { "access_token": string, "refresh_token": string, "user": {...} }
-  static const String loginWithOtp = '/auth/otp/verify';
+  static const String loginWithOtp = '/auth/login';
 
   /// POST - Request OTP for mobile number
   /// Body: { "mobile": string }
   /// Returns: { "message": string }
-  static const String requestOtp = '/auth/otp/request';
+  static const String requestOtp = '/auth/request-otp';
 
   /// POST - Revoke all sessions
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -153,6 +153,7 @@ class ApiEndpoints {
 
   /// PATCH - Update system settings (superadmin)
   static const String systemSettingsPatch = '/admin/system-settings/';
+  static const String systemSettingsPut = '/admin/system-settings/';
 
   /// POST - Reset system settings to defaults (superadmin)
   static const String systemSettingsReset = '/admin/system-settings/reset';
@@ -217,18 +218,24 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
   static String deleteForm(String formId) => '/forms/$formId';
+  static String deleteProjectForm(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId';
 
   /// POST - Publish form (async, returns 202)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "major": bool, "minor": bool }
   /// Returns: { "task_id": string }
   static String publishForm(String formId) => '/forms/$formId/publish';
+  static String publishProjectForm(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/publish';
 
   /// POST - Clone/duplicate form (async, returns 202)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "title": string, "slug": string? }
   /// Returns: { "task_id": string }
   static String cloneForm(String formId) => '/forms/$formId/clone';
+  static String cloneProjectForm(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/clone';
 
   // ============================================================================
   // Project Management Endpoints (§2b)
@@ -334,6 +341,8 @@ class ApiEndpoints {
   /// Body: { "data": { "field_id": value, ... } }
   /// Returns: { "response_id": string }
   static String submitResponse(String formId) => '/forms/$formId/responses';
+  static String submitProjectResponse(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/responses';
 
   /// POST - Submit form response (anonymous/public)
   /// No authentication required. Form must have is_public=true and status="published"
@@ -343,21 +352,38 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?page=int&page_size=int
   static String listResponses(String formId) => '/forms/$formId/responses';
+  static String listProjectResponses(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/responses';
 
   /// GET - Get single response by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   static String getResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
+  static String getProjectResponse(
+    String projectId,
+    String formId,
+    String responseId,
+  ) => '/projects/$projectId/forms/$formId/responses/$responseId';
 
   /// PUT - Update response
   /// Headers: { "Authorization": "Bearer {token}" }
   static String updateResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
+  static String updateProjectResponse(
+    String projectId,
+    String formId,
+    String responseId,
+  ) => '/projects/$projectId/forms/$formId/responses/$responseId';
 
   /// DELETE - Delete response
   /// Headers: { "Authorization": "Bearer {token}" }
   static String deleteResponse(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId';
+  static String deleteProjectResponse(
+    String projectId,
+    String formId,
+    String responseId,
+  ) => '/projects/$projectId/forms/$formId/responses/$responseId';
 
   /// GET - Count responses
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -481,11 +507,19 @@ class ApiEndpoints {
   static String exportResponses(String formId, {String format = 'csv'}) =>
       '/forms/$formId/export/$format';
 
+  static String exportProjectResponses(
+    String projectId,
+    String formId, {
+    String format = 'csv',
+  }) => '/projects/$projectId/forms/$formId/export/$format';
+
   /// POST - Start bulk export (async, returns 202)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "form_ids": string[] }
   /// Returns: { "job_id": string, "status": string }
   static const String bulkExport = '/forms/export/bulk';
+  static String projectBulkExport(String projectId) =>
+      '/projects/$projectId/forms/export/bulk';
 
   /// GET - Generic async task status.
   static String taskStatus(String taskId) => '/tasks/$taskId';
@@ -493,11 +527,15 @@ class ApiEndpoints {
   /// GET - Check bulk export status
   /// Headers: { "Authorization": "Bearer {token}" }
   static String bulkExportStatus(String jobId) => '/forms/export/bulk/$jobId';
+  static String projectBulkExportStatus(String projectId, String jobId) =>
+      '/projects/$projectId/forms/export/bulk/$jobId';
 
   /// GET - Download completed bulk export (ZIP)
   /// Headers: { "Authorization": "Bearer {token}" }
   static String bulkExportDownload(String jobId) =>
       '/forms/export/bulk/$jobId/download';
+  static String projectBulkExportDownload(String projectId, String jobId) =>
+      '/projects/$projectId/forms/export/bulk/$jobId/download';
 
   // ============================================================================
   // Advanced Response Queries (§14)
@@ -628,15 +666,15 @@ class ApiEndpoints {
   static const String aiHealthCheck = '/ai/health';
 
   /// POST - NLP search across form responses
-  static String nlpSearch(String formId) => '/ai/forms/$formId/nlp-search';
+  static String nlpSearch(String formId) => '/ai/search/$formId/nlp-search';
 
   /// POST - Semantic search across form responses
   static String semanticSearch(String formId) =>
-      '/ai/forms/$formId/semantic-search';
+      '/ai/search/$formId/semantic-search';
 
   /// POST - Semantic search (streaming SSE)
   static String semanticSearchStream(String formId) =>
-      '/ai/forms/$formId/semantic-search/stream';
+      '/ai/search/$formId/semantic-search/stream';
 
   /// POST - Analyze a specific form response using AI
   static String analyzeResponseAI(String formId, String responseId) =>
@@ -676,7 +714,7 @@ class ApiEndpoints {
       '/dashboards/$dashboardId';
 
   /// Dashboard settings
-  static const String dashboardSettings = '/dashboard-settings';
+  static const String dashboardSettings = '/dashboard-settings/settings';
 
   /// Public view route for a form
   static String viewForm(String formId) => '/view/$formId';
@@ -693,6 +731,8 @@ class ApiEndpoints {
 
   /// GET - Get analytics for a specific form
   static String getAnalytics(String formId) => '/forms/$formId/analytics';
+  static String getProjectAnalytics(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/analytics';
 
   /// GET - Get analytics summary
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -734,11 +774,11 @@ class ApiEndpoints {
 
   /// POST - Test webhook
   /// Headers: { "Authorization": "Bearer {token}" }
-  static String webhookTest(String webhookId) => '/webhooks/$webhookId/test';
+  static String webhookTest(String webhookId) => '/webhooks/test';
 
   /// GET - Webhook logs
   /// Headers: { "Authorization": "Bearer {token}" }
-  static String webhookLogs(String webhookId) => '/webhooks/$webhookId/logs';
+  static String webhookLogs(String webhookId) => '/webhooks/logs';
 
   // ============================================================================
   // SMS API (§21)

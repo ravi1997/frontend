@@ -16,7 +16,19 @@ class ResponseRepositoryImpl implements ResponseRepository {
   @override
   Future<List<FormResponse>> getResponsesForForm(String formId) async {
     final response = await _apiClient.get(ApiEndpoints.listResponses(formId));
-    final List<dynamic> data = response.data as List<dynamic>;
+    final List<dynamic> data = _items(response.data);
+    return data.map((json) => FormResponse.fromJson(json)).toList();
+  }
+
+  @override
+  Future<List<FormResponse>> getProjectResponses(
+    String projectId,
+    String formId,
+  ) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.listProjectResponses(projectId, formId),
+    );
+    final List<dynamic> data = _items(response.data);
     return data.map((json) => FormResponse.fromJson(json)).toList();
   }
 
@@ -32,9 +44,32 @@ class ResponseRepositoryImpl implements ResponseRepository {
   }
 
   @override
+  Future<FormResponse> getProjectResponseDetail(
+    String projectId,
+    String formId,
+    String responseId,
+  ) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.getProjectResponse(projectId, formId, responseId),
+    );
+    return FormResponse.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
   Future<void> submitResponse(FormResponse response) async {
     await _apiClient.post(
       ApiEndpoints.submitResponse(response.formId),
+      data: response.toJson(),
+    );
+  }
+
+  @override
+  Future<void> submitProjectResponse(
+    String projectId,
+    FormResponse response,
+  ) async {
+    await _apiClient.post(
+      ApiEndpoints.submitProjectResponse(projectId, response.formId),
       data: response.toJson(),
     );
   }
@@ -59,6 +94,30 @@ class ResponseRepositoryImpl implements ResponseRepository {
     );
     final List<dynamic> data = response.data as List<dynamic>;
     return data.map((json) => ResponseHistory.fromJson(json)).toList();
+  }
+
+  @override
+  Future<List<ResponseHistory>> getProjectResponseHistory(
+    String projectId,
+    String formId,
+    String responseId,
+  ) async {
+    final response = await _apiClient.get(
+      ApiEndpoints.getResponseHistory(formId, responseId),
+    );
+    final List<dynamic> data = _items(response.data);
+    return data.map((json) => ResponseHistory.fromJson(json)).toList();
+  }
+
+  List<dynamic> _items(dynamic data) {
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      return data['items'] as List<dynamic>? ??
+          data['responses'] as List<dynamic>? ??
+          data['data'] as List<dynamic>? ??
+          const [];
+    }
+    return const [];
   }
 }
 

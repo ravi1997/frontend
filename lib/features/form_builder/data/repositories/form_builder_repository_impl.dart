@@ -1,4 +1,6 @@
 import 'package:logger/logger.dart';
+import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/builder_form.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/repositories/form_builder_repository.dart';
@@ -20,6 +22,7 @@ import '../mappers/form_mapper.dart';
 class FormBuilderRepositoryImpl implements FormBuilderRepository {
   final ApiClient _apiClient;
   final Logger _logger = Logger();
+  static const _uuid = Uuid();
 
   FormBuilderRepositoryImpl(this._apiClient);
 
@@ -312,13 +315,14 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> publishForm(String formId) async {
+  Future<Map<String, dynamic>> publishForm(String projectId, String formId) async {
     try {
-      // Backend: POST /forms/<id>/publish → 202 { "task_id": "..." }
+      // Backend: POST /projects/<projectId>/forms/<id>/publish → 202 { "task_id": "..." }
       // Body: { "major": bool, "minor": bool }
       final response = await _apiClient.post(
-        ApiEndpoints.publishForm(formId),
+        ApiEndpoints.publishProjectForm(projectId, formId),
         data: {'major': false, 'minor': true},
+        options: Options(headers: {'Idempotency-Key': _uuid.v4()}),
       );
       return response.data as Map<String, dynamic>;
     } catch (e, s) {
@@ -533,8 +537,9 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       if (slug != null) payload['slug'] = slug;
 
       final response = await _apiClient.post(
-        ApiEndpoints.cloneForm(formId),
+        ApiEndpoints.cloneProjectForm(projectId, formId),
         data: payload,
+        options: Options(headers: {'Idempotency-Key': _uuid.v4()}),
       );
       final data = response.data;
 
