@@ -43,27 +43,30 @@ const _stringOperators = [
   ('contains', 'Contains'),
   ('starts_with', 'Starts with'),
   ('ends_with', 'Ends with'),
+  ('in', 'In'),
+  ('not_in', 'Not in'),
   ('is_empty', 'Is empty'),
   ('is_not_empty', 'Is not empty'),
 ];
 
 const _numberOperators = [
   ('equals', 'Equals'),
-  ('greater_than', 'Greater than'),
-  ('less_than', 'Less than'),
+  ('not_equals', 'Not equals'),
+  ('gt', 'Greater than'),
+  ('gte', 'Greater than or equal'),
+  ('lt', 'Less than'),
+  ('lte', 'Less than or equal'),
   ('between', 'Between'),
 ];
 
 const _dateOperators = [
+  ('equals', 'Equals'),
   ('before', 'Before'),
   ('after', 'After'),
   ('between', 'Between'),
 ];
 
-const _boolOperators = [
-  ('is_true', 'Is true'),
-  ('is_false', 'Is false'),
-];
+const _boolOperators = [('equals', 'Equals')];
 
 List<(String, String)> _operatorsFor(_FilterFieldType t) {
   switch (t) {
@@ -78,10 +81,52 @@ List<(String, String)> _operatorsFor(_FilterFieldType t) {
   }
 }
 
-bool _requiresNoValue(String op) =>
-    op == 'is_empty' || op == 'is_not_empty' || op == 'is_true' || op == 'is_false';
+bool _requiresNoValue(String op) => op == 'is_empty' || op == 'is_not_empty';
 
 bool _isBetween(String op) => op == 'between';
+
+bool _isListOperator(String op) => op == 'in' || op == 'not_in';
+
+String _canonicalOperator(String op) {
+  switch (op) {
+    case 'greater_than':
+      return 'gt';
+    case 'greater_than_equals':
+      return 'gte';
+    case 'less_than':
+      return 'lt';
+    case 'less_than_equals':
+      return 'lte';
+    case 'in_list':
+      return 'in';
+    case 'not_in_list':
+      return 'not_in';
+    case 'is_true':
+    case 'is_false':
+      return 'equals';
+    default:
+      return op;
+  }
+}
+
+dynamic _normalizeValue(String op, dynamic value) {
+  if (op == 'is_true') return true;
+  if (op == 'is_false') return false;
+  if (_isListOperator(op) && value is List) {
+    return value.map((v) => v.toString()).join(', ');
+  }
+  if (_isBetween(op) && value is List && value.isNotEmpty) {
+    return value.first;
+  }
+  return value;
+}
+
+dynamic _normalizeSecondValue(String op, dynamic value) {
+  if (_isBetween(op) && value is List && value.length > 1) {
+    return value[1];
+  }
+  return null;
+}
 
 // ─────────────────────────────────────────────
 // Helper – map QuestionType → _FilterFieldType
@@ -147,7 +192,6 @@ class FilterBuilderDialog extends StatefulWidget {
 class _FilterBuilderDialogState extends State<FilterBuilderDialog>
     with TickerProviderStateMixin {
   static const _accent = Color(0xFF6366F1);
-  static const _accentLight = Color(0xFFEEF2FF);
   static const _cardBg = Color(0xFF1E1B4B);
   static const _dialogBg = Color(0xFF0F0C29);
   static const _borderColor = Color(0xFF3730A3);
@@ -173,22 +217,26 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
       ),
       // Fields from form questions
       ...widget.questions
-          .where((q) =>
-              q.label != null &&
-              q.label.toString().isNotEmpty &&
-              q.type != QuestionType.divider &&
-              q.type != QuestionType.spacer &&
-              q.type != QuestionType.signature &&
-              q.type != QuestionType.fileUpload &&
-              q.type != QuestionType.multiFileUpload &&
-              q.type != QuestionType.filePicker &&
-              q.type != QuestionType.image &&
-              q.type != QuestionType.imageGallery)
-          .map((q) => _FilterField(
-                id: q.id,
-                label: q.label.toString(),
-                fieldType: _mapQuestionType(q.type),
-              )),
+          .where(
+            (q) =>
+                q.label != null &&
+                q.label.toString().isNotEmpty &&
+                q.type != QuestionType.divider &&
+                q.type != QuestionType.spacer &&
+                q.type != QuestionType.signature &&
+                q.type != QuestionType.fileUpload &&
+                q.type != QuestionType.multiFileUpload &&
+                q.type != QuestionType.filePicker &&
+                q.type != QuestionType.image &&
+                q.type != QuestionType.imageGallery,
+          )
+          .map(
+            (q) => _FilterField(
+              id: q.id,
+              label: q.label.toString(),
+              fieldType: _mapQuestionType(q.type),
+            ),
+          ),
     ];
 
     // Dialog fade-in
@@ -206,16 +254,21 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
     if (widget.initialFilters != null && widget.initialFilters!.isNotEmpty) {
       for (final f in widget.initialFilters!) {
         final fieldId = f['field'] as String?;
-        final op = f['operator'] as String?;
+        final rawOp = f['operator'] as String? ?? '';
+        final op = _canonicalOperator(rawOp);
         final val = f['value'];
-        final field = _availableFields.where((af) => af.id == fieldId).firstOrNull;
+        final field = _availableFields
+            .where((af) => af.id == fieldId)
+            .firstOrNull;
         if (field != null) {
-          _rules.add(_FilterRule(
-            field: field,
-            operator: op,
-            value: _isBetween(op ?? '') && val is List ? val[0] : val,
-            value2: _isBetween(op ?? '') && val is List ? val[1] : null,
-          ));
+          _rules.add(
+            _FilterRule(
+              field: field,
+              operator: op,
+              value: _normalizeValue(rawOp, val),
+              value2: _normalizeSecondValue(rawOp, val),
+            ),
+          );
         }
       }
     }
@@ -230,8 +283,10 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
   void _addRule() {
     final rule = _FilterRule();
     _rules.add(rule);
-    _listKey.currentState?.insertItem(_rules.length - 1,
-        duration: const Duration(milliseconds: 320));
+    _listKey.currentState?.insertItem(
+      _rules.length - 1,
+      duration: const Duration(milliseconds: 320),
+    );
   }
 
   void _removeRule(int index) {
@@ -255,11 +310,24 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
         value = null;
       } else if (_isBetween(op)) {
         value = [rule.value?.toString() ?? '', rule.value2?.toString() ?? ''];
+      } else if (_isListOperator(op)) {
+        final raw = rule.value?.toString() ?? '';
+        value = raw
+            .split(',')
+            .map((part) => part.trim())
+            .where((part) => part.isNotEmpty)
+            .toList();
       } else {
         if (field.fieldType == _FilterFieldType.boolean) {
-          value = rule.value ?? false;
+          value = rule.value is bool ? rule.value : false;
         } else {
-          value = rule.value?.toString() ?? '';
+          final raw = rule.value?.toString() ?? '';
+          if (field.fieldType == _FilterFieldType.number) {
+            final parsed = num.tryParse(raw);
+            value = parsed ?? raw;
+          } else {
+            value = raw;
+          }
         }
       }
 
@@ -316,11 +384,16 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
                           key: _listKey,
                           shrinkWrap: true,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 16),
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           initialItemCount: _rules.length,
                           itemBuilder: (context, index, animation) {
                             return _buildAnimatedRow(
-                                _rules[index], index, animation);
+                              _rules[index],
+                              index,
+                              animation,
+                            );
                           },
                         ),
                 ),
@@ -355,8 +428,11 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
               color: _accent.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.filter_list_rounded,
-                color: _accent, size: 22),
+            child: const Icon(
+              Icons.filter_list_rounded,
+              color: _accent,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -403,8 +479,11 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
               color: _accent.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.filter_alt_outlined,
-                color: _accent, size: 32),
+            child: const Icon(
+              Icons.filter_alt_outlined,
+              color: _accent,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -418,10 +497,7 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
           const SizedBox(height: 6),
           Text(
             'Click "Add Rule" below to start filtering.',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: Colors.white38,
-            ),
+            style: GoogleFonts.inter(fontSize: 13, color: Colors.white38),
           ),
         ],
       ),
@@ -429,15 +505,15 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
   }
 
   Widget _buildAnimatedRow(
-      _FilterRule rule, int index, Animation<double> animation) {
+    _FilterRule rule,
+    int index,
+    Animation<double> animation,
+  ) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0.06, 0),
         end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutCubic,
-      )),
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
       child: FadeTransition(
         opacity: animation,
         child: _FilterRuleRow(
@@ -468,10 +544,10 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
             style: OutlinedButton.styleFrom(
               foregroundColor: _accent,
               side: const BorderSide(color: _accent, width: 1.2),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
           const Spacer(),
@@ -507,10 +583,10 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
               backgroundColor: _accent,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             child: Text(
               'Apply Filters',
@@ -563,9 +639,11 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
   void initState() {
     super.initState();
     _valueCtrl = TextEditingController(
-        text: widget.rule.value?.toString() ?? '');
+      text: widget.rule.value?.toString() ?? '',
+    );
     _value2Ctrl = TextEditingController(
-        text: widget.rule.value2?.toString() ?? '');
+      text: widget.rule.value2?.toString() ?? '',
+    );
   }
 
   @override
@@ -584,15 +662,11 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
   InputDecoration _inputDeco(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.inter(
-        color: Colors.white24,
-        fontSize: 13,
-      ),
+      hintStyle: GoogleFonts.inter(color: Colors.white24, fontSize: 13),
       filled: true,
       fillColor: _inputFill,
       isDense: true,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: _borderColor),
@@ -615,7 +689,8 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
     required void Function(T?) onChanged,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      key: ValueKey<Object?>('$hint-$value'),
+      initialValue: value,
       isExpanded: true,
       dropdownColor: const Color(0xFF1A1744),
       iconEnabledColor: Colors.white38,
@@ -645,7 +720,7 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 13),
           ),
           value: rule.value as bool? ?? false,
-          activeColor: _accent,
+          activeThumbColor: _accent,
           contentPadding: EdgeInsets.zero,
           onChanged: (v) {
             rule.value = v;
@@ -707,8 +782,7 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
                 child: TextField(
                   controller: _valueCtrl,
                   keyboardType: TextInputType.number,
-                  style: GoogleFonts.inter(
-                      color: Colors.white, fontSize: 13),
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                   decoration: _inputDeco('Min value'),
                   onChanged: (v) {
                     rule.value = v;
@@ -721,8 +795,7 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
                 child: TextField(
                   controller: _value2Ctrl,
                   keyboardType: TextInputType.number,
-                  style: GoogleFonts.inter(
-                      color: Colors.white, fontSize: 13),
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                   decoration: _inputDeco('Max value'),
                   onChanged: (v) {
                     rule.value2 = v;
@@ -745,7 +818,17 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
         );
 
       case _FilterFieldType.string:
-      default:
+        if (_isListOperator(op)) {
+          return TextField(
+            controller: _valueCtrl,
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+            decoration: _inputDeco('Comma-separated values'),
+            onChanged: (v) {
+              rule.value = v;
+              widget.onChanged();
+            },
+          );
+        }
         return TextField(
           controller: _valueCtrl,
           style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
@@ -844,7 +927,9 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
                       child: Text(
                         f.label,
                         style: GoogleFonts.inter(
-                            color: Colors.white, fontSize: 13),
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -875,8 +960,7 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
                   value: op.$1,
                   child: Text(
                     op.$2,
-                    style: GoogleFonts.inter(
-                        color: Colors.white, fontSize: 13),
+                    style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                   ),
                 );
               }).toList(),
@@ -907,17 +991,29 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
     }
     switch (ft) {
       case _FilterFieldType.number:
-        return const Icon(Icons.tag_rounded, size: 14, color: Color(0xFF10B981));
+        return const Icon(
+          Icons.tag_rounded,
+          size: 14,
+          color: Color(0xFF10B981),
+        );
       case _FilterFieldType.date:
-        return const Icon(Icons.calendar_today_rounded,
-            size: 14, color: Color(0xFFF59E0B));
+        return const Icon(
+          Icons.calendar_today_rounded,
+          size: 14,
+          color: Color(0xFFF59E0B),
+        );
       case _FilterFieldType.boolean:
-        return const Icon(Icons.toggle_on_rounded,
-            size: 14, color: Color(0xFF8B5CF6));
+        return const Icon(
+          Icons.toggle_on_rounded,
+          size: 14,
+          color: Color(0xFF8B5CF6),
+        );
       case _FilterFieldType.string:
-      default:
-        return const Icon(Icons.text_fields_rounded,
-            size: 14, color: Color(0xFF60A5FA));
+        return const Icon(
+          Icons.text_fields_rounded,
+          size: 14,
+          color: Color(0xFF60A5FA),
+        );
     }
   }
 }
@@ -947,9 +1043,7 @@ class _DatePickerInput extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         final now = DateTime.now();
-        final initial = value != null
-            ? DateTime.tryParse(value!) ?? now
-            : now;
+        final initial = value != null ? DateTime.tryParse(value!) ?? now : now;
         final picked = await showDatePicker(
           context: context,
           initialDate: initial,
@@ -982,8 +1076,11 @@ class _DatePickerInput extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today_rounded,
-                size: 14, color: accent.withValues(alpha: 0.7)),
+            Icon(
+              Icons.calendar_today_rounded,
+              size: 14,
+              color: accent.withValues(alpha: 0.7),
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

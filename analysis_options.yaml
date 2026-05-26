@@ -12,6 +12,8 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   plugins:
     - custom_lint
+  exclude:
+    - lib/generated/api/**
   errors:
     invalid_annotation_target: ignore
     non_constant_identifier_names: ignore

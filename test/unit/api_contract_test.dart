@@ -55,6 +55,13 @@ void main() {
         '/projects/project-1/forms/form-1/analytics',
       );
     });
+
+    test('response filter route is form scoped', () {
+      expect(
+        ApiEndpoints.filterResponses('form-1'),
+        '/forms/form-1/responses/filter',
+      );
+    });
   });
 
   group('AuthInterceptor', () {

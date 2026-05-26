@@ -18,8 +18,9 @@ import 'package:frontend/features/responses/presentation/widgets/filter_builder_
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 
 final _searchQueryProvider = StateProvider<String?>((ref) => null);
-final _activeFiltersProvider =
-    StateProvider<List<Map<String, dynamic>>>((ref) => const []);
+final _activeFiltersProvider = StateProvider<List<Map<String, dynamic>>>(
+  (ref) => const [],
+);
 
 class ResponseListPage extends ConsumerWidget {
   final String projectId;
@@ -502,9 +503,7 @@ class _FilterBar extends ConsumerWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            color: hasFilters
-                ? _accent.withValues(alpha: 0.12)
-                : Colors.white,
+            color: hasFilters ? _accent.withValues(alpha: 0.12) : Colors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: hasFilters ? _accent : const Color(0xFFE5E7EB),
@@ -536,8 +535,7 @@ class _FilterBar extends ConsumerWidget {
               }
             },
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -548,16 +546,13 @@ class _FilterBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    hasFilters
-                        ? 'Filters (${activeFilters.length})'
-                        : 'Filter',
+                    hasFilters ? 'Filters (${activeFilters.length})' : 'Filter',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      fontWeight:
-                          hasFilters ? FontWeight.w600 : FontWeight.w500,
-                      color: hasFilters
-                          ? _accent
-                          : const Color(0xFF6B7280),
+                      fontWeight: hasFilters
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                      color: hasFilters ? _accent : const Color(0xFF6B7280),
                     ),
                   ),
                 ],
@@ -582,14 +577,20 @@ class _ActiveFilterChips extends ConsumerWidget {
     final val = f['value'];
 
     // Friendly field label
-    final fieldLabel = field == 'submitted_at' ? 'Date' : field;
+    final fieldLabel = field == 'submitted_at' ? 'Submission Date' : field;
 
     // Friendly operator label
     final opLabel = _opLabel(op);
 
     if (val == null) return '$fieldLabel $opLabel';
     if (val is List) {
-      return '$fieldLabel $opLabel ${val[0]} → ${val[1]}';
+      if (op == 'between') {
+        return '$fieldLabel $opLabel ${val[0]} → ${val[1]}';
+      }
+      return '$fieldLabel $opLabel ${val.join(', ')}';
+    }
+    if (val is bool) {
+      return '$fieldLabel $opLabel ${val ? 'true' : 'false'}';
     }
     return '$fieldLabel $opLabel $val';
   }
@@ -601,10 +602,20 @@ class _ActiveFilterChips extends ConsumerWidget {
       'contains': 'contains',
       'starts_with': 'starts',
       'ends_with': 'ends',
+      'in': 'in',
+      'not_in': 'not in',
+      'in_list': 'in',
+      'not_in_list': 'not in',
       'is_empty': 'is empty',
       'is_not_empty': 'not empty',
+      'gt': '>',
+      'gte': '≥',
+      'lt': '<',
+      'lte': '≤',
       'greater_than': '>',
+      'greater_than_equals': '≥',
       'less_than': '<',
+      'less_than_equals': '≤',
       'between': 'between',
       'before': 'before',
       'after': 'after',
@@ -628,9 +639,7 @@ class _ActiveFilterChips extends ConsumerWidget {
             child: Chip(
               key: ValueKey(i),
               backgroundColor: _accent.withValues(alpha: 0.12),
-              side: BorderSide(
-                color: _accent.withValues(alpha: 0.35),
-              ),
+              side: BorderSide(color: _accent.withValues(alpha: 0.35)),
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               label: Text(
                 _chipLabel(f),
