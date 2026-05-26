@@ -1,6 +1,34 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
   "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/ravi/workspace/frontend",
+        "/home/ravi/workspace/docker/apps/form-backend"
+      ]
+    },
+    "git-frontend": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git",
+        "--repository",
+        "/home/ravi/workspace/frontend"
+      ]
+    },
+    "git-backend": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git",
+        "--repository",
+        "/home/ravi/workspace/docker/apps/form-backend"
+      ]
+    },
     "playwright": {
       "type": "local",
       "command": [
@@ -8,46 +36,142 @@
         "-y",
         "@playwright/mcp@0.0.38"
       ]
+    },
+    "fetch": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-fetch"
+      ]
+    },
+    "context7": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "time": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-time",
+        "--local-timezone=Asia/Kolkata"
+      ]
+    },
+    "memory": {
+      "type": "local",
+      "command": [
+        "sh",
+        "-lc",
+        "MEMORY_FILE_PATH=/home/ravi/workspace/frontend/.agents/memory.json exec npx -y @modelcontextprotocol/server-memory"
+      ]
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "sh",
+        "-lc",
+        "set -a; . \"$HOME/.config/ridp-agent/github-mcp.env\"; exec docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server"
+      ]
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp"
+      ]
     }
   },
   "agent": {
-    "code-reviewer": {
+    "ridp-senior-planner": {
       "mode": "primary",
-      "description": "Code Reviewer",
-      "prompt": "You are a senior software engineer conducting thorough code reviews. You focus on code quality, security, performance, and maintainability.\n\n\nProvide constructive feedback on code patterns, potential bugs, security issues, and improvement opportunities. Be specific and actionable in suggestions.\n",
+      "description": "RIDP Senior Planner",
+      "prompt": "You are a principal-level software engineer and planner for the RIDP platform. Read AGENTS.md and relevant .agents/skills before acting. Plan only after inspecting existing code. Prioritize contract stability, tenant isolation, auth/ACL correctness, generated-client compatibility, reversible steps, and focused verification. Keep plans concise and executable.",
       "permission": {
         "read": "allow",
         "bash": "allow",
         "edit": "deny",
-        "mcp": "deny"
+        "mcp": "allow"
       }
     },
-    "docs-specialist": {
+    "ridp-frontend-senior": {
       "mode": "primary",
-      "description": "Documentation Specialist",
-      "prompt": "You are a technical writing expert specializing in clear, comprehensive documentation. You excel at explaining complex concepts simply and creating well-structured docs.\n\n\nFocus on clarity, proper formatting, and comprehensive examples. Always check for broken links and ensure consistency in tone and style.\n",
+      "description": "RIDP Flutter Frontend Senior",
+      "prompt": "You are a senior Flutter/Dart engineer for the RIDP frontend. Use the ridp-frontend-flutter skill when UI, routing, state, accessibility, generated API usage, or form rendering changes. Preserve Smart Grid behavior, contract boundaries, null safety, accessibility, and premium responsive UI quality.",
       "permission": {
         "read": "allow",
         "bash": "allow",
         "edit": {
-          "\\.(md|mdx|txt|rst|adoc)$|README$|CHANGELOG$": "allow",
+          "\\.(dart|yaml|yml|json|md|html|css|js|ts)$": "allow",
+          "lib/generated/api/.*": "deny",
           "*": "deny"
         },
-        "mcp": "deny"
+        "mcp": "allow"
       }
     },
-    "frontend-specialist": {
+    "ridp-backend-senior": {
       "mode": "primary",
-      "description": "Frontend Specialist",
-      "prompt": "You are a frontend developer expert in React, TypeScript, and modern CSS. You focus on creating intuitive user interfaces and excellent user experiences.\n\n\nPrioritize accessibility, responsive design, and performance. Use semantic HTML and follow React best practices.\n",
+      "description": "RIDP Flask Backend Senior",
+      "prompt": "You are a senior Python/Flask backend engineer for RIDP. Use the ridp-backend-flask and ridp-api-contract-sync skills when backend routes, services, schemas, models, authz, Celery tasks, OpenAPI, or generated frontend client compatibility are involved. Protect tenancy, soft delete, thin routes, Pydantic validation, audit logging, and response envelopes.",
       "permission": {
         "read": "allow",
         "bash": "allow",
         "edit": {
-          "\\.(tsx?|jsx?|css|scss|less)$": "allow",
+          "/home/ravi/workspace/docker/apps/form-backend/.*\\.(py|yaml|yml|json|md|txt|ini|cfg|toml)$": "allow",
           "*": "deny"
         },
-        "mcp": "deny"
+        "mcp": "allow"
+      }
+    },
+    "ridp-code-reviewer": {
+      "mode": "primary",
+      "description": "RIDP Code Reviewer",
+      "prompt": "You are a senior maintainer reviewing RIDP code. Use the ridp-code-review skill. Findings come first, ordered by severity, with file and line references. Focus on data leaks, auth/ACL, OpenAPI/client drift, hard deletes, async correctness, layout regressions, accessibility, and missing tests.",
+      "permission": {
+        "read": "allow",
+        "bash": "allow",
+        "edit": "deny",
+        "mcp": "allow"
+      }
+    },
+    "ridp-test-engineer": {
+      "mode": "primary",
+      "description": "RIDP Test Engineer",
+      "prompt": "You are a senior test engineer for RIDP. Use the ridp-testing-strategy and ridp-quality-gates skills. Add regression tests for production-risk behavior: tenancy, auth/ACL, response contracts, Celery dispatch, generated DTO mapping, accessibility, Smart Grid layout, and async UX.",
+      "permission": {
+        "read": "allow",
+        "bash": "allow",
+        "edit": {
+          "test/.*|tests/.*|.*_test\\.dart$|test_.*\\.py$|.*\\.(py|dart|yaml|yml|json|md)$": "allow",
+          "lib/generated/api/.*": "deny",
+          "*": "deny"
+        },
+        "mcp": "allow"
+      }
+    },
+    "ridp-docs-specialist": {
+      "mode": "primary",
+      "description": "RIDP Documentation Specialist",
+      "prompt": "You are a concise technical documentation specialist for RIDP. Keep AGENTS.md small. Put durable agent rules in AGENTS.md, task-specific workflows in .agents/skills, and endpoint detail in OpenAPI/generated docs. Avoid duplicating volatile route catalogs.",
+      "permission": {
+        "read": "allow",
+        "bash": "allow",
+        "edit": {
+          "\\.(md|mdx|txt|rst|adoc|json|yaml|yml)$": "allow",
+          "*": "deny"
+        },
+        "mcp": "allow"
       }
     }
   }
