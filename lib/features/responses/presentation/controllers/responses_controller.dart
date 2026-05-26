@@ -40,3 +40,17 @@ Future<List<ResponseHistory>> responseHistory(
   final repository = ref.watch(responseRepositoryProvider);
   return repository.getProjectResponseHistory(projectId, formId, responseId);
 }
+
+@riverpod
+Future<List<FormResponse>> filteredFormResponses(
+  Ref ref,
+  String projectId,
+  String formId, {
+  List<Map<String, dynamic>>? filters,
+}) {
+  final repository = ref.watch(responseRepositoryProvider);
+  if (filters != null && filters.isNotEmpty) {
+    return repository.getFilteredResponses(projectId, formId, filters);
+  }
+  return repository.getProjectResponses(projectId, formId);
+}

@@ -272,3 +272,99 @@ final class ResponseHistoryFamily extends $Family
   @override
   String toString() => r'responseHistoryProvider';
 }
+
+@ProviderFor(filteredFormResponses)
+final filteredFormResponsesProvider = FilteredFormResponsesFamily._();
+
+final class FilteredFormResponsesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FormResponse>>,
+          List<FormResponse>,
+          FutureOr<List<FormResponse>>
+        >
+    with
+        $FutureModifier<List<FormResponse>>,
+        $FutureProvider<List<FormResponse>> {
+  FilteredFormResponsesProvider._({
+    required FilteredFormResponsesFamily super.from,
+    required (String, String, {List<Map<String, dynamic>>? filters})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'filteredFormResponsesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$filteredFormResponsesHash();
+
+  @override
+  String toString() {
+    return r'filteredFormResponsesProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<FormResponse>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<FormResponse>> create(Ref ref) {
+    final argument =
+        this.argument
+            as (String, String, {List<Map<String, dynamic>>? filters});
+    return filteredFormResponses(
+      ref,
+      argument.$1,
+      argument.$2,
+      filters: argument.filters,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FilteredFormResponsesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$filteredFormResponsesHash() =>
+    r'9596b8f10269fb71f95e31f1488e2fa4bc462661';
+
+final class FilteredFormResponsesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<FormResponse>>,
+          (String, String, {List<Map<String, dynamic>>? filters})
+        > {
+  FilteredFormResponsesFamily._()
+    : super(
+        retry: null,
+        name: r'filteredFormResponsesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  FilteredFormResponsesProvider call(
+    String projectId,
+    String formId, {
+    List<Map<String, dynamic>>? filters,
+  }) => FilteredFormResponsesProvider._(
+    argument: (projectId, formId, filters: filters),
+    from: this,
+  );
+
+  @override
+  String toString() => r'filteredFormResponsesProvider';
+}

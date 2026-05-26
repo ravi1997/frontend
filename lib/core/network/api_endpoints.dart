@@ -354,6 +354,8 @@ class ApiEndpoints {
   static String listResponses(String formId) => '/forms/$formId/responses';
   static String listProjectResponses(String projectId, String formId) =>
       '/projects/$projectId/forms/$formId/responses';
+  static String filterProjectResponses(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/responses/filter';
 
   /// GET - Get single response by ID
   /// Headers: { "Authorization": "Bearer {token}" }

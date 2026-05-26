@@ -25,4 +25,10 @@ abstract class ResponseRepository {
     String formId,
     String responseId,
   );
+
+  Future<List<FormResponse>> getFilteredResponses(
+    String projectId,
+    String formId,
+    List<Map<String, dynamic>> filters,
+  );
 }

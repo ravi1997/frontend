@@ -109,7 +109,22 @@ class ResponseRepositoryImpl implements ResponseRepository {
     return data.map((json) => ResponseHistory.fromJson(json)).toList();
   }
 
+  @override
+  Future<List<FormResponse>> getFilteredResponses(
+    String projectId,
+    String formId,
+    List<Map<String, dynamic>> filters,
+  ) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.filterProjectResponses(projectId, formId),
+      data: {'filters': filters},
+    );
+    final List<dynamic> data = _items(response.data);
+    return data.map((json) => FormResponse.fromJson(json)).toList();
+  }
+
   List<dynamic> _items(dynamic data) {
+
     if (data is List) return data;
     if (data is Map<String, dynamic>) {
       return data['items'] as List<dynamic>? ??

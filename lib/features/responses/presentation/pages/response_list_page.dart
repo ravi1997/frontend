@@ -11,11 +11,15 @@ import 'package:file_saver/file_saver.dart';
 import 'package:frontend/features/responses/presentation/controllers/responses_controller.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/form_builder/domain/repositories/form_builder_repository.dart';
+import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
 import 'package:frontend/features/responses/domain/utils/csv_exporter.dart';
 import 'package:frontend/features/responses/presentation/widgets/export_options_dialog.dart';
+import 'package:frontend/features/responses/presentation/widgets/filter_builder_dialog.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 
 final _searchQueryProvider = StateProvider<String?>((ref) => null);
+final _activeFiltersProvider =
+    StateProvider<List<Map<String, dynamic>>>((ref) => const []);
 
 class ResponseListPage extends ConsumerWidget {
   final String projectId;
@@ -30,9 +34,18 @@ class ResponseListPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(_searchQueryProvider);
-    final responsesAsync = ref.watch(
-      formResponsesProvider(projectId, formId, searchQuery: searchQuery),
-    );
+    final activeFilters = ref.watch(_activeFiltersProvider);
+    final responsesAsync = activeFilters.isNotEmpty
+        ? ref.watch(
+            filteredFormResponsesProvider(
+              projectId,
+              formId,
+              filters: activeFilters,
+            ),
+          )
+        : ref.watch(
+            formResponsesProvider(projectId, formId, searchQuery: searchQuery),
+          );
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
@@ -47,13 +60,24 @@ class ResponseListPage extends ConsumerWidget {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => ref.refresh(
-                  formResponsesProvider(
-                    projectId,
-                    formId,
-                    searchQuery: searchQuery,
-                  ).future,
-                ),
+                onRefresh: () {
+                  if (activeFilters.isNotEmpty) {
+                    return ref.refresh(
+                      filteredFormResponsesProvider(
+                        projectId,
+                        formId,
+                        filters: activeFilters,
+                      ).future,
+                    );
+                  }
+                  return ref.refresh(
+                    formResponsesProvider(
+                      projectId,
+                      formId,
+                      searchQuery: searchQuery,
+                    ).future,
+                  );
+                },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(
@@ -71,8 +95,10 @@ class ResponseListPage extends ConsumerWidget {
                           responsesAsync.when(
                             data: (responses) => _ResponseListContent(
                               formId: formId,
+                              projectId: projectId,
                               responses: responses,
                               searchQuery: searchQuery,
+                              activeFilters: activeFilters,
                             ),
                             loading: () => const _LoadingSkeleton(),
                             error: (err, stack) =>
@@ -233,13 +259,17 @@ class _HeaderSection extends ConsumerWidget {
 
 class _ResponseListContent extends StatelessWidget {
   final String formId;
+  final String projectId;
   final List<FormResponse> responses;
   final String? searchQuery;
+  final List<Map<String, dynamic>> activeFilters;
 
   const _ResponseListContent({
     required this.formId,
+    required this.projectId,
     required this.responses,
     this.searchQuery,
+    required this.activeFilters,
   });
 
   @override
@@ -248,7 +278,11 @@ class _ResponseListContent extends StatelessWidget {
       children: [
         _StatsGrid(responses: responses),
         const SizedBox(height: 48),
-        _FilterBar(formId: formId),
+        _FilterBar(formId: formId, projectId: projectId),
+        if (activeFilters.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _ActiveFilterChips(filters: activeFilters),
+        ],
         const SizedBox(height: 24),
         if (responses.isEmpty)
           _EmptyState()
@@ -415,10 +449,16 @@ class _SimpleStatsCard extends StatelessWidget {
 
 class _FilterBar extends ConsumerWidget {
   final String formId;
-  const _FilterBar({required this.formId});
+  final String projectId;
+  const _FilterBar({required this.formId, required this.projectId});
+
+  static const _accent = Color(0xFF6366F1);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilters = ref.watch(_activeFiltersProvider);
+    final hasFilters = activeFilters.isNotEmpty;
+
     return Row(
       children: [
         Expanded(
@@ -456,6 +496,178 @@ class _FilterBar extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+        const SizedBox(width: 12),
+        // Filter button
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: hasFilters
+                ? _accent.withValues(alpha: 0.12)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: hasFilters ? _accent : const Color(0xFFE5E7EB),
+              width: hasFilters ? 1.5 : 1.0,
+            ),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () async {
+              // Load form questions for the filter builder
+              final form = await ref
+                  .read(formBuilderRepositoryProvider)
+                  .getForm(projectId, formId);
+              if (!context.mounted) return;
+
+              final questions = <FormQuestion>[];
+              for (final section in form.sections) {
+                questions.addAll(section.questions);
+              }
+
+              final result = await showFilterBuilderDialog(
+                context: context,
+                questions: questions,
+                initialFilters: activeFilters,
+              );
+
+              if (result != null) {
+                ref.read(_activeFiltersProvider.notifier).state = result;
+              }
+            },
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.filter_list_rounded,
+                    size: 18,
+                    color: hasFilters ? _accent : const Color(0xFF6B7280),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    hasFilters
+                        ? 'Filters (${activeFilters.length})'
+                        : 'Filter',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight:
+                          hasFilters ? FontWeight.w600 : FontWeight.w500,
+                      color: hasFilters
+                          ? _accent
+                          : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActiveFilterChips extends ConsumerWidget {
+  final List<Map<String, dynamic>> filters;
+  const _ActiveFilterChips({required this.filters});
+
+  static const _accent = Color(0xFF6366F1);
+
+  String _chipLabel(Map<String, dynamic> f) {
+    final field = f['field'] as String? ?? '';
+    final op = f['operator'] as String? ?? '';
+    final val = f['value'];
+
+    // Friendly field label
+    final fieldLabel = field == 'submitted_at' ? 'Date' : field;
+
+    // Friendly operator label
+    final opLabel = _opLabel(op);
+
+    if (val == null) return '$fieldLabel $opLabel';
+    if (val is List) {
+      return '$fieldLabel $opLabel ${val[0]} → ${val[1]}';
+    }
+    return '$fieldLabel $opLabel $val';
+  }
+
+  String _opLabel(String op) {
+    const map = {
+      'equals': '=',
+      'not_equals': '≠',
+      'contains': 'contains',
+      'starts_with': 'starts',
+      'ends_with': 'ends',
+      'is_empty': 'is empty',
+      'is_not_empty': 'not empty',
+      'greater_than': '>',
+      'less_than': '<',
+      'between': 'between',
+      'before': 'before',
+      'after': 'after',
+      'is_true': 'is true',
+      'is_false': 'is false',
+    };
+    return map[op] ?? op;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      children: [
+        ...filters.asMap().entries.map((entry) {
+          final i = entry.key;
+          final f = entry.value;
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: Chip(
+              key: ValueKey(i),
+              backgroundColor: _accent.withValues(alpha: 0.12),
+              side: BorderSide(
+                color: _accent.withValues(alpha: 0.35),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              label: Text(
+                _chipLabel(f),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _accent,
+                ),
+              ),
+              deleteIcon: Icon(
+                Icons.close_rounded,
+                size: 14,
+                color: _accent.withValues(alpha: 0.75),
+              ),
+              onDeleted: () {
+                final updated = List<Map<String, dynamic>>.from(filters)
+                  ..removeAt(i);
+                ref.read(_activeFiltersProvider.notifier).state = updated;
+              },
+            ),
+          );
+        }),
+        // Clear all chip
+        ActionChip(
+          backgroundColor: Colors.transparent,
+          side: BorderSide(color: Colors.red.shade300),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          label: Text(
+            'Clear all',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.red.shade400,
+            ),
+          ),
+          onPressed: () =>
+              ref.read(_activeFiltersProvider.notifier).state = const [],
         ),
       ],
     );
