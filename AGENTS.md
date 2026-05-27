@@ -17,7 +17,7 @@ Project MCP defaults are in `.mcp.json`. Use the smallest relevant tool set. Val
 For promptless report-only verification while another agent edits, run `.agents/watch-ridp-changes.sh`; logs go to `/home/ravi/workspace/.agent-worker-logs`.
 
 ## Hard Invariants
-- Backend source: `/home/ravi/workspace/docker/apps/form-backend`; API prefix: `/form/api/v1/`.
+- Backend source: `/home/ravi/workspace/docker/apps/form-backend`; API prefix: `/mahasangraha/api/v1/`.
 - Generated client `lib/generated/api/` is read-only; regenerate from backend with `make openapi && make generate-dart-client`.
 - Auth supports Bearer and HttpOnly cookie modes; cookie writes require `X-CSRF-TOKEN-ACCESS`.
 - Role order: `superadmin > admin > manager > user`; enforce UI visibility from roles plus form ACLs, with backend as source of truth.

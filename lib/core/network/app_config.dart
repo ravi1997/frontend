@@ -18,7 +18,7 @@ class AppConfig {
   );
 
   /// Versioned API prefix — combined with [apiServerUrl] by [ApiEndpoints].
-  static const String apiPath = '/form/api/v1';
+  static const String apiPath = '/mahasangraha/api/v1';
 
   /// Full base URL used as the Dio `baseUrl`.
   static const String apiBaseUrl = '$apiServerUrl$apiPath';

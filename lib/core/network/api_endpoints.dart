@@ -587,7 +587,7 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?form_id=string&language=string
   static String getFormTranslations({String? formId, String? language}) {
-    var url = '/forms/translations';
+    var url = '/translations';
     final params = <String>[];
     if (formId != null) params.add('form_id=$formId');
     if (language != null) params.add('language=$language');
@@ -597,55 +597,55 @@ class ApiEndpoints {
   /// POST - Save translations
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "form_id": string, "language": string, "translations": {...} }
-  static const String saveFormTranslations = '/forms/translations';
+  static const String saveFormTranslations = '/translations';
 
   /// POST - Start a new translation job (AI batch translation)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "form_id": string, "source_language": string, "target_languages": string[], "total_fields": int }
   /// Returns: { "message": string, "job_id": string }
-  static const String startTranslationJob = '/forms/translations/jobs';
+  static const String startTranslationJob = '/translations/jobs';
 
   /// GET - List translation jobs for a form
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Query: ?form_id=string
   static String listTranslationJobs(String formId) =>
-      '/forms/translations/jobs?form_id=$formId';
+      '/translations/jobs?form_id=$formId';
 
   /// GET - Get translation job details
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "job_id": string, "status": string, "progress": int, ... }
   static String getTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId';
+      '/translations/jobs/$jobId';
 
   /// PATCH - Cancel a translation job
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
   static String cancelTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId/cancel';
+      '/translations/jobs/$jobId/cancel';
 
   /// DELETE - Delete a translation job
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "message": string }
   static String deleteTranslationJob(String jobId) =>
-      '/forms/translations/jobs/$jobId';
+      '/translations/jobs/$jobId';
 
   /// POST - Preview translation
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Body: { "text": string, "source_language": string, "target_language": string }
   /// Returns: { "translated_text": string }
-  static const String previewTranslation = '/forms/translations/preview';
+  static const String previewTranslation = '/translations/preview';
 
   /// GET - List available languages for translation
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "code": string, "name": string, "native_name": string }]
   static const String listTranslationLanguages =
-      '/forms/translations/languages';
+      '/translations/languages';
 
   /// GET - Get translated content for a job (completed jobs only)
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "form_id": string, "language": string, "translations": {...} }
   static String getTranslatedContent(String jobId) =>
-      '/forms/translations/jobs/$jobId/content';
+      '/translations/jobs/$jobId/content';
 
   // ============================================================================
   // AI / NLP Search API (§17)
@@ -844,10 +844,10 @@ class ApiEndpoints {
   // ============================================================================
 
   /// POST - Upload a file
-  static const String uploadFile = '/forms/upload';
+  static const String uploadFile = '/files/upload';
 
   /// POST - Upload a signature
-  static const String uploadSignature = '/forms/signatures';
+  static const String uploadSignature = '/files/signatures';
 
   // ============================================================================
   // Helper methods for building URLs
