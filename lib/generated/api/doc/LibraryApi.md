@@ -32,7 +32,7 @@ final api = RidpApi().getLibraryApi();
 
 try {
     api.formApiV1CustomFieldsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1CustomFieldsGet: $e\n');
 }
 ```
@@ -68,7 +68,7 @@ final api = RidpApi().getLibraryApi();
 
 try {
     api.formApiV1CustomFieldsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1CustomFieldsPost: $e\n');
 }
 ```
@@ -105,7 +105,7 @@ final String templateId = templateId_example; // String |
 
 try {
     api.formApiV1CustomFieldsTemplateIdDelete(templateId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1CustomFieldsTemplateIdDelete: $e\n');
 }
 ```
@@ -145,7 +145,7 @@ final String templateId = templateId_example; // String |
 
 try {
     api.formApiV1CustomFieldsTemplateIdGet(templateId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1CustomFieldsTemplateIdGet: $e\n');
 }
 ```
@@ -184,7 +184,7 @@ final api = RidpApi().getLibraryApi();
 
 try {
     api.formApiV1TemplatesGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1TemplatesGet: $e\n');
 }
 ```
@@ -220,7 +220,7 @@ final api = RidpApi().getLibraryApi();
 
 try {
     api.formApiV1TemplatesPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1TemplatesPost: $e\n');
 }
 ```
@@ -257,7 +257,7 @@ final String templateId = templateId_example; // String |
 
 try {
     api.formApiV1TemplatesTemplateIdDelete(templateId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1TemplatesTemplateIdDelete: $e\n');
 }
 ```
@@ -297,7 +297,7 @@ final String templateId = templateId_example; // String |
 
 try {
     api.formApiV1TemplatesTemplateIdGet(templateId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling LibraryApi->formApiV1TemplatesTemplateIdGet: $e\n');
 }
 ```

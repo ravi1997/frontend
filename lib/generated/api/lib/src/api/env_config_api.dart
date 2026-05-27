@@ -28,7 +28,7 @@ class EnvConfigApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AdminEnvConfigGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class EnvConfigApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AdminEnvConfigPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -118,7 +118,7 @@ class EnvConfigApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AdminEnvConfigPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

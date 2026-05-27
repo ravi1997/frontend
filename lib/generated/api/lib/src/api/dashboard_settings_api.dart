@@ -28,7 +28,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsLayoutPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsResetPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -118,7 +118,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsSettingsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -163,7 +163,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsSettingsPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -208,7 +208,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsWidgetsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -253,7 +253,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsWidgetsPositionsPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -298,7 +298,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsWidgetsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -344,7 +344,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsWidgetsWidgetIdDelete({ 
     required String widgetId,
     CancelToken? cancelToken,
@@ -391,7 +391,7 @@ class DashboardSettingsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1DashboardSettingsWidgetsWidgetIdPut({ 
     required String widgetId,
     CancelToken? cancelToken,

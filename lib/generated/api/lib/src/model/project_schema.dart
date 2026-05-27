@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'project_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -53,7 +55,7 @@ class ProjectSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -65,7 +67,7 @@ class ProjectSchema {
     
     name: r'active_version',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -77,7 +79,7 @@ class ProjectSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -89,7 +91,7 @@ class ProjectSchema {
     
     name: r'deleted_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -101,7 +103,7 @@ class ProjectSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -113,7 +115,7 @@ class ProjectSchema {
     
     name: r'forms',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -125,7 +127,7 @@ class ProjectSchema {
     
     name: r'help_text',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -137,7 +139,7 @@ class ProjectSchema {
     defaultValue: false,
     name: r'is_deleted',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -149,7 +151,7 @@ class ProjectSchema {
     
     name: r'organization_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -161,7 +163,7 @@ class ProjectSchema {
     defaultValue: 'draft',
     name: r'status',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,7 +175,7 @@ class ProjectSchema {
     
     name: r'sub_projects',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -185,7 +187,7 @@ class ProjectSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -197,7 +199,7 @@ class ProjectSchema {
     
     name: r'title',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -209,7 +211,7 @@ class ProjectSchema {
     
     name: r'triggers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -221,7 +223,7 @@ class ProjectSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -229,41 +231,43 @@ class ProjectSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ProjectSchema &&
-     other.id == id &&
-     other.activeVersion == activeVersion &&
-     other.createdAt == createdAt &&
-     other.deletedAt == deletedAt &&
-     other.description == description &&
-     other.forms == forms &&
-     other.helpText == helpText &&
-     other.isDeleted == isDeleted &&
-     other.organizationId == organizationId &&
-     other.status == status &&
-     other.subProjects == subProjects &&
-     other.tags == tags &&
-     other.title == title &&
-     other.triggers == triggers &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    activeVersion.hashCode +
-    createdAt.hashCode +
-    deletedAt.hashCode +
-    description.hashCode +
-    forms.hashCode +
-    helpText.hashCode +
-    isDeleted.hashCode +
-    organizationId.hashCode +
-    status.hashCode +
-    subProjects.hashCode +
-    tags.hashCode +
-    title.hashCode +
-    triggers.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ProjectSchema &&
+      other.id == id &&
+      other.activeVersion == activeVersion &&
+      other.createdAt == createdAt &&
+      other.deletedAt == deletedAt &&
+      other.description == description &&
+      other.forms == forms &&
+      other.helpText == helpText &&
+      other.isDeleted == isDeleted &&
+      other.organizationId == organizationId &&
+      other.status == status &&
+      other.subProjects == subProjects &&
+      other.tags == tags &&
+      other.title == title &&
+      other.triggers == triggers &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        activeVersion.hashCode +
+        createdAt.hashCode +
+        deletedAt.hashCode +
+        description.hashCode +
+        forms.hashCode +
+        helpText.hashCode +
+        isDeleted.hashCode +
+        organizationId.hashCode +
+        status.hashCode +
+        subProjects.hashCode +
+        tags.hashCode +
+        title.hashCode +
+        triggers.hashCode +
+        updatedAt.hashCode;
 
   factory ProjectSchema.fromJson(Map<String, dynamic> json) => _$ProjectSchemaFromJson(json);
 
@@ -278,12 +282,19 @@ class ProjectSchema {
 
 
 enum ProjectSchemaStatusEnum {
-  @JsonValue(r'draft')
-  draft,
-  @JsonValue(r'published')
-  published,
-  @JsonValue(r'archived')
-  archived,
+@JsonValue(r'draft')
+draft(r'draft'),
+@JsonValue(r'published')
+published(r'published'),
+@JsonValue(r'archived')
+archived(r'archived');
+
+const ProjectSchemaStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

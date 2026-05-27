@@ -7,10 +7,8 @@ import 'package:ridp_api/src/auth/api_key_auth.dart';
 import 'package:ridp_api/src/auth/basic_auth.dart';
 import 'package:ridp_api/src/auth/bearer_auth.dart';
 import 'package:ridp_api/src/auth/oauth.dart';
-import 'package:ridp_api/src/api/admin_tasks_api.dart';
 import 'package:ridp_api/src/api/advanced_responses_api.dart';
 import 'package:ridp_api/src/api/ai_api.dart';
-import 'package:ridp_api/src/api/analysis_board_api.dart';
 import 'package:ridp_api/src/api/analytics_api.dart';
 import 'package:ridp_api/src/api/anomaly_api.dart';
 import 'package:ridp_api/src/api/auth_api.dart';
@@ -71,9 +69,29 @@ class RidpApi {
     }
   }
 
+  /// Removes the OAuth token associated with the given [name].
+  ///
+  /// If no [OAuthInterceptor] is registered or no token exists for the given
+  /// [name], this method has no effect.
+  void removeOAuthToken(String name) {
+    if (this.dio.interceptors.any((i) => i is OAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is OAuthInterceptor) as OAuthInterceptor).tokens.remove(name);
+    }
+  }
+
   void setBearerAuth(String name, String token) {
     if (this.dio.interceptors.any((i) => i is BearerAuthInterceptor)) {
       (this.dio.interceptors.firstWhere((i) => i is BearerAuthInterceptor) as BearerAuthInterceptor).tokens[name] = token;
+    }
+  }
+
+  /// Removes the bearer authentication token associated with the given [name].
+  ///
+  /// If no [BearerAuthInterceptor] is registered or no token exists for the
+  /// given [name], this method has no effect.
+  void removeBearerAuth(String name) {
+    if (this.dio.interceptors.any((i) => i is BearerAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is BearerAuthInterceptor) as BearerAuthInterceptor).tokens.remove(name);
     }
   }
 
@@ -83,16 +101,30 @@ class RidpApi {
     }
   }
 
+  /// Removes the basic authentication credentials associated with the given [name].
+  ///
+  /// If no [BasicAuthInterceptor] is registered or no credentials exist for the
+  /// given [name], this method has no effect.
+  void removeBasicAuth(String name) {
+    if (this.dio.interceptors.any((i) => i is BasicAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((i) => i is BasicAuthInterceptor) as BasicAuthInterceptor).authInfo.remove(name);
+    }
+  }
+
   void setApiKey(String name, String apiKey) {
     if (this.dio.interceptors.any((i) => i is ApiKeyAuthInterceptor)) {
       (this.dio.interceptors.firstWhere((element) => element is ApiKeyAuthInterceptor) as ApiKeyAuthInterceptor).apiKeys[name] = apiKey;
     }
   }
 
-  /// Get AdminTasksApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  AdminTasksApi getAdminTasksApi() {
-    return AdminTasksApi(dio);
+  /// Removes the API key associated with the given [name].
+  ///
+  /// If no [ApiKeyAuthInterceptor] is registered or no API key exists for the
+  /// given [name], this method has no effect.
+  void removeApiKey(String name) {
+    if (this.dio.interceptors.any((i) => i is ApiKeyAuthInterceptor)) {
+      (this.dio.interceptors.firstWhere((element) => element is ApiKeyAuthInterceptor) as ApiKeyAuthInterceptor).apiKeys.remove(name);
+    }
   }
 
   /// Get AdvancedResponsesApi instance, base route and serializer can be overridden by a given but be careful,
@@ -105,12 +137,6 @@ class RidpApi {
   /// by doing that all interceptors will not be executed
   AiApi getAiApi() {
     return AiApi(dio);
-  }
-
-  /// Get AnalysisBoardApi instance, base route and serializer can be overridden by a given but be careful,
-  /// by doing that all interceptors will not be executed
-  AnalysisBoardApi getAnalysisBoardApi() {
-    return AnalysisBoardApi(dio);
   }
 
   /// Get AnalyticsApi instance, base route and serializer can be overridden by a given but be careful,

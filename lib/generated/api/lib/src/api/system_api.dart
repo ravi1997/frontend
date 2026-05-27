@@ -29,7 +29,7 @@ class SystemApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1SystemAnalyticsTrendsOrgIdGet({ 
     required String orgId,
     CancelToken? cancelToken,
@@ -75,7 +75,7 @@ class SystemApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1SystemEventHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -120,7 +120,7 @@ class SystemApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1SystemGdprCleanupPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -166,7 +166,7 @@ class SystemApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1SystemTasksTaskIdGet({ 
     required String taskId,
     CancelToken? cancelToken,

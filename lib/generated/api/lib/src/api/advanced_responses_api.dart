@@ -28,7 +28,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFetchExternalGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -74,7 +74,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdAccessControlGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -121,7 +121,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdAccessPolicyPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -168,7 +168,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdAccessPolicyPut({ 
     required String formId,
     CancelToken? cancelToken,
@@ -215,7 +215,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdFetchSameGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -262,7 +262,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdResponsesMetaGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -309,7 +309,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsFormIdResponsesQuestionsGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -355,7 +355,7 @@ class AdvancedResponsesApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

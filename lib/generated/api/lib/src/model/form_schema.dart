@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'form_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -79,7 +81,7 @@ class FormSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -91,7 +93,7 @@ class FormSchema {
     
     name: r'active_version',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,7 +105,7 @@ class FormSchema {
     defaultValue: false,
     name: r'approval_enabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -115,7 +117,7 @@ class FormSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -127,7 +129,7 @@ class FormSchema {
     
     name: r'created_by',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -139,7 +141,7 @@ class FormSchema {
     defaultValue: 'en',
     name: r'default_language',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -151,7 +153,7 @@ class FormSchema {
     
     name: r'deleted_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -163,7 +165,7 @@ class FormSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -175,7 +177,7 @@ class FormSchema {
     
     name: r'editors',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -187,7 +189,7 @@ class FormSchema {
     
     name: r'expires_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -199,7 +201,7 @@ class FormSchema {
     
     name: r'help_text',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -211,7 +213,7 @@ class FormSchema {
     defaultValue: false,
     name: r'is_deleted',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -223,7 +225,7 @@ class FormSchema {
     defaultValue: false,
     name: r'is_public',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -235,7 +237,7 @@ class FormSchema {
     defaultValue: false,
     name: r'is_template',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -247,7 +249,7 @@ class FormSchema {
     
     name: r'organization_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -259,7 +261,7 @@ class FormSchema {
     
     name: r'publish_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -271,7 +273,7 @@ class FormSchema {
     
     name: r'response_templates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -283,7 +285,7 @@ class FormSchema {
     
     name: r'slug',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -295,7 +297,7 @@ class FormSchema {
     defaultValue: 'draft',
     name: r'status',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -307,7 +309,7 @@ class FormSchema {
     
     name: r'style',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -319,7 +321,7 @@ class FormSchema {
     
     name: r'submitters',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -331,7 +333,7 @@ class FormSchema {
     
     name: r'supported_languages',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -343,7 +345,7 @@ class FormSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -355,7 +357,7 @@ class FormSchema {
     
     name: r'title',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -367,7 +369,7 @@ class FormSchema {
     
     name: r'triggers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -379,7 +381,7 @@ class FormSchema {
     defaultValue: 'flex',
     name: r'ui_type',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -391,7 +393,7 @@ class FormSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -403,7 +405,7 @@ class FormSchema {
     
     name: r'viewers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -411,67 +413,69 @@ class FormSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is FormSchema &&
-     other.id == id &&
-     other.activeVersion == activeVersion &&
-     other.approvalEnabled == approvalEnabled &&
-     other.createdAt == createdAt &&
-     other.createdBy == createdBy &&
-     other.defaultLanguage == defaultLanguage &&
-     other.deletedAt == deletedAt &&
-     other.description == description &&
-     other.editors == editors &&
-     other.expiresAt == expiresAt &&
-     other.helpText == helpText &&
-     other.isDeleted == isDeleted &&
-     other.isPublic == isPublic &&
-     other.isTemplate == isTemplate &&
-     other.organizationId == organizationId &&
-     other.publishAt == publishAt &&
-     other.responseTemplates == responseTemplates &&
-     other.slug == slug &&
-     other.status == status &&
-     other.style == style &&
-     other.submitters == submitters &&
-     other.supportedLanguages == supportedLanguages &&
-     other.tags == tags &&
-     other.title == title &&
-     other.triggers == triggers &&
-     other.uiType == uiType &&
-     other.updatedAt == updatedAt &&
-     other.viewers == viewers;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    activeVersion.hashCode +
-    approvalEnabled.hashCode +
-    createdAt.hashCode +
-    createdBy.hashCode +
-    defaultLanguage.hashCode +
-    deletedAt.hashCode +
-    description.hashCode +
-    editors.hashCode +
-    expiresAt.hashCode +
-    helpText.hashCode +
-    isDeleted.hashCode +
-    isPublic.hashCode +
-    isTemplate.hashCode +
-    organizationId.hashCode +
-    publishAt.hashCode +
-    responseTemplates.hashCode +
-    slug.hashCode +
-    status.hashCode +
-    style.hashCode +
-    submitters.hashCode +
-    supportedLanguages.hashCode +
-    tags.hashCode +
-    title.hashCode +
-    triggers.hashCode +
-    uiType.hashCode +
-    updatedAt.hashCode +
-    viewers.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is FormSchema &&
+      other.id == id &&
+      other.activeVersion == activeVersion &&
+      other.approvalEnabled == approvalEnabled &&
+      other.createdAt == createdAt &&
+      other.createdBy == createdBy &&
+      other.defaultLanguage == defaultLanguage &&
+      other.deletedAt == deletedAt &&
+      other.description == description &&
+      other.editors == editors &&
+      other.expiresAt == expiresAt &&
+      other.helpText == helpText &&
+      other.isDeleted == isDeleted &&
+      other.isPublic == isPublic &&
+      other.isTemplate == isTemplate &&
+      other.organizationId == organizationId &&
+      other.publishAt == publishAt &&
+      other.responseTemplates == responseTemplates &&
+      other.slug == slug &&
+      other.status == status &&
+      other.style == style &&
+      other.submitters == submitters &&
+      other.supportedLanguages == supportedLanguages &&
+      other.tags == tags &&
+      other.title == title &&
+      other.triggers == triggers &&
+      other.uiType == uiType &&
+      other.updatedAt == updatedAt &&
+      other.viewers == viewers;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        activeVersion.hashCode +
+        approvalEnabled.hashCode +
+        createdAt.hashCode +
+        createdBy.hashCode +
+        defaultLanguage.hashCode +
+        deletedAt.hashCode +
+        description.hashCode +
+        editors.hashCode +
+        expiresAt.hashCode +
+        helpText.hashCode +
+        isDeleted.hashCode +
+        isPublic.hashCode +
+        isTemplate.hashCode +
+        organizationId.hashCode +
+        publishAt.hashCode +
+        responseTemplates.hashCode +
+        slug.hashCode +
+        status.hashCode +
+        style.hashCode +
+        submitters.hashCode +
+        supportedLanguages.hashCode +
+        tags.hashCode +
+        title.hashCode +
+        triggers.hashCode +
+        uiType.hashCode +
+        updatedAt.hashCode +
+        viewers.hashCode;
 
   factory FormSchema.fromJson(Map<String, dynamic> json) => _$FormSchemaFromJson(json);
 
@@ -486,33 +490,47 @@ class FormSchema {
 
 
 enum FormSchemaStatusEnum {
-  @JsonValue(r'draft')
-  draft,
-  @JsonValue(r'published')
-  published,
-  @JsonValue(r'archived')
-  archived,
+@JsonValue(r'draft')
+draft(r'draft'),
+@JsonValue(r'published')
+published(r'published'),
+@JsonValue(r'archived')
+archived(r'archived');
+
+const FormSchemaStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 
 
 enum FormSchemaUiTypeEnum {
-  @JsonValue(r'flex')
-  flex,
-  @JsonValue(r'grid-cols-2')
-  gridCols2,
-  @JsonValue(r'tabbed')
-  tabbed,
-  @JsonValue(r'custom')
-  custom,
-  @JsonValue(r'grid-cols-3')
-  gridCols3,
-  @JsonValue(r'full-width')
-  fullWidth,
-  @JsonValue(r'cards')
-  cards,
-  @JsonValue(r'card')
-  card,
+@JsonValue(r'flex')
+flex(r'flex'),
+@JsonValue(r'grid-cols-2')
+gridCols2(r'grid-cols-2'),
+@JsonValue(r'tabbed')
+tabbed(r'tabbed'),
+@JsonValue(r'custom')
+custom(r'custom'),
+@JsonValue(r'grid-cols-3')
+gridCols3(r'grid-cols-3'),
+@JsonValue(r'full-width')
+fullWidth(r'full-width'),
+@JsonValue(r'cards')
+cards(r'cards'),
+@JsonValue(r'card')
+card(r'card');
+
+const FormSchemaUiTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

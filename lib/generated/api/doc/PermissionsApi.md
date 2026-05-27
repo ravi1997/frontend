@@ -27,7 +27,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdPermissionsGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling PermissionsApi->formApiV1ProjectsProjectIdFormsFormIdPermissionsGet: $e\n');
 }
 ```
@@ -67,7 +67,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdPermissionsPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling PermissionsApi->formApiV1ProjectsProjectIdFormsFormIdPermissionsPost: $e\n');
 }
 ```

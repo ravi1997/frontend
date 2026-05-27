@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **Object** |  | [optional] 
 **createdAt** | **Object** |  | [optional] 
-**data** | **Object** |  | 
+**data** | **Map&lt;String, Object&gt;** |  | 
 **deletedAt** | **Object** |  | [optional] 
 **form** | **String** |  | 
 **formVersion** | **String** |  | 

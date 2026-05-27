@@ -30,7 +30,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdAnomaliesResponseIdGet({ 
     required String formId,
     required String responseId,
@@ -78,7 +78,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesBatchPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -125,7 +125,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -172,7 +172,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdThresholdsHistoryGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -219,7 +219,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdThresholdsLatestGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -266,7 +266,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdThresholdsManualPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -313,7 +313,7 @@ class AnomalyApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdThresholdsUpdateBaselinePost({ 
     required String formId,
     CancelToken? cancelToken,

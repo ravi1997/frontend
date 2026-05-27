@@ -5,13 +5,12 @@
 export 'package:ridp_api/src/api.dart';
 export 'package:ridp_api/src/auth/api_key_auth.dart';
 export 'package:ridp_api/src/auth/basic_auth.dart';
+export 'package:ridp_api/src/auth/bearer_auth.dart';
 export 'package:ridp_api/src/auth/oauth.dart';
 
 
-export 'package:ridp_api/src/api/admin_tasks_api.dart';
 export 'package:ridp_api/src/api/advanced_responses_api.dart';
 export 'package:ridp_api/src/api/ai_api.dart';
-export 'package:ridp_api/src/api/analysis_board_api.dart';
 export 'package:ridp_api/src/api/analytics_api.dart';
 export 'package:ridp_api/src/api/anomaly_api.dart';
 export 'package:ridp_api/src/api/auth_api.dart';
@@ -52,8 +51,8 @@ export 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response.dart'
 export 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response_data.dart';
 export 'package:ridp_api/src/model/form_api_v1_auth_refresh_post200_response.dart';
 export 'package:ridp_api/src/model/form_api_v1_auth_request_otp_post_request.dart';
-export 'package:ridp_api/src/model/form_api_v1_forms_external_hooks_hook_id_approve_post_request.dart';
-export 'package:ridp_api/src/model/form_api_v1_forms_external_hooks_register_post_request.dart';
+export 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
+export 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
 export 'package:ridp_api/src/model/form_api_v1_user_security_lock_status_user_id_get200_response.dart';
 export 'package:ridp_api/src/model/form_blueprint_schema.dart';
 export 'package:ridp_api/src/model/form_response_schema.dart';
@@ -88,3 +87,4 @@ export 'package:ridp_api/src/model/user_update_schema.dart';
 export 'package:ridp_api/src/model/validation_schema.dart';
 export 'package:ridp_api/src/model/version_schema.dart';
 export 'package:ridp_api/src/model/workflow_instance_schema.dart';
+

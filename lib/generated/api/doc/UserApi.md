@@ -49,7 +49,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UserChangePasswordPost();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserChangePasswordPost: $e\n');
 }
 ```
@@ -86,7 +86,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UserProfileGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserProfileGet: $e\n');
 }
 ```
@@ -124,7 +124,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UserSecurityLockStatusUserIdGet(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserSecurityLockStatusUserIdGet: $e\n');
 }
 ```
@@ -164,7 +164,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UserStatusGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserStatusGet: $e\n');
 }
 ```
@@ -201,7 +201,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UserUsersGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersGet: $e\n');
 }
 ```
@@ -239,7 +239,7 @@ final UserUpdateSchema body = ; // UserUpdateSchema |
 try {
     final response = api.formApiV1UserUsersPost(body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersPost: $e\n');
 }
 ```
@@ -279,7 +279,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UserUsersUserIdDelete(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdDelete: $e\n');
 }
 ```
@@ -320,7 +320,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UserUsersUserIdGet(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdGet: $e\n');
 }
 ```
@@ -360,7 +360,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UserUsersUserIdLockPost(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdLockPost: $e\n');
 }
 ```
@@ -402,7 +402,7 @@ final UserUpdateSchema body = ; // UserUpdateSchema |
 try {
     final response = api.formApiV1UserUsersUserIdPut(userId, body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdPut: $e\n');
 }
 ```
@@ -444,7 +444,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UserUsersUserIdRolesPut(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdRolesPut: $e\n');
 }
 ```
@@ -484,7 +484,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UserUsersUserIdUnlockPost(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UserUsersUserIdUnlockPost: $e\n');
 }
 ```
@@ -524,7 +524,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UsersChangePasswordPost();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersChangePasswordPost: $e\n');
 }
 ```
@@ -561,7 +561,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UsersProfileGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersProfileGet: $e\n');
 }
 ```
@@ -599,7 +599,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UsersSecurityLockStatusUserIdGet(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersSecurityLockStatusUserIdGet: $e\n');
 }
 ```
@@ -639,7 +639,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UsersStatusGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersStatusGet: $e\n');
 }
 ```
@@ -676,7 +676,7 @@ final api = RidpApi().getUserApi();
 try {
     final response = api.formApiV1UsersUsersGet();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersGet: $e\n');
 }
 ```
@@ -714,7 +714,7 @@ final UserUpdateSchema body = ; // UserUpdateSchema |
 try {
     final response = api.formApiV1UsersUsersPost(body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersPost: $e\n');
 }
 ```
@@ -754,7 +754,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UsersUsersUserIdDelete(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdDelete: $e\n');
 }
 ```
@@ -795,7 +795,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UsersUsersUserIdGet(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdGet: $e\n');
 }
 ```
@@ -835,7 +835,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UsersUsersUserIdLockPost(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdLockPost: $e\n');
 }
 ```
@@ -877,7 +877,7 @@ final UserUpdateSchema body = ; // UserUpdateSchema |
 try {
     final response = api.formApiV1UsersUsersUserIdPut(userId, body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdPut: $e\n');
 }
 ```
@@ -919,7 +919,7 @@ final String userId = userId_example; // String |
 try {
     final response = api.formApiV1UsersUsersUserIdRolesPut(userId);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdRolesPut: $e\n');
 }
 ```
@@ -959,7 +959,7 @@ final String userId = userId_example; // String |
 
 try {
     api.formApiV1UsersUsersUserIdUnlockPost(userId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling UserApi->formApiV1UsersUsersUserIdUnlockPost: $e\n');
 }
 ```

@@ -42,7 +42,7 @@ final api = RidpApi().getAiApi();
 
 try {
     api.formApiV1AiCrossAnalysisPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiCrossAnalysisPost: $e\n');
 }
 ```
@@ -79,7 +79,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdAnomaliesPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdAnomaliesPost: $e\n');
 }
 ```
@@ -119,7 +119,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdAnomalyDetectPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdAnomalyDetectPost: $e\n');
 }
 ```
@@ -159,7 +159,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdCacheDelete(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdCacheDelete: $e\n');
 }
 ```
@@ -199,7 +199,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdCacheInvalidatePost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdCacheInvalidatePost: $e\n');
 }
 ```
@@ -239,7 +239,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdExportPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdExportPost: $e\n');
 }
 ```
@@ -280,7 +280,7 @@ final String responseId = responseId_example; // String |
 
 try {
     api.formApiV1AiFormIdResponsesResponseIdAnalyzePost(formId, responseId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdResponsesResponseIdAnalyzePost: $e\n');
 }
 ```
@@ -322,7 +322,7 @@ final String responseId = responseId_example; // String |
 
 try {
     api.formApiV1AiFormIdResponsesResponseIdModeratePost(formId, responseId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdResponsesResponseIdModeratePost: $e\n');
 }
 ```
@@ -363,7 +363,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdSearchPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdSearchPost: $e\n');
 }
 ```
@@ -403,7 +403,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdSecurityScanPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdSecurityScanPost: $e\n');
 }
 ```
@@ -443,7 +443,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdSentimentGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdSentimentGet: $e\n');
 }
 ```
@@ -483,7 +483,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdSummarizePost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdSummarizePost: $e\n');
 }
 ```
@@ -523,7 +523,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiFormIdValidateDesignPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiFormIdValidateDesignPost: $e\n');
 }
 ```
@@ -562,7 +562,7 @@ final api = RidpApi().getAiApi();
 
 try {
     api.formApiV1AiGeneratePost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiGeneratePost: $e\n');
 }
 ```
@@ -598,7 +598,7 @@ final api = RidpApi().getAiApi();
 
 try {
     api.formApiV1AiHealthGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiHealthGet: $e\n');
 }
 ```
@@ -634,7 +634,7 @@ final api = RidpApi().getAiApi();
 
 try {
     api.formApiV1AiSuggestionsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiSuggestionsPost: $e\n');
 }
 ```
@@ -670,7 +670,7 @@ final api = RidpApi().getAiApi();
 
 try {
     api.formApiV1AiTemplatesGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiTemplatesGet: $e\n');
 }
 ```
@@ -707,7 +707,7 @@ final String templateId = templateId_example; // String |
 
 try {
     api.formApiV1AiTemplatesTemplateIdGet(templateId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AiApi->formApiV1AiTemplatesTemplateIdGet: $e\n');
 }
 ```

@@ -32,7 +32,7 @@ final api = RidpApi().getWebhooksApi();
 
 try {
     api.formApiV1WebhooksDeliverPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksDeliverPost: $e\n');
 }
 ```
@@ -69,7 +69,7 @@ final String deliveryId = deliveryId_example; // String |
 
 try {
     api.formApiV1WebhooksDeliveryIdCancelDelete(deliveryId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksDeliveryIdCancelDelete: $e\n');
 }
 ```
@@ -108,7 +108,7 @@ final api = RidpApi().getWebhooksApi();
 
 try {
     api.formApiV1WebhooksDeliveryIdHistoryGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksDeliveryIdHistoryGet: $e\n');
 }
 ```
@@ -145,7 +145,7 @@ final String deliveryId = deliveryId_example; // String |
 
 try {
     api.formApiV1WebhooksDeliveryIdRetryPost(deliveryId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksDeliveryIdRetryPost: $e\n');
 }
 ```
@@ -185,7 +185,7 @@ final String deliveryId = deliveryId_example; // String |
 
 try {
     api.formApiV1WebhooksDeliveryIdStatusGet(deliveryId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksDeliveryIdStatusGet: $e\n');
 }
 ```
@@ -224,7 +224,7 @@ final api = RidpApi().getWebhooksApi();
 
 try {
     api.formApiV1WebhooksHistoryGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksHistoryGet: $e\n');
 }
 ```
@@ -260,7 +260,7 @@ final api = RidpApi().getWebhooksApi();
 
 try {
     api.formApiV1WebhooksLogsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksLogsGet: $e\n');
 }
 ```
@@ -296,7 +296,7 @@ final api = RidpApi().getWebhooksApi();
 
 try {
     api.formApiV1WebhooksTestPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WebhooksApi->formApiV1WebhooksTestPost: $e\n');
 }
 ```

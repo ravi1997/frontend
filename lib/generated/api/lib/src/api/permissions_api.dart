@@ -29,7 +29,7 @@ class PermissionsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdPermissionsGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -76,7 +76,7 @@ class PermissionsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdPermissionsPost({ 
     required String formId,
     CancelToken? cancelToken,

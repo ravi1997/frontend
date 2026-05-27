@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'resource_access_control_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -45,7 +47,7 @@ class ResourceAccessControlSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class ResourceAccessControlSchema {
     defaultValue: 'private',
     name: r'access_level',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class ResourceAccessControlSchema {
     
     name: r'approval_workflow',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class ResourceAccessControlSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -93,7 +95,7 @@ class ResourceAccessControlSchema {
     
     name: r'entries',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -105,7 +107,7 @@ class ResourceAccessControlSchema {
     defaultValue: true,
     name: r'is_active',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,7 +119,7 @@ class ResourceAccessControlSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -129,7 +131,7 @@ class ResourceAccessControlSchema {
     
     name: r'resource_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -141,7 +143,7 @@ class ResourceAccessControlSchema {
     
     name: r'resource_type',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -153,7 +155,7 @@ class ResourceAccessControlSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -165,7 +167,7 @@ class ResourceAccessControlSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,33 +175,35 @@ class ResourceAccessControlSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ResourceAccessControlSchema &&
-     other.id == id &&
-     other.accessLevel == accessLevel &&
-     other.approvalWorkflow == approvalWorkflow &&
-     other.createdAt == createdAt &&
-     other.entries == entries &&
-     other.isActive == isActive &&
-     other.metaData == metaData &&
-     other.resourceId == resourceId &&
-     other.resourceType == resourceType &&
-     other.tags == tags &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    accessLevel.hashCode +
-    approvalWorkflow.hashCode +
-    createdAt.hashCode +
-    entries.hashCode +
-    isActive.hashCode +
-    metaData.hashCode +
-    resourceId.hashCode +
-    resourceType.hashCode +
-    tags.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ResourceAccessControlSchema &&
+      other.id == id &&
+      other.accessLevel == accessLevel &&
+      other.approvalWorkflow == approvalWorkflow &&
+      other.createdAt == createdAt &&
+      other.entries == entries &&
+      other.isActive == isActive &&
+      other.metaData == metaData &&
+      other.resourceId == resourceId &&
+      other.resourceType == resourceType &&
+      other.tags == tags &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        accessLevel.hashCode +
+        approvalWorkflow.hashCode +
+        createdAt.hashCode +
+        entries.hashCode +
+        isActive.hashCode +
+        metaData.hashCode +
+        resourceId.hashCode +
+        resourceType.hashCode +
+        tags.hashCode +
+        updatedAt.hashCode;
 
   factory ResourceAccessControlSchema.fromJson(Map<String, dynamic> json) => _$ResourceAccessControlSchemaFromJson(json);
 
@@ -214,27 +218,41 @@ class ResourceAccessControlSchema {
 
 
 enum ResourceAccessControlSchemaAccessLevelEnum {
-  @JsonValue(r'private')
-  private,
-  @JsonValue(r'group')
-  group,
-  @JsonValue(r'organization')
-  organization,
-  @JsonValue(r'public')
-  public,
+@JsonValue(r'private')
+private(r'private'),
+@JsonValue(r'group')
+group(r'group'),
+@JsonValue(r'organization')
+organization(r'organization'),
+@JsonValue(r'public')
+public(r'public');
+
+const ResourceAccessControlSchemaAccessLevelEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 
 
 enum ResourceAccessControlSchemaResourceTypeEnum {
-  @JsonValue(r'form')
-  form,
-  @JsonValue(r'project')
-  project,
-  @JsonValue(r'submission')
-  submission,
-  @JsonValue(r'view')
-  view,
+@JsonValue(r'form')
+form(r'form'),
+@JsonValue(r'project')
+project(r'project'),
+@JsonValue(r'submission')
+submission(r'submission'),
+@JsonValue(r'view')
+view(r'view');
+
+const ResourceAccessControlSchemaResourceTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

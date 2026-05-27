@@ -33,7 +33,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsLayoutPut();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsLayoutPut: $e\n');
 }
 ```
@@ -69,7 +69,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsResetPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsResetPost: $e\n');
 }
 ```
@@ -105,7 +105,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsSettingsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsSettingsGet: $e\n');
 }
 ```
@@ -141,7 +141,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsSettingsPut();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsSettingsPut: $e\n');
 }
 ```
@@ -177,7 +177,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsWidgetsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsWidgetsGet: $e\n');
 }
 ```
@@ -213,7 +213,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsWidgetsPositionsPut();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsWidgetsPositionsPut: $e\n');
 }
 ```
@@ -249,7 +249,7 @@ final api = RidpApi().getDashboardSettingsApi();
 
 try {
     api.formApiV1DashboardSettingsWidgetsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsWidgetsPost: $e\n');
 }
 ```
@@ -286,7 +286,7 @@ final String widgetId = widgetId_example; // String |
 
 try {
     api.formApiV1DashboardSettingsWidgetsWidgetIdDelete(widgetId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsWidgetsWidgetIdDelete: $e\n');
 }
 ```
@@ -326,7 +326,7 @@ final String widgetId = widgetId_example; // String |
 
 try {
     api.formApiV1DashboardSettingsWidgetsWidgetIdPut(widgetId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardSettingsApi->formApiV1DashboardSettingsWidgetsWidgetIdPut: $e\n');
 }
 ```

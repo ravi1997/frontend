@@ -28,7 +28,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -119,7 +119,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsJobIdCancelPatch({ 
     required String jobId,
     CancelToken? cancelToken,
@@ -166,7 +166,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsJobIdContentGet({ 
     required String jobId,
     CancelToken? cancelToken,
@@ -213,7 +213,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsJobIdDelete({ 
     required String jobId,
     CancelToken? cancelToken,
@@ -260,7 +260,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsJobIdGet({ 
     required String jobId,
     CancelToken? cancelToken,
@@ -306,7 +306,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsJobsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -351,7 +351,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsLanguagesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -396,7 +396,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -441,7 +441,7 @@ class TranslationApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1FormsTranslationsPreviewPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

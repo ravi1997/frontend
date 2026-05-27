@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'login_request.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -32,7 +34,7 @@ class LoginRequest {
     
     name: r'identifier',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -45,7 +47,7 @@ class LoginRequest {
     
     name: r'mobile',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -58,7 +60,7 @@ class LoginRequest {
     
     name: r'otp',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -71,7 +73,7 @@ class LoginRequest {
     
     name: r'password',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -79,19 +81,21 @@ class LoginRequest {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is LoginRequest &&
-     other.identifier == identifier &&
-     other.mobile == mobile &&
-     other.otp == otp &&
-     other.password == password;
 
-  @override
-  int get hashCode =>
-    identifier.hashCode +
-    mobile.hashCode +
-    otp.hashCode +
-    password.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is LoginRequest &&
+      other.identifier == identifier &&
+      other.mobile == mobile &&
+      other.otp == otp &&
+      other.password == password;
+
+    @override
+    int get hashCode =>
+        identifier.hashCode +
+        mobile.hashCode +
+        otp.hashCode +
+        password.hashCode;
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
 

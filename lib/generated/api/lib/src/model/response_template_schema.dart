@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'response_template_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -39,7 +41,7 @@ class ResponseTemplateSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -51,7 +53,7 @@ class ResponseTemplateSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -63,7 +65,7 @@ class ResponseTemplateSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -75,7 +77,7 @@ class ResponseTemplateSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -87,7 +89,7 @@ class ResponseTemplateSchema {
     
     name: r'name',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -99,7 +101,7 @@ class ResponseTemplateSchema {
     
     name: r'structure',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class ResponseTemplateSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class ResponseTemplateSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -131,27 +133,29 @@ class ResponseTemplateSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ResponseTemplateSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.metaData == metaData &&
-     other.name == name &&
-     other.structure == structure &&
-     other.tags == tags &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    metaData.hashCode +
-    name.hashCode +
-    structure.hashCode +
-    tags.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ResponseTemplateSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.metaData == metaData &&
+      other.name == name &&
+      other.structure == structure &&
+      other.tags == tags &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        metaData.hashCode +
+        name.hashCode +
+        structure.hashCode +
+        tags.hashCode +
+        updatedAt.hashCode;
 
   factory ResponseTemplateSchema.fromJson(Map<String, dynamic> json) => _$ResponseTemplateSchemaFromJson(json);
 

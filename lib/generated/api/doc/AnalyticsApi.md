@@ -26,7 +26,7 @@ final api = RidpApi().getAnalyticsApi();
 
 try {
     api.formApiV1AnalyticsDashboardGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnalyticsApi->formApiV1AnalyticsDashboardGet: $e\n');
 }
 ```
@@ -62,7 +62,7 @@ final api = RidpApi().getAnalyticsApi();
 
 try {
     api.formApiV1AnalyticsSummaryGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnalyticsApi->formApiV1AnalyticsSummaryGet: $e\n');
 }
 ```

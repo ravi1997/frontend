@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'section_schema_struct.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -51,7 +53,7 @@ class SectionSchemaStruct {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -63,7 +65,7 @@ class SectionSchemaStruct {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -75,7 +77,7 @@ class SectionSchemaStruct {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -87,7 +89,7 @@ class SectionSchemaStruct {
     
     name: r'help_text',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -99,7 +101,7 @@ class SectionSchemaStruct {
     
     name: r'logic',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class SectionSchemaStruct {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class SectionSchemaStruct {
     
     name: r'order',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -135,7 +137,7 @@ class SectionSchemaStruct {
     
     name: r'questions',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -147,7 +149,7 @@ class SectionSchemaStruct {
     
     name: r'response_templates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -159,7 +161,7 @@ class SectionSchemaStruct {
     
     name: r'sections',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -171,7 +173,7 @@ class SectionSchemaStruct {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -183,7 +185,7 @@ class SectionSchemaStruct {
     
     name: r'title',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -195,7 +197,7 @@ class SectionSchemaStruct {
     
     name: r'ui',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -207,7 +209,7 @@ class SectionSchemaStruct {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -215,39 +217,41 @@ class SectionSchemaStruct {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is SectionSchemaStruct &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.helpText == helpText &&
-     other.logic == logic &&
-     other.metaData == metaData &&
-     other.order == order &&
-     other.questions == questions &&
-     other.responseTemplates == responseTemplates &&
-     other.sections == sections &&
-     other.tags == tags &&
-     other.title == title &&
-     other.ui == ui &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    helpText.hashCode +
-    logic.hashCode +
-    metaData.hashCode +
-    order.hashCode +
-    questions.hashCode +
-    responseTemplates.hashCode +
-    sections.hashCode +
-    tags.hashCode +
-    title.hashCode +
-    ui.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is SectionSchemaStruct &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.helpText == helpText &&
+      other.logic == logic &&
+      other.metaData == metaData &&
+      other.order == order &&
+      other.questions == questions &&
+      other.responseTemplates == responseTemplates &&
+      other.sections == sections &&
+      other.tags == tags &&
+      other.title == title &&
+      other.ui == ui &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        helpText.hashCode +
+        logic.hashCode +
+        metaData.hashCode +
+        order.hashCode +
+        questions.hashCode +
+        responseTemplates.hashCode +
+        sections.hashCode +
+        tags.hashCode +
+        title.hashCode +
+        ui.hashCode +
+        updatedAt.hashCode;
 
   factory SectionSchemaStruct.fromJson(Map<String, dynamic> json) => _$SectionSchemaStructFromJson(json);
 

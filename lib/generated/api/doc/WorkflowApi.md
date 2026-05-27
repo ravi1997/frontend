@@ -29,7 +29,7 @@ final api = RidpApi().getWorkflowApi();
 
 try {
     api.formApiV1WorkflowsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WorkflowApi->formApiV1WorkflowsGet: $e\n');
 }
 ```
@@ -65,7 +65,7 @@ final api = RidpApi().getWorkflowApi();
 
 try {
     api.formApiV1WorkflowsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WorkflowApi->formApiV1WorkflowsPost: $e\n');
 }
 ```
@@ -102,7 +102,7 @@ final String workflowId = workflowId_example; // String |
 
 try {
     api.formApiV1WorkflowsWorkflowIdDelete(workflowId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WorkflowApi->formApiV1WorkflowsWorkflowIdDelete: $e\n');
 }
 ```
@@ -142,7 +142,7 @@ final String workflowId = workflowId_example; // String |
 
 try {
     api.formApiV1WorkflowsWorkflowIdGet(workflowId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WorkflowApi->formApiV1WorkflowsWorkflowIdGet: $e\n');
 }
 ```
@@ -182,7 +182,7 @@ final String workflowId = workflowId_example; // String |
 
 try {
     api.formApiV1WorkflowsWorkflowIdPut(workflowId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling WorkflowApi->formApiV1WorkflowsWorkflowIdPut: $e\n');
 }
 ```

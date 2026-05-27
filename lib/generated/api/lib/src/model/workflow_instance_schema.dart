@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'workflow_instance_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -53,7 +55,7 @@ class WorkflowInstanceSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -65,7 +67,7 @@ class WorkflowInstanceSchema {
     
     name: r'completed_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -77,7 +79,7 @@ class WorkflowInstanceSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -89,7 +91,7 @@ class WorkflowInstanceSchema {
     
     name: r'current_step_order',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -101,7 +103,7 @@ class WorkflowInstanceSchema {
     
     name: r'deleted_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -113,7 +115,7 @@ class WorkflowInstanceSchema {
     
     name: r'history',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -125,7 +127,7 @@ class WorkflowInstanceSchema {
     defaultValue: false,
     name: r'is_deleted',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -137,7 +139,7 @@ class WorkflowInstanceSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -149,7 +151,7 @@ class WorkflowInstanceSchema {
     
     name: r'organization_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -161,7 +163,7 @@ class WorkflowInstanceSchema {
     
     name: r'resource_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,7 +175,7 @@ class WorkflowInstanceSchema {
     defaultValue: 'form_response',
     name: r'resource_type',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -185,7 +187,7 @@ class WorkflowInstanceSchema {
     
     name: r'started_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -197,7 +199,7 @@ class WorkflowInstanceSchema {
     defaultValue: 'pending',
     name: r'status',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -209,7 +211,7 @@ class WorkflowInstanceSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -221,7 +223,7 @@ class WorkflowInstanceSchema {
     
     name: r'workflow_definition',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -229,41 +231,43 @@ class WorkflowInstanceSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is WorkflowInstanceSchema &&
-     other.id == id &&
-     other.completedAt == completedAt &&
-     other.createdAt == createdAt &&
-     other.currentStepOrder == currentStepOrder &&
-     other.deletedAt == deletedAt &&
-     other.history == history &&
-     other.isDeleted == isDeleted &&
-     other.metaData == metaData &&
-     other.organizationId == organizationId &&
-     other.resourceId == resourceId &&
-     other.resourceType == resourceType &&
-     other.startedAt == startedAt &&
-     other.status == status &&
-     other.updatedAt == updatedAt &&
-     other.workflowDefinition == workflowDefinition;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    completedAt.hashCode +
-    createdAt.hashCode +
-    currentStepOrder.hashCode +
-    deletedAt.hashCode +
-    history.hashCode +
-    isDeleted.hashCode +
-    metaData.hashCode +
-    organizationId.hashCode +
-    resourceId.hashCode +
-    resourceType.hashCode +
-    startedAt.hashCode +
-    status.hashCode +
-    updatedAt.hashCode +
-    workflowDefinition.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is WorkflowInstanceSchema &&
+      other.id == id &&
+      other.completedAt == completedAt &&
+      other.createdAt == createdAt &&
+      other.currentStepOrder == currentStepOrder &&
+      other.deletedAt == deletedAt &&
+      other.history == history &&
+      other.isDeleted == isDeleted &&
+      other.metaData == metaData &&
+      other.organizationId == organizationId &&
+      other.resourceId == resourceId &&
+      other.resourceType == resourceType &&
+      other.startedAt == startedAt &&
+      other.status == status &&
+      other.updatedAt == updatedAt &&
+      other.workflowDefinition == workflowDefinition;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        completedAt.hashCode +
+        createdAt.hashCode +
+        currentStepOrder.hashCode +
+        deletedAt.hashCode +
+        history.hashCode +
+        isDeleted.hashCode +
+        metaData.hashCode +
+        organizationId.hashCode +
+        resourceId.hashCode +
+        resourceType.hashCode +
+        startedAt.hashCode +
+        status.hashCode +
+        updatedAt.hashCode +
+        workflowDefinition.hashCode;
 
   factory WorkflowInstanceSchema.fromJson(Map<String, dynamic> json) => _$WorkflowInstanceSchemaFromJson(json);
 
@@ -278,16 +282,23 @@ class WorkflowInstanceSchema {
 
 
 enum WorkflowInstanceSchemaStatusEnum {
-  @JsonValue(r'pending')
-  pending,
-  @JsonValue(r'in_review')
-  inReview,
-  @JsonValue(r'approved')
-  approved,
-  @JsonValue(r'rejected')
-  rejected,
-  @JsonValue(r'reverted')
-  reverted,
+@JsonValue(r'pending')
+pending(r'pending'),
+@JsonValue(r'in_review')
+inReview(r'in_review'),
+@JsonValue(r'approved')
+approved(r'approved'),
+@JsonValue(r'rejected')
+rejected(r'rejected'),
+@JsonValue(r'reverted')
+reverted(r'reverted');
+
+const WorkflowInstanceSchemaStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

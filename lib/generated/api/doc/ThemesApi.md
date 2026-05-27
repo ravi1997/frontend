@@ -28,7 +28,7 @@ final api = RidpApi().getThemesApi();
 
 try {
     api.formApiV1ThemesGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ThemesApi->formApiV1ThemesGet: $e\n');
 }
 ```
@@ -64,7 +64,7 @@ final api = RidpApi().getThemesApi();
 
 try {
     api.formApiV1ThemesPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ThemesApi->formApiV1ThemesPost: $e\n');
 }
 ```
@@ -100,7 +100,7 @@ final api = RidpApi().getThemesApi();
 
 try {
     api.formApiV1ThemesThemeIdDelete();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ThemesApi->formApiV1ThemesThemeIdDelete: $e\n');
 }
 ```
@@ -136,7 +136,7 @@ final api = RidpApi().getThemesApi();
 
 try {
     api.formApiV1ThemesThemeIdPut();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ThemesApi->formApiV1ThemesThemeIdPut: $e\n');
 }
 ```

@@ -28,7 +28,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksDeliverPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -74,7 +74,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksDeliveryIdCancelDelete({ 
     required String deliveryId,
     CancelToken? cancelToken,
@@ -120,7 +120,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksDeliveryIdHistoryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -166,7 +166,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksDeliveryIdRetryPost({ 
     required String deliveryId,
     CancelToken? cancelToken,
@@ -213,7 +213,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksDeliveryIdStatusGet({ 
     required String deliveryId,
     CancelToken? cancelToken,
@@ -259,7 +259,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksHistoryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -304,7 +304,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksLogsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -349,7 +349,7 @@ class WebhooksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WebhooksTestPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'section_logic_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -51,7 +53,7 @@ class SectionLogicSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -63,7 +65,7 @@ class SectionLogicSchema {
     
     name: r'action_config',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -75,7 +77,7 @@ class SectionLogicSchema {
     
     name: r'conditional_logic',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -87,7 +89,7 @@ class SectionLogicSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -99,7 +101,7 @@ class SectionLogicSchema {
     
     name: r'custom_script',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class SectionLogicSchema {
     
     name: r'field_api_call',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class SectionLogicSchema {
     defaultValue: false,
     name: r'is_disabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -135,7 +137,7 @@ class SectionLogicSchema {
     defaultValue: false,
     name: r'is_repeatable',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -147,7 +149,7 @@ class SectionLogicSchema {
     
     name: r'on_change',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -159,7 +161,7 @@ class SectionLogicSchema {
     
     name: r'repeat_max',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -172,7 +174,7 @@ class SectionLogicSchema {
     
     name: r'repeat_min',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -184,7 +186,7 @@ class SectionLogicSchema {
     
     name: r'triggers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -196,7 +198,7 @@ class SectionLogicSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -208,7 +210,7 @@ class SectionLogicSchema {
     
     name: r'visibility_condition',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -216,39 +218,41 @@ class SectionLogicSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is SectionLogicSchema &&
-     other.id == id &&
-     other.actionConfig == actionConfig &&
-     other.conditionalLogic == conditionalLogic &&
-     other.createdAt == createdAt &&
-     other.customScript == customScript &&
-     other.fieldApiCall == fieldApiCall &&
-     other.isDisabled == isDisabled &&
-     other.isRepeatable == isRepeatable &&
-     other.onChange == onChange &&
-     other.repeatMax == repeatMax &&
-     other.repeatMin == repeatMin &&
-     other.triggers == triggers &&
-     other.updatedAt == updatedAt &&
-     other.visibilityCondition == visibilityCondition;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    actionConfig.hashCode +
-    conditionalLogic.hashCode +
-    createdAt.hashCode +
-    customScript.hashCode +
-    fieldApiCall.hashCode +
-    isDisabled.hashCode +
-    isRepeatable.hashCode +
-    onChange.hashCode +
-    repeatMax.hashCode +
-    repeatMin.hashCode +
-    triggers.hashCode +
-    updatedAt.hashCode +
-    visibilityCondition.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is SectionLogicSchema &&
+      other.id == id &&
+      other.actionConfig == actionConfig &&
+      other.conditionalLogic == conditionalLogic &&
+      other.createdAt == createdAt &&
+      other.customScript == customScript &&
+      other.fieldApiCall == fieldApiCall &&
+      other.isDisabled == isDisabled &&
+      other.isRepeatable == isRepeatable &&
+      other.onChange == onChange &&
+      other.repeatMax == repeatMax &&
+      other.repeatMin == repeatMin &&
+      other.triggers == triggers &&
+      other.updatedAt == updatedAt &&
+      other.visibilityCondition == visibilityCondition;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        actionConfig.hashCode +
+        conditionalLogic.hashCode +
+        createdAt.hashCode +
+        customScript.hashCode +
+        fieldApiCall.hashCode +
+        isDisabled.hashCode +
+        isRepeatable.hashCode +
+        onChange.hashCode +
+        repeatMax.hashCode +
+        repeatMin.hashCode +
+        triggers.hashCode +
+        updatedAt.hashCode +
+        visibilityCondition.hashCode;
 
   factory SectionLogicSchema.fromJson(Map<String, dynamic> json) => _$SectionLogicSchemaFromJson(json);
 

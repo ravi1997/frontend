@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'conditional_validation_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -35,7 +37,7 @@ class ConditionalValidationSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -47,7 +49,7 @@ class ConditionalValidationSchema {
     
     name: r'conditions',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -59,7 +61,7 @@ class ConditionalValidationSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -71,7 +73,7 @@ class ConditionalValidationSchema {
     
     name: r'error_message',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -83,7 +85,7 @@ class ConditionalValidationSchema {
     defaultValue: 'AND',
     name: r'logical_operator',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -95,7 +97,7 @@ class ConditionalValidationSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,23 +105,25 @@ class ConditionalValidationSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ConditionalValidationSchema &&
-     other.id == id &&
-     other.conditions == conditions &&
-     other.createdAt == createdAt &&
-     other.errorMessage == errorMessage &&
-     other.logicalOperator == logicalOperator &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    conditions.hashCode +
-    createdAt.hashCode +
-    errorMessage.hashCode +
-    logicalOperator.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ConditionalValidationSchema &&
+      other.id == id &&
+      other.conditions == conditions &&
+      other.createdAt == createdAt &&
+      other.errorMessage == errorMessage &&
+      other.logicalOperator == logicalOperator &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        conditions.hashCode +
+        createdAt.hashCode +
+        errorMessage.hashCode +
+        logicalOperator.hashCode +
+        updatedAt.hashCode;
 
   factory ConditionalValidationSchema.fromJson(Map<String, dynamic> json) => _$ConditionalValidationSchemaFromJson(json);
 

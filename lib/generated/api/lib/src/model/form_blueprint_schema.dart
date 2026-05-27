@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'form_blueprint_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -53,7 +55,7 @@ class FormBlueprintSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -65,7 +67,7 @@ class FormBlueprintSchema {
     
     name: r'category',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -77,7 +79,7 @@ class FormBlueprintSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -89,7 +91,7 @@ class FormBlueprintSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -101,7 +103,7 @@ class FormBlueprintSchema {
     
     name: r'estimated_completion_time',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -113,7 +115,7 @@ class FormBlueprintSchema {
     
     name: r'icon',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -125,7 +127,7 @@ class FormBlueprintSchema {
     
     name: r'industry',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -137,7 +139,7 @@ class FormBlueprintSchema {
     defaultValue: false,
     name: r'is_official',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -149,7 +151,7 @@ class FormBlueprintSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -161,7 +163,7 @@ class FormBlueprintSchema {
     
     name: r'name',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,7 +175,7 @@ class FormBlueprintSchema {
     
     name: r'response_templates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -185,7 +187,7 @@ class FormBlueprintSchema {
     
     name: r'sections',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -197,7 +199,7 @@ class FormBlueprintSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -209,7 +211,7 @@ class FormBlueprintSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -221,7 +223,7 @@ class FormBlueprintSchema {
     
     name: r'usage_count',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -229,41 +231,43 @@ class FormBlueprintSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is FormBlueprintSchema &&
-     other.id == id &&
-     other.category == category &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.estimatedCompletionTime == estimatedCompletionTime &&
-     other.icon == icon &&
-     other.industry == industry &&
-     other.isOfficial == isOfficial &&
-     other.metaData == metaData &&
-     other.name == name &&
-     other.responseTemplates == responseTemplates &&
-     other.sections == sections &&
-     other.tags == tags &&
-     other.updatedAt == updatedAt &&
-     other.usageCount == usageCount;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    category.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    estimatedCompletionTime.hashCode +
-    icon.hashCode +
-    industry.hashCode +
-    isOfficial.hashCode +
-    metaData.hashCode +
-    name.hashCode +
-    responseTemplates.hashCode +
-    sections.hashCode +
-    tags.hashCode +
-    updatedAt.hashCode +
-    usageCount.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is FormBlueprintSchema &&
+      other.id == id &&
+      other.category == category &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.estimatedCompletionTime == estimatedCompletionTime &&
+      other.icon == icon &&
+      other.industry == industry &&
+      other.isOfficial == isOfficial &&
+      other.metaData == metaData &&
+      other.name == name &&
+      other.responseTemplates == responseTemplates &&
+      other.sections == sections &&
+      other.tags == tags &&
+      other.updatedAt == updatedAt &&
+      other.usageCount == usageCount;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        category.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        estimatedCompletionTime.hashCode +
+        icon.hashCode +
+        industry.hashCode +
+        isOfficial.hashCode +
+        metaData.hashCode +
+        name.hashCode +
+        responseTemplates.hashCode +
+        sections.hashCode +
+        tags.hashCode +
+        updatedAt.hashCode +
+        usageCount.hashCode;
 
   factory FormBlueprintSchema.fromJson(Map<String, dynamic> json) => _$FormBlueprintSchemaFromJson(json);
 

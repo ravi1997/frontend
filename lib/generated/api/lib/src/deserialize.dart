@@ -11,8 +11,8 @@ import 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response.dart'
 import 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response_data.dart';
 import 'package:ridp_api/src/model/form_api_v1_auth_refresh_post200_response.dart';
 import 'package:ridp_api/src/model/form_api_v1_auth_request_otp_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_forms_external_hooks_hook_id_approve_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_forms_external_hooks_register_post_request.dart';
+import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
+import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
 import 'package:ridp_api/src/model/form_api_v1_user_security_lock_status_user_id_get200_response.dart';
 import 'package:ridp_api/src/model/form_blueprint_schema.dart';
 import 'package:ridp_api/src/model/form_response_schema.dart';
@@ -92,10 +92,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return FormApiV1AuthRefreshPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FormApiV1AuthRequestOtpPostRequest':
           return FormApiV1AuthRequestOtpPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1FormsExternalHooksHookIdApprovePostRequest':
-          return FormApiV1FormsExternalHooksHookIdApprovePostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1FormsExternalHooksRegisterPostRequest':
-          return FormApiV1FormsExternalHooksRegisterPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FormApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest':
+          return FormApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FormApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest':
+          return FormApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FormApiV1UserSecurityLockStatusUserIdGet200Response':
           return FormApiV1UserSecurityLockStatusUserIdGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FormBlueprintSchema':
@@ -180,13 +180,13 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
               .toSet() as ReturnType;
           }
           if (value is Map && (match = _regMap.firstMatch(targetType)) != null) {
-            targetType = match![1]!; // ignore: parameter_assignments
-            return Map<dynamic, BaseType>.fromIterables(
-              value.keys,
+            targetType = match![1]!.trim(); // ignore: parameter_assignments
+            return Map<String, BaseType>.fromIterables(
+              value.keys as Iterable<String>,
               value.values.map((dynamic v) => deserialize<BaseType, BaseType>(v, targetType, growable: growable)),
             ) as ReturnType;
           }
           break;
-    } 
+    }
     throw Exception('Cannot deserialize');
   }

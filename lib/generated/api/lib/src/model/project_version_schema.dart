@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'project_version_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -39,7 +41,7 @@ class ProjectVersionSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -51,7 +53,7 @@ class ProjectVersionSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -63,7 +65,7 @@ class ProjectVersionSchema {
     
     name: r'forms',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -75,7 +77,7 @@ class ProjectVersionSchema {
     
     name: r'project',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -87,7 +89,7 @@ class ProjectVersionSchema {
     defaultValue: 'draft',
     name: r'status',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -99,7 +101,7 @@ class ProjectVersionSchema {
     
     name: r'sub_projects',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class ProjectVersionSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class ProjectVersionSchema {
     
     name: r'version',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -131,27 +133,29 @@ class ProjectVersionSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ProjectVersionSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.forms == forms &&
-     other.project == project &&
-     other.status == status &&
-     other.subProjects == subProjects &&
-     other.updatedAt == updatedAt &&
-     other.version == version;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    forms.hashCode +
-    project.hashCode +
-    status.hashCode +
-    subProjects.hashCode +
-    updatedAt.hashCode +
-    version.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ProjectVersionSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.forms == forms &&
+      other.project == project &&
+      other.status == status &&
+      other.subProjects == subProjects &&
+      other.updatedAt == updatedAt &&
+      other.version == version;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        forms.hashCode +
+        project.hashCode +
+        status.hashCode +
+        subProjects.hashCode +
+        updatedAt.hashCode +
+        version.hashCode;
 
   factory ProjectVersionSchema.fromJson(Map<String, dynamic> json) => _$ProjectVersionSchemaFromJson(json);
 
@@ -166,12 +170,19 @@ class ProjectVersionSchema {
 
 
 enum ProjectVersionSchemaStatusEnum {
-  @JsonValue(r'draft')
-  draft,
-  @JsonValue(r'published')
-  published,
-  @JsonValue(r'archived')
-  archived,
+@JsonValue(r'draft')
+draft(r'draft'),
+@JsonValue(r'published')
+published(r'published'),
+@JsonValue(r'archived')
+archived(r'archived');
+
+const ProjectVersionSchemaStatusEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

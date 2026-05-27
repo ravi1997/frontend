@@ -28,7 +28,7 @@ final api = RidpApi().getSmsApi();
 
 try {
     api.formApiV1SmsHealthGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SmsApi->formApiV1SmsHealthGet: $e\n');
 }
 ```
@@ -64,7 +64,7 @@ final api = RidpApi().getSmsApi();
 
 try {
     api.formApiV1SmsNotifyPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SmsApi->formApiV1SmsNotifyPost: $e\n');
 }
 ```
@@ -100,7 +100,7 @@ final api = RidpApi().getSmsApi();
 
 try {
     api.formApiV1SmsOtpPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SmsApi->formApiV1SmsOtpPost: $e\n');
 }
 ```
@@ -136,7 +136,7 @@ final api = RidpApi().getSmsApi();
 
 try {
     api.formApiV1SmsSinglePost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SmsApi->formApiV1SmsSinglePost: $e\n');
 }
 ```

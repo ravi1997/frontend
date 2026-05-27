@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'approval_workflow_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -43,7 +45,7 @@ class ApprovalWorkflowSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -55,7 +57,7 @@ class ApprovalWorkflowSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -67,7 +69,7 @@ class ApprovalWorkflowSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -79,7 +81,7 @@ class ApprovalWorkflowSchema {
     
     name: r'initiator_groups',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -91,7 +93,7 @@ class ApprovalWorkflowSchema {
     defaultValue: true,
     name: r'is_active',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,7 +105,7 @@ class ApprovalWorkflowSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -115,7 +117,7 @@ class ApprovalWorkflowSchema {
     
     name: r'name',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -127,7 +129,7 @@ class ApprovalWorkflowSchema {
     
     name: r'steps',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -139,7 +141,7 @@ class ApprovalWorkflowSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -151,7 +153,7 @@ class ApprovalWorkflowSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -159,31 +161,33 @@ class ApprovalWorkflowSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ApprovalWorkflowSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.initiatorGroups == initiatorGroups &&
-     other.isActive == isActive &&
-     other.metaData == metaData &&
-     other.name == name &&
-     other.steps == steps &&
-     other.tags == tags &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    initiatorGroups.hashCode +
-    isActive.hashCode +
-    metaData.hashCode +
-    name.hashCode +
-    steps.hashCode +
-    tags.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ApprovalWorkflowSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.initiatorGroups == initiatorGroups &&
+      other.isActive == isActive &&
+      other.metaData == metaData &&
+      other.name == name &&
+      other.steps == steps &&
+      other.tags == tags &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        initiatorGroups.hashCode +
+        isActive.hashCode +
+        metaData.hashCode +
+        name.hashCode +
+        steps.hashCode +
+        tags.hashCode +
+        updatedAt.hashCode;
 
   factory ApprovalWorkflowSchema.fromJson(Map<String, dynamic> json) => _$ApprovalWorkflowSchemaFromJson(json);
 

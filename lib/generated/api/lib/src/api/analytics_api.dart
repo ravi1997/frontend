@@ -28,7 +28,7 @@ class AnalyticsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AnalyticsDashboardGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class AnalyticsApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AnalyticsSummaryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

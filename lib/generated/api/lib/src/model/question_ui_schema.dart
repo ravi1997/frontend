@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'question_ui_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -37,7 +39,7 @@ class QuestionUISchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -49,7 +51,7 @@ class QuestionUISchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -61,7 +63,7 @@ class QuestionUISchema {
     
     name: r'placeholder',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -73,7 +75,7 @@ class QuestionUISchema {
     
     name: r'style',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -85,7 +87,7 @@ class QuestionUISchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -97,7 +99,7 @@ class QuestionUISchema {
     defaultValue: false,
     name: r'visible_header',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -109,7 +111,7 @@ class QuestionUISchema {
     
     name: r'visible_name',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,25 +119,27 @@ class QuestionUISchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is QuestionUISchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.placeholder == placeholder &&
-     other.style == style &&
-     other.updatedAt == updatedAt &&
-     other.visibleHeader == visibleHeader &&
-     other.visibleName == visibleName;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    placeholder.hashCode +
-    style.hashCode +
-    updatedAt.hashCode +
-    visibleHeader.hashCode +
-    visibleName.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is QuestionUISchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.placeholder == placeholder &&
+      other.style == style &&
+      other.updatedAt == updatedAt &&
+      other.visibleHeader == visibleHeader &&
+      other.visibleName == visibleName;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        placeholder.hashCode +
+        style.hashCode +
+        updatedAt.hashCode +
+        visibleHeader.hashCode +
+        visibleName.hashCode;
 
   factory QuestionUISchema.fromJson(Map<String, dynamic> json) => _$QuestionUISchemaFromJson(json);
 

@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'paginated_result.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -33,7 +35,7 @@ class PaginatedResult {
     
     name: r'has_next',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -45,7 +47,7 @@ class PaginatedResult {
     
     name: r'items',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class PaginatedResult {
     
     name: r'page',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class PaginatedResult {
     
     name: r'page_size',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class PaginatedResult {
     
     name: r'total',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -89,21 +91,23 @@ class PaginatedResult {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is PaginatedResult &&
-     other.hasNext == hasNext &&
-     other.items == items &&
-     other.page == page &&
-     other.pageSize == pageSize &&
-     other.total == total;
 
-  @override
-  int get hashCode =>
-    hasNext.hashCode +
-    items.hashCode +
-    page.hashCode +
-    pageSize.hashCode +
-    total.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is PaginatedResult &&
+      other.hasNext == hasNext &&
+      other.items == items &&
+      other.page == page &&
+      other.pageSize == pageSize &&
+      other.total == total;
+
+    @override
+    int get hashCode =>
+        hasNext.hashCode +
+        items.hashCode +
+        page.hashCode +
+        pageSize.hashCode +
+        total.hashCode;
 
   factory PaginatedResult.fromJson(Map<String, dynamic> json) => _$PaginatedResultFromJson(json);
 

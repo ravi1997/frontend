@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **actionType** | **String** |  | 
 **eventTimestamp** | **num** |  | 
-**flattenedFields** | **Object** |  | 
+**flattenedFields** | **Map&lt;String, Object&gt;** |  | 
 **formId** | **String** |  | 
 **responseId** | **String** |  | 
 **tenantId** | **String** |  | 

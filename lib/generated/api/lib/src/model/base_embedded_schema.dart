@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'base_embedded_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -29,7 +31,7 @@ class BaseEmbeddedSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -41,7 +43,7 @@ class BaseEmbeddedSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -53,7 +55,7 @@ class BaseEmbeddedSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -61,17 +63,19 @@ class BaseEmbeddedSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is BaseEmbeddedSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is BaseEmbeddedSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        updatedAt.hashCode;
 
   factory BaseEmbeddedSchema.fromJson(Map<String, dynamic> json) => _$BaseEmbeddedSchemaFromJson(json);
 

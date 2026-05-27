@@ -34,7 +34,7 @@ final LoginRequest body = ; // LoginRequest |
 try {
     final response = api.formApiV1AuthLoginPost(body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthLoginPost: $e\n');
 }
 ```
@@ -79,7 +79,7 @@ final api = RidpApi().getAuthApi();
 
 try {
     api.formApiV1AuthLogoutPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthLogoutPost: $e\n');
 }
 ```
@@ -122,7 +122,7 @@ final api = RidpApi().getAuthApi();
 try {
     final response = api.formApiV1AuthRefreshPost();
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthRefreshPost: $e\n');
 }
 ```
@@ -162,7 +162,7 @@ final UserCreateSchema body = ; // UserCreateSchema |
 try {
     final response = api.formApiV1AuthRegisterPost(body);
     print(response);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthRegisterPost: $e\n');
 }
 ```
@@ -204,7 +204,7 @@ final FormApiV1AuthRequestOtpPostRequest body = ; // FormApiV1AuthRequestOtpPost
 
 try {
     api.formApiV1AuthRequestOtpPost(body);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthRequestOtpPost: $e\n');
 }
 ```
@@ -249,7 +249,7 @@ final api = RidpApi().getAuthApi();
 
 try {
     api.formApiV1AuthRevokeAllPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AuthApi->formApiV1AuthRevokeAllPost: $e\n');
 }
 ```

@@ -26,7 +26,7 @@ final String taskId = taskId_example; // String |
 
 try {
     api.formApiV1TasksTaskIdGet(taskId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TasksApi->formApiV1TasksTaskIdGet: $e\n');
 }
 ```

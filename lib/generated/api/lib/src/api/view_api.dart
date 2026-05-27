@@ -29,7 +29,7 @@ class ViewApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ViewFormIdGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -76,7 +76,7 @@ class ViewApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ViewFormIdInfoGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -122,7 +122,7 @@ class ViewApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1ViewGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

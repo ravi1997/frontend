@@ -25,11 +25,11 @@ import 'package:ridp_api/api.dart';
 
 final api = RidpApi().getDashboardApi();
 final String dashboardId = dashboardId_example; // String | 
-final DashboardUpdateSchema body = ; // DashboardUpdateSchema | 
+final Map<String, Object> body = Object; // Map<String, Object> | 
 
 try {
     api.formApiV1DashboardsDashboardIdPut(dashboardId, body);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardApi->formApiV1DashboardsDashboardIdPut: $e\n');
 }
 ```
@@ -39,7 +39,7 @@ try {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **dashboardId** | **String**|  | 
- **body** | **DashboardUpdateSchema**|  | [optional] 
+ **body** | [**Map&lt;String, Object&gt;**](Object.md)|  | [optional] 
 
 ### Return type
 
@@ -66,11 +66,11 @@ Create a new Dashboard configuration.
 import 'package:ridp_api/api.dart';
 
 final api = RidpApi().getDashboardApi();
-final DashboardCreateSchema body = ; // DashboardCreateSchema | 
+final Map<String, Object> body = Object; // Map<String, Object> | 
 
 try {
     api.formApiV1DashboardsPost(body);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardApi->formApiV1DashboardsPost: $e\n');
 }
 ```
@@ -79,7 +79,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | **DashboardCreateSchema**|  | [optional] 
+ **body** | [**Map&lt;String, Object&gt;**](Object.md)|  | [optional] 
 
 ### Return type
 
@@ -110,7 +110,7 @@ final String slug = slug_example; // String |
 
 try {
     api.formApiV1DashboardsSlugGet(slug);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling DashboardApi->formApiV1DashboardsSlugGet: $e\n');
 }
 ```

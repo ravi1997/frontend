@@ -32,7 +32,7 @@ final api = RidpApi().getAdvancedResponsesApi();
 
 try {
     api.formApiV1FormsFetchExternalGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFetchExternalGet: $e\n');
 }
 ```
@@ -69,7 +69,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdAccessControlGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdAccessControlGet: $e\n');
 }
 ```
@@ -109,7 +109,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdAccessPolicyPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdAccessPolicyPost: $e\n');
 }
 ```
@@ -149,7 +149,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdAccessPolicyPut(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdAccessPolicyPut: $e\n');
 }
 ```
@@ -189,7 +189,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdFetchSameGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdFetchSameGet: $e\n');
 }
 ```
@@ -229,7 +229,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdResponsesMetaGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdResponsesMetaGet: $e\n');
 }
 ```
@@ -269,7 +269,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1FormsFormIdResponsesQuestionsGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsFormIdResponsesQuestionsGet: $e\n');
 }
 ```
@@ -308,7 +308,7 @@ final api = RidpApi().getAdvancedResponsesApi();
 
 try {
     api.formApiV1FormsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AdvancedResponsesApi->formApiV1FormsGet: $e\n');
 }
 ```

@@ -26,7 +26,7 @@ final api = RidpApi().getSystemSettingsApi();
 
 try {
     api.formApiV1AdminSystemSettingsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemSettingsApi->formApiV1AdminSystemSettingsGet: $e\n');
 }
 ```
@@ -59,11 +59,11 @@ Update the global system configuration.
 import 'package:ridp_api/api.dart';
 
 final api = RidpApi().getSystemSettingsApi();
-final SystemSettingsUpdateSchema body = ; // SystemSettingsUpdateSchema | 
+final Map<String, Object> body = Object; // Map<String, Object> | 
 
 try {
     api.formApiV1AdminSystemSettingsPut(body);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemSettingsApi->formApiV1AdminSystemSettingsPut: $e\n');
 }
 ```
@@ -72,7 +72,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | **SystemSettingsUpdateSchema**|  | [optional] 
+ **body** | [**Map&lt;String, Object&gt;**](Object.md)|  | [optional] 
 
 ### Return type
 

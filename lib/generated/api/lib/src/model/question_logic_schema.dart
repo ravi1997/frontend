@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'question_logic_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -47,7 +49,7 @@ class QuestionLogicSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -59,7 +61,7 @@ class QuestionLogicSchema {
     
     name: r'action_config',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -71,7 +73,7 @@ class QuestionLogicSchema {
     
     name: r'calculated_value',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -83,7 +85,7 @@ class QuestionLogicSchema {
     
     name: r'conditional_logic',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -95,7 +97,7 @@ class QuestionLogicSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -107,7 +109,7 @@ class QuestionLogicSchema {
     
     name: r'custom_script',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -119,7 +121,7 @@ class QuestionLogicSchema {
     
     name: r'field_api_call',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -131,7 +133,7 @@ class QuestionLogicSchema {
     defaultValue: false,
     name: r'is_disabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -143,7 +145,7 @@ class QuestionLogicSchema {
     
     name: r'on_change',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -155,7 +157,7 @@ class QuestionLogicSchema {
     
     name: r'triggers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -167,7 +169,7 @@ class QuestionLogicSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -179,7 +181,7 @@ class QuestionLogicSchema {
     
     name: r'visibility_condition',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -187,35 +189,37 @@ class QuestionLogicSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is QuestionLogicSchema &&
-     other.id == id &&
-     other.actionConfig == actionConfig &&
-     other.calculatedValue == calculatedValue &&
-     other.conditionalLogic == conditionalLogic &&
-     other.createdAt == createdAt &&
-     other.customScript == customScript &&
-     other.fieldApiCall == fieldApiCall &&
-     other.isDisabled == isDisabled &&
-     other.onChange == onChange &&
-     other.triggers == triggers &&
-     other.updatedAt == updatedAt &&
-     other.visibilityCondition == visibilityCondition;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    actionConfig.hashCode +
-    calculatedValue.hashCode +
-    conditionalLogic.hashCode +
-    createdAt.hashCode +
-    customScript.hashCode +
-    fieldApiCall.hashCode +
-    isDisabled.hashCode +
-    onChange.hashCode +
-    triggers.hashCode +
-    updatedAt.hashCode +
-    visibilityCondition.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is QuestionLogicSchema &&
+      other.id == id &&
+      other.actionConfig == actionConfig &&
+      other.calculatedValue == calculatedValue &&
+      other.conditionalLogic == conditionalLogic &&
+      other.createdAt == createdAt &&
+      other.customScript == customScript &&
+      other.fieldApiCall == fieldApiCall &&
+      other.isDisabled == isDisabled &&
+      other.onChange == onChange &&
+      other.triggers == triggers &&
+      other.updatedAt == updatedAt &&
+      other.visibilityCondition == visibilityCondition;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        actionConfig.hashCode +
+        calculatedValue.hashCode +
+        conditionalLogic.hashCode +
+        createdAt.hashCode +
+        customScript.hashCode +
+        fieldApiCall.hashCode +
+        isDisabled.hashCode +
+        onChange.hashCode +
+        triggers.hashCode +
+        updatedAt.hashCode +
+        visibilityCondition.hashCode;
 
   factory QuestionLogicSchema.fromJson(Map<String, dynamic> json) => _$QuestionLogicSchemaFromJson(json);
 

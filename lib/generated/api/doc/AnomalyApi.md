@@ -33,7 +33,7 @@ final String responseId = responseId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdAnomaliesResponseIdGet(formId, responseId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdAnomaliesResponseIdGet: $e\n');
 }
 ```
@@ -74,7 +74,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesBatchPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesBatchPost: $e\n');
 }
 ```
@@ -114,7 +114,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdDetectAnomaliesPost: $e\n');
 }
 ```
@@ -154,7 +154,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdThresholdsHistoryGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdThresholdsHistoryGet: $e\n');
 }
 ```
@@ -194,7 +194,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdThresholdsLatestGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdThresholdsLatestGet: $e\n');
 }
 ```
@@ -234,7 +234,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdThresholdsManualPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdThresholdsManualPost: $e\n');
 }
 ```
@@ -274,7 +274,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ProjectsProjectIdFormsFormIdThresholdsUpdateBaselinePost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling AnomalyApi->formApiV1ProjectsProjectIdFormsFormIdThresholdsUpdateBaselinePost: $e\n');
 }
 ```

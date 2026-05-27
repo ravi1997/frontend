@@ -31,7 +31,7 @@ class UserApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserChangePasswordPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -66,11 +66,12 @@ class UserApi {
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -100,7 +101,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserProfileGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -135,11 +136,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -170,7 +172,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [FormApiV1UserSecurityLockStatusUserIdGet200Response] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>> formApiV1UserSecurityLockStatusUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
@@ -206,11 +208,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockStatusUserIdGet200Response, FormApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'FormApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -240,7 +243,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserStatusGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -275,11 +278,12 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -309,7 +313,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserUsersGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -344,11 +348,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -379,7 +384,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserUsersPost({ 
     UserUpdateSchema? body,
     CancelToken? cancelToken,
@@ -405,14 +410,15 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -432,11 +438,12 @@ _bodyData=jsonEncode(body);
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -467,7 +474,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UserUsersUserIdDelete({ 
     required String userId,
     CancelToken? cancelToken,
@@ -514,7 +521,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserUsersUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
@@ -550,11 +557,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -585,7 +593,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UserUsersUserIdLockPost({ 
     required String userId,
     CancelToken? cancelToken,
@@ -633,7 +641,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserUsersUserIdPut({ 
     required String userId,
     UserUpdateSchema? body,
@@ -660,14 +668,15 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -687,11 +696,12 @@ _bodyData=jsonEncode(body);
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -722,7 +732,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UserUsersUserIdRolesPut({ 
     required String userId,
     CancelToken? cancelToken,
@@ -758,11 +768,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -793,7 +804,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UserUsersUserIdUnlockPost({ 
     required String userId,
     CancelToken? cancelToken,
@@ -839,7 +850,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersChangePasswordPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -874,11 +885,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -908,7 +920,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersProfileGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -943,11 +955,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -978,7 +991,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [FormApiV1UserSecurityLockStatusUserIdGet200Response] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>> formApiV1UsersSecurityLockStatusUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
@@ -1014,11 +1027,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockStatusUserIdGet200Response, FormApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'FormApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1048,7 +1062,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersStatusGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1083,11 +1097,12 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1117,7 +1132,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersUsersGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1152,11 +1167,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1187,7 +1203,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersUsersPost({ 
     UserUpdateSchema? body,
     CancelToken? cancelToken,
@@ -1213,14 +1229,15 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1240,11 +1257,12 @@ _bodyData=jsonEncode(body);
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1275,7 +1293,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UsersUsersUserIdDelete({ 
     required String userId,
     CancelToken? cancelToken,
@@ -1322,7 +1340,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersUsersUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
@@ -1358,11 +1376,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1393,7 +1412,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UsersUsersUserIdLockPost({ 
     required String userId,
     CancelToken? cancelToken,
@@ -1441,7 +1460,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersUsersUserIdPut({ 
     required String userId,
     UserUpdateSchema? body,
@@ -1468,14 +1487,15 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1495,11 +1515,12 @@ _bodyData=jsonEncode(body);
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1530,7 +1551,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<UserOut>> formApiV1UsersUsersUserIdRolesPut({ 
     required String userId,
     CancelToken? cancelToken,
@@ -1566,11 +1587,12 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     try {
 final rawData = _response.data;
 _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
+
     } catch (error, stackTrace) {
-      throw DioError(
+      throw DioException(
         requestOptions: _response.requestOptions,
         response: _response,
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -1601,7 +1623,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1UsersUsersUserIdUnlockPost({ 
     required String userId,
     CancelToken? cancelToken,

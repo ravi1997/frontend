@@ -29,7 +29,7 @@ final String orgId = orgId_example; // String |
 
 try {
     api.formApiV1SystemAnalyticsTrendsOrgIdGet(orgId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemApi->formApiV1SystemAnalyticsTrendsOrgIdGet: $e\n');
 }
 ```
@@ -68,7 +68,7 @@ final api = RidpApi().getSystemApi();
 
 try {
     api.formApiV1SystemEventHealthGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemApi->formApiV1SystemEventHealthGet: $e\n');
 }
 ```
@@ -104,7 +104,7 @@ final api = RidpApi().getSystemApi();
 
 try {
     api.formApiV1SystemGdprCleanupPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemApi->formApiV1SystemGdprCleanupPost: $e\n');
 }
 ```
@@ -141,7 +141,7 @@ final String taskId = taskId_example; // String | Celery task ID
 
 try {
     api.formApiV1SystemTasksTaskIdGet(taskId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling SystemApi->formApiV1SystemTasksTaskIdGet: $e\n');
 }
 ```

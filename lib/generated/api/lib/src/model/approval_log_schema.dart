@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'approval_log_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -39,7 +41,7 @@ class ApprovalLogSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -51,7 +53,7 @@ class ApprovalLogSchema {
     
     name: r'action',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -63,7 +65,7 @@ class ApprovalLogSchema {
     
     name: r'action_by',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -75,7 +77,7 @@ class ApprovalLogSchema {
     
     name: r'comment',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -87,7 +89,7 @@ class ApprovalLogSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -99,7 +101,7 @@ class ApprovalLogSchema {
     
     name: r'step_name',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class ApprovalLogSchema {
     
     name: r'timestamp',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class ApprovalLogSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -131,27 +133,29 @@ class ApprovalLogSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ApprovalLogSchema &&
-     other.id == id &&
-     other.action == action &&
-     other.actionBy == actionBy &&
-     other.comment == comment &&
-     other.createdAt == createdAt &&
-     other.stepName == stepName &&
-     other.timestamp == timestamp &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    action.hashCode +
-    actionBy.hashCode +
-    comment.hashCode +
-    createdAt.hashCode +
-    stepName.hashCode +
-    timestamp.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ApprovalLogSchema &&
+      other.id == id &&
+      other.action == action &&
+      other.actionBy == actionBy &&
+      other.comment == comment &&
+      other.createdAt == createdAt &&
+      other.stepName == stepName &&
+      other.timestamp == timestamp &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        action.hashCode +
+        actionBy.hashCode +
+        comment.hashCode +
+        createdAt.hashCode +
+        stepName.hashCode +
+        timestamp.hashCode +
+        updatedAt.hashCode;
 
   factory ApprovalLogSchema.fromJson(Map<String, dynamic> json) => _$ApprovalLogSchemaFromJson(json);
 
@@ -166,14 +170,21 @@ class ApprovalLogSchema {
 
 
 enum ApprovalLogSchemaActionEnum {
-  @JsonValue(r'approve')
-  approve,
-  @JsonValue(r'reject')
-  reject,
-  @JsonValue(r'revert')
-  revert,
-  @JsonValue(r'claim')
-  claim,
+@JsonValue(r'approve')
+approve(r'approve'),
+@JsonValue(r'reject')
+reject(r'reject'),
+@JsonValue(r'revert')
+revert(r'revert'),
+@JsonValue(r'claim')
+claim(r'claim');
+
+const ApprovalLogSchemaActionEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

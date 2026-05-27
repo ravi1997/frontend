@@ -26,7 +26,7 @@ final ProjectSchema body = ; // ProjectSchema |
 
 try {
     api.formApiV1ProjectsPost(body);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ProjectApi->formApiV1ProjectsPost: $e\n');
 }
 ```

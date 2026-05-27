@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'option_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -45,7 +47,7 @@ class OptionSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class OptionSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class OptionSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class OptionSchema {
     defaultValue: false,
     name: r'is_default',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -93,7 +95,7 @@ class OptionSchema {
     defaultValue: false,
     name: r'is_disabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -105,7 +107,7 @@ class OptionSchema {
     
     name: r'option_code',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,7 +119,7 @@ class OptionSchema {
     
     name: r'option_label',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -129,7 +131,7 @@ class OptionSchema {
     
     name: r'option_value',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -141,7 +143,7 @@ class OptionSchema {
     
     name: r'order',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -153,7 +155,7 @@ class OptionSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -165,7 +167,7 @@ class OptionSchema {
     
     name: r'visibility_condition',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,33 +175,35 @@ class OptionSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is OptionSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.isDefault == isDefault &&
-     other.isDisabled == isDisabled &&
-     other.optionCode == optionCode &&
-     other.optionLabel == optionLabel &&
-     other.optionValue == optionValue &&
-     other.order == order &&
-     other.updatedAt == updatedAt &&
-     other.visibilityCondition == visibilityCondition;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    isDefault.hashCode +
-    isDisabled.hashCode +
-    optionCode.hashCode +
-    optionLabel.hashCode +
-    optionValue.hashCode +
-    order.hashCode +
-    updatedAt.hashCode +
-    visibilityCondition.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is OptionSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.isDefault == isDefault &&
+      other.isDisabled == isDisabled &&
+      other.optionCode == optionCode &&
+      other.optionLabel == optionLabel &&
+      other.optionValue == optionValue &&
+      other.order == order &&
+      other.updatedAt == updatedAt &&
+      other.visibilityCondition == visibilityCondition;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        isDefault.hashCode +
+        isDisabled.hashCode +
+        optionCode.hashCode +
+        optionLabel.hashCode +
+        optionValue.hashCode +
+        order.hashCode +
+        updatedAt.hashCode +
+        visibilityCondition.hashCode;
 
   factory OptionSchema.fromJson(Map<String, dynamic> json) => _$OptionSchemaFromJson(json);
 

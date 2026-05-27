@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'logic_component_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -45,7 +47,7 @@ class LogicComponentSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class LogicComponentSchema {
     
     name: r'action_config',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class LogicComponentSchema {
     
     name: r'conditional_logic',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class LogicComponentSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -93,7 +95,7 @@ class LogicComponentSchema {
     
     name: r'custom_script',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -105,7 +107,7 @@ class LogicComponentSchema {
     
     name: r'field_api_call',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,7 +119,7 @@ class LogicComponentSchema {
     defaultValue: false,
     name: r'is_disabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -129,7 +131,7 @@ class LogicComponentSchema {
     
     name: r'on_change',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -141,7 +143,7 @@ class LogicComponentSchema {
     
     name: r'triggers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -153,7 +155,7 @@ class LogicComponentSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -165,7 +167,7 @@ class LogicComponentSchema {
     
     name: r'visibility_condition',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,33 +175,35 @@ class LogicComponentSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is LogicComponentSchema &&
-     other.id == id &&
-     other.actionConfig == actionConfig &&
-     other.conditionalLogic == conditionalLogic &&
-     other.createdAt == createdAt &&
-     other.customScript == customScript &&
-     other.fieldApiCall == fieldApiCall &&
-     other.isDisabled == isDisabled &&
-     other.onChange == onChange &&
-     other.triggers == triggers &&
-     other.updatedAt == updatedAt &&
-     other.visibilityCondition == visibilityCondition;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    actionConfig.hashCode +
-    conditionalLogic.hashCode +
-    createdAt.hashCode +
-    customScript.hashCode +
-    fieldApiCall.hashCode +
-    isDisabled.hashCode +
-    onChange.hashCode +
-    triggers.hashCode +
-    updatedAt.hashCode +
-    visibilityCondition.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is LogicComponentSchema &&
+      other.id == id &&
+      other.actionConfig == actionConfig &&
+      other.conditionalLogic == conditionalLogic &&
+      other.createdAt == createdAt &&
+      other.customScript == customScript &&
+      other.fieldApiCall == fieldApiCall &&
+      other.isDisabled == isDisabled &&
+      other.onChange == onChange &&
+      other.triggers == triggers &&
+      other.updatedAt == updatedAt &&
+      other.visibilityCondition == visibilityCondition;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        actionConfig.hashCode +
+        conditionalLogic.hashCode +
+        createdAt.hashCode +
+        customScript.hashCode +
+        fieldApiCall.hashCode +
+        isDisabled.hashCode +
+        onChange.hashCode +
+        triggers.hashCode +
+        updatedAt.hashCode +
+        visibilityCondition.hashCode;
 
   factory LogicComponentSchema.fromJson(Map<String, dynamic> json) => _$LogicComponentSchemaFromJson(json);
 

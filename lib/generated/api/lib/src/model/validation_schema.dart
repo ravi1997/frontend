@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'validation_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -79,7 +81,7 @@ class ValidationSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -91,7 +93,7 @@ class ValidationSchema {
     
     name: r'allowed_file_types',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,7 +105,7 @@ class ValidationSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -115,7 +117,7 @@ class ValidationSchema {
     
     name: r'custom_validations',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -127,7 +129,7 @@ class ValidationSchema {
     
     name: r'date_max',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -139,7 +141,7 @@ class ValidationSchema {
     
     name: r'date_min',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -151,7 +153,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'disable_future_dates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -163,7 +165,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'disable_past_dates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -175,7 +177,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'disable_weekends',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -187,7 +189,7 @@ class ValidationSchema {
     
     name: r'error_message',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -199,7 +201,7 @@ class ValidationSchema {
     
     name: r'input_mask',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -211,7 +213,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'is_required',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -223,7 +225,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'is_unique',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -235,7 +237,7 @@ class ValidationSchema {
     defaultValue: 'AND',
     name: r'logical_operator',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -247,7 +249,7 @@ class ValidationSchema {
     
     name: r'max_file_size',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -259,7 +261,7 @@ class ValidationSchema {
     
     name: r'max_files',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -271,7 +273,7 @@ class ValidationSchema {
     
     name: r'max_length',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -283,7 +285,7 @@ class ValidationSchema {
     
     name: r'max_selection',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -295,7 +297,7 @@ class ValidationSchema {
     
     name: r'max_value',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -307,7 +309,7 @@ class ValidationSchema {
     
     name: r'max_word_count',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -319,7 +321,7 @@ class ValidationSchema {
     
     name: r'min_length',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -331,7 +333,7 @@ class ValidationSchema {
     
     name: r'min_selection',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -343,7 +345,7 @@ class ValidationSchema {
     
     name: r'min_value',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -355,7 +357,7 @@ class ValidationSchema {
     
     name: r'min_word_count',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -367,7 +369,7 @@ class ValidationSchema {
     
     name: r'regex',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -379,7 +381,7 @@ class ValidationSchema {
     
     name: r'required_conditions',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -391,7 +393,7 @@ class ValidationSchema {
     defaultValue: false,
     name: r'requires_confirmation',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -403,7 +405,7 @@ class ValidationSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -411,67 +413,69 @@ class ValidationSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ValidationSchema &&
-     other.id == id &&
-     other.allowedFileTypes == allowedFileTypes &&
-     other.createdAt == createdAt &&
-     other.customValidations == customValidations &&
-     other.dateMax == dateMax &&
-     other.dateMin == dateMin &&
-     other.disableFutureDates == disableFutureDates &&
-     other.disablePastDates == disablePastDates &&
-     other.disableWeekends == disableWeekends &&
-     other.errorMessage == errorMessage &&
-     other.inputMask == inputMask &&
-     other.isRequired == isRequired &&
-     other.isUnique == isUnique &&
-     other.logicalOperator == logicalOperator &&
-     other.maxFileSize == maxFileSize &&
-     other.maxFiles == maxFiles &&
-     other.maxLength == maxLength &&
-     other.maxSelection == maxSelection &&
-     other.maxValue == maxValue &&
-     other.maxWordCount == maxWordCount &&
-     other.minLength == minLength &&
-     other.minSelection == minSelection &&
-     other.minValue == minValue &&
-     other.minWordCount == minWordCount &&
-     other.regex == regex &&
-     other.requiredConditions == requiredConditions &&
-     other.requiresConfirmation == requiresConfirmation &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    allowedFileTypes.hashCode +
-    createdAt.hashCode +
-    customValidations.hashCode +
-    dateMax.hashCode +
-    dateMin.hashCode +
-    disableFutureDates.hashCode +
-    disablePastDates.hashCode +
-    disableWeekends.hashCode +
-    errorMessage.hashCode +
-    inputMask.hashCode +
-    isRequired.hashCode +
-    isUnique.hashCode +
-    logicalOperator.hashCode +
-    maxFileSize.hashCode +
-    maxFiles.hashCode +
-    maxLength.hashCode +
-    maxSelection.hashCode +
-    maxValue.hashCode +
-    maxWordCount.hashCode +
-    minLength.hashCode +
-    minSelection.hashCode +
-    minValue.hashCode +
-    minWordCount.hashCode +
-    regex.hashCode +
-    requiredConditions.hashCode +
-    requiresConfirmation.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ValidationSchema &&
+      other.id == id &&
+      other.allowedFileTypes == allowedFileTypes &&
+      other.createdAt == createdAt &&
+      other.customValidations == customValidations &&
+      other.dateMax == dateMax &&
+      other.dateMin == dateMin &&
+      other.disableFutureDates == disableFutureDates &&
+      other.disablePastDates == disablePastDates &&
+      other.disableWeekends == disableWeekends &&
+      other.errorMessage == errorMessage &&
+      other.inputMask == inputMask &&
+      other.isRequired == isRequired &&
+      other.isUnique == isUnique &&
+      other.logicalOperator == logicalOperator &&
+      other.maxFileSize == maxFileSize &&
+      other.maxFiles == maxFiles &&
+      other.maxLength == maxLength &&
+      other.maxSelection == maxSelection &&
+      other.maxValue == maxValue &&
+      other.maxWordCount == maxWordCount &&
+      other.minLength == minLength &&
+      other.minSelection == minSelection &&
+      other.minValue == minValue &&
+      other.minWordCount == minWordCount &&
+      other.regex == regex &&
+      other.requiredConditions == requiredConditions &&
+      other.requiresConfirmation == requiresConfirmation &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        allowedFileTypes.hashCode +
+        createdAt.hashCode +
+        customValidations.hashCode +
+        dateMax.hashCode +
+        dateMin.hashCode +
+        disableFutureDates.hashCode +
+        disablePastDates.hashCode +
+        disableWeekends.hashCode +
+        errorMessage.hashCode +
+        inputMask.hashCode +
+        isRequired.hashCode +
+        isUnique.hashCode +
+        logicalOperator.hashCode +
+        maxFileSize.hashCode +
+        maxFiles.hashCode +
+        maxLength.hashCode +
+        maxSelection.hashCode +
+        maxValue.hashCode +
+        maxWordCount.hashCode +
+        minLength.hashCode +
+        minSelection.hashCode +
+        minValue.hashCode +
+        minWordCount.hashCode +
+        regex.hashCode +
+        requiredConditions.hashCode +
+        requiresConfirmation.hashCode +
+        updatedAt.hashCode;
 
   factory ValidationSchema.fromJson(Map<String, dynamic> json) => _$ValidationSchemaFromJson(json);
 

@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'form_api_v1_auth_request_otp_post_request.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -27,7 +29,7 @@ class FormApiV1AuthRequestOtpPostRequest {
     
     name: r'email',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -39,7 +41,7 @@ class FormApiV1AuthRequestOtpPostRequest {
     
     name: r'mobile',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -47,15 +49,17 @@ class FormApiV1AuthRequestOtpPostRequest {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is FormApiV1AuthRequestOtpPostRequest &&
-     other.email == email &&
-     other.mobile == mobile;
 
-  @override
-  int get hashCode =>
-    email.hashCode +
-    mobile.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is FormApiV1AuthRequestOtpPostRequest &&
+      other.email == email &&
+      other.mobile == mobile;
+
+    @override
+    int get hashCode =>
+        email.hashCode +
+        mobile.hashCode;
 
   factory FormApiV1AuthRequestOtpPostRequest.fromJson(Map<String, dynamic> json) => _$FormApiV1AuthRequestOtpPostRequestFromJson(json);
 

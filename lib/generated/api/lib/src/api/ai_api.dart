@@ -28,7 +28,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiCrossAnalysisPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -74,7 +74,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdAnomaliesPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -121,7 +121,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdAnomalyDetectPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -168,7 +168,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdCacheDelete({ 
     required String formId,
     CancelToken? cancelToken,
@@ -215,7 +215,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdCacheInvalidatePost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -262,7 +262,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdExportPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -310,7 +310,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdResponsesResponseIdAnalyzePost({ 
     required String formId,
     required String responseId,
@@ -359,7 +359,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdResponsesResponseIdModeratePost({ 
     required String formId,
     required String responseId,
@@ -407,7 +407,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -454,7 +454,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdSecurityScanPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -501,7 +501,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdSentimentGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -548,7 +548,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdSummarizePost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -595,7 +595,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiFormIdValidateDesignPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -641,7 +641,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiGeneratePost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -686,7 +686,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -731,7 +731,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSuggestionsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -776,7 +776,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiTemplatesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -822,7 +822,7 @@ class AiApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiTemplatesTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,

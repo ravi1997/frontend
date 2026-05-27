@@ -28,7 +28,7 @@ class WorkflowApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WorkflowsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class WorkflowApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WorkflowsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -119,7 +119,7 @@ class WorkflowApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WorkflowsWorkflowIdDelete({ 
     required String workflowId,
     CancelToken? cancelToken,
@@ -166,7 +166,7 @@ class WorkflowApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WorkflowsWorkflowIdGet({ 
     required String workflowId,
     CancelToken? cancelToken,
@@ -213,7 +213,7 @@ class WorkflowApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1WorkflowsWorkflowIdPut({ 
     required String workflowId,
     CancelToken? cancelToken,

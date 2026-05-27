@@ -34,7 +34,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsGet: $e\n');
 }
 ```
@@ -70,7 +70,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsJobsGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsGet: $e\n');
 }
 ```
@@ -107,7 +107,7 @@ final String jobId = jobId_example; // String |
 
 try {
     api.formApiV1FormsTranslationsJobsJobIdCancelPatch(jobId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsJobIdCancelPatch: $e\n');
 }
 ```
@@ -147,7 +147,7 @@ final String jobId = jobId_example; // String |
 
 try {
     api.formApiV1FormsTranslationsJobsJobIdContentGet(jobId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsJobIdContentGet: $e\n');
 }
 ```
@@ -187,7 +187,7 @@ final String jobId = jobId_example; // String |
 
 try {
     api.formApiV1FormsTranslationsJobsJobIdDelete(jobId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsJobIdDelete: $e\n');
 }
 ```
@@ -227,7 +227,7 @@ final String jobId = jobId_example; // String |
 
 try {
     api.formApiV1FormsTranslationsJobsJobIdGet(jobId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsJobIdGet: $e\n');
 }
 ```
@@ -266,7 +266,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsJobsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsJobsPost: $e\n');
 }
 ```
@@ -302,7 +302,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsLanguagesGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsLanguagesGet: $e\n');
 }
 ```
@@ -338,7 +338,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsPost: $e\n');
 }
 ```
@@ -374,7 +374,7 @@ final api = RidpApi().getTranslationApi();
 
 try {
     api.formApiV1FormsTranslationsPreviewPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling TranslationApi->formApiV1FormsTranslationsPreviewPost: $e\n');
 }
 ```

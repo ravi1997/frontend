@@ -28,7 +28,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ViewFormIdGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ViewApi->formApiV1ViewFormIdGet: $e\n');
 }
 ```
@@ -68,7 +68,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1ViewFormIdInfoGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ViewApi->formApiV1ViewFormIdInfoGet: $e\n');
 }
 ```
@@ -107,7 +107,7 @@ final api = RidpApi().getViewApi();
 
 try {
     api.formApiV1ViewGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ViewApi->formApiV1ViewGet: $e\n');
 }
 ```

@@ -36,7 +36,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdNlpSearchPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdNlpSearchPost: $e\n');
 }
 ```
@@ -76,7 +76,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdPopularQueriesGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdPopularQueriesGet: $e\n');
 }
 ```
@@ -116,7 +116,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdQuerySuggestionsGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdQuerySuggestionsGet: $e\n');
 }
 ```
@@ -156,7 +156,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSearchHistoryDelete(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSearchHistoryDelete: $e\n');
 }
 ```
@@ -196,7 +196,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSearchHistoryGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSearchHistoryGet: $e\n');
 }
 ```
@@ -236,7 +236,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSearchHistoryPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSearchHistoryPost: $e\n');
 }
 ```
@@ -277,7 +277,7 @@ final String searchId = searchId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSearchHistorySearchIdDelete(formId, searchId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSearchHistorySearchIdDelete: $e\n');
 }
 ```
@@ -318,7 +318,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSearchStatsGet(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSearchStatsGet: $e\n');
 }
 ```
@@ -358,7 +358,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSemanticSearchPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSemanticSearchPost: $e\n');
 }
 ```
@@ -398,7 +398,7 @@ final String formId = formId_example; // String |
 
 try {
     api.formApiV1AiSearchFormIdSemanticSearchStreamPost(formId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchFormIdSemanticSearchStreamPost: $e\n');
 }
 ```
@@ -437,7 +437,7 @@ final api = RidpApi().getNlpSearchApi();
 
 try {
     api.formApiV1AiSearchHealthGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling NlpSearchApi->formApiV1AiSearchHealthGet: $e\n');
 }
 ```

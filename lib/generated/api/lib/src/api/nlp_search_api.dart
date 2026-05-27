@@ -29,7 +29,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdNlpSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -76,7 +76,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdPopularQueriesGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -123,7 +123,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdQuerySuggestionsGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -170,7 +170,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryDelete({ 
     required String formId,
     CancelToken? cancelToken,
@@ -217,7 +217,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -264,7 +264,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -312,7 +312,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSearchHistorySearchIdDelete({ 
     required String formId,
     required String searchId,
@@ -360,7 +360,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSearchStatsGet({ 
     required String formId,
     CancelToken? cancelToken,
@@ -407,7 +407,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSemanticSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -454,7 +454,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchFormIdSemanticSearchStreamPost({ 
     required String formId,
     CancelToken? cancelToken,
@@ -500,7 +500,7 @@ class NlpSearchApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1AiSearchHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,

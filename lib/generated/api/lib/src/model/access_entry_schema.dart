@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'access_entry_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -37,7 +39,7 @@ class AccessEntrySchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -49,7 +51,7 @@ class AccessEntrySchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -61,7 +63,7 @@ class AccessEntrySchema {
     
     name: r'grantee_group',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -73,7 +75,7 @@ class AccessEntrySchema {
     
     name: r'grantee_type',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -85,7 +87,7 @@ class AccessEntrySchema {
     
     name: r'grantee_user',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -97,7 +99,7 @@ class AccessEntrySchema {
     
     name: r'permissions',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -109,7 +111,7 @@ class AccessEntrySchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,25 +119,27 @@ class AccessEntrySchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is AccessEntrySchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.granteeGroup == granteeGroup &&
-     other.granteeType == granteeType &&
-     other.granteeUser == granteeUser &&
-     other.permissions == permissions &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    granteeGroup.hashCode +
-    granteeType.hashCode +
-    granteeUser.hashCode +
-    permissions.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is AccessEntrySchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.granteeGroup == granteeGroup &&
+      other.granteeType == granteeType &&
+      other.granteeUser == granteeUser &&
+      other.permissions == permissions &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        granteeGroup.hashCode +
+        granteeType.hashCode +
+        granteeUser.hashCode +
+        permissions.hashCode +
+        updatedAt.hashCode;
 
   factory AccessEntrySchema.fromJson(Map<String, dynamic> json) => _$AccessEntrySchemaFromJson(json);
 
@@ -150,29 +154,43 @@ class AccessEntrySchema {
 
 
 enum AccessEntrySchemaGranteeTypeEnum {
-  @JsonValue(r'user')
-  user,
-  @JsonValue(r'group')
-  group,
+@JsonValue(r'user')
+user(r'user'),
+@JsonValue(r'group')
+group(r'group');
+
+const AccessEntrySchemaGranteeTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 
 
 enum AccessEntrySchemaPermissionsEnum {
-  @JsonValue(r'view')
-  view,
-  @JsonValue(r'edit')
-  edit,
-  @JsonValue(r'delete')
-  delete,
-  @JsonValue(r'publish')
-  publish,
-  @JsonValue(r'export_data')
-  exportData,
-  @JsonValue(r'manage_access')
-  manageAccess,
-  @JsonValue(r'approve_submissions')
-  approveSubmissions,
+@JsonValue(r'view')
+view(r'view'),
+@JsonValue(r'edit')
+edit(r'edit'),
+@JsonValue(r'delete')
+delete(r'delete'),
+@JsonValue(r'publish')
+publish(r'publish'),
+@JsonValue(r'export_data')
+exportData(r'export_data'),
+@JsonValue(r'manage_access')
+manageAccess(r'manage_access'),
+@JsonValue(r'approve_submissions')
+approveSubmissions(r'approve_submissions');
+
+const AccessEntrySchemaPermissionsEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

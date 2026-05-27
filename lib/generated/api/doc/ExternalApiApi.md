@@ -29,7 +29,7 @@ final String employeeId = employeeId_example; // String |
 
 try {
     api.formApiV1ExternalEmployeeEmployeeIdGet(employeeId);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ExternalApiApi->formApiV1ExternalEmployeeEmployeeIdGet: $e\n');
 }
 ```
@@ -68,7 +68,7 @@ final api = RidpApi().getExternalApiApi();
 
 try {
     api.formApiV1ExternalMailPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ExternalApiApi->formApiV1ExternalMailPost: $e\n');
 }
 ```
@@ -104,7 +104,7 @@ final api = RidpApi().getExternalApiApi();
 
 try {
     api.formApiV1ExternalSmsPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ExternalApiApi->formApiV1ExternalSmsPost: $e\n');
 }
 ```
@@ -141,7 +141,7 @@ final String uhid = uhid_example; // String |
 
 try {
     api.formApiV1ExternalUhidUhidGet(uhid);
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling ExternalApiApi->formApiV1ExternalUhidUhidGet: $e\n');
 }
 ```

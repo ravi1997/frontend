@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'system_settings_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -99,7 +101,7 @@ class SystemSettingsSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -111,7 +113,7 @@ class SystemSettingsSchema {
     
     name: r'account_lock_duration_hours',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -123,7 +125,7 @@ class SystemSettingsSchema {
     defaultValue: 'pdf,docx,xlsx,jpg,jpeg,png,gif,svg,mp4,mp3',
     name: r'allowed_upload_extensions',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -135,7 +137,7 @@ class SystemSettingsSchema {
     
     name: r'cache_api_response_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -147,7 +149,7 @@ class SystemSettingsSchema {
     
     name: r'cache_dashboard_widget_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -159,7 +161,7 @@ class SystemSettingsSchema {
     
     name: r'cache_default_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -171,7 +173,7 @@ class SystemSettingsSchema {
     defaultValue: true,
     name: r'cache_enabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -183,7 +185,7 @@ class SystemSettingsSchema {
     
     name: r'cache_form_schema_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -195,7 +197,7 @@ class SystemSettingsSchema {
     
     name: r'cache_query_result_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -207,7 +209,7 @@ class SystemSettingsSchema {
     
     name: r'cache_user_session_ttl_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -219,7 +221,7 @@ class SystemSettingsSchema {
     defaultValue: true,
     name: r'cors_enabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -231,7 +233,7 @@ class SystemSettingsSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -243,7 +245,7 @@ class SystemSettingsSchema {
     defaultValue: false,
     name: r'debug_mode',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -255,7 +257,7 @@ class SystemSettingsSchema {
     defaultValue: 'default',
     name: r'env_key',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -267,7 +269,7 @@ class SystemSettingsSchema {
     
     name: r'jwt_access_token_expires_minutes',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -279,7 +281,7 @@ class SystemSettingsSchema {
     
     name: r'jwt_refresh_token_expires_days',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -291,7 +293,7 @@ class SystemSettingsSchema {
     defaultValue: 'http://ollama:11434/v1',
     name: r'llm_api_url',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -303,7 +305,7 @@ class SystemSettingsSchema {
     defaultValue: 'llama3',
     name: r'llm_model',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -315,7 +317,7 @@ class SystemSettingsSchema {
     defaultValue: 'ollama',
     name: r'llm_provider',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -327,7 +329,7 @@ class SystemSettingsSchema {
     
     name: r'max_failed_login_attempts',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -339,7 +341,7 @@ class SystemSettingsSchema {
     
     name: r'max_otp_resends',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -351,7 +353,7 @@ class SystemSettingsSchema {
     
     name: r'max_upload_size_mb',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -363,7 +365,7 @@ class SystemSettingsSchema {
     defaultValue: 'http://localhost:11434',
     name: r'ollama_api_url',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -375,7 +377,7 @@ class SystemSettingsSchema {
     
     name: r'ollama_connection_timeout_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -387,7 +389,7 @@ class SystemSettingsSchema {
     defaultValue: 'nomic-embed-text',
     name: r'ollama_embedding_model',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -399,7 +401,7 @@ class SystemSettingsSchema {
     
     name: r'ollama_pool_size',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -411,7 +413,7 @@ class SystemSettingsSchema {
     
     name: r'ollama_pool_timeout_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -423,7 +425,7 @@ class SystemSettingsSchema {
     
     name: r'otp_expiration_minutes',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -435,7 +437,7 @@ class SystemSettingsSchema {
     
     name: r'password_expiration_days',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -447,7 +449,7 @@ class SystemSettingsSchema {
     defaultValue: true,
     name: r'rate_limit_enabled',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -459,7 +461,7 @@ class SystemSettingsSchema {
     
     name: r'rate_limit_requests_per_minute',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -471,7 +473,7 @@ class SystemSettingsSchema {
     
     name: r'redis_db',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -483,7 +485,7 @@ class SystemSettingsSchema {
     defaultValue: 'localhost',
     name: r'redis_host',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -495,7 +497,7 @@ class SystemSettingsSchema {
     
     name: r'redis_max_connections',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -507,7 +509,7 @@ class SystemSettingsSchema {
     
     name: r'redis_port',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -519,7 +521,7 @@ class SystemSettingsSchema {
     
     name: r'redis_socket_timeout_seconds',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -531,7 +533,7 @@ class SystemSettingsSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -543,7 +545,7 @@ class SystemSettingsSchema {
     
     name: r'updated_by',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -551,87 +553,89 @@ class SystemSettingsSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is SystemSettingsSchema &&
-     other.id == id &&
-     other.accountLockDurationHours == accountLockDurationHours &&
-     other.allowedUploadExtensions == allowedUploadExtensions &&
-     other.cacheApiResponseTtlSeconds == cacheApiResponseTtlSeconds &&
-     other.cacheDashboardWidgetTtlSeconds == cacheDashboardWidgetTtlSeconds &&
-     other.cacheDefaultTtlSeconds == cacheDefaultTtlSeconds &&
-     other.cacheEnabled == cacheEnabled &&
-     other.cacheFormSchemaTtlSeconds == cacheFormSchemaTtlSeconds &&
-     other.cacheQueryResultTtlSeconds == cacheQueryResultTtlSeconds &&
-     other.cacheUserSessionTtlSeconds == cacheUserSessionTtlSeconds &&
-     other.corsEnabled == corsEnabled &&
-     other.createdAt == createdAt &&
-     other.debugMode == debugMode &&
-     other.envKey == envKey &&
-     other.jwtAccessTokenExpiresMinutes == jwtAccessTokenExpiresMinutes &&
-     other.jwtRefreshTokenExpiresDays == jwtRefreshTokenExpiresDays &&
-     other.llmApiUrl == llmApiUrl &&
-     other.llmModel == llmModel &&
-     other.llmProvider == llmProvider &&
-     other.maxFailedLoginAttempts == maxFailedLoginAttempts &&
-     other.maxOtpResends == maxOtpResends &&
-     other.maxUploadSizeMb == maxUploadSizeMb &&
-     other.ollamaApiUrl == ollamaApiUrl &&
-     other.ollamaConnectionTimeoutSeconds == ollamaConnectionTimeoutSeconds &&
-     other.ollamaEmbeddingModel == ollamaEmbeddingModel &&
-     other.ollamaPoolSize == ollamaPoolSize &&
-     other.ollamaPoolTimeoutSeconds == ollamaPoolTimeoutSeconds &&
-     other.otpExpirationMinutes == otpExpirationMinutes &&
-     other.passwordExpirationDays == passwordExpirationDays &&
-     other.rateLimitEnabled == rateLimitEnabled &&
-     other.rateLimitRequestsPerMinute == rateLimitRequestsPerMinute &&
-     other.redisDb == redisDb &&
-     other.redisHost == redisHost &&
-     other.redisMaxConnections == redisMaxConnections &&
-     other.redisPort == redisPort &&
-     other.redisSocketTimeoutSeconds == redisSocketTimeoutSeconds &&
-     other.updatedAt == updatedAt &&
-     other.updatedBy == updatedBy;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    accountLockDurationHours.hashCode +
-    allowedUploadExtensions.hashCode +
-    cacheApiResponseTtlSeconds.hashCode +
-    cacheDashboardWidgetTtlSeconds.hashCode +
-    cacheDefaultTtlSeconds.hashCode +
-    cacheEnabled.hashCode +
-    cacheFormSchemaTtlSeconds.hashCode +
-    cacheQueryResultTtlSeconds.hashCode +
-    cacheUserSessionTtlSeconds.hashCode +
-    corsEnabled.hashCode +
-    createdAt.hashCode +
-    debugMode.hashCode +
-    envKey.hashCode +
-    jwtAccessTokenExpiresMinutes.hashCode +
-    jwtRefreshTokenExpiresDays.hashCode +
-    llmApiUrl.hashCode +
-    llmModel.hashCode +
-    llmProvider.hashCode +
-    maxFailedLoginAttempts.hashCode +
-    maxOtpResends.hashCode +
-    maxUploadSizeMb.hashCode +
-    ollamaApiUrl.hashCode +
-    ollamaConnectionTimeoutSeconds.hashCode +
-    ollamaEmbeddingModel.hashCode +
-    ollamaPoolSize.hashCode +
-    ollamaPoolTimeoutSeconds.hashCode +
-    otpExpirationMinutes.hashCode +
-    passwordExpirationDays.hashCode +
-    rateLimitEnabled.hashCode +
-    rateLimitRequestsPerMinute.hashCode +
-    redisDb.hashCode +
-    redisHost.hashCode +
-    redisMaxConnections.hashCode +
-    redisPort.hashCode +
-    redisSocketTimeoutSeconds.hashCode +
-    updatedAt.hashCode +
-    updatedBy.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is SystemSettingsSchema &&
+      other.id == id &&
+      other.accountLockDurationHours == accountLockDurationHours &&
+      other.allowedUploadExtensions == allowedUploadExtensions &&
+      other.cacheApiResponseTtlSeconds == cacheApiResponseTtlSeconds &&
+      other.cacheDashboardWidgetTtlSeconds == cacheDashboardWidgetTtlSeconds &&
+      other.cacheDefaultTtlSeconds == cacheDefaultTtlSeconds &&
+      other.cacheEnabled == cacheEnabled &&
+      other.cacheFormSchemaTtlSeconds == cacheFormSchemaTtlSeconds &&
+      other.cacheQueryResultTtlSeconds == cacheQueryResultTtlSeconds &&
+      other.cacheUserSessionTtlSeconds == cacheUserSessionTtlSeconds &&
+      other.corsEnabled == corsEnabled &&
+      other.createdAt == createdAt &&
+      other.debugMode == debugMode &&
+      other.envKey == envKey &&
+      other.jwtAccessTokenExpiresMinutes == jwtAccessTokenExpiresMinutes &&
+      other.jwtRefreshTokenExpiresDays == jwtRefreshTokenExpiresDays &&
+      other.llmApiUrl == llmApiUrl &&
+      other.llmModel == llmModel &&
+      other.llmProvider == llmProvider &&
+      other.maxFailedLoginAttempts == maxFailedLoginAttempts &&
+      other.maxOtpResends == maxOtpResends &&
+      other.maxUploadSizeMb == maxUploadSizeMb &&
+      other.ollamaApiUrl == ollamaApiUrl &&
+      other.ollamaConnectionTimeoutSeconds == ollamaConnectionTimeoutSeconds &&
+      other.ollamaEmbeddingModel == ollamaEmbeddingModel &&
+      other.ollamaPoolSize == ollamaPoolSize &&
+      other.ollamaPoolTimeoutSeconds == ollamaPoolTimeoutSeconds &&
+      other.otpExpirationMinutes == otpExpirationMinutes &&
+      other.passwordExpirationDays == passwordExpirationDays &&
+      other.rateLimitEnabled == rateLimitEnabled &&
+      other.rateLimitRequestsPerMinute == rateLimitRequestsPerMinute &&
+      other.redisDb == redisDb &&
+      other.redisHost == redisHost &&
+      other.redisMaxConnections == redisMaxConnections &&
+      other.redisPort == redisPort &&
+      other.redisSocketTimeoutSeconds == redisSocketTimeoutSeconds &&
+      other.updatedAt == updatedAt &&
+      other.updatedBy == updatedBy;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        accountLockDurationHours.hashCode +
+        allowedUploadExtensions.hashCode +
+        cacheApiResponseTtlSeconds.hashCode +
+        cacheDashboardWidgetTtlSeconds.hashCode +
+        cacheDefaultTtlSeconds.hashCode +
+        cacheEnabled.hashCode +
+        cacheFormSchemaTtlSeconds.hashCode +
+        cacheQueryResultTtlSeconds.hashCode +
+        cacheUserSessionTtlSeconds.hashCode +
+        corsEnabled.hashCode +
+        createdAt.hashCode +
+        debugMode.hashCode +
+        envKey.hashCode +
+        jwtAccessTokenExpiresMinutes.hashCode +
+        jwtRefreshTokenExpiresDays.hashCode +
+        llmApiUrl.hashCode +
+        llmModel.hashCode +
+        llmProvider.hashCode +
+        maxFailedLoginAttempts.hashCode +
+        maxOtpResends.hashCode +
+        maxUploadSizeMb.hashCode +
+        ollamaApiUrl.hashCode +
+        ollamaConnectionTimeoutSeconds.hashCode +
+        ollamaEmbeddingModel.hashCode +
+        ollamaPoolSize.hashCode +
+        ollamaPoolTimeoutSeconds.hashCode +
+        otpExpirationMinutes.hashCode +
+        passwordExpirationDays.hashCode +
+        rateLimitEnabled.hashCode +
+        rateLimitRequestsPerMinute.hashCode +
+        redisDb.hashCode +
+        redisHost.hashCode +
+        redisMaxConnections.hashCode +
+        redisPort.hashCode +
+        redisSocketTimeoutSeconds.hashCode +
+        updatedAt.hashCode +
+        updatedBy.hashCode;
 
   factory SystemSettingsSchema.fromJson(Map<String, dynamic> json) => _$SystemSettingsSchemaFromJson(json);
 

@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 **form** | **Object** |  | [optional] 
 **isDeleted** | **bool** |  | [optional] [default to false]
 **organizationId** | **String** |  | 
-**pipeline** | **List&lt;Object&gt;** |  | 
+**pipeline** | [**List&lt;Map&lt;String, Object&gt;&gt;**](Map.md) |  | 
 **project** | **Object** |  | [optional] 
 **tags** | **List&lt;String&gt;** |  | [optional] 
 **updatedAt** | **Object** |  | [optional] 

@@ -28,7 +28,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1CustomFieldsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -73,7 +73,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1CustomFieldsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -119,7 +119,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1CustomFieldsTemplateIdDelete({ 
     required String templateId,
     CancelToken? cancelToken,
@@ -166,7 +166,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1CustomFieldsTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,
@@ -212,7 +212,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1TemplatesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -257,7 +257,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1TemplatesPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -303,7 +303,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1TemplatesTemplateIdDelete({ 
     required String templateId,
     CancelToken? cancelToken,
@@ -350,7 +350,7 @@ class LibraryApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
+  /// Throws [DioException] if API call or serialization fails
   Future<Response<void>> formApiV1TemplatesTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,

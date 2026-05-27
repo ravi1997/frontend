@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'analytics_state_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -35,7 +37,7 @@ class AnalyticsStateSchema {
     
     name: r'action_type',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -47,7 +49,7 @@ class AnalyticsStateSchema {
     
     name: r'event_timestamp',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -59,11 +61,11 @@ class AnalyticsStateSchema {
     
     name: r'flattened_fields',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
-  final Object flattenedFields;
+  final Map<String, Object> flattenedFields;
 
 
 
@@ -71,7 +73,7 @@ class AnalyticsStateSchema {
     
     name: r'form_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -83,7 +85,7 @@ class AnalyticsStateSchema {
     
     name: r'response_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -95,7 +97,7 @@ class AnalyticsStateSchema {
     
     name: r'tenant_id',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,23 +105,25 @@ class AnalyticsStateSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is AnalyticsStateSchema &&
-     other.actionType == actionType &&
-     other.eventTimestamp == eventTimestamp &&
-     other.flattenedFields == flattenedFields &&
-     other.formId == formId &&
-     other.responseId == responseId &&
-     other.tenantId == tenantId;
 
-  @override
-  int get hashCode =>
-    actionType.hashCode +
-    eventTimestamp.hashCode +
-    flattenedFields.hashCode +
-    formId.hashCode +
-    responseId.hashCode +
-    tenantId.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is AnalyticsStateSchema &&
+      other.actionType == actionType &&
+      other.eventTimestamp == eventTimestamp &&
+      other.flattenedFields == flattenedFields &&
+      other.formId == formId &&
+      other.responseId == responseId &&
+      other.tenantId == tenantId;
+
+    @override
+    int get hashCode =>
+        actionType.hashCode +
+        eventTimestamp.hashCode +
+        flattenedFields.hashCode +
+        formId.hashCode +
+        responseId.hashCode +
+        tenantId.hashCode;
 
   factory AnalyticsStateSchema.fromJson(Map<String, dynamic> json) => _$AnalyticsStateSchemaFromJson(json);
 

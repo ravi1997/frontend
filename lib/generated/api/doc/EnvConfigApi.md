@@ -27,7 +27,7 @@ final api = RidpApi().getEnvConfigApi();
 
 try {
     api.formApiV1AdminEnvConfigGet();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling EnvConfigApi->formApiV1AdminEnvConfigGet: $e\n');
 }
 ```
@@ -63,7 +63,7 @@ final api = RidpApi().getEnvConfigApi();
 
 try {
     api.formApiV1AdminEnvConfigPost();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling EnvConfigApi->formApiV1AdminEnvConfigPost: $e\n');
 }
 ```
@@ -99,7 +99,7 @@ final api = RidpApi().getEnvConfigApi();
 
 try {
     api.formApiV1AdminEnvConfigPut();
-} catch on DioError (e) {
+} on DioException catch (e) {
     print('Exception when calling EnvConfigApi->formApiV1AdminEnvConfigPut: $e\n');
 }
 ```

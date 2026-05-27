@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'approval_step_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -45,7 +47,7 @@ class ApprovalStepSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class ApprovalStepSchema {
     defaultValue: 'any_one',
     name: r'approval_type',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class ApprovalStepSchema {
     
     name: r'approver_groups',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class ApprovalStepSchema {
     
     name: r'approvers',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -93,7 +95,7 @@ class ApprovalStepSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -106,7 +108,7 @@ class ApprovalStepSchema {
     
     name: r'min_approvals_required',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -118,7 +120,7 @@ class ApprovalStepSchema {
     
     name: r'on_approve_script',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -130,7 +132,7 @@ class ApprovalStepSchema {
     
     name: r'on_reject_script',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -142,7 +144,7 @@ class ApprovalStepSchema {
     
     name: r'order',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -154,7 +156,7 @@ class ApprovalStepSchema {
     
     name: r'step_name',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -166,7 +168,7 @@ class ApprovalStepSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -174,33 +176,35 @@ class ApprovalStepSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is ApprovalStepSchema &&
-     other.id == id &&
-     other.approvalType == approvalType &&
-     other.approverGroups == approverGroups &&
-     other.approvers == approvers &&
-     other.createdAt == createdAt &&
-     other.minApprovalsRequired == minApprovalsRequired &&
-     other.onApproveScript == onApproveScript &&
-     other.onRejectScript == onRejectScript &&
-     other.order == order &&
-     other.stepName == stepName &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    approvalType.hashCode +
-    approverGroups.hashCode +
-    approvers.hashCode +
-    createdAt.hashCode +
-    minApprovalsRequired.hashCode +
-    onApproveScript.hashCode +
-    onRejectScript.hashCode +
-    order.hashCode +
-    stepName.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ApprovalStepSchema &&
+      other.id == id &&
+      other.approvalType == approvalType &&
+      other.approverGroups == approverGroups &&
+      other.approvers == approvers &&
+      other.createdAt == createdAt &&
+      other.minApprovalsRequired == minApprovalsRequired &&
+      other.onApproveScript == onApproveScript &&
+      other.onRejectScript == onRejectScript &&
+      other.order == order &&
+      other.stepName == stepName &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        approvalType.hashCode +
+        approverGroups.hashCode +
+        approvers.hashCode +
+        createdAt.hashCode +
+        minApprovalsRequired.hashCode +
+        onApproveScript.hashCode +
+        onRejectScript.hashCode +
+        order.hashCode +
+        stepName.hashCode +
+        updatedAt.hashCode;
 
   factory ApprovalStepSchema.fromJson(Map<String, dynamic> json) => _$ApprovalStepSchemaFromJson(json);
 
@@ -215,14 +219,21 @@ class ApprovalStepSchema {
 
 
 enum ApprovalStepSchemaApprovalTypeEnum {
-  @JsonValue(r'sequential')
-  sequential,
-  @JsonValue(r'parallel')
-  parallel,
-  @JsonValue(r'maker-checker')
-  makerChecker,
-  @JsonValue(r'any_one')
-  anyOne,
+@JsonValue(r'sequential')
+sequential(r'sequential'),
+@JsonValue(r'parallel')
+parallel(r'parallel'),
+@JsonValue(r'maker-checker')
+makerChecker(r'maker-checker'),
+@JsonValue(r'any_one')
+anyOne(r'any_one');
+
+const ApprovalStepSchemaApprovalTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 

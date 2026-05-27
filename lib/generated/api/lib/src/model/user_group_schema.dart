@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_group_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -45,7 +47,7 @@ class UserGroupSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -57,7 +59,7 @@ class UserGroupSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -69,7 +71,7 @@ class UserGroupSchema {
     
     name: r'description',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -81,7 +83,7 @@ class UserGroupSchema {
     defaultValue: true,
     name: r'is_active',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -93,7 +95,7 @@ class UserGroupSchema {
     
     name: r'members',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -105,7 +107,7 @@ class UserGroupSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -117,7 +119,7 @@ class UserGroupSchema {
     
     name: r'name',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -129,7 +131,7 @@ class UserGroupSchema {
     
     name: r'organization_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -141,7 +143,7 @@ class UserGroupSchema {
     
     name: r'owners',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -153,7 +155,7 @@ class UserGroupSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -165,7 +167,7 @@ class UserGroupSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -173,33 +175,35 @@ class UserGroupSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is UserGroupSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.description == description &&
-     other.isActive == isActive &&
-     other.members == members &&
-     other.metaData == metaData &&
-     other.name == name &&
-     other.organizationId == organizationId &&
-     other.owners == owners &&
-     other.tags == tags &&
-     other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    description.hashCode +
-    isActive.hashCode +
-    members.hashCode +
-    metaData.hashCode +
-    name.hashCode +
-    organizationId.hashCode +
-    owners.hashCode +
-    tags.hashCode +
-    updatedAt.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is UserGroupSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.description == description &&
+      other.isActive == isActive &&
+      other.members == members &&
+      other.metaData == metaData &&
+      other.name == name &&
+      other.organizationId == organizationId &&
+      other.owners == owners &&
+      other.tags == tags &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        description.hashCode +
+        isActive.hashCode +
+        members.hashCode +
+        metaData.hashCode +
+        name.hashCode +
+        organizationId.hashCode +
+        owners.hashCode +
+        tags.hashCode +
+        updatedAt.hashCode;
 
   factory UserGroupSchema.fromJson(Map<String, dynamic> json) => _$UserGroupSchemaFromJson(json);
 

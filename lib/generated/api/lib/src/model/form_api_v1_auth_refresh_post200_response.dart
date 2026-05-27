@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'form_api_v1_auth_refresh_post200_response.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -29,7 +31,7 @@ class FormApiV1AuthRefreshPost200Response {
     
     name: r'access_token',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -41,7 +43,7 @@ class FormApiV1AuthRefreshPost200Response {
     
     name: r'refresh_token',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -53,7 +55,7 @@ class FormApiV1AuthRefreshPost200Response {
     
     name: r'success',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -61,17 +63,19 @@ class FormApiV1AuthRefreshPost200Response {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is FormApiV1AuthRefreshPost200Response &&
-     other.accessToken == accessToken &&
-     other.refreshToken == refreshToken &&
-     other.success == success;
 
-  @override
-  int get hashCode =>
-    accessToken.hashCode +
-    refreshToken.hashCode +
-    success.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is FormApiV1AuthRefreshPost200Response &&
+      other.accessToken == accessToken &&
+      other.refreshToken == refreshToken &&
+      other.success == success;
+
+    @override
+    int get hashCode =>
+        accessToken.hashCode +
+        refreshToken.hashCode +
+        success.hashCode;
 
   factory FormApiV1AuthRefreshPost200Response.fromJson(Map<String, dynamic> json) => _$FormApiV1AuthRefreshPost200ResponseFromJson(json);
 

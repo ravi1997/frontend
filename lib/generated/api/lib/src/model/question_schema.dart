@@ -3,11 +3,13 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'question_schema.g.dart';
 
 
+@CopyWith()
 @JsonSerializable(
   checked: true,
   createToJson: true,
@@ -67,7 +69,7 @@ class QuestionSchema {
     
     name: r'_id',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -79,7 +81,7 @@ class QuestionSchema {
     
     name: r'created_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -91,7 +93,7 @@ class QuestionSchema {
     
     name: r'default_value',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -103,7 +105,7 @@ class QuestionSchema {
     
     name: r'field_type',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -115,7 +117,7 @@ class QuestionSchema {
     
     name: r'help_text',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -127,7 +129,7 @@ class QuestionSchema {
     defaultValue: false,
     name: r'is_hidden',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -139,7 +141,7 @@ class QuestionSchema {
     defaultValue: false,
     name: r'is_read_only',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -151,7 +153,7 @@ class QuestionSchema {
     defaultValue: false,
     name: r'is_repeatable',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -163,7 +165,7 @@ class QuestionSchema {
     defaultValue: false,
     name: r'keep_last_value',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -175,7 +177,7 @@ class QuestionSchema {
     
     name: r'label',
     required: true,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -187,7 +189,7 @@ class QuestionSchema {
     
     name: r'logic',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -199,7 +201,7 @@ class QuestionSchema {
     
     name: r'meta_data',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -211,7 +213,7 @@ class QuestionSchema {
     
     name: r'options',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -224,7 +226,7 @@ class QuestionSchema {
     
     name: r'order',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -236,7 +238,7 @@ class QuestionSchema {
     
     name: r'repeat_max',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -249,7 +251,7 @@ class QuestionSchema {
     
     name: r'repeat_min',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -261,7 +263,7 @@ class QuestionSchema {
     
     name: r'response_templates',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -273,7 +275,7 @@ class QuestionSchema {
     
     name: r'tags',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -285,7 +287,7 @@ class QuestionSchema {
     
     name: r'ui',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -297,7 +299,7 @@ class QuestionSchema {
     
     name: r'updated_at',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -309,7 +311,7 @@ class QuestionSchema {
     
     name: r'validation',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -321,7 +323,7 @@ class QuestionSchema {
     
     name: r'variable_name',
     required: false,
-    includeIfNull: false
+    includeIfNull: false,
   )
 
 
@@ -329,55 +331,57 @@ class QuestionSchema {
 
 
 
-  @override
-  bool operator ==(Object other) => identical(this, other) || other is QuestionSchema &&
-     other.id == id &&
-     other.createdAt == createdAt &&
-     other.defaultValue == defaultValue &&
-     other.fieldType == fieldType &&
-     other.helpText == helpText &&
-     other.isHidden == isHidden &&
-     other.isReadOnly == isReadOnly &&
-     other.isRepeatable == isRepeatable &&
-     other.keepLastValue == keepLastValue &&
-     other.label == label &&
-     other.logic == logic &&
-     other.metaData == metaData &&
-     other.options == options &&
-     other.order == order &&
-     other.repeatMax == repeatMax &&
-     other.repeatMin == repeatMin &&
-     other.responseTemplates == responseTemplates &&
-     other.tags == tags &&
-     other.ui == ui &&
-     other.updatedAt == updatedAt &&
-     other.validation == validation &&
-     other.variableName == variableName;
 
-  @override
-  int get hashCode =>
-    id.hashCode +
-    createdAt.hashCode +
-    defaultValue.hashCode +
-    fieldType.hashCode +
-    helpText.hashCode +
-    isHidden.hashCode +
-    isReadOnly.hashCode +
-    isRepeatable.hashCode +
-    keepLastValue.hashCode +
-    label.hashCode +
-    logic.hashCode +
-    metaData.hashCode +
-    options.hashCode +
-    order.hashCode +
-    repeatMax.hashCode +
-    repeatMin.hashCode +
-    responseTemplates.hashCode +
-    tags.hashCode +
-    ui.hashCode +
-    updatedAt.hashCode +
-    validation.hashCode +
-    variableName.hashCode;
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is QuestionSchema &&
+      other.id == id &&
+      other.createdAt == createdAt &&
+      other.defaultValue == defaultValue &&
+      other.fieldType == fieldType &&
+      other.helpText == helpText &&
+      other.isHidden == isHidden &&
+      other.isReadOnly == isReadOnly &&
+      other.isRepeatable == isRepeatable &&
+      other.keepLastValue == keepLastValue &&
+      other.label == label &&
+      other.logic == logic &&
+      other.metaData == metaData &&
+      other.options == options &&
+      other.order == order &&
+      other.repeatMax == repeatMax &&
+      other.repeatMin == repeatMin &&
+      other.responseTemplates == responseTemplates &&
+      other.tags == tags &&
+      other.ui == ui &&
+      other.updatedAt == updatedAt &&
+      other.validation == validation &&
+      other.variableName == variableName;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        createdAt.hashCode +
+        defaultValue.hashCode +
+        fieldType.hashCode +
+        helpText.hashCode +
+        isHidden.hashCode +
+        isReadOnly.hashCode +
+        isRepeatable.hashCode +
+        keepLastValue.hashCode +
+        label.hashCode +
+        logic.hashCode +
+        metaData.hashCode +
+        options.hashCode +
+        order.hashCode +
+        repeatMax.hashCode +
+        repeatMin.hashCode +
+        responseTemplates.hashCode +
+        tags.hashCode +
+        ui.hashCode +
+        updatedAt.hashCode +
+        validation.hashCode +
+        variableName.hashCode;
 
   factory QuestionSchema.fromJson(Map<String, dynamic> json) => _$QuestionSchemaFromJson(json);
 
@@ -392,20 +396,27 @@ class QuestionSchema {
 
 
 enum QuestionSchemaFieldTypeEnum {
-  @JsonValue(r'input')
-  input,
-  @JsonValue(r'textarea')
-  textarea,
-  @JsonValue(r'number')
-  number,
-  @JsonValue(r'email')
-  email,
-  @JsonValue(r'mobile')
-  mobile,
-  @JsonValue(r'url')
-  url,
-  @JsonValue(r'password')
-  password,
+@JsonValue(r'input')
+input(r'input'),
+@JsonValue(r'textarea')
+textarea(r'textarea'),
+@JsonValue(r'number')
+number(r'number'),
+@JsonValue(r'email')
+email(r'email'),
+@JsonValue(r'mobile')
+mobile(r'mobile'),
+@JsonValue(r'url')
+url(r'url'),
+@JsonValue(r'password')
+password(r'password');
+
+const QuestionSchemaFieldTypeEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
 }
 
 
