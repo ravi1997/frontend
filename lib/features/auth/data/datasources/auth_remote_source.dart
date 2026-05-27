@@ -119,6 +119,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         'username': username,
         'email': email,
         'password': password,
+        'user_type': 'general',
         if (employeeId != null) 'employee_id': employeeId,
         if (mobile != null) 'mobile': mobile,
       },

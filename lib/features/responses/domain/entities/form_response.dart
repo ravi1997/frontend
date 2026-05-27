@@ -7,7 +7,7 @@ part 'form_response.g.dart';
 @freezed
 abstract class FormResponse with _$FormResponse {
   const factory FormResponse({
-    @JsonKey(name: '_id') required String id,
+    @JsonKey(name: 'id') required String id,
     @JsonKey(name: 'form') required String formId,
     @JsonKey(name: 'organization_id') String? organizationId,
     @JsonKey(name: 'submitted_by') String? submittedBy,
@@ -24,6 +24,11 @@ abstract class FormResponse with _$FormResponse {
     @Default('pending') String status,
   }) = _FormResponse;
 
-  factory FormResponse.fromJson(Map<String, dynamic> json) =>
-      _$FormResponseFromJson(json);
+  factory FormResponse.fromJson(Map<String, dynamic> json) {
+    final normalized = Map<String, dynamic>.from(json);
+    if (!normalized.containsKey('_id') && normalized['id'] != null) {
+      normalized['_id'] = normalized['id'];
+    }
+    return _$FormResponseFromJson(normalized);
+  }
 }

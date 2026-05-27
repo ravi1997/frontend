@@ -20,6 +20,7 @@ class SectionWidget extends ConsumerWidget {
   final String? selectedQuestionId;
   final List<String> selectedQuestionIds;
   final String? selectedSectionId;
+  final String? parentSectionId;
   final String locale;
   final String? mode;
 
@@ -33,6 +34,7 @@ class SectionWidget extends ConsumerWidget {
     required this.selectedQuestionId,
     required this.selectedQuestionIds,
     required this.selectedSectionId,
+    this.parentSectionId,
     required this.locale,
     this.mode,
   });
@@ -246,16 +248,32 @@ class SectionWidget extends ConsumerWidget {
                                       );
                                     } else if (value == 'move_up') {
                                       if (sectionIndex > 0) {
-                                        notifier.reorderSections(
-                                          sectionIndex,
-                                          sectionIndex - 1,
-                                        );
+                                        if (parentSectionId == null) {
+                                          notifier.reorderSections(
+                                            sectionIndex,
+                                            sectionIndex - 1,
+                                          );
+                                        } else {
+                                          notifier.reorderNestedSections(
+                                            parentSectionId!,
+                                            sectionIndex,
+                                            sectionIndex - 1,
+                                          );
+                                        }
                                       }
                                     } else if (value == 'move_down') {
-                                      notifier.reorderSections(
-                                        sectionIndex,
-                                        sectionIndex + 1,
-                                      );
+                                      if (parentSectionId == null) {
+                                        notifier.reorderSections(
+                                          sectionIndex,
+                                          sectionIndex + 1,
+                                        );
+                                      } else {
+                                        notifier.reorderNestedSections(
+                                          parentSectionId!,
+                                          sectionIndex,
+                                          sectionIndex + 1,
+                                        );
+                                      }
                                     }
                                   },
                                   itemBuilder: (context) => [
@@ -587,6 +605,7 @@ class SectionWidget extends ConsumerWidget {
                               selectedQuestionId: selectedQuestionId,
                               selectedQuestionIds: selectedQuestionIds,
                               selectedSectionId: selectedSectionId,
+                              parentSectionId: section.id,
                               locale: locale,
                               mode: mode,
                             ),

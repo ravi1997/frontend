@@ -126,19 +126,6 @@ Raw<GoRouter> appRouter(Ref ref) {
         },
       ),
       GoRoute(
-        path: '/projects/:projectId/forms/:formId',
-        builder: (context, state) {
-          final projectId = state.pathParameters['projectId']!;
-          final formId = state.pathParameters['formId'] ?? 'new';
-          final mode = state.uri.queryParameters['mode'];
-          return FormBuilderPage(
-            projectId: projectId,
-            formId: formId,
-            mode: mode,
-          );
-        },
-      ),
-      GoRoute(
         path: '/projects/:projectId/forms/:formId/responses',
         builder: (context, state) {
           final projectId = state.pathParameters['projectId']!;

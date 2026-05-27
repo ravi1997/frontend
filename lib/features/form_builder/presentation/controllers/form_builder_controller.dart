@@ -11,7 +11,6 @@ import '../../domain/entities/form_section.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/repositories/form_builder_repository.dart';
-import '../../domain/entities/form_version_history.dart';
 import '../../domain/services/field_registry.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../../domain/entities/access_policy.dart';
@@ -153,20 +152,49 @@ class FormBuilderController extends _$FormBuilderController {
   ) {
     if (state.value == null) return null;
 
-    final sections = [...state.value!.form.sections];
-    final index = sections.indexWhere((section) => section.id == sectionId);
-    if (index == -1) return null;
-
-    final updatedSection = updater(sections[index]);
-    sections[index] = updatedSection;
+    final result = _updateSectionRecursive(
+      state.value!.form.sections,
+      sectionId,
+      updater,
+    );
+    if (result == null) return null;
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: state.value!.form.copyWith(sections: result.sections),
       ),
     );
     _markDirty();
-    return updatedSection;
+    return result.updatedSection;
+  }
+
+  ({List<FormSection> sections, FormSection updatedSection})?
+  _updateSectionRecursive(
+    List<FormSection> sections,
+    String sectionId,
+    FormSection Function(FormSection section) updater,
+  ) {
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      if (section.id == sectionId) {
+        final updatedSection = updater(section);
+        final updatedSections = [...sections]..[i] = updatedSection;
+        return (sections: updatedSections, updatedSection: updatedSection);
+      }
+
+      if (section.sections.isEmpty) continue;
+      final nested = _updateSectionRecursive(
+        section.sections,
+        sectionId,
+        updater,
+      );
+      if (nested != null) {
+        final updatedSection = section.copyWith(sections: nested.sections);
+        final updatedSections = [...sections]..[i] = updatedSection;
+        return (sections: updatedSections, updatedSection: nested.updatedSection);
+      }
+    }
+    return null;
   }
 
   void setEditingLocale(String locale) {
@@ -494,18 +522,13 @@ class FormBuilderController extends _$FormBuilderController {
     Map<String, dynamic> metadata,
   ) {
     if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final updatedQuestion = s.questions[qIndex].copyWith(
-          metadata: {...s.questions[qIndex].metadata ?? {}, ...metadata},
-        );
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = updatedQuestion;
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (question) => question.copyWith(
+        metadata: {...question.metadata ?? {}, ...metadata},
+      ),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -517,14 +540,16 @@ class FormBuilderController extends _$FormBuilderController {
 
   void removeQuestion(String sectionId, String questionId) {
     if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        return s.copyWith(
-          questions: s.questions.where((q) => q.id != questionId).toList(),
-        );
-      }
-      return s;
-    }).toList();
+    final sectionsResult = _updateSectionRecursive(
+      state.value!.form.sections,
+      sectionId,
+      (section) => section.copyWith(
+        questions: section.questions.where((q) => q.id != questionId).toList(),
+      ),
+    );
+
+    final sections = sectionsResult?.sections;
+    if (sections == null) return;
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -583,17 +608,11 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateQuestion(FormQuestion updatedQuestion) {
     if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      final questionIndex = s.questions.indexWhere(
-        (q) => q.id == updatedQuestion.id,
-      );
-      if (questionIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[questionIndex] = updatedQuestion;
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      updatedQuestion.id,
+      (_) => updatedQuestion,
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -605,21 +624,14 @@ class FormBuilderController extends _$FormBuilderController {
 
   void convertQuestionType(String questionId, QuestionType newType) {
     if (state.value == null) return;
-
-    final sections = state.value!.form.sections.map((s) {
-      final questionIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (questionIndex == -1) return s;
-
-      final currentQuestion = s.questions[questionIndex];
-      final convertedQuestion = FieldRegistry.convertQuestionType(
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (currentQuestion) => FieldRegistry.convertQuestionType(
         currentQuestion,
         newType,
-      );
-
-      final newQuestions = [...s.questions];
-      newQuestions[questionIndex] = convertedQuestion;
-      return s.copyWith(questions: newQuestions);
-    }).toList();
+      ),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -635,13 +647,10 @@ class FormBuilderController extends _$FormBuilderController {
   ) {
     if (state.value == null || questionIds.isEmpty) return;
     final ids = questionIds.toSet();
-    final sections = state.value!.form.sections.map((s) {
-      final newQuestions = s.questions.map((q) {
-        if (!ids.contains(q.id)) return q;
-        return updater(q);
-      }).toList();
-      return s.copyWith(questions: newQuestions);
-    }).toList();
+    final sections = _updateQuestionsRecursive(
+      state.value!.form.sections,
+      (question) => ids.contains(question.id) ? updater(question) : question,
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -661,21 +670,13 @@ class FormBuilderController extends _$FormBuilderController {
   void updateQuestionLabel(String questionId, String label) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          label: _updateLocalizedField(
-            newQuestions[qIndex].label,
-            label,
-            locale,
-          ),
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (question) => question.copyWith(
+        label: _updateLocalizedField(question.label, label, locale),
+      ),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -688,21 +689,13 @@ class FormBuilderController extends _$FormBuilderController {
   void updateQuestionHelperText(String questionId, String helperText) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          helperText: _updateLocalizedField(
-            newQuestions[qIndex].helperText,
-            helperText,
-            locale,
-          ),
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (question) => question.copyWith(
+        helperText: _updateLocalizedField(question.helperText, helperText, locale),
+      ),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -715,21 +708,17 @@ class FormBuilderController extends _$FormBuilderController {
   void updateQuestionPlaceholder(String questionId, String placeholder) {
     if (state.value == null) return;
     final locale = state.value!.editingLocale;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          placeholder: _updateLocalizedField(
-            newQuestions[qIndex].placeholder,
-            placeholder,
-            locale,
-          ),
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (question) => question.copyWith(
+        placeholder: _updateLocalizedField(
+          question.placeholder,
+          placeholder,
+          locale,
+        ),
+      ),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -741,17 +730,11 @@ class FormBuilderController extends _$FormBuilderController {
 
   void updateQuestionDefaultValue(String questionId, dynamic defaultValue) {
     if (state.value == null) return;
-    final sections = state.value!.form.sections.map((s) {
-      final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-      if (qIndex != -1) {
-        final newQuestions = [...s.questions];
-        newQuestions[qIndex] = newQuestions[qIndex].copyWith(
-          defaultValue: defaultValue,
-        );
-        return s.copyWith(questions: newQuestions);
-      }
-      return s;
-    }).toList();
+    final sections = _updateQuestionRecursive(
+      state.value!.form.sections,
+      questionId,
+      (question) => question.copyWith(defaultValue: defaultValue),
+    );
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -840,25 +823,99 @@ class FormBuilderController extends _$FormBuilderController {
     _markDirty();
   }
 
-  void reorderQuestions(String sectionId, int oldIndex, int newIndex) {
+  void reorderNestedSections(
+    String parentSectionId,
+    int oldIndex,
+    int newIndex,
+  ) {
     if (state.value == null) return;
 
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        final questions = [...s.questions];
+    final result = _reorderNestedSectionsRecursive(
+      state.value!.form.sections,
+      parentSectionId,
+      oldIndex,
+      newIndex,
+    );
+    if (result == null) return;
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: state.value!.form.copyWith(sections: result),
+      ),
+    );
+    _markDirty();
+  }
+
+  List<FormSection>? _reorderNestedSectionsRecursive(
+    List<FormSection> sections,
+    String parentSectionId,
+    int oldIndex,
+    int newIndex,
+  ) {
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      if (section.id == parentSectionId) {
+        if (oldIndex < 0 ||
+            oldIndex >= section.sections.length ||
+            newIndex < 0 ||
+            newIndex > section.sections.length) {
+          return null;
+        }
+
+        final nested = [...section.sections];
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final item = nested.removeAt(oldIndex);
+        nested.insert(newIndex, item);
+
+        final updatedSections = [...sections]
+          ..[i] = section.copyWith(sections: nested);
+        return updatedSections;
+      }
+
+      if (section.sections.isEmpty) continue;
+      final nested = _reorderNestedSectionsRecursive(
+        section.sections,
+        parentSectionId,
+        oldIndex,
+        newIndex,
+      );
+      if (nested != null) {
+        final updatedSections = [...sections]
+          ..[i] = section.copyWith(sections: nested);
+        return updatedSections;
+      }
+    }
+    return null;
+  }
+
+  void reorderQuestions(String sectionId, int oldIndex, int newIndex) {
+    if (state.value == null) return;
+    final result = _updateSectionRecursive(
+      state.value!.form.sections,
+      sectionId,
+      (section) {
+        final questions = [...section.questions];
+        if (oldIndex < 0 ||
+            oldIndex >= questions.length ||
+            newIndex < 0 ||
+            newIndex > questions.length) {
+          return section;
+        }
         if (oldIndex < newIndex) {
           newIndex -= 1;
         }
         final item = questions.removeAt(oldIndex);
         questions.insert(newIndex, item);
-        return s.copyWith(questions: questions);
-      }
-      return s;
-    }).toList();
+        return section.copyWith(questions: questions);
+      },
+    );
+    if (result == null) return;
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: state.value!.form.copyWith(sections: result.sections),
       ),
     );
     _markDirty();
@@ -875,31 +932,37 @@ class FormBuilderController extends _$FormBuilderController {
     FormQuestion? movingQuestion;
 
     // 1. Remove from source section
-    final sectionsWithRemoved = state.value!.form.sections.map((s) {
-      if (s.id == fromSectionId) {
-        final qIndex = s.questions.indexWhere((q) => q.id == questionId);
-        if (qIndex != -1) {
-          movingQuestion = s.questions[qIndex];
-          final questions = [...s.questions];
-          questions.removeAt(qIndex);
-          return s.copyWith(questions: questions);
-        }
-      }
-      return s;
-    }).toList();
+    final sectionsWithRemovedResult = _updateSectionRecursive(
+      state.value!.form.sections,
+      fromSectionId,
+      (section) {
+        final qIndex = section.questions.indexWhere((q) => q.id == questionId);
+        if (qIndex == -1) return section;
+        movingQuestion = section.questions[qIndex];
+        final questions = [...section.questions]..removeAt(qIndex);
+        return section.copyWith(questions: questions);
+      },
+    );
+
+    final sectionsWithRemoved = sectionsWithRemovedResult?.sections;
 
     if (movingQuestion == null) return;
+    if (sectionsWithRemoved == null) return;
 
     // 2. Add to destination section
-    final finalSections = sectionsWithRemoved.map((s) {
-      if (s.id == toSectionId) {
-        final questions = [...s.questions];
+    final finalSectionsResult = _updateSectionRecursive(
+      sectionsWithRemoved,
+      toSectionId,
+      (section) {
+        final questions = [...section.questions];
         if (newIndex > questions.length) newIndex = questions.length;
         questions.insert(newIndex, movingQuestion!);
-        return s.copyWith(questions: questions);
-      }
-      return s;
-    }).toList();
+        return section.copyWith(questions: questions);
+      },
+    );
+
+    final finalSections = finalSectionsResult?.sections;
+    if (finalSections == null) return;
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -919,17 +982,20 @@ class FormBuilderController extends _$FormBuilderController {
       label: '${question.label} (Copy)',
     );
 
-    final sections = state.value!.form.sections.map((s) {
-      if (s.id == sectionId) {
-        final qIndex = s.questions.indexWhere((q) => q.id == question.id);
-        if (qIndex != -1) {
-          final questions = [...s.questions];
-          questions.insert(qIndex + 1, newQuestion);
-          return s.copyWith(questions: questions);
-        }
-      }
-      return s;
-    }).toList();
+    final sectionsResult = _updateSectionRecursive(
+      state.value!.form.sections,
+      sectionId,
+      (section) {
+        final qIndex = section.questions.indexWhere((q) => q.id == question.id);
+        if (qIndex == -1) return section;
+        final questions = [...section.questions];
+        questions.insert(qIndex + 1, newQuestion);
+        return section.copyWith(questions: questions);
+      },
+    );
+
+    final sections = sectionsResult?.sections;
+    if (sections == null) return;
 
     state = AsyncValue.data(
       state.value!.copyWith(
@@ -939,6 +1005,48 @@ class FormBuilderController extends _$FormBuilderController {
       ),
     );
     _markDirty();
+  }
+
+  List<FormSection> _updateQuestionRecursive(
+    List<FormSection> sections,
+    String questionId,
+    FormQuestion Function(FormQuestion question) updater,
+  ) {
+    return sections.map((section) {
+      final questionIndex = section.questions.indexWhere(
+        (question) => question.id == questionId,
+      );
+      if (questionIndex != -1) {
+        final updatedQuestions = [...section.questions];
+        updatedQuestions[questionIndex] = updater(updatedQuestions[questionIndex]);
+        return section.copyWith(questions: updatedQuestions);
+      }
+
+      if (section.sections.isEmpty) return section;
+      return section.copyWith(
+        sections: _updateQuestionRecursive(
+          section.sections,
+          questionId,
+          updater,
+        ),
+      );
+    }).toList();
+  }
+
+  List<FormSection> _updateQuestionsRecursive(
+    List<FormSection> sections,
+    FormQuestion Function(FormQuestion question) updater,
+  ) {
+    return sections.map((section) {
+      final updatedQuestions = section.questions.map(updater).toList();
+      if (section.sections.isEmpty) {
+        return section.copyWith(questions: updatedQuestions);
+      }
+      return section.copyWith(
+        questions: updatedQuestions,
+        sections: _updateQuestionsRecursive(section.sections, updater),
+      );
+    }).toList();
   }
 
   Future<bool> saveForm({String versionType = 'patch'}) async {
@@ -986,43 +1094,27 @@ class FormBuilderController extends _$FormBuilderController {
 
     try {
       final repository = ref.read(formBuilderRepositoryProvider);
-      final result = await repository.publishForm(_projectId, state.value!.form.id);
-
-      final publishedVersion =
-          result['published_version'] as String? ?? state.value!.form.version;
-
-      // We'll update the local state to reflect it's published.
-      // Ideally we re-fetch the form, but let's update immediately for UX.
-
-      final newHistoryEntry = FormVersionHistory(
-        version: publishedVersion,
-        created_at: DateTime.now(),
-        changeLog: 'Form published',
-      );
-
-      final updatedForm = state.value!.form.copyWith(
-        isPublished: true,
-        status: 'published',
-        version:
-            publishedVersion, // Display published version or shift to next draft?
-        // Usually after publish, we stay on the page. The page might switch to 'Draft Mode' for V2.
-        // Let's assume we show the published state primarily.
-        versionHistory: [...state.value!.form.versionHistory, newHistoryEntry],
+      final result = await repository.publishForm(
+        _projectId,
+        state.value!.form.id,
       );
 
       state = AsyncValue.data(
         state.value!.copyWith(
-          form: updatedForm,
           isSaving: false,
           isDirty: false,
           canUndo: false,
           canRedo: false,
         ),
       );
-      _savedFormSnapshot = updatedForm;
-      _undoStack.clear();
-      _redoStack.clear();
-      _lastHistoryForm = updatedForm;
+
+      if (!result.containsKey('task_id')) {
+        state = AsyncValue.data(
+          state.value!.copyWith(
+            error: 'Publish did not return a task_id',
+          ),
+        );
+      }
       return true;
     } catch (e) {
       final error = ErrorHandler.handle(e);

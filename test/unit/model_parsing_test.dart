@@ -119,7 +119,7 @@ void main() {
   group('FormResponse parsing tests', () {
     test('parses backend response correctly', () {
       final json = {
-        '_id': 'resp-123',
+        'id': 'resp-123',
         'form': 'form-456',
         'organization_id': 'org-789',
         'submitted_by': 'user-abc',
@@ -163,7 +163,7 @@ void main() {
   });
 
   group('Register payload mapping tests', () {
-    test('sends correct payload without userType', () async {
+    test('sends correct payload with default userType', () async {
       when(
         () => mockApiClient.post(any(), data: any(named: 'data')),
       ).thenAnswer(
@@ -182,13 +182,14 @@ void main() {
         mobile: '1234567890',
       );
 
-      verify(
+        verify(
         () => mockApiClient.post(
           ApiEndpoints.register,
           data: {
             'username': 'testuser',
             'email': 'test@example.com',
             'password': 'password123',
+            'user_type': 'general',
             'employee_id': 'EMP001',
             'mobile': '1234567890',
           },

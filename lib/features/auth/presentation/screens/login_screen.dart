@@ -264,7 +264,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
       final notifier = ref.read(authControllerProvider.notifier);
       if (_isEmailTab) {
-        notifier.login(_emailController.text, _passwordController.text);
+        await notifier.login(_emailController.text, _passwordController.text);
       } else {
         final mobile = _phoneController.text;
         await notifier.requestOtp(mobile);

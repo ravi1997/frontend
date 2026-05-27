@@ -431,13 +431,6 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
       ),
     );
 
-    formTitleController.dispose();
-    slugController.dispose();
-    descriptionController.dispose();
-    helpTextController.dispose();
-    tagInputController.dispose();
-    languageInputController.dispose();
-    defaultLanguageController.dispose();
     if (payload == null) return;
 
     final api = ref.read(apiClientProvider);
