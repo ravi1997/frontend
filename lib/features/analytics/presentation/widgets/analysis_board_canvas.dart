@@ -193,12 +193,12 @@ class _AnalysisBoardCanvasState extends State<AnalysisBoardCanvas> {
             color: const Color(0xAA161435),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF6366F1).withOpacity(0.4),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.4),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6366F1).withOpacity(0.15),
+                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                 blurRadius: 16,
                 spreadRadius: 2,
               ),
@@ -232,7 +232,7 @@ class _AnalysisBoardCanvasState extends State<AnalysisBoardCanvas> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1).withOpacity(0.2),
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -391,11 +391,11 @@ class _AnalysisBoardCanvasState extends State<AnalysisBoardCanvas> {
       child: Container(
         height: 64,
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        decoration: BoxDecoration(
+          decoration: BoxDecoration(
           color: const Color(0xDD0B091B),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF3730A3).withOpacity(0.6),
+            color: const Color(0xFF3730A3).withValues(alpha: 0.6),
             width: 1.5,
           ),
         ),
@@ -481,7 +481,7 @@ class _AnalysisBoardCanvasState extends State<AnalysisBoardCanvas> {
           color: const Color(0xEE0B091B),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF3730A3).withOpacity(0.6),
+            color: const Color(0xFF3730A3).withValues(alpha: 0.6),
             width: 1.5,
           ),
         ),
@@ -548,7 +548,7 @@ class _AnalysisBoardCanvasState extends State<AnalysisBoardCanvas> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: highlight.withOpacity(0.2),
+                color: highlight.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -605,7 +605,7 @@ class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.06)
+      ..color = const Color(0xFF6366F1).withValues(alpha: 0.06)
       ..strokeWidth = 1.0;
 
     final double step = 40.0 * scale;
@@ -645,11 +645,6 @@ class _ConnectionPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.65)
-      ..strokeWidth = 2.5 * scale
-      ..style = PaintingStyle.stroke;
-
     final double cardWidth = 260.0;
     final double cardHeight = 175.0;
 
@@ -688,7 +683,7 @@ class _ConnectionPainter extends CustomPainter {
 
       // Dynamic compatibility indicators (Orange while dragging)
       final dragPaint = Paint()
-        ..color = const Color(0xFFF59E0B).withOpacity(0.8)
+        ..color = const Color(0xFFF59E0B).withValues(alpha: 0.8)
         ..strokeWidth = 2.5 * scale
         ..style = PaintingStyle.stroke;
 

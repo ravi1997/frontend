@@ -3,7 +3,7 @@
 Flutter/Dart frontend for the RIDP Form Platform. Keep this file as the durable index; load task detail from `.agents/skills/<name>/SKILL.md` only when relevant.
 
 ## Durable Subagent Orchestration
-All major coding, planning, reviews, and test runs are delegated to specialized, narrow-context subagents to keep parent model token usage extremely low and optimize context cost. For architecture and operations, see [.agents/skills/ORCHESTRATOR.md](file:///home/ravi/workspace/docker/apps/form-backend/.agents/skills/ORCHESTRATOR.md).
+Prefer the narrowest relevant skill for non-trivial work. Use the specialized `ridp-*` skills when the task clearly matches them, but do not force subagent orchestration for small, local edits.
 
 ## Skill Router
 - `ridp-frontend-flutter`: UI, routing, state, form rendering, Smart Grid, accessibility, frontend tests.
@@ -13,12 +13,12 @@ All major coding, planning, reviews, and test runs are delegated to specialized,
 - `ridp-testing-strategy`: new/failing/flaky tests and coverage strategy.
 - `ridp-quality-gates`: final verification, lint/test/security/tooling readiness.
 
-Project MCP defaults are in `.mcp.json`. Use the smallest relevant tool set. Validate agent tooling with `.agents/check-agent-tools.sh`.
+Project MCP defaults are in `.mcp.json`. Use the smallest relevant tool set. Validate agent tooling with `.agents/check-agent-tools.sh` when you need to confirm the local environment.
 For promptless report-only verification while another agent edits, run `.agents/watch-ridp-changes.sh`; logs go to `/home/ravi/workspace/.agent-worker-logs`.
 
 ## Hard Invariants
 - Backend source: `/home/ravi/workspace/docker/apps/form-backend`; API prefix: `/mahasangraha/api/v1/`.
-- Generated client `lib/generated/api/` is read-only; regenerate from backend with `make openapi && make generate-dart-client`.
+- Generated client `lib/generated/api/` is read-only. Regenerate it from `/home/ravi/workspace/docker/apps/form-backend` with `make openapi && make generate-dart-client`, then copy the generated output back into this repo.
 - Auth supports Bearer and HttpOnly cookie modes; cookie writes require `X-CSRF-TOKEN-ACCESS`.
 - Role order: `superadmin > admin > manager > user`; enforce UI visibility from roles plus form ACLs, with backend as source of truth.
 - Async operations such as publish, clone, bulk export, and translation jobs return `202` with `task_id`.
@@ -33,5 +33,7 @@ flutter analyze
 flutter test
 flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8051
 ```
+
+If you touch `lib/generated/api/` or backend contract-dependent wrappers, also regenerate the client from the backend repo before handoff.
 
 Before handoff, report checks run, skipped checks, and residual risk.

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'analysis_boards_list_page.dart';
 
 class ProjectAnalysisBoardsListPage extends StatefulWidget {
   final String projectId;
@@ -116,8 +115,8 @@ class _ProjectAnalysisBoardsListPageState extends State<ProjectAnalysisBoardsLis
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFE5E7EB)),
                           boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
+                          BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),

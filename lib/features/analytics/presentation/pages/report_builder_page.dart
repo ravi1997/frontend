@@ -30,7 +30,6 @@ class _ReportBuilderPageState extends State<ReportBuilderPage> {
   String _triggerType = 'schedule'; // 'schedule' or 'threshold'
   String _cronExpression = '0 9 * * 1';
   int _thresholdLimit = 100;
-  final List<String> _recipients = ['manager@form-platform.com'];
 
   @override
   void initState() {
@@ -143,7 +142,7 @@ class _ReportBuilderPageState extends State<ReportBuilderPage> {
                   
                   // Trigger Type
                   DropdownButtonFormField<String>(
-                    value: _triggerType,
+                    initialValue: _triggerType,
                     dropdownColor: const Color(0xFF161435),
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
