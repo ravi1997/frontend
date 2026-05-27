@@ -37,6 +37,27 @@ abstract class User with _$User {
   bool get isAdmin =>
       roles.contains('admin') || roles.contains('superadmin') || isAdminFlag;
 
+  static const List<String> _roleOrder = <String>[
+    'user',
+    'manager',
+    'admin',
+    'superadmin',
+  ];
+
+  bool hasAtLeastRole(String role) {
+    final requiredIndex = _roleOrder.indexOf(role);
+    if (requiredIndex == -1) return false;
+
+    for (final currentRole in roles) {
+      final currentIndex = _roleOrder.indexOf(currentRole);
+      if (currentIndex >= requiredIndex) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool get isLocked {
     if (lockUntil == null) return false;
     try {

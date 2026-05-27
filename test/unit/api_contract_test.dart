@@ -74,6 +74,7 @@ void main() {
         ),
         clearTokens: () async {},
         onNavigateToLogin: () {},
+        getCsrfToken: () => 'csrf-token',
       );
       final options = RequestOptions(path: '/projects');
       final handler = _RequestCaptureHandler();
@@ -84,6 +85,21 @@ void main() {
       expect(options.headers['X-Organization-ID'], 'org-1');
       expect(options.headers['X-Request-ID'], isA<String>());
       expect((options.headers['X-Request-ID'] as String).isNotEmpty, isTrue);
+    });
+
+    test('adds csrf token for unsafe cookie-mode requests', () {
+      final interceptor = AuthInterceptor(
+        getTokens: () => AuthTokens(accessToken: 'access'),
+        clearTokens: () async {},
+        onNavigateToLogin: () {},
+        getCsrfToken: () => 'csrf-token',
+      );
+      final options = RequestOptions(path: '/forms', method: 'POST');
+      final handler = _RequestCaptureHandler();
+
+      interceptor.onRequest(options, handler);
+
+      expect(options.headers['X-CSRF-TOKEN-ACCESS'], 'csrf-token');
     });
   });
 }

@@ -100,6 +100,20 @@ void main() {
       );
       expect(user.isAdmin, true);
     });
+
+    test('hasAtLeastRole respects role order', () {
+      final user = User(
+        id: '1',
+        username: 'test',
+        email: 'test@test.com',
+        roles: ['manager'],
+      );
+
+      expect(user.hasAtLeastRole('user'), true);
+      expect(user.hasAtLeastRole('manager'), true);
+      expect(user.hasAtLeastRole('admin'), false);
+      expect(user.hasAtLeastRole('superadmin'), false);
+    });
   });
 
   group('FormResponse parsing tests', () {

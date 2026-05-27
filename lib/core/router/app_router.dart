@@ -65,8 +65,8 @@ Raw<GoRouter> appRouter(Ref ref) {
         final user = authState.value!;
         final isAdminOnly = state.matchedLocation == '/user-management';
         final isSuperAdminOnly = state.matchedLocation == '/backend-settings';
-        if (isAdminOnly && !user.isAdmin) return '/';
-        if (isSuperAdminOnly && !user.roles.contains('superadmin')) return '/';
+        if (isAdminOnly && !user.hasAtLeastRole('admin')) return '/';
+        if (isSuperAdminOnly && !user.hasAtLeastRole('superadmin')) return '/';
       }
 
       return null;

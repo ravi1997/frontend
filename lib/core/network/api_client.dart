@@ -7,6 +7,7 @@ import 'unified_network_interceptor.dart';
 import '../widgets/snackbar_service.dart';
 import 'api_endpoints.dart';
 import 'app_config.dart';
+import 'web_cookie_store.dart';
 
 part 'api_client.g.dart';
 
@@ -69,6 +70,7 @@ Dio dio(Ref ref) {
       onNavigateToLogin: () {
         if (!ref.mounted) return;
       },
+      getCsrfToken: () => readCookieValue('X-CSRF-TOKEN-ACCESS'),
     ),
   );
 

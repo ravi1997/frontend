@@ -19,14 +19,17 @@ class AuthInterceptor extends QueuedInterceptor {
   final AuthTokens? Function() _getTokens;
   final Future<void> Function() _clearTokens;
   final Function() _onNavigateToLogin;
+  final String? Function() _getCsrfToken;
 
   AuthInterceptor({
     required AuthTokens? Function() getTokens,
     required Future<void> Function() clearTokens,
     required Function() onNavigateToLogin,
+    String? Function()? getCsrfToken,
   }) : _getTokens = getTokens,
        _clearTokens = clearTokens,
-       _onNavigateToLogin = onNavigateToLogin;
+       _onNavigateToLogin = onNavigateToLogin,
+       _getCsrfToken = getCsrfToken ?? (() => null);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -43,6 +46,14 @@ class AuthInterceptor extends QueuedInterceptor {
       final organizationId = _getTokens()?.organizationId;
       if (organizationId != null) {
         options.headers['X-Organization-ID'] = organizationId;
+      }
+
+      final needsCsrf = _requiresCsrf(options.method);
+      if (needsCsrf) {
+        final csrfToken = _getCsrfToken();
+        if (csrfToken != null && csrfToken.isNotEmpty) {
+          options.headers['X-CSRF-TOKEN-ACCESS'] = csrfToken;
+        }
       }
     }
 
@@ -79,5 +90,17 @@ class AuthInterceptor extends QueuedInterceptor {
         path.contains('/auth/refresh') ||
         path.contains('/auth/request-password-reset') ||
         path.contains('/generate-otp'); // legacy alias
+  }
+
+  bool _requiresCsrf(String method) {
+    switch (method.toUpperCase()) {
+      case 'POST':
+      case 'PUT':
+      case 'PATCH':
+      case 'DELETE':
+        return true;
+      default:
+        return false;
+    }
   }
 }
