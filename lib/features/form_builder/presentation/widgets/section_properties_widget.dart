@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import '../controllers/form_builder_controller.dart';
 import 'properties/general_settings_panels.dart';
 import 'properties/section_layout_settings.dart';

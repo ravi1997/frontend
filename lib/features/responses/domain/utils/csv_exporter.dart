@@ -1,6 +1,6 @@
 import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
-import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 
 class CsvExporter {
@@ -12,7 +12,7 @@ class CsvExporter {
     final Map<String, String> questionHeaders = {};
     for (var section in form.sections) {
       for (var question in section.questions) {
-        questionHeaders[question.id] = question.label?.toString() ?? '';
+        questionHeaders[question.id] = question.label.toString();
       }
     }
 

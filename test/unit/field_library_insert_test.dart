@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/features/form_builder/domain/entities/custom_field_template.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
+import 'package:frontend/models/form_models.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers

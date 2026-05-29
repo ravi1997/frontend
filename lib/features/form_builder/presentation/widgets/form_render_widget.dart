@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
-import '../../domain/entities/builder_form.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/form_question_option.dart';
+import 'package:frontend/models/form_models.dart';
+import '../../domain/entities/form_style.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
@@ -42,10 +41,30 @@ class FormRenderWidget extends ConsumerWidget {
 
   const FormRenderWidget({super.key, required this.form});
 
+  FormStyle _formStyle(BuilderForm form) {
+    return FormStyle.fromJson(form.style);
+  }
+
+  QuestionStyle _questionStyle(FormQuestion question) {
+    final raw = question.ui['style'];
+    if (raw is Map) {
+      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return const QuestionStyle();
+  }
+
+  dynamic _helperText(FormQuestion question) {
+    return question.helpText ?? question.metadata['helper_text'] ?? '';
+  }
+
+  dynamic _placeholder(FormQuestion question) {
+    return question.metadata['placeholder'] ?? '';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider).languageCode;
-    final formStyle = form.style;
+    final formStyle = _formStyle(form);
     Color canvasColor;
     try {
       canvasColor = Color(
@@ -189,13 +208,11 @@ class FormRenderWidget extends ConsumerWidget {
   // ---------------------------------------------------------------------------
   Widget _buildQuestionsGrid(
     BuildContext context,
-    dynamic section,
+    FormSection section,
     String locale,
-    dynamic sectionStyle,
+    SectionStyle sectionStyle,
   ) {
-    final metadata = (section.metaData is Map)
-        ? Map<String, dynamic>.from(section.metaData as Map)
-        : <String, dynamic>{};
+    final metadata = section.metadata;
     final defaultPad = (sectionStyle.padding as num?)?.toDouble() ?? 16.0;
     final vPad =
         (metadata['verticalPadding'] as num?)?.toDouble() ?? defaultPad;
@@ -209,8 +226,12 @@ class FormRenderWidget extends ConsumerWidget {
         builder: (context, constraints) {
           final availableWidth = constraints.maxWidth;
 
+          final layout = SectionLayoutType.values.firstWhere(
+            (e) => e.name == section.layout,
+            orElse: () => SectionLayoutType.standard,
+          );
           int crossAxisCount = _sectionCrossAxisCount(
-            section.layout,
+            layout,
             section.gridColumns,
           );
           if (availableWidth < 400 && crossAxisCount > 1) crossAxisCount = 1;
@@ -223,10 +244,11 @@ class FormRenderWidget extends ConsumerWidget {
           return Wrap(
             spacing: questionSpacing,
             runSpacing: questionSpacing,
-            children: (section.questions as List).map<Widget>((q) {
+            children: section.questions.map((q) {
+              final qStyle = _questionStyle(q);
               double width = itemWidth;
-              if (q.style.widthMode == 'fixed') {
-                switch (q.style.fixedWidth) {
+              if (qStyle.widthMode == 'fixed') {
+                switch (qStyle.fixedWidth) {
                   case 'small':
                     width = 200.0;
                   case 'medium':
@@ -243,7 +265,13 @@ class FormRenderWidget extends ConsumerWidget {
               if (width > availableWidth) width = availableWidth;
               return SizedBox(
                 width: width,
-                child: _RenderFieldWidget(question: q, locale: locale),
+                child: _RenderFieldWidget(
+                  question: q,
+                  locale: locale,
+                  style: qStyle,
+                  helperText: _helperText(q),
+                  placeholder: _placeholder(q),
+                ),
               );
             }).toList(),
           );
@@ -257,13 +285,15 @@ class FormRenderWidget extends ConsumerWidget {
   // ---------------------------------------------------------------------------
   Widget _buildStandardSection(
     BuildContext context,
-    dynamic section,
+    FormSection section,
     String locale,
     Color sectionBg,
     Color headerBg,
     Map<String, dynamic> metadata,
   ) {
-    final sectionStyle = section.style;
+    final sectionStyle = SectionStyle.fromJson(
+      Map<String, dynamic>.from(section.ui['style'] as Map? ?? const {}),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,7 +352,7 @@ class FormRenderWidget extends ConsumerWidget {
             padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: section.sections.map<Widget>((child) {
+              children: section.sections.map((child) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: _buildSection(context, child, locale),
@@ -337,11 +367,11 @@ class FormRenderWidget extends ConsumerWidget {
   // ---------------------------------------------------------------------------
   // Layout dispatcher
   // ---------------------------------------------------------------------------
-  Widget _buildSection(BuildContext context, dynamic section, String locale) {
-    final sectionStyle = section.style;
-    final metadata = (section.metaData is Map)
-        ? Map<String, dynamic>.from(section.metaData as Map)
-        : <String, dynamic>{};
+  Widget _buildSection(BuildContext context, FormSection section, String locale) {
+    final sectionStyle = SectionStyle.fromJson(
+      Map<String, dynamic>.from(section.ui['style'] as Map? ?? const {}),
+    );
+    final metadata = section.metadata;
 
     Color sectionBg;
     Color headerBg;
@@ -358,9 +388,12 @@ class FormRenderWidget extends ConsumerWidget {
     }
 
     // ---- Layout-specific widgets (with conditions) ----
-    final layout = section.layout as SectionLayoutType;
-    final hasSubSections = (section.sections as List).isNotEmpty;
-    final hasEnoughSubSections = (section.sections as List).length >= 2;
+    final layout = SectionLayoutType.values.firstWhere(
+      (e) => e.name == section.layout,
+      orElse: () => SectionLayoutType.standard,
+    );
+    final hasSubSections = section.sections.isNotEmpty;
+    final hasEnoughSubSections = section.sections.length >= 2;
 
     // ACCORDION: works with just questions — no sub-section requirement.
     if (layout == SectionLayoutType.accordion) {
@@ -375,9 +408,8 @@ class FormRenderWidget extends ConsumerWidget {
           locale,
           sectionStyle,
         ),
-        childSections: (section.sections as List)
-            .map<Widget>((c) => _buildSection(context, c, locale))
-            .toList(),
+        childSections:
+            section.sections.map((c) => _buildSection(context, c, locale)).toList(),
       );
     }
 
@@ -386,14 +418,21 @@ class FormRenderWidget extends ConsumerWidget {
     if (layout == SectionLayoutType.tabbed && hasSubSections) {
       return TabbedSection(
         section: section,
-        tabs: section.sections as List,
+        tabs: section.sections,
         locale: locale,
         sectionBg: sectionBg,
         headerBg: headerBg,
         metadata: metadata,
         sectionStyle: sectionStyle,
         buildQuestionsGrid: (s) =>
-            _buildQuestionsGrid(context, s, locale, s.style),
+            _buildQuestionsGrid(
+              context,
+              s,
+              locale,
+              SectionStyle.fromJson(
+                Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
+              ),
+            ),
       );
     }
 
@@ -408,7 +447,14 @@ class FormRenderWidget extends ConsumerWidget {
         metadata: metadata,
         sectionStyle: sectionStyle,
         buildQuestionsGrid: (s) =>
-            _buildQuestionsGrid(context, s, locale, s.style),
+            _buildQuestionsGrid(
+              context,
+              s,
+              locale,
+              SectionStyle.fromJson(
+                Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
+              ),
+            ),
         buildChildSection: (s) => _buildSection(context, s, locale),
       );
     }
@@ -534,8 +580,29 @@ class FormRenderWidget extends ConsumerWidget {
 class _RenderFieldWidget extends StatelessWidget {
   final FormQuestion question;
   final String locale;
+  final QuestionStyle style;
+  final dynamic helperText;
+  final dynamic placeholder;
 
-  const _RenderFieldWidget({required this.question, required this.locale});
+  const _RenderFieldWidget({
+    required this.question,
+    required this.locale,
+    required this.style,
+    required this.helperText,
+    required this.placeholder,
+  });
+
+  QuestionStyle _styleFor(FormQuestion question) {
+    final raw = question.ui['style'];
+    if (raw is Map) {
+      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return const QuestionStyle();
+  }
+
+  dynamic _placeholderFor(FormQuestion question) {
+    return question.metadata['placeholder'] ?? '';
+  }
 
   FontWeight _parseFontWeight(String weight) {
     switch (weight) {
@@ -551,7 +618,6 @@ class _RenderFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = question.style;
     Color labelColor;
     Color helperColor;
 
@@ -593,9 +659,9 @@ class _RenderFieldWidget extends StatelessWidget {
     );
 
     Widget? helperWidget;
-    if (question.helperText.translate(locale).isNotEmpty) {
+    if (helperText.translate(locale).isNotEmpty) {
       helperWidget = Text(
-        question.helperText.translate(locale),
+        helperText.translate(locale),
         style: TextStyle(
           color: helperColor,
           fontSize: style.helperFontSize,
@@ -661,7 +727,7 @@ class _RenderFieldWidget extends StatelessWidget {
   }
 
   Widget _buildFieldInput(FormQuestion q, String locale) {
-    final inputStyle = q.style.inputStyle;
+    final inputStyle = style.inputStyle;
     Color fillColor = AppColors.fieldBackground;
     BoxBorder? border = Border.all(color: AppColors.borderLight);
     List<BoxShadow>? shadows;
@@ -717,7 +783,7 @@ class _RenderFieldWidget extends StatelessWidget {
     Color inputColor;
     try {
       inputColor = Color(
-        int.parse(q.style.inputFontColor.replaceAll('#', '0xFF')),
+        int.parse(style.inputFontColor.replaceAll('#', '0xFF')),
       );
     } catch (_) {
       inputColor = AppColors.textDark;
@@ -725,8 +791,8 @@ class _RenderFieldWidget extends StatelessWidget {
 
     final textStyle = TextStyle(
       color: inputColor,
-      fontSize: q.style.inputFontSize,
-      fontWeight: _parseFontWeight(q.style.inputFontWeight),
+      fontSize: style.inputFontSize,
+      fontWeight: _parseFontWeight(style.inputFontWeight),
     );
 
     switch (q.type) {
@@ -740,46 +806,46 @@ class _RenderFieldWidget extends StatelessWidget {
       case QuestionType.tel:
       case QuestionType.url:
         return Container(
-          height: q.style.height ?? 48,
+          height: style.height ?? 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           alignment: Alignment.centerLeft,
           child: Row(
             children: [
-              if (q.style.prefixIcon?.isNotEmpty ?? false)
+              if (style.prefixIcon?.isNotEmpty ?? false)
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Text(q.style.prefixIcon!, style: textStyle),
+                  child: Text(style.prefixIcon!, style: textStyle),
                 ),
               Expanded(
                 child: Text(
-                  q.placeholder.translate(locale).isEmpty
+                  placeholder.translate(locale).isEmpty
                       ? _getPlaceholderForType(q.type)
-                      : q.placeholder.translate(locale),
+                      : placeholder.translate(locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (q.style.suffixIcon?.isNotEmpty ?? false)
+              if (style.suffixIcon?.isNotEmpty ?? false)
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(q.style.suffixIcon!, style: textStyle),
+                  child: Text(style.suffixIcon!, style: textStyle),
                 ),
             ],
           ),
         );
       case QuestionType.paragraph:
         return Container(
-          height: q.style.height ?? 120,
+          height: style.height ?? 120,
           padding: const EdgeInsets.all(12),
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            q.placeholder.translate(locale).isEmpty
+            placeholder.translate(locale).isEmpty
                 ? 'Long answer text...'
-                : q.placeholder.translate(locale),
+                : placeholder.translate(locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -787,15 +853,15 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.dropdown:
         return Container(
-          height: q.style.height ?? 48,
+          height: style.height ?? 48,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           child: Row(
             children: [
               Text(
-                q.placeholder.translate(locale).isEmpty
+                placeholder.translate(locale).isEmpty
                     ? 'Select an option'
-                    : q.placeholder.translate(locale),
+                    : placeholder.translate(locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),
@@ -811,24 +877,26 @@ class _RenderFieldWidget extends StatelessWidget {
           ),
         );
       case QuestionType.checkboxes:
+        final options = q.options.isEmpty
+            ? const <Map<String, dynamic>>[
+                {
+                  'id': '1',
+                  'option_label': 'Option 1',
+                  'option_value': '1',
+                  'order': 0,
+                },
+                {
+                  'id': '2',
+                  'option_label': 'Option 2',
+                  'option_value': '2',
+                  'order': 1,
+                },
+              ]
+            : q.options;
         return Column(
-          children:
-              (q.options ??
-                      const [
-                        FormQuestionOption(
-                          id: '1',
-                          label: 'Option 1',
-                          value: '1',
-                          order: 0,
-                        ),
-                        FormQuestionOption(
-                          id: '2',
-                          label: 'Option 2',
-                          value: '2',
-                          order: 1,
-                        ),
-                      ])
-                  .map((opt) {
+          children: options.map((opt) {
+            final label =
+                (opt['option_label'] ?? opt['label'] ?? '').toString();
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
@@ -844,32 +912,33 @@ class _RenderFieldWidget extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(opt.label, style: textStyle),
+                          Text(label, style: textStyle),
                         ],
                       ),
                     );
-                  })
-                  .toList(),
+                  }).toList(),
         );
       case QuestionType.multipleChoice:
+        final options = q.options.isEmpty
+            ? const <Map<String, dynamic>>[
+                {
+                  'id': '1',
+                  'option_label': 'Option 1',
+                  'option_value': '1',
+                  'order': 0,
+                },
+                {
+                  'id': '2',
+                  'option_label': 'Option 2',
+                  'option_value': '2',
+                  'order': 1,
+                },
+              ]
+            : q.options;
         return Column(
-          children:
-              (q.options ??
-                      const [
-                        FormQuestionOption(
-                          id: '1',
-                          label: 'Option 1',
-                          value: '1',
-                          order: 0,
-                        ),
-                        FormQuestionOption(
-                          id: '2',
-                          label: 'Option 2',
-                          value: '2',
-                          order: 1,
-                        ),
-                      ])
-                  .map((opt) {
+          children: options.map((opt) {
+            final label =
+                (opt['option_label'] ?? opt['label'] ?? '').toString();
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
@@ -880,16 +949,15 @@ class _RenderFieldWidget extends StatelessWidget {
                             color: textStyle.color ?? AppColors.textGrey,
                           ),
                           const SizedBox(width: 8),
-                          Text(opt.label, style: textStyle),
+                          Text(label, style: textStyle),
                         ],
                       ),
                     );
-                  })
-                  .toList(),
+                  }).toList(),
         );
       case QuestionType.fileUpload:
         return Container(
-          height: q.style.height ?? 100,
+          height: style.height ?? 100,
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.borderLight, width: 1),
             color: AppColors.fieldBackground,
@@ -932,7 +1000,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.signature:
         return Container(
-          height: q.style.height ?? 150,
+          height: style.height ?? 150,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Icon(
@@ -965,7 +1033,7 @@ class _RenderFieldWidget extends StatelessWidget {
         );
       case QuestionType.image:
         return Container(
-          height: q.style.height ?? 200,
+          height: style.height ?? 200,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Column(
@@ -1034,7 +1102,7 @@ class _RenderFieldWidget extends StatelessWidget {
           color: textStyle.color ?? AppColors.borderLight,
         );
       case QuestionType.spacer:
-        return SizedBox(height: q.style.height ?? 32);
+        return SizedBox(height: style.height ?? 32);
       case QuestionType.matrixChoice:
         return Container(
           padding: const EdgeInsets.all(12),
@@ -1124,8 +1192,10 @@ class _RenderFieldWidget extends StatelessWidget {
     TextStyle textStyle,
     String locale,
   ) {
+    final style = _styleFor(q);
+    final placeholder = _placeholderFor(q);
     return Container(
-      height: q.style.height ?? 120,
+      height: style.height ?? 120,
       decoration: BoxDecoration(
         color: AppColors.fieldBackground,
         borderRadius: BorderRadius.circular(8),
@@ -1152,9 +1222,9 @@ class _RenderFieldWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            q.placeholder.translate(locale).isEmpty
+            placeholder.translate(locale).isEmpty
                 ? 'Specialized input preview'
-                : q.placeholder.translate(locale),
+                : placeholder.translate(locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.65),
             ),

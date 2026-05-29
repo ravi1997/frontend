@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import '../logic_rule_dialog.dart';
 import 'property_builder_utils.dart';
@@ -24,7 +24,9 @@ class SectionLogicSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+    final logic = (section.conditionalLogic is Map)
+        ? Map<String, dynamic>.from(section.conditionalLogic as Map)
+        : <String, dynamic>{'version': 3, 'rules': []};
     final rules = (logic['rules'] as List? ?? []).cast<Map<String, dynamic>>();
     final locale =
         ref
@@ -93,10 +95,7 @@ class SectionLogicSettings extends ConsumerWidget {
           onChanged: (val) {
             onSectionChanged(
               section.copyWith(
-                metaData: {
-                  ...section.metaData,
-                  'disableWhenHidden': val,
-                },
+                metadata: {...section.metaData, 'disableWhenHidden': val},
               ),
             );
           },
@@ -216,7 +215,9 @@ class SectionLogicSettings extends ConsumerWidget {
     );
 
     if (result != null) {
-      final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+      final logic = (section.conditionalLogic is Map)
+          ? Map<String, dynamic>.from(section.conditionalLogic as Map)
+          : <String, dynamic>{'version': 3, 'rules': []};
       final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? []);
       if (index != null) {
         newRules[index] = result;
@@ -225,17 +226,24 @@ class SectionLogicSettings extends ConsumerWidget {
       }
 
       onSectionChanged(
-        section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+        section.copyWith(logic: {...section.logic, 'conditional_logic': {...logic, 'rules': newRules}}),
       );
     }
   }
 
   void _deleteRule(WidgetRef ref, int index) {
-    final logic = section.conditionalLogic ?? {'version': 3, 'rules': []};
+    final logic = (section.conditionalLogic is Map)
+        ? Map<String, dynamic>.from(section.conditionalLogic as Map)
+        : <String, dynamic>{'version': 3, 'rules': []};
     final newRules = List<Map<String, dynamic>>.from(logic['rules'] ?? [])
       ..removeAt(index);
     onSectionChanged(
-      section.copyWith(conditionalLogic: {...logic, 'rules': newRules}),
+      section.copyWith(
+        logic: {
+          ...section.logic,
+          'conditional_logic': {...logic, 'rules': newRules},
+        },
+      ),
     );
   }
 }

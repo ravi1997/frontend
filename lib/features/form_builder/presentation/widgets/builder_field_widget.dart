@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
-import '../../domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 
-import '../../domain/entities/form_question_option.dart';
+import '../../domain/entities/form_style.dart';
 import '../../domain/entities/question_type.dart';
 
 class BuilderFieldWidget extends StatelessWidget {
@@ -29,7 +29,7 @@ class BuilderFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = question.style;
+    final style = _questionStyle(question);
     Color bgColor;
     Color borderColor;
 
@@ -85,9 +85,8 @@ class BuilderFieldWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildLabelText(context),
-                        if (question.helperText
-                            .translate(locale)
-                            .isNotEmpty) ...[
+                        if (_helperText(question).translate(locale).isNotEmpty)
+                          ...[
                           const SizedBox(height: 4),
                           _buildHelperText(context),
                         ],
@@ -101,7 +100,7 @@ class BuilderFieldWidget extends StatelessWidget {
             ] else ...[
               // Top or Hidden
               if (!isHidden &&
-                  question.helperText.translate(locale).isNotEmpty) ...[
+                  _helperText(question).translate(locale).isNotEmpty) ...[
                 const SizedBox(height: 4),
                 _buildHelperText(context),
               ],
@@ -158,7 +157,7 @@ class BuilderFieldWidget extends StatelessWidget {
   }
 
   Widget _buildLabelText(BuildContext context) {
-    final style = question.style;
+    final style = _questionStyle(question);
     Color labelColor;
     try {
       labelColor = Color(int.parse(style.labelColor.replaceAll('#', '0xFF')));
@@ -189,7 +188,7 @@ class BuilderFieldWidget extends StatelessWidget {
   }
 
   Widget _buildHelperText(BuildContext context) {
-    final style = question.style;
+    final style = _questionStyle(question);
     Color helperColor;
     try {
       helperColor = Color(int.parse(style.helperColor.replaceAll('#', '0xFF')));
@@ -198,13 +197,30 @@ class BuilderFieldWidget extends StatelessWidget {
     }
 
     return Text(
-      question.helperText.translate(locale),
+      _helperText(question).translate(locale),
       style: TextStyle(
         color: helperColor,
         fontSize: style.helperFontSize,
         fontWeight: _parseFontWeight(style.helperFontWeight),
       ),
     );
+  }
+
+  QuestionStyle _questionStyle(FormQuestion q) {
+    final raw = q.ui['style'];
+    if (raw is Map) {
+      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return const QuestionStyle();
+  }
+
+  dynamic _helperText(FormQuestion q) {
+    // Current canonical field name is `helpText`, but some flows store it in metadata.
+    return q.helpText ?? q.metadata['helper_text'] ?? '';
+  }
+
+  dynamic _placeholder(FormQuestion q) {
+    return q.metadata['placeholder'] ?? '';
   }
 
   FontWeight _parseFontWeight(String weight) {
@@ -223,7 +239,8 @@ class BuilderFieldWidget extends StatelessWidget {
     // This is a READ-ONLY preview for the builder.
     // It mocks the appearance of the field.
 
-    final inputStyle = q.style.inputStyle;
+    final style = _questionStyle(q);
+    final inputStyle = style.inputStyle;
     Color fillColor = AppColors.fieldBackground;
     BoxBorder? border = Border.all(color: AppColors.borderLight);
     List<BoxShadow>? shadows;
@@ -281,7 +298,7 @@ class BuilderFieldWidget extends StatelessWidget {
     Color inputColor;
     try {
       inputColor = Color(
-        int.parse(q.style.inputFontColor.replaceAll('#', '0xFF')),
+        int.parse(style.inputFontColor.replaceAll('#', '0xFF')),
       );
     } catch (_) {
       inputColor = AppColors.textDark;
@@ -289,8 +306,8 @@ class BuilderFieldWidget extends StatelessWidget {
 
     final textStyle = TextStyle(
       color: inputColor,
-      fontSize: q.style.inputFontSize,
-      fontWeight: _parseFontWeight(q.style.inputFontWeight),
+      fontSize: style.inputFontSize,
+      fontWeight: _parseFontWeight(style.inputFontWeight),
     );
 
     switch (q.type) {
@@ -304,46 +321,46 @@ class BuilderFieldWidget extends StatelessWidget {
       case QuestionType.tel:
       case QuestionType.url:
         return Container(
-          height: q.style.height ?? 42,
+          height: style.height ?? 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           alignment: Alignment.centerLeft,
           child: Row(
             children: [
-              if (q.style.prefixIcon?.isNotEmpty ?? false)
+              if (style.prefixIcon?.isNotEmpty ?? false)
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Text(q.style.prefixIcon!, style: textStyle),
+                  child: Text(style.prefixIcon!, style: textStyle),
                 ),
               Expanded(
                 child: Text(
-                  q.placeholder.translate(locale).isEmpty
+                  _placeholder(q).translate(locale).isEmpty
                       ? _getPlaceholderForType(q.type)
-                      : q.placeholder.translate(locale),
+                      : _placeholder(q).translate(locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (q.style.suffixIcon?.isNotEmpty ?? false)
+              if (style.suffixIcon?.isNotEmpty ?? false)
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(q.style.suffixIcon!, style: textStyle),
+                  child: Text(style.suffixIcon!, style: textStyle),
                 ),
             ],
           ),
         );
       case QuestionType.paragraph:
         return Container(
-          height: q.style.height ?? 90,
+          height: style.height ?? 90,
           padding: const EdgeInsets.all(12),
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            q.placeholder.translate(locale).isEmpty
+            _placeholder(q).translate(locale).isEmpty
                 ? 'Long answer text...'
-                : q.placeholder.translate(locale),
+                : _placeholder(q).translate(locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -351,15 +368,15 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.dropdown:
         return Container(
-          height: q.style.height ?? 42,
+          height: style.height ?? 42,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: containerDecor,
           child: Row(
             children: [
               Text(
-                q.placeholder.translate(locale).isEmpty
+                _placeholder(q).translate(locale).isEmpty
                     ? 'Select an option'
-                    : q.placeholder.translate(locale),
+                    : _placeholder(q).translate(locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),
@@ -375,24 +392,26 @@ class BuilderFieldWidget extends StatelessWidget {
           ),
         );
       case QuestionType.checkboxes:
+        final options = q.options.isEmpty
+            ? const <Map<String, dynamic>>[
+                {
+                  'id': '1',
+                  'option_label': 'Option 1',
+                  'option_value': '1',
+                  'order': 0,
+                },
+                {
+                  'id': '2',
+                  'option_label': 'Option 2',
+                  'option_value': '2',
+                  'order': 1,
+                },
+              ]
+            : q.options;
         return Column(
-          children:
-              (q.options ??
-                      const [
-                        FormQuestionOption(
-                          id: '1',
-                          label: 'Option 1',
-                          value: '1',
-                          order: 0,
-                        ),
-                        FormQuestionOption(
-                          id: '2',
-                          label: 'Option 2',
-                          value: '2',
-                          order: 1,
-                        ),
-                      ])
-                  .map((opt) {
+          children: options.map((opt) {
+            final label =
+                (opt['option_label'] ?? opt['label'] ?? '').toString();
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
@@ -408,32 +427,33 @@ class BuilderFieldWidget extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(opt.label, style: textStyle),
+                          Text(label, style: textStyle),
                         ],
                       ),
                     );
-                  })
-                  .toList(),
+                  }).toList(),
         );
       case QuestionType.multipleChoice:
+        final options = q.options.isEmpty
+            ? const <Map<String, dynamic>>[
+                {
+                  'id': '1',
+                  'option_label': 'Option 1',
+                  'option_value': '1',
+                  'order': 0,
+                },
+                {
+                  'id': '2',
+                  'option_label': 'Option 2',
+                  'option_value': '2',
+                  'order': 1,
+                },
+              ]
+            : q.options;
         return Column(
-          children:
-              (q.options ??
-                      const [
-                        FormQuestionOption(
-                          id: '1',
-                          label: 'Option 1',
-                          value: '1',
-                          order: 0,
-                        ),
-                        FormQuestionOption(
-                          id: '2',
-                          label: 'Option 2',
-                          value: '2',
-                          order: 1,
-                        ),
-                      ])
-                  .map((opt) {
+          children: options.map((opt) {
+            final label =
+                (opt['option_label'] ?? opt['label'] ?? '').toString();
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
@@ -444,16 +464,15 @@ class BuilderFieldWidget extends StatelessWidget {
                             color: textStyle.color ?? AppColors.textGrey,
                           ),
                           const SizedBox(width: 8),
-                          Text(opt.label, style: textStyle),
+                          Text(label, style: textStyle),
                         ],
                       ),
                     );
-                  })
-                  .toList(),
+                  }).toList(),
         );
       case QuestionType.fileUpload:
         return Container(
-          height: q.style.height ?? 80,
+          height: style.height ?? 80,
           decoration: BoxDecoration(
             border: Border.all(
               color: AppColors.borderLight,
@@ -489,7 +508,7 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.signature:
         return Container(
-          height: q.style.height ?? 100,
+          height: style.height ?? 100,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Icon(
@@ -502,7 +521,7 @@ class BuilderFieldWidget extends StatelessWidget {
         );
       case QuestionType.image:
         return Container(
-          height: q.style.height ?? 120,
+          height: style.height ?? 120,
           decoration: containerDecor.copyWith(color: Colors.grey.shade50),
           child: Center(
             child: Column(
@@ -569,7 +588,7 @@ class BuilderFieldWidget extends StatelessWidget {
           color: textStyle.color ?? AppColors.borderLight,
         );
       case QuestionType.spacer:
-        return SizedBox(height: q.style.height ?? 32);
+        return SizedBox(height: style.height ?? 32);
       case QuestionType.matrixChoice:
         return Container(
           padding: const EdgeInsets.all(8),

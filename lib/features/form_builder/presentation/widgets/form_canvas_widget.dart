@@ -8,6 +8,7 @@ import '../../domain/entities/form_layout_type.dart';
 import '../controllers/form_builder_controller.dart';
 import 'form_drag_data.dart';
 import 'section_widget.dart';
+import 'package:frontend/models/form_models.dart';
 
 class FormCanvasWidget extends ConsumerWidget {
   final String controllerKey;

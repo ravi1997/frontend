@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/form_version_history.dart';
-import '../../domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 
 part 'version_history_controller.g.dart';
@@ -163,7 +163,7 @@ class VersionHistoryController extends _$VersionHistoryController {
       final updatedForm = formToRestore.copyWith(
         id: formId,
         title: formToRestore.title,
-        updatedAt: DateTime.now(),
+        activeVersion: version.version,
       );
 
       // Save the restored form (creates a new version)

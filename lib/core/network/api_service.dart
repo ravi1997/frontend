@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
-import 'api_client_wrapper.dart';
+import 'api_client.dart';
 import 'api_endpoints.dart';
 
 import '../../features/form_builder/data/dto/form_dto.dart';
@@ -10,7 +10,7 @@ part 'api_service.g.dart';
 
 /// Comprehensive API service providing typed methods for all backend endpoints.
 ///
-/// This service wraps the API client and provides convenient, type-safe methods
+/// This service wraps Dio directly and provides convenient, type-safe methods
 /// for interacting with the backend API. All methods automatically handle:
 /// - JWT authentication via interceptors
 /// - Token refresh on 401 errors
@@ -24,7 +24,7 @@ part 'api_service.g.dart';
 /// final forms = await apiService.listForms();
 /// ```
 class ApiService {
-  final ApiClient _client;
+  final Dio _client;
   static const _uuid = Uuid();
 
   ApiService(this._client);
@@ -645,11 +645,17 @@ class ApiService {
       if (workflows != null) 'workflows': workflows,
     };
   }
+
+  /// GET - Fetch the dynamic builder metadata schema
+  Future<Map<String, dynamic>> getBuilderMetadata() async {
+    final response = await _client.get(ApiEndpoints.builderMetadata);
+    return response.data as Map<String, dynamic>;
+  }
 }
 
 /// Riverpod provider for ApiService
 @riverpod
 ApiService apiService(Ref ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return ApiService(apiClient);
+  final dioClient = ref.watch(dioProvider);
+  return ApiService(dioClient);
 }

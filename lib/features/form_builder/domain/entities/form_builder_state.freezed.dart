@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormBuilderState {
 
- BuilderForm get form; String? get selectedSectionId; String? get selectedQuestionId; List<String> get selectedQuestionIds; bool get isFormSelected; bool get isDirty; bool get canUndo; bool get canRedo; bool get isSaving; bool get isLoading; String get editingLocale; String? get error;
+ Form get form; String? get selectedSectionId; String? get selectedQuestionId; List<String> get selectedQuestionIds; bool get isFormSelected; bool get isDirty; bool get canUndo; bool get canRedo; bool get isSaving; bool get isLoading; String get editingLocale; String? get error;
 /// Create a copy of FormBuilderState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,11 +45,11 @@ abstract mixin class $FormBuilderStateCopyWith<$Res>  {
   factory $FormBuilderStateCopyWith(FormBuilderState value, $Res Function(FormBuilderState) _then) = _$FormBuilderStateCopyWithImpl;
 @useResult
 $Res call({
- BuilderForm form, String? selectedSectionId, String? selectedQuestionId, List<String> selectedQuestionIds, bool isFormSelected, bool isDirty, bool canUndo, bool canRedo, bool isSaving, bool isLoading, String editingLocale, String? error
+ Form form, String? selectedSectionId, String? selectedQuestionId, List<String> selectedQuestionIds, bool isFormSelected, bool isDirty, bool canUndo, bool canRedo, bool isSaving, bool isLoading, String editingLocale, String? error
 });
 
 
-$BuilderFormCopyWith<$Res> get form;
+$FormCopyWith<$Res> get form;
 
 }
 /// @nodoc
@@ -65,7 +65,7 @@ class _$FormBuilderStateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? selectedQuestionIds = null,Object? isFormSelected = null,Object? isDirty = null,Object? canUndo = null,Object? canRedo = null,Object? isSaving = null,Object? isLoading = null,Object? editingLocale = null,Object? error = freezed,}) {
   return _then(_self.copyWith(
 form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
-as BuilderForm,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
+as Form,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionId: freezed == selectedQuestionId ? _self.selectedQuestionId : selectedQuestionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionIds: null == selectedQuestionIds ? _self.selectedQuestionIds : selectedQuestionIds // ignore: cast_nullable_to_non_nullable
 as List<String>,isFormSelected: null == isFormSelected ? _self.isFormSelected : isFormSelected // ignore: cast_nullable_to_non_nullable
@@ -83,9 +83,9 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$BuilderFormCopyWith<$Res> get form {
+$FormCopyWith<$Res> get form {
   
-  return $BuilderFormCopyWith<$Res>(_self.form, (value) {
+  return $FormCopyWith<$Res>(_self.form, (value) {
     return _then(_self.copyWith(form: value));
   });
 }
@@ -170,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Form form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormBuilderState() when $default != null:
 return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.selectedQuestionIds,_that.isFormSelected,_that.isDirty,_that.canUndo,_that.canRedo,_that.isSaving,_that.isLoading,_that.editingLocale,_that.error);case _:
@@ -191,7 +191,7 @@ return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Form form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _FormBuilderState():
 return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.selectedQuestionIds,_that.isFormSelected,_that.isDirty,_that.canUndo,_that.canRedo,_that.isSaving,_that.isLoading,_that.editingLocale,_that.error);case _:
@@ -211,7 +211,7 @@ return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( BuilderForm form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Form form,  String? selectedSectionId,  String? selectedQuestionId,  List<String> selectedQuestionIds,  bool isFormSelected,  bool isDirty,  bool canUndo,  bool canRedo,  bool isSaving,  bool isLoading,  String editingLocale,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _FormBuilderState() when $default != null:
 return $default(_that.form,_that.selectedSectionId,_that.selectedQuestionId,_that.selectedQuestionIds,_that.isFormSelected,_that.isDirty,_that.canUndo,_that.canRedo,_that.isSaving,_that.isLoading,_that.editingLocale,_that.error);case _:
@@ -229,7 +229,7 @@ class _FormBuilderState implements FormBuilderState {
   const _FormBuilderState({required this.form, this.selectedSectionId, this.selectedQuestionId, final  List<String> selectedQuestionIds = const <String>[], this.isFormSelected = false, this.isDirty = false, this.canUndo = false, this.canRedo = false, this.isSaving = false, this.isLoading = false, this.editingLocale = 'en', this.error}): _selectedQuestionIds = selectedQuestionIds;
   
 
-@override final  BuilderForm form;
+@override final  Form form;
 @override final  String? selectedSectionId;
 @override final  String? selectedQuestionId;
  final  List<String> _selectedQuestionIds;
@@ -278,11 +278,11 @@ abstract mixin class _$FormBuilderStateCopyWith<$Res> implements $FormBuilderSta
   factory _$FormBuilderStateCopyWith(_FormBuilderState value, $Res Function(_FormBuilderState) _then) = __$FormBuilderStateCopyWithImpl;
 @override @useResult
 $Res call({
- BuilderForm form, String? selectedSectionId, String? selectedQuestionId, List<String> selectedQuestionIds, bool isFormSelected, bool isDirty, bool canUndo, bool canRedo, bool isSaving, bool isLoading, String editingLocale, String? error
+ Form form, String? selectedSectionId, String? selectedQuestionId, List<String> selectedQuestionIds, bool isFormSelected, bool isDirty, bool canUndo, bool canRedo, bool isSaving, bool isLoading, String editingLocale, String? error
 });
 
 
-@override $BuilderFormCopyWith<$Res> get form;
+@override $FormCopyWith<$Res> get form;
 
 }
 /// @nodoc
@@ -298,7 +298,7 @@ class __$FormBuilderStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? form = null,Object? selectedSectionId = freezed,Object? selectedQuestionId = freezed,Object? selectedQuestionIds = null,Object? isFormSelected = null,Object? isDirty = null,Object? canUndo = null,Object? canRedo = null,Object? isSaving = null,Object? isLoading = null,Object? editingLocale = null,Object? error = freezed,}) {
   return _then(_FormBuilderState(
 form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
-as BuilderForm,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
+as Form,selectedSectionId: freezed == selectedSectionId ? _self.selectedSectionId : selectedSectionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionId: freezed == selectedQuestionId ? _self.selectedQuestionId : selectedQuestionId // ignore: cast_nullable_to_non_nullable
 as String?,selectedQuestionIds: null == selectedQuestionIds ? _self._selectedQuestionIds : selectedQuestionIds // ignore: cast_nullable_to_non_nullable
 as List<String>,isFormSelected: null == isFormSelected ? _self.isFormSelected : isFormSelected // ignore: cast_nullable_to_non_nullable
@@ -317,9 +317,9 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$BuilderFormCopyWith<$Res> get form {
+$FormCopyWith<$Res> get form {
   
-  return $BuilderFormCopyWith<$Res>(_self.form, (value) {
+  return $FormCopyWith<$Res>(_self.form, (value) {
     return _then(_self.copyWith(form: value));
   });
 }

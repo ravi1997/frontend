@@ -8,6 +8,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'project_schema.g.dart';
 
+
 @CopyWith()
 @JsonSerializable(
   checked: true,
@@ -18,57 +19,121 @@ part 'project_schema.g.dart';
 class ProjectSchema {
   /// Returns a new [ProjectSchema] instance.
   ProjectSchema({
-    this.id,
 
-    this.activeVersion,
+     this.id,
 
-    this.createdAt,
+     this.activeVersion,
 
-    this.deletedAt,
+     this.createdAt,
 
-    this.description,
+     this.deletedAt,
 
-    this.forms,
+     this.description,
 
-    this.helpText,
+     this.forms,
 
-    this.isDeleted = false,
+     this.helpText,
 
-    required this.organizationId,
+     this.isDeleted = false,
 
-    this.status = const ProjectSchemaStatusEnum._('draft'),
+    required  this.organizationId,
 
-    this.subProjects,
+     this.status = const ProjectSchemaStatusEnum._('draft'),
 
-    this.tags,
+     this.subProjects,
 
-    required this.title,
+     this.tags,
 
-    this.triggers,
+    required  this.title,
 
-    this.updatedAt,
+     this.triggers,
+
+     this.updatedAt,
   });
 
-  @JsonKey(name: r'_id', required: false, includeIfNull: false)
+  @JsonKey(
+    
+    name: r'_id',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? id;
 
-  @JsonKey(name: r'active_version', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'active_version',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? activeVersion;
 
-  @JsonKey(name: r'created_at', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'created_at',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? createdAt;
 
-  @JsonKey(name: r'deleted_at', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'deleted_at',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? deletedAt;
 
-  @JsonKey(name: r'description', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'description',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? description;
 
-  @JsonKey(name: r'forms', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'forms',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final List<String>? forms;
 
-  @JsonKey(name: r'help_text', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'help_text',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? helpText;
+
+
 
   @JsonKey(
     defaultValue: false,
@@ -76,10 +141,23 @@ class ProjectSchema {
     required: false,
     includeIfNull: false,
   )
+
+
   final bool? isDeleted;
 
-  @JsonKey(name: r'organization_id', required: true, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'organization_id',
+    required: true,
+    includeIfNull: false,
+  )
+
+
   final String organizationId;
+
+
 
   @JsonKey(
     defaultValue: 'draft',
@@ -87,63 +165,111 @@ class ProjectSchema {
     required: false,
     includeIfNull: false,
   )
+
+
   final ProjectSchemaStatusEnum? status;
 
-  @JsonKey(name: r'sub_projects', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'sub_projects',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final List<String>? subProjects;
 
-  @JsonKey(name: r'tags', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'tags',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final List<String>? tags;
 
-  @JsonKey(name: r'title', required: true, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'title',
+    required: true,
+    includeIfNull: false,
+  )
+
+
   final String title;
 
-  @JsonKey(name: r'triggers', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'triggers',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final List<Object>? triggers;
 
-  @JsonKey(name: r'updated_at', required: false, includeIfNull: false)
+
+
+  @JsonKey(
+    
+    name: r'updated_at',
+    required: false,
+    includeIfNull: false,
+  )
+
+
   final Object? updatedAt;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ProjectSchema &&
-          other.id == id &&
-          other.activeVersion == activeVersion &&
-          other.createdAt == createdAt &&
-          other.deletedAt == deletedAt &&
-          other.description == description &&
-          other.forms == forms &&
-          other.helpText == helpText &&
-          other.isDeleted == isDeleted &&
-          other.organizationId == organizationId &&
-          other.status == status &&
-          other.subProjects == subProjects &&
-          other.tags == tags &&
-          other.title == title &&
-          other.triggers == triggers &&
-          other.updatedAt == updatedAt;
 
-  @override
-  int get hashCode =>
-      id.hashCode +
-      activeVersion.hashCode +
-      createdAt.hashCode +
-      deletedAt.hashCode +
-      description.hashCode +
-      forms.hashCode +
-      helpText.hashCode +
-      isDeleted.hashCode +
-      organizationId.hashCode +
-      status.hashCode +
-      subProjects.hashCode +
-      tags.hashCode +
-      title.hashCode +
-      triggers.hashCode +
-      updatedAt.hashCode;
 
-  factory ProjectSchema.fromJson(Map<String, dynamic> json) =>
-      _$ProjectSchemaFromJson(json);
+
+
+    @override
+    bool operator ==(Object other) => identical(this, other) || other is ProjectSchema &&
+      other.id == id &&
+      other.activeVersion == activeVersion &&
+      other.createdAt == createdAt &&
+      other.deletedAt == deletedAt &&
+      other.description == description &&
+      other.forms == forms &&
+      other.helpText == helpText &&
+      other.isDeleted == isDeleted &&
+      other.organizationId == organizationId &&
+      other.status == status &&
+      other.subProjects == subProjects &&
+      other.tags == tags &&
+      other.title == title &&
+      other.triggers == triggers &&
+      other.updatedAt == updatedAt;
+
+    @override
+    int get hashCode =>
+        id.hashCode +
+        activeVersion.hashCode +
+        createdAt.hashCode +
+        deletedAt.hashCode +
+        description.hashCode +
+        forms.hashCode +
+        helpText.hashCode +
+        isDeleted.hashCode +
+        organizationId.hashCode +
+        status.hashCode +
+        subProjects.hashCode +
+        tags.hashCode +
+        title.hashCode +
+        triggers.hashCode +
+        updatedAt.hashCode;
+
+  factory ProjectSchema.fromJson(Map<String, dynamic> json) => _$ProjectSchemaFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProjectSchemaToJson(this);
 
@@ -151,20 +277,24 @@ class ProjectSchema {
   String toString() {
     return toJson().toString();
   }
+
 }
+
 
 enum ProjectSchemaStatusEnum {
-  @JsonValue(r'draft')
-  draft(r'draft'),
-  @JsonValue(r'published')
-  published(r'published'),
-  @JsonValue(r'archived')
-  archived(r'archived');
+@JsonValue(r'draft')
+draft(r'draft'),
+@JsonValue(r'published')
+published(r'published'),
+@JsonValue(r'archived')
+archived(r'archived');
 
-  const ProjectSchemaStatusEnum(this.value);
+const ProjectSchemaStatusEnum(this.value);
 
-  final String value;
+final String value;
 
-  @override
-  String toString() => value;
+@override
+String toString() => value;
 }
+
+

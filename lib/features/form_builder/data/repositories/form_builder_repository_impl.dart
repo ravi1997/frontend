@@ -1,11 +1,10 @@
 import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
-import '../../domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/form_version_history.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 import '../../domain/entities/custom_field_template.dart';
-import '../../domain/entities/form_section.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';

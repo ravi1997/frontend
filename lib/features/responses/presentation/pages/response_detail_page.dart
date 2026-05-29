@@ -536,9 +536,17 @@ class _AnswersList extends ConsumerWidget {
 
     return formAsync.when(
       data: (formState) {
-        final questions = formState.form.sections
-            .expand((s) => s.questions)
-            .toList();
+        final form = formState.form;
+        final activeVersion = form.activeVersion;
+        final sections = form.versions.isEmpty
+            ? const <dynamic>[]
+            : (activeVersion == null
+                ? form.versions.first.sections
+                : form.versions.firstWhere(
+                    (v) => v.version == activeVersion,
+                    orElse: () => form.versions.first,
+                  ).sections);
+        final questions = sections.expand((s) => s.questions).toList();
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,

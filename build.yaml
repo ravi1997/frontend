@@ -1,0 +1,8 @@
+targets:
+  $default:
+    sources:
+      include:
+        - "lib/**"
+        - "pubspec.yaml"
+      exclude:
+        - "lib/generated/api/**"

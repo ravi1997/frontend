@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import '../logic_rule_dialog.dart';
 

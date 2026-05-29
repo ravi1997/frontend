@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_builder_state.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/domain/services/field_registry.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
@@ -176,7 +176,12 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                             )
                             .updateQuestionsBulk(
                               selectedQuestionIds,
-                              (q) => q.copyWith(isRequired: val),
+                              (q) => q.copyWith(
+                                validation: {
+                                  ...q.validation,
+                                  'is_required': val,
+                                },
+                              ),
                             ),
                       ),
                       const SizedBox(height: 12),

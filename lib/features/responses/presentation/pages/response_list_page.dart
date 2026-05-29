@@ -11,7 +11,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:frontend/features/responses/presentation/controllers/responses_controller.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/form_builder/domain/repositories/form_builder_repository.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/responses/domain/utils/csv_exporter.dart';
 import 'package:frontend/features/responses/presentation/widgets/export_options_dialog.dart';
 import 'package:frontend/features/responses/presentation/widgets/filter_builder_dialog.dart';
@@ -891,7 +891,24 @@ class _ResponseListPageUtils {
           mimeType = MimeType.microsoftExcel;
         }
       } else if (format == 'JSON') {
-        content = jsonEncode(filteredResponses.map((r) => r.toJson()).toList());
+        content = jsonEncode(
+          filteredResponses
+              .map(
+                (r) => {
+                  'id': r.id,
+                  'form_id': r.formId,
+                  'organization_id': r.organizationId,
+                  'submitted_by': r.submittedBy,
+                  'submitted_at': r.submittedAt?.toIso8601String(),
+                  'answers': r.answers,
+                  'ip_address': r.ipAddress,
+                  'user_agent': r.userAgent,
+                  'ai_results': r.aiResults,
+                  'status': r.status,
+                },
+              )
+              .toList(),
+        );
         extension = 'json';
         mimeType = MimeType.json;
       } else {

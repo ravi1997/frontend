@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../form_builder/domain/entities/builder_form.dart';
-import '../../../form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 
 class ExportOptionsDialog extends StatefulWidget {
   final BuilderForm form;
@@ -231,7 +230,7 @@ class _ExportOptionsDialogState extends State<ExportOptionsDialog> {
             itemBuilder: (context, index) {
               final question = _getAllQuestions()[index];
               return CheckboxListTile(
-                title: Text(question.label?.toString() ?? 'Untitled Field'),
+                title: Text(question.label.toString()),
                 subtitle: Text(
                   question.type.toString().split('.').last,
                   style: const TextStyle(fontSize: 12),

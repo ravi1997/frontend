@@ -1,8 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../domain/entities/custom_field_template.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/question_type.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/repositories/form_builder_repository.dart';
 
 part 'custom_fields_controller.g.dart';
@@ -26,46 +25,7 @@ class CustomFields extends _$CustomFields {
   }
 
   List<CustomFieldTemplate> _getDefaultTemplates() {
-    return [
-      CustomFieldTemplate(
-        id: 'tpl-full-name',
-        name: 'Full Name',
-        category: 'Personal Info',
-        template_type: 'question',
-        data: const FormQuestion(
-          id: 'temp-id-1',
-          label: 'Full Name',
-          type: QuestionType.shortText,
-          placeholder: 'Enter your first and last name',
-          isRequired: true,
-        ).toJson(),
-      ),
-      CustomFieldTemplate(
-        id: 'tpl-phone-intl',
-        name: 'International Phone',
-        category: 'Contact',
-        template_type: 'question',
-        data: const FormQuestion(
-          id: 'temp-id-2',
-          label: 'Phone Number',
-          type: QuestionType.mobile,
-          placeholder: '+1 (555) 000-0000',
-          inputMask: '+# (###) ###-####',
-        ).toJson(),
-      ),
-      CustomFieldTemplate(
-        id: 'tpl-satisfaction',
-        name: 'Satisfaction Scale',
-        category: 'Feedback',
-        template_type: 'question',
-        data: const FormQuestion(
-          id: 'temp-id-3',
-          label: 'How satisfied are you?',
-          type: QuestionType.rating,
-          metadata: {'maxStars': 10, 'icon': 'heart'},
-        ).toJson(),
-      ),
-    ];
+    return [];
   }
 
   Future<void> saveAsTemplate(

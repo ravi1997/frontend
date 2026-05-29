@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question_option.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/domain/services/field_registry.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
@@ -45,28 +44,28 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   void initState() {
     super.initState();
     _defaultValueController = TextEditingController(
-      text: widget.question.metadata?['defaultValue']?.toString() ?? '',
+      text: widget.question.metadata['defaultValue']?.toString() ?? '',
     );
     _dividerTextController = TextEditingController(
-      text: widget.question.metadata?['dividerText']?.toString() ?? '',
+      text: widget.question.metadata['dividerText']?.toString() ?? '',
     );
   }
 
   @override
   void didUpdateWidget(covariant FieldGeneralSettings oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.question.metadata?['defaultValue']?.toString() !=
+    if (widget.question.metadata['defaultValue']?.toString() !=
         _defaultValueController.text) {
       if (!FocusScope.of(context).hasFocus) {
         _defaultValueController.text =
-            widget.question.metadata?['defaultValue']?.toString() ?? '';
+            widget.question.metadata['defaultValue']?.toString() ?? '';
       }
     }
-    if (widget.question.metadata?['dividerText']?.toString() !=
+    if (widget.question.metadata['dividerText']?.toString() !=
         _dividerTextController.text) {
       if (!FocusScope.of(context).hasFocus) {
         _dividerTextController.text =
-            widget.question.metadata?['dividerText']?.toString() ?? '';
+            widget.question.metadata['dividerText']?.toString() ?? '';
       }
     }
   }
@@ -508,7 +507,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   }
 
   Widget _buildFieldActions(WidgetRef ref) {
-    final actionConfig = widget.question.actionConfig ?? {};
+    final actionConfig = widget.question.actionConfig;
     final hasButton = actionConfig['hasButton'] ?? false;
     final buttonLabel = actionConfig['buttonLabel'] ?? 'Search';
     final webhookUrl = actionConfig['webhookUrl'] ?? '';
@@ -554,7 +553,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                         ).notifier,
                       )
                       .updateQuestion(
-                        widget.question.copyWith(actionConfig: newConfig),
+                        widget.question.copyWith(
+                          logic: {
+                            ...widget.question.logic,
+                            'actionConfig': newConfig,
+                          },
+                        ),
                       );
                 },
               ),
@@ -576,7 +580,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           ).notifier,
                         )
                         .updateQuestion(
-                          widget.question.copyWith(actionConfig: newConfig),
+                          widget.question.copyWith(
+                            logic: {
+                              ...widget.question.logic,
+                              'actionConfig': newConfig,
+                            },
+                          ),
                         );
                   },
                 ),
@@ -628,7 +637,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               )
                               .updateQuestion(
                                 widget.question.copyWith(
-                                  actionConfig: newConfig,
+                                  logic: {
+                                    ...widget.question.logic,
+                                    'actionConfig': newConfig,
+                                  },
                                 ),
                               );
                         },
@@ -662,7 +674,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               )
                               .updateQuestion(
                                 widget.question.copyWith(
-                                  actionConfig: newConfig,
+                                  logic: {
+                                    ...widget.question.logic,
+                                    'actionConfig': newConfig,
+                                  },
                                 ),
                               );
                         },
@@ -722,7 +737,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                                   )
                                   .updateQuestion(
                                     widget.question.copyWith(
-                                      actionConfig: newConfig,
+                                      logic: {
+                                        ...widget.question.logic,
+                                        'actionConfig': newConfig,
+                                      },
                                     ),
                                   );
                             },
@@ -756,7 +774,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                                 )
                                 .updateQuestion(
                                   widget.question.copyWith(
-                                    actionConfig: newConfig,
+                                    logic: {
+                                      ...widget.question.logic,
+                                      'actionConfig': newConfig,
+                                    },
                                   ),
                                 );
                           }),
@@ -783,7 +804,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                                 )
                                 .updateQuestion(
                                   widget.question.copyWith(
-                                    actionConfig: newConfig,
+                                    logic: {
+                                      ...widget.question.logic,
+                                      'actionConfig': newConfig,
+                                    },
                                   ),
                                 );
                           },
@@ -805,7 +829,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           ).notifier,
                         )
                         .updateQuestion(
-                          widget.question.copyWith(actionConfig: newConfig),
+                          widget.question.copyWith(
+                            logic: {
+                              ...widget.question.logic,
+                              'actionConfig': newConfig,
+                            },
+                          ),
                         );
                   },
                   icon: const Icon(Icons.add, size: 14),
@@ -854,7 +883,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         return DropdownMenuItem(
           value: q.id,
           child: Text(
-            '${q.label is String ? q.label as String : (q.label as Map?)?['en'] ?? 'Untitled'} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
+            '${q.label} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12, color: AppColors.textDark),
           ),
@@ -920,8 +949,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             );
 
             var q = widget.question;
-            if (mask != null) q = q.copyWith(inputMask: mask);
-            if (regex != null) q = q.copyWith(validationRegex: regex);
+            if (mask != null) {
+              q = q.copyWith(metadata: {...q.metadata, 'inputMask': mask});
+            }
+            if (regex != null) {
+              q = q.copyWith(validation: {...q.validation, 'regex': regex});
+            }
 
             notifier.updateQuestion(q);
           },
@@ -1062,7 +1095,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
     if (widget.question.type == QuestionType.dropdown ||
         widget.question.type == QuestionType.multipleChoice) {
-      final options = widget.question.options ?? [];
+      final options = widget.question.options;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1137,8 +1170,8 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   }
 
   Widget _buildOptionsEditor(WidgetRef ref, FormQuestion question) {
-    final options = question.options ?? [];
-    final hasOtherOption = question.metadata?['hasOtherOption'] == true;
+    final options = question.options;
+    final hasOtherOption = question.metadata['hasOtherOption'] == true;
 
     final optionValues = options
         .map((e) => e.value.trim().toLowerCase())
@@ -1175,13 +1208,13 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           itemCount: options.length,
           onReorder: (oldIndex, newIndex) {
             if (oldIndex < newIndex) newIndex -= 1;
-            final newOptions = List<FormQuestionOption>.from(options);
+            final newOptions = List<Map<String, dynamic>>.from(options);
             final item = newOptions.removeAt(oldIndex);
             newOptions.insert(newIndex, item);
 
             // Re-assign order
             final orderedOptions = newOptions.asMap().entries.map((e) {
-              return e.value.copyWith(order: e.key);
+              return {...e.value, 'order': e.key};
             }).toList();
 
             ref
@@ -1197,15 +1230,16 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             );
 
             return _OptionRow(
-              key: ValueKey(option.id),
+              key: ValueKey(option['id']?.toString() ?? index),
               initialValue: option.label,
               errorText: isDuplicate ? 'Duplicate option value' : null,
               onChanged: (newValue) {
-                final newOptions = List<FormQuestionOption>.from(options);
-                newOptions[index] = option.copyWith(
-                  label: newValue,
-                  value: newValue,
-                );
+                final newOptions = List<Map<String, dynamic>>.from(options);
+                newOptions[index] = {
+                  ...option,
+                  'option_label': newValue,
+                  'option_value': newValue,
+                };
                 ref
                     .read(
                       formBuilderControllerProvider(
@@ -1215,7 +1249,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     .updateQuestion(question.copyWith(options: newOptions));
               },
               onDelete: () {
-                final newOptions = List<FormQuestionOption>.from(options);
+                final newOptions = List<Map<String, dynamic>>.from(options);
                 newOptions.removeAt(index);
                 ref
                     .read(
@@ -1231,15 +1265,13 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: () {
-            final newOptions = List<FormQuestionOption>.from(options);
-            newOptions.add(
-              FormQuestionOption(
-                id: const Uuid().v4(),
-                label: 'Option ${newOptions.length + 1}',
-                value: 'Option ${newOptions.length + 1}',
-                order: newOptions.length,
-              ),
-            );
+            final newOptions = List<Map<String, dynamic>>.from(options);
+            newOptions.add({
+              'id': const Uuid().v4(),
+              'option_label': 'Option ${newOptions.length + 1}',
+              'option_value': 'Option ${newOptions.length + 1}',
+              'order': newOptions.length,
+            });
             ref
                 .read(
                   formBuilderControllerProvider(widget.controllerKey).notifier,
@@ -1273,7 +1305,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     );
   }
 
-  void _showBulkAddDialog(List<FormQuestionOption> currentOptions) {
+  void _showBulkAddDialog(List<Map<String, dynamic>> currentOptions) {
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -1322,24 +1354,27 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                               .firstOrNull ??
                           widget.question;
 
-                final newOptions = List<FormQuestionOption>.from(
-                  liveQuestion.options ?? currentOptions,
+                final newOptions = List<Map<String, dynamic>>.from(
+                  liveQuestion.options.isEmpty
+                      ? currentOptions
+                      : liveQuestion.options,
                 );
                 for (var line in lines) {
                   final exists = newOptions.any(
                     (opt) =>
-                        opt.value.trim().toLowerCase() ==
+                        (opt['option_value'] ?? opt['value'] ?? '')
+                            .toString()
+                            .trim()
+                            .toLowerCase() ==
                         line.trim().toLowerCase(),
                   );
                   if (exists) continue;
-                  newOptions.add(
-                    FormQuestionOption(
-                      id: const Uuid().v4(),
-                      label: line,
-                      value: line,
-                      order: newOptions.length,
-                    ),
-                  );
+                  newOptions.add({
+                    'id': const Uuid().v4(),
+                    'option_label': line,
+                    'option_value': line,
+                    'order': newOptions.length,
+                  });
                 }
                 ref
                     .read(

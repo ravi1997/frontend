@@ -4,10 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../../domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/form_builder_state.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/form_section.dart';
 import '../../domain/entities/section_layout_type.dart';
 import '../../domain/entities/question_type.dart';
 import '../../domain/repositories/form_builder_repository.dart';
@@ -35,12 +33,23 @@ class FormBuilderController extends _$FormBuilderController {
 
     // For now, let's create an empty form if formId is 'new'
     if (_formId == 'new') {
+      final initialSection = FormSection(
+        id: _uuid.v4(),
+        title: 'Untitled Section',
+      );
+      final initialVersion = FormVersion(
+        id: _uuid.v4(),
+        version: '1.0.0',
+        sections: [initialSection],
+      );
       final initialForm = BuilderForm(
         id: _uuid.v4(),
         title: 'Untitled Form',
-        sections: [
-          FormSection(id: _uuid.v4(), title: 'Untitled Section', questions: []),
-        ],
+        slug: _uuid.v4(),
+        organizationId: _projectId,
+        createdBy: 'system',
+        activeVersion: initialVersion.version,
+        versions: [initialVersion],
       );
       _savedFormSnapshot = initialForm;
       _lastHistoryForm = initialForm;
@@ -146,6 +155,34 @@ class FormBuilderController extends _$FormBuilderController {
     return {'en': current?.toString() ?? '', locale: newValue};
   }
 
+  BuilderForm _replaceFormSections(
+    BuilderForm form,
+    List<FormSection> sections,
+  ) {
+    if (form.versions.isEmpty) return form;
+    final activeVersion = form.activeVersion ?? form.versions.first.version;
+    final updatedVersions = form.versions.map((version) {
+      if (version.version == activeVersion) {
+        return version.copyWith(sections: sections);
+      }
+      return version;
+    }).toList();
+    return form.copyWith(
+      activeVersion: activeVersion,
+      versions: updatedVersions,
+    );
+  }
+
+  List<FormSection> _currentSections(BuilderForm form) {
+    if (form.versions.isEmpty) return const [];
+    final activeVersion = form.activeVersion;
+    if (activeVersion == null) return form.versions.first.sections;
+    return form.versions.firstWhere(
+      (version) => version.version == activeVersion,
+      orElse: () => form.versions.first,
+    ).sections;
+  }
+
   FormSection? _updateSectionById(
     String sectionId,
     FormSection Function(FormSection section) updater,
@@ -161,7 +198,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: result.sections),
+        form: _replaceFormSections(state.value!.form, result.sections),
       ),
     );
     _markDirty();
@@ -272,7 +309,14 @@ class FormBuilderController extends _$FormBuilderController {
     _updateQuestion(
       questionId,
       (q) => q.copyWith(
-        helperText: _updateLocalizedField(q.helperText, text, locale),
+        metadata: {
+          ...q.metadata,
+          'helper_text': _updateLocalizedField(
+            q.metadata['helper_text'],
+            text,
+            locale,
+          ),
+        },
       ),
     );
     _markDirty();
@@ -286,7 +330,14 @@ class FormBuilderController extends _$FormBuilderController {
     _updateQuestion(
       questionId,
       (q) => q.copyWith(
-        placeholder: _updateLocalizedField(q.placeholder, text, locale),
+        metadata: {
+          ...q.metadata,
+          'placeholder': _updateLocalizedField(
+            q.metadata['placeholder'],
+            text,
+            locale,
+          ),
+        },
       ),
     );
     _markDirty();
@@ -309,14 +360,22 @@ class FormBuilderController extends _$FormBuilderController {
     }).toList();
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
   }
 
   void updateQuestionRequired(String questionId, bool required) {
-    _updateQuestion(questionId, (q) => q.copyWith(isRequired: required));
+    _updateQuestion(
+      questionId,
+      (q) => q.copyWith(
+        validation: {
+          ...q.validation,
+          'is_required': required,
+        },
+      ),
+    );
   }
 
   Future<void> addSection({String? parentSectionId}) async {
@@ -326,7 +385,7 @@ class FormBuilderController extends _$FormBuilderController {
       id: _uuid.v4(),
       title: 'Untitled Section',
       questions: [],
-      layout: SectionLayoutType.standard,
+      layout: SectionLayoutType.standard.name,
     );
 
     if (parentSectionId != null) {
@@ -338,7 +397,7 @@ class FormBuilderController extends _$FormBuilderController {
       if (sections == null) return;
       state = AsyncValue.data(
         state.value!.copyWith(
-          form: state.value!.form.copyWith(sections: sections),
+          form: _replaceFormSections(state.value!.form, sections),
           selectedSectionId: newSection.id,
           selectedQuestionId: null,
           isFormSelected: false,
@@ -350,8 +409,9 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(
-          sections: [...state.value!.form.sections, newSection],
+        form: _replaceFormSections(
+          state.value!.form,
+          [..._currentSections(state.value!.form), newSection],
         ),
         selectedSectionId: newSection.id,
         selectedQuestionId: null,
@@ -390,7 +450,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
         selectedSectionId: state.value!.selectedSectionId == sectionId
             ? null
             : state.value!.selectedSectionId,
@@ -426,7 +486,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
         selectedQuestionId: newQuestion.id,
         selectedSectionId: sectionId,
         isFormSelected: false,
@@ -451,7 +511,7 @@ class FormBuilderController extends _$FormBuilderController {
 
       state = AsyncValue.data(
         state.value!.copyWith(
-          form: state.value!.form.copyWith(sections: sections),
+          form: _replaceFormSections(state.value!.form, sections),
           selectedQuestionId: newQuestion.id,
           selectedSectionId: sectionId,
           isFormSelected: false,
@@ -463,14 +523,15 @@ class FormBuilderController extends _$FormBuilderController {
       final newSection = section.copyWith(id: _uuid.v4());
 
       state = AsyncValue.data(
-        state.value!.copyWith(
-          form: state.value!.form.copyWith(
-            sections: [...state.value!.form.sections, newSection],
-          ),
-          selectedSectionId: newSection.id,
-          selectedQuestionId: null,
-          isFormSelected: false,
+      state.value!.copyWith(
+        form: _replaceFormSections(
+          state.value!.form,
+          [..._currentSections(state.value!.form), newSection],
         ),
+        selectedSectionId: newSection.id,
+        selectedQuestionId: null,
+        isFormSelected: false,
+      ),
       );
       _markDirty();
     } else if (template.template_type == 'workflow') {
@@ -526,13 +587,13 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.form.sections,
       questionId,
       (question) => question.copyWith(
-        metadata: {...question.metadata ?? {}, ...metadata},
+        metadata: {...question.metadata, ...metadata},
       ),
     );
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -553,7 +614,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
         selectedQuestionId: state.value!.selectedQuestionId == questionId
             ? null
             : state.value!.selectedQuestionId,
@@ -616,7 +677,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -635,7 +696,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -654,7 +715,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -680,7 +741,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -693,13 +754,20 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.form.sections,
       questionId,
       (question) => question.copyWith(
-        helperText: _updateLocalizedField(question.helperText, helperText, locale),
+        metadata: {
+          ...question.metadata,
+          'helper_text': _updateLocalizedField(
+            question.metadata['helper_text'],
+            helperText,
+            locale,
+          ),
+        },
       ),
     );
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -712,17 +780,20 @@ class FormBuilderController extends _$FormBuilderController {
       state.value!.form.sections,
       questionId,
       (question) => question.copyWith(
-        placeholder: _updateLocalizedField(
-          question.placeholder,
-          placeholder,
-          locale,
-        ),
+        metadata: {
+          ...question.metadata,
+          'placeholder': _updateLocalizedField(
+            question.metadata['placeholder'],
+            placeholder,
+            locale,
+          ),
+        },
       ),
     );
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -738,7 +809,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -789,7 +860,7 @@ class FormBuilderController extends _$FormBuilderController {
     if (state.value == null) return;
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: updatedForm.copyWith(sections: state.value!.form.sections),
+        form: _replaceFormSections(updatedForm, _currentSections(state.value!.form)),
       ),
     );
     _markDirty();
@@ -817,7 +888,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -840,7 +911,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: result),
+        form: _replaceFormSections(state.value!.form, result),
       ),
     );
     _markDirty();
@@ -915,7 +986,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: result.sections),
+        form: _replaceFormSections(state.value!.form, result.sections),
       ),
     );
     _markDirty();
@@ -966,7 +1037,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: finalSections),
+        form: _replaceFormSections(state.value!.form, finalSections),
         selectedSectionId: toSectionId,
         selectedQuestionId: questionId,
       ),
@@ -999,7 +1070,7 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
         selectedQuestionId: newQuestion.id,
         selectedSectionId: sectionId,
       ),
@@ -1142,7 +1213,7 @@ class FormBuilderController extends _$FormBuilderController {
 
       state = AsyncValue.data(
         state.value!.copyWith(
-          form: state.value!.form.copyWith(sections: updatedSections),
+          form: _replaceFormSections(state.value!.form, updatedSections),
         ),
       );
       _markDirty();
@@ -1182,14 +1253,14 @@ class FormBuilderController extends _$FormBuilderController {
     if (state.value == null) return;
     final sections = state.value!.form.sections.map((s) {
       if (s.id == sectionId) {
-        return s.copyWith(metaData: {...s.metaData, ...metadata});
+        return s.copyWith(metadata: {...s.metadata, ...metadata});
       }
       return s;
     }).toList();
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(sections: sections),
+        form: _replaceFormSections(state.value!.form, sections),
       ),
     );
     _markDirty();
@@ -1200,7 +1271,7 @@ class FormBuilderController extends _$FormBuilderController {
     state = AsyncValue.data(
       state.value!.copyWith(
         form: state.value!.form.copyWith(
-          metadata: {...state.value!.form.metadata, ...metadata},
+          workflows: {...state.value!.form.workflows, ...metadata},
         ),
       ),
     );
@@ -1211,7 +1282,7 @@ class FormBuilderController extends _$FormBuilderController {
     if (state.value == null) return;
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: state.value!.form.copyWith(accessPolicy: policy),
+        form: state.value!.form.copyWith(accessPolicy: policy.toJson()),
       ),
     );
     _markDirty();

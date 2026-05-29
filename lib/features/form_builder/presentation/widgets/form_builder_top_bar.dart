@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
-import '../../domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import '../controllers/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
 import '../controllers/git_controller.dart';

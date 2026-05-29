@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/localization/locale_controller.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/custom_field_template.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/domain/entities/section_layout_type.dart';
+import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/features/form_builder/presentation/utils/layout_engine.dart';
 import 'builder_field_widget.dart';
@@ -63,6 +64,29 @@ class SectionWidget extends ConsumerWidget {
     }
   }
 
+  SectionStyle _sectionStyle(FormSection section) {
+    final raw = section.ui['style'];
+    if (raw is Map) {
+      return SectionStyle.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return const SectionStyle();
+  }
+
+  QuestionStyle _questionStyle(FormQuestion question) {
+    final raw = question.ui['style'];
+    if (raw is Map) {
+      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+    }
+    return const QuestionStyle();
+  }
+
+  SectionLayoutType _parseLayout(String raw) {
+    for (final value in SectionLayoutType.values) {
+      if (value.name == raw) return value;
+    }
+    return SectionLayoutType.standard;
+  }
+
   TextStyle _sectionTypographyStyle({
     required String baseColor,
     required Color fallbackColor,
@@ -90,12 +114,13 @@ class SectionWidget extends ConsumerWidget {
   }
 
   BoxBorder _buildSectionBorder(Map<String, dynamic> metadata) {
+    final sectionStyle = _sectionStyle(section);
     final borderColor = _parseColor(
-      metadata['borderColor']?.toString() ?? section.style.borderColor,
+      metadata['borderColor']?.toString() ?? sectionStyle.borderColor,
       AppColors.borderLight,
     );
     final borderWidth = (metadata['borderWidth'] as num?)?.toDouble() ??
-        section.style.borderWidth;
+        sectionStyle.borderWidth;
     final borderStyle = metadata['borderStyle']?.toString() ?? 'solid';
     final style = switch (borderStyle) {
       'dashed' || 'dotted' => BorderStyle.solid,
@@ -112,8 +137,9 @@ class SectionWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isSectionSelected =
         selectedSectionId == section.id && selectedQuestionId == null;
-    final sectionStyle = section.style;
-    final metadata = section.metaData;
+    final sectionStyle = _sectionStyle(section);
+    final metadata = section.metadata;
+    final layout = _parseLayout(section.layout);
     final double fieldGap =
         (metadata['fieldGap'] as num?)?.toDouble() ?? 16.0;
     final double verticalPadding =
@@ -128,7 +154,7 @@ class SectionWidget extends ConsumerWidget {
     if (alignStr == 'right') sectionAlignment = Alignment.centerRight;
     final double sectionMaxWidth =
         (metadata['maxWidth'] as num?)?.toDouble() ??
-        (section.layout == SectionLayoutType.centered ? 760.0 : 1200.0);
+        (layout == SectionLayoutType.centered ? 760.0 : 1200.0);
 
     Color sectionBg;
     Color headerBg;
@@ -234,14 +260,14 @@ class SectionWidget extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    (section.title?.translate(locale) ?? ''),
+                                    section.title.translate(locale),
                                     style: _sectionTypographyStyle(
                                       baseColor: sectionStyle.titleColor,
                                       fallbackColor: AppColors.textDark,
                                       sizeKey: 'titleSize',
                                       weightKey: 'titleWeight',
                                       fallbackSize: 18,
-                                      metadata: section.metaData,
+                                      metadata: metadata,
                                     ),
                                   ),
                                 ),
@@ -364,7 +390,7 @@ class SectionWidget extends ConsumerWidget {
                               children: [
                                 _SectionMetaChip(
                                   icon: Icons.view_agenda_outlined,
-                                  label: section.layout.name,
+                                  label: layout.name,
                                 ),
                                 _SectionMetaChip(
                                   icon: Icons.format_list_bulleted,
@@ -396,7 +422,7 @@ class SectionWidget extends ConsumerWidget {
                                   sizeKey: 'descSize',
                                   weightKey: 'descWeight',
                                   fallbackSize: 14,
-                                  metadata: section.metaData,
+                                  metadata: metadata,
                                 ),
                               ),
                             ],
@@ -416,7 +442,7 @@ class SectionWidget extends ConsumerWidget {
                         final availableWidth = constraints.maxWidth;
 
                         int crossAxisCount = _sectionCrossAxisCount(
-                          section.layout,
+                          layout,
                           section.gridColumns,
                         );
 
@@ -456,9 +482,10 @@ class SectionWidget extends ConsumerWidget {
                               // Calculate width based on span or fixed mode
                               double width = itemWidth; // Default to 1 column
 
-                            if (q.style.widthMode == 'fixed') {
+                            final qStyle = _questionStyle(q);
+                            if (qStyle.widthMode == 'fixed') {
                                 // Fixed widths
-                                switch (q.style.fixedWidth) {
+                                switch (qStyle.fixedWidth) {
                                   case 'small':
                                     width = 200.0;
                                     break;
@@ -650,8 +677,8 @@ class SectionWidget extends ConsumerWidget {
           ),
         );
 
-        final wrappedSection = _wrapSectionByLayout(
-          section.layout,
+                              final wrappedSection = _wrapSectionByLayout(
+          layout,
           sectionShell,
           sectionStyle,
           sectionBg,

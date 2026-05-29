@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormTemplate {
 
- String get id; String get name; String get description; FormTemplateCategory get category; BuilderForm get form; String get thumbnailUrl; List<String> get tags; int get usageCount; DateTime? get createdAt;
+ String get id; String get name; String get description; FormTemplateCategory get category; Form get form; String get thumbnailUrl; List<String> get tags; int get usageCount; DateTime? get createdAt;
 /// Create a copy of FormTemplate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $FormTemplateCopyWith<$Res>  {
   factory $FormTemplateCopyWith(FormTemplate value, $Res Function(FormTemplate) _then) = _$FormTemplateCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String description, FormTemplateCategory category, BuilderForm form, String thumbnailUrl, List<String> tags, int usageCount, DateTime? createdAt
+ String id, String name, String description, FormTemplateCategory category, Form form, String thumbnailUrl, List<String> tags, int usageCount, DateTime? createdAt
 });
 
 
-$BuilderFormCopyWith<$Res> get form;
+$FormCopyWith<$Res> get form;
 
 }
 /// @nodoc
@@ -72,7 +72,7 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as FormTemplateCategory,form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
-as BuilderForm,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as Form,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
 as String,tags: null == tags ? _self.tags : tags // ignore: cast_nullable_to_non_nullable
 as List<String>,usageCount: null == usageCount ? _self.usageCount : usageCount // ignore: cast_nullable_to_non_nullable
 as int,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -83,9 +83,9 @@ as DateTime?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$BuilderFormCopyWith<$Res> get form {
+$FormCopyWith<$Res> get form {
   
-  return $BuilderFormCopyWith<$Res>(_self.form, (value) {
+  return $FormCopyWith<$Res>(_self.form, (value) {
     return _then(_self.copyWith(form: value));
   });
 }
@@ -170,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  FormTemplateCategory category,  BuilderForm form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  FormTemplateCategory category,  Form form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormTemplate() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.category,_that.form,_that.thumbnailUrl,_that.tags,_that.usageCount,_that.createdAt);case _:
@@ -191,7 +191,7 @@ return $default(_that.id,_that.name,_that.description,_that.category,_that.form,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  FormTemplateCategory category,  BuilderForm form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  FormTemplateCategory category,  Form form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _FormTemplate():
 return $default(_that.id,_that.name,_that.description,_that.category,_that.form,_that.thumbnailUrl,_that.tags,_that.usageCount,_that.createdAt);case _:
@@ -211,7 +211,7 @@ return $default(_that.id,_that.name,_that.description,_that.category,_that.form,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  FormTemplateCategory category,  BuilderForm form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  FormTemplateCategory category,  Form form,  String thumbnailUrl,  List<String> tags,  int usageCount,  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _FormTemplate() when $default != null:
 return $default(_that.id,_that.name,_that.description,_that.category,_that.form,_that.thumbnailUrl,_that.tags,_that.usageCount,_that.createdAt);case _:
@@ -233,7 +233,7 @@ class _FormTemplate implements FormTemplate {
 @override final  String name;
 @override final  String description;
 @override final  FormTemplateCategory category;
-@override final  BuilderForm form;
+@override final  Form form;
 @override@JsonKey() final  String thumbnailUrl;
  final  List<String> _tags;
 @override@JsonKey() List<String> get tags {
@@ -278,11 +278,11 @@ abstract mixin class _$FormTemplateCopyWith<$Res> implements $FormTemplateCopyWi
   factory _$FormTemplateCopyWith(_FormTemplate value, $Res Function(_FormTemplate) _then) = __$FormTemplateCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String description, FormTemplateCategory category, BuilderForm form, String thumbnailUrl, List<String> tags, int usageCount, DateTime? createdAt
+ String id, String name, String description, FormTemplateCategory category, Form form, String thumbnailUrl, List<String> tags, int usageCount, DateTime? createdAt
 });
 
 
-@override $BuilderFormCopyWith<$Res> get form;
+@override $FormCopyWith<$Res> get form;
 
 }
 /// @nodoc
@@ -302,7 +302,7 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,category: null == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as FormTemplateCategory,form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
-as BuilderForm,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
+as Form,thumbnailUrl: null == thumbnailUrl ? _self.thumbnailUrl : thumbnailUrl // ignore: cast_nullable_to_non_nullable
 as String,tags: null == tags ? _self._tags : tags // ignore: cast_nullable_to_non_nullable
 as List<String>,usageCount: null == usageCount ? _self.usageCount : usageCount // ignore: cast_nullable_to_non_nullable
 as int,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -314,9 +314,9 @@ as DateTime?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$BuilderFormCopyWith<$Res> get form {
+$FormCopyWith<$Res> get form {
   
-  return $BuilderFormCopyWith<$Res>(_self.form, (value) {
+  return $FormCopyWith<$Res>(_self.form, (value) {
     return _then(_self.copyWith(form: value));
   });
 }

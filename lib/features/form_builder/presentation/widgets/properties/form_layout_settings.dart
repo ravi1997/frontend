@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_layout_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
@@ -37,7 +37,7 @@ class FormLayoutSettings extends ConsumerWidget {
                       '$projectId::$formId',
                     ).notifier,
                   )
-                  .updateForm(form.copyWith(layout: val));
+                  .updateForm(form.copyWith(uiType: val.name));
             }
           },
         ),
@@ -72,7 +72,7 @@ class FormLayoutSettings extends ConsumerWidget {
                     ).notifier,
                   )
                   .updateForm(
-                    form.copyWith(style: form.style.copyWith(layoutType: val)),
+                    form.copyWith(style: {...form.style, 'layoutType': val}),
                   );
             }
           },
@@ -89,7 +89,7 @@ class FormLayoutSettings extends ConsumerWidget {
                   formBuilderControllerProvider('$projectId::$formId').notifier,
                 )
                 .updateForm(
-                  form.copyWith(style: form.style.copyWith(maxWidth: val)),
+                  form.copyWith(style: {...form.style, 'maxWidth': val}),
                 );
           },
         ),
@@ -116,7 +116,7 @@ class FormLayoutSettings extends ConsumerWidget {
                 )
                 .updateForm(
                   form.copyWith(
-                    style: form.style.copyWith(sectionSpacing: val),
+                    style: {...form.style, 'sectionSpacing': val},
                   ),
                 );
           },
@@ -134,7 +134,7 @@ class FormLayoutSettings extends ConsumerWidget {
                 )
                 .updateForm(
                   form.copyWith(
-                    style: form.style.copyWith(questionSpacing: val),
+                    style: {...form.style, 'questionSpacing': val},
                   ),
                 );
           },

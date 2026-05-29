@@ -165,5 +165,3 @@ lib/src/model/validation_schema.dart
 lib/src/model/version_schema.dart
 lib/src/model/workflow_instance_schema.dart
 pubspec.yaml
-test/form_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request_test.dart
-test/form_api_v1_projects_project_id_forms_external_hooks_register_post_request_test.dart

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
@@ -32,7 +32,11 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
     if (_formKey.currentState!.validate()) {
       ref
           .read(formBuilderControllerProvider(widget.formId).notifier)
-          .updateQuestion(widget.question.copyWith(style: newStyle));
+          .updateQuestion(
+            widget.question.copyWith(
+              ui: {...widget.question.ui, 'style': newStyle.toJson()},
+            ),
+          );
     }
   }
 
@@ -90,7 +94,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
             const SizedBox(height: 12),
             PropertyBuilderUtils.buildDropdown<String>(
               label: 'Style',
-              value: widget.question.metadata?['dividerStyle'] ?? 'solid',
+              value: widget.question.metadata['dividerStyle'] ?? 'solid',
               items: const [
                 DropdownMenuItem(value: 'solid', child: Text('Solid')),
                 DropdownMenuItem(value: 'dashed', child: Text('Dashed')),
@@ -265,7 +269,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                     // Shadow Settings
                     PropertyBuilderUtils.buildNumberSlider(
                       label: 'Shadow Elevation',
-                      value: (widget.question.metadata?['elevation'] ?? 0)
+                      value: (widget.question.metadata['elevation'] ?? 0)
                           .toDouble(),
                       min: 0,
                       max: 10,
@@ -282,11 +286,11 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    if ((widget.question.metadata?['elevation'] ?? 0) > 0)
+                    if ((widget.question.metadata['elevation'] ?? 0) > 0)
                       PropertyBuilderUtils.buildColorPicker(
                         label: 'Shadow Color',
                         value:
-                            widget.question.metadata?['shadowColor'] ??
+                            widget.question.metadata['shadowColor'] ??
                             '#000000',
                         onChanged: (val) {
                           ref

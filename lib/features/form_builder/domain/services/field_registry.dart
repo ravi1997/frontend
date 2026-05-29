@@ -1,8 +1,7 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/models/form_models.dart';
 import '../entities/question_type.dart';
-import '../entities/form_question.dart';
-import '../entities/form_question_option.dart';
 import 'package:uuid/uuid.dart';
 
 class FieldRegistry {
@@ -31,6 +30,7 @@ class FieldRegistry {
     final id = const Uuid().v4();
 
     Map<String, dynamic>? metadata;
+    final String fieldType = _fieldTypeForQuestionType(type);
 
     switch (type) {
       case QuestionType.rating:
@@ -52,28 +52,29 @@ class FieldRegistry {
     return FormQuestion(
       id: id,
       label: 'Untitled ${type.label}',
-      type: type,
-      metadata: metadata,
+      fieldType: fieldType,
+      metadata: metadata ?? const <String, dynamic>{},
       options:
           (type == QuestionType.dropdown ||
               type == QuestionType.checkboxes ||
               type == QuestionType.multipleChoice ||
-              type == QuestionType.multiSelect)
+              type == QuestionType.multiSelect ||
+              type == QuestionType.multiCheckbox)
           ? [
-              FormQuestionOption(
-                id: const Uuid().v4(),
-                label: 'Option 1',
-                value: 'Option 1',
-                order: 0,
-              ),
-              FormQuestionOption(
-                id: const Uuid().v4(),
-                label: 'Option 2',
-                value: 'Option 2',
-                order: 1,
-              ),
+              {
+                'id': const Uuid().v4(),
+                'option_label': 'Option 1',
+                'option_value': 'Option 1',
+                'order': 0,
+              },
+              {
+                'id': const Uuid().v4(),
+                'option_label': 'Option 2',
+                'option_value': 'Option 2',
+                'order': 1,
+              },
             ]
-          : null,
+          : const <Map<String, dynamic>>[],
     );
   }
 
@@ -287,13 +288,112 @@ class FieldRegistry {
         isChoiceType(question.type) && isChoiceType(newType);
 
     return question.copyWith(
-      type: newType,
+      fieldType: _fieldTypeForQuestionType(newType),
       options: shouldKeepOptions ? question.options : defaults.options,
-      metadata: {...?defaults.metadata, ...?question.metadata},
+      metadata: {...defaults.metadata, ...question.metadata},
       defaultValue: _isDefaultValueCompatible(newType, question.defaultValue)
           ? question.defaultValue
           : null,
     );
+  }
+
+  static String _fieldTypeForQuestionType(QuestionType type) {
+    switch (type) {
+      case QuestionType.shortText:
+        return 'input';
+      case QuestionType.paragraph:
+        return 'textarea';
+      case QuestionType.dropdown:
+        return 'select';
+      case QuestionType.checkboxes:
+        return 'checkboxes';
+      case QuestionType.multipleChoice:
+        return 'radio';
+      case QuestionType.fileUpload:
+        return 'file_upload';
+      case QuestionType.multiFileUpload:
+        return 'multi-file_upload';
+      case QuestionType.filePicker:
+        return 'file_picker';
+      case QuestionType.fileList:
+        return 'file_list';
+      case QuestionType.signaturePad:
+        return 'signature_pad';
+      case QuestionType.imageGallery:
+        return 'image_gallery';
+      case QuestionType.divider:
+        return 'note';
+      case QuestionType.spacer:
+        return 'hidden';
+      case QuestionType.matrixChoice:
+        return 'matrix_choice';
+      case QuestionType.mapLocation:
+        return 'map_location';
+      case QuestionType.addressLookup:
+        return 'address_lookup';
+      case QuestionType.richText:
+        return 'rich_text';
+      case QuestionType.markdownEditor:
+        return 'markdown_editor';
+      case QuestionType.booleanValue:
+        return 'boolean';
+      case QuestionType.multiSelect:
+        return 'multi_select';
+      case QuestionType.customField:
+        return 'custom_field';
+      case QuestionType.colorPicker:
+        return 'color_picker';
+      case QuestionType.dateRange:
+        return 'date_range';
+      case QuestionType.timeRange:
+        return 'time_range';
+      case QuestionType.countrySelect:
+        return 'country_select';
+      case QuestionType.stateSelect:
+        return 'state_select';
+      case QuestionType.citySelect:
+        return 'city_select';
+      case QuestionType.socialMediaHandle:
+        return 'social_media_handle';
+      case QuestionType.websiteUrl:
+        return 'website_url';
+      case QuestionType.phoneNumber:
+        return 'phone_number';
+      case QuestionType.unitSelect:
+        return 'unit_select';
+      case QuestionType.multiCheckbox:
+        return 'multi_checkbox';
+      case QuestionType.emailList:
+        return 'email_list';
+      case QuestionType.qrCodeScan:
+        return 'qr_code_scan';
+      case QuestionType.calculate:
+      case QuestionType.calculated:
+      case QuestionType.number:
+      case QuestionType.password:
+      case QuestionType.date:
+      case QuestionType.time:
+      case QuestionType.tel:
+      case QuestionType.email:
+      case QuestionType.mobile:
+      case QuestionType.url:
+      case QuestionType.rating:
+      case QuestionType.signature:
+      case QuestionType.slider:
+      case QuestionType.image:
+      case QuestionType.otp:
+      case QuestionType.range:
+      case QuestionType.stepper:
+      case QuestionType.captcha:
+      case QuestionType.price:
+      case QuestionType.age:
+      case QuestionType.toggle:
+      case QuestionType.search:
+      case QuestionType.file:
+        return type.name;
+      default:
+        return type.name;
+    }
   }
 
   static bool _isDefaultValueCompatible(QuestionType type, Object? value) {

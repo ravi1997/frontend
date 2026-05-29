@@ -11,7 +11,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/form_builder/presentation/pages/form_builder_page.dart';
 import '../../features/responses/presentation/pages/response_list_page.dart';
 import '../../features/responses/presentation/pages/response_detail_page.dart';
-import '../../features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../features/form_builder/presentation/pages/form_preview_page.dart';
 import '../../features/analytics/presentation/pages/analytics_page.dart';
 import '../../features/auth/presentation/screens/otp_verification_screen.dart';

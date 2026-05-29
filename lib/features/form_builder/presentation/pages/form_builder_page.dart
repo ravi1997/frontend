@@ -14,6 +14,7 @@ import '../widgets/section_properties_widget.dart';
 import '../widgets/form_builder_top_bar.dart';
 import '../widgets/form_canvas_widget.dart';
 import '../../domain/entities/question_type.dart';
+import 'package:frontend/models/form_models.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
   final String formId;

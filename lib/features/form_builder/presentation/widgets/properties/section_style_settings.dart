@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'property_builder_utils.dart';
 
@@ -20,12 +20,16 @@ class SectionStyleSettings extends ConsumerWidget {
   });
 
   void _updateStyle(SectionStyle newStyle) {
-    onSectionChanged(section.copyWith(style: newStyle));
+    onSectionChanged(
+      section.copyWith(
+        ui: {...section.ui, 'style': newStyle.toJson()},
+      ),
+    );
   }
 
   void _updateMetadata(String key, dynamic value) {
     onSectionChanged(
-      section.copyWith(metaData: {...section.metaData, key: value}),
+      section.copyWith(metadata: {...section.metaData, key: value}),
     );
   }
 

@@ -1,14 +1,16 @@
-import '../../domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/question_type.dart';
 
 class LayoutEngine {
   static int getFieldSpan(FormQuestion field, int sectionColumns) {
-    final metadata = field.metadata ?? {};
+    final metadata = field.metadata;
     final layout = metadata['layout'] as Map<String, dynamic>? ?? {};
-    
+
     final explicitSpan = layout['span']?.toString();
 
-    if (explicitSpan != null && explicitSpan != 'auto' && explicitSpan.isNotEmpty) {
+    if (explicitSpan != null &&
+        explicitSpan != 'auto' &&
+        explicitSpan.isNotEmpty) {
       if (explicitSpan == 'full') return sectionColumns;
       final spanNum = int.tryParse(explicitSpan);
       if (spanNum != null) {
@@ -26,7 +28,11 @@ class LayoutEngine {
     return getAutoSpanByFieldType(field.type, sectionColumns, field);
   }
 
-  static int getAutoSpanByFieldType(QuestionType type, int columns, FormQuestion field) {
+  static int getAutoSpanByFieldType(
+    QuestionType type,
+    int columns,
+    FormQuestion field,
+  ) {
     final fullWidthTypes = [
       QuestionType.paragraph,
       QuestionType.fileUpload,
@@ -58,7 +64,7 @@ class LayoutEngine {
       return 2 < columns ? 2 : columns;
     }
 
-    final labelStr = field.label?.toString() ?? '';
+    final labelStr = field.label.toString();
     if (labelStr.length > 40) {
       return 2 < columns ? 2 : columns;
     }

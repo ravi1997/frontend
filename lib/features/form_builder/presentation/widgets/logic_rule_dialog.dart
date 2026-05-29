@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import '../../domain/entities/question_type.dart';
 
 enum LogicActionCategory {
@@ -755,14 +754,20 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     if (trigger == null) return const SizedBox();
 
     // 1. Handle types with predefined options (Dropdown, Multiple Choice, Checkboxes)
-    if (trigger.options != null && trigger.options!.isNotEmpty) {
+    if (trigger.options.isNotEmpty) {
       return _buildDropdown(
         label: 'Select Value',
-        value: trigger.options!.any((o) => o.value == condition['value'])
+        value: trigger.options.any(
+          (o) => (o['option_value'] ?? o['value']) == condition['value'],
+        )
             ? condition['value']
             : null,
-        items: trigger.options!
-            .map((o) => DropdownMenuItem(value: o.value, child: Text(o.label)))
+        items: trigger.options
+            .map((o) {
+              final value = (o['option_value'] ?? o['value'] ?? '').toString();
+              final label = (o['option_label'] ?? o['label'] ?? value).toString();
+              return DropdownMenuItem(value: value, child: Text(label));
+            })
             .toList(),
         onChanged: (val) => setState(() => condition['value'] = val ?? ''),
       );
@@ -770,7 +775,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
 
     // 2. Handle Rating (usually 1-5 if not specified)
     if (trigger.type == QuestionType.rating) {
-      final max = trigger.maxValue?.toInt() ?? 5;
+      final max = (trigger.metadata['maxStars'] as num?)?.toInt() ?? 5;
       return _buildDropdown(
         label: 'Select Rating',
         value: condition['value'],

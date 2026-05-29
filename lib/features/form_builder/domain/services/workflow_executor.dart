@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../../../core/utils/error_handler.dart';
-import '../entities/builder_form.dart';
 import '../../../../core/localization/locale_controller.dart';
 
 abstract class WorkflowExecutor {

@@ -69,4 +69,45 @@ final class DioProvider extends $FunctionalProvider<Dio, Dio, Dio>
   }
 }
 
-String _$dioHash() => r'9dca44a9ac1d356dde45e1f6431c012f6142f7b2';
+String _$dioHash() => r'7391f822850fb3145f0aece7985ca919e0f06ca3';
+
+@ProviderFor(apiClient)
+final apiClientProvider = ApiClientProvider._();
+
+final class ApiClientProvider
+    extends $FunctionalProvider<ApiClient, ApiClient, ApiClient>
+    with $Provider<ApiClient> {
+  ApiClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'apiClientProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$apiClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApiClient> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ApiClient create(Ref ref) {
+    return apiClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApiClient value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApiClient>(value),
+    );
+  }
+}
+
+String _$apiClientHash() => r'79a7e448d60630732f5d4f2d05ca8c82bfebee8a';

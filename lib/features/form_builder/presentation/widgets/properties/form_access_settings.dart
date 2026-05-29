@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/access_policy.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
@@ -20,7 +20,7 @@ class FormAccessSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AccessPolicy policy = form.accessPolicy;
+    final AccessPolicy policy = AccessPolicy.fromJson(form.accessPolicy);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

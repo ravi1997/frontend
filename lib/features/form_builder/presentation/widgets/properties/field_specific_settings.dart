@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/core/theme/app_colors.dart';
@@ -30,7 +30,7 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final metadata = widget.question.metadata ?? {};
+    final metadata = widget.question.metadata;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,7 +272,9 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
 
   Widget _buildFileSettings(Map<String, dynamic> metadata) {
     final allowedTypes =
-        (metadata['allowedTypes'] as List?)?.map((e) => e.toString()).toList() ??
+        (metadata['allowedTypes'] as List?)
+            ?.map((e) => e.toString())
+            .toList() ??
         const ['pdf', 'jpg', 'png'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

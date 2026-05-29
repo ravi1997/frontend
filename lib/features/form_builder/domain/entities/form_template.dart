@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'builder_form.dart';
+import '../../../../models/form_models.dart';
 
 part 'form_template.freezed.dart';
 part 'form_template.g.dart';
@@ -12,7 +12,7 @@ abstract class FormTemplate with _$FormTemplate {
     required String name,
     required String description,
     required FormTemplateCategory category,
-    required BuilderForm form,
+    required Form form,
     @Default('') String thumbnailUrl,
     @Default([]) List<String> tags,
     @Default(0) int usageCount,
@@ -39,3 +39,4 @@ enum FormTemplateCategory {
 
   const FormTemplateCategory(this.displayName);
 }
+

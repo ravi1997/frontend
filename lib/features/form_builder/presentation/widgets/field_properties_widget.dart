@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_general_settings.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_style_settings.dart';
-import 'package:frontend/features/form_builder/presentation/widgets/properties/field_validation_settings.dart';
+import 'package:frontend/features/form_builder/presentation/widgets/properties/dynamic_properties_panel.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_logic_settings.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_layout_settings.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_specific_settings.dart';
@@ -280,7 +279,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       // General Tab
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
-                      child: FieldGeneralSettings(
+                        child: FieldGeneralSettings(
                           controllerKey: widget.controllerKey,
                           projectId: widget.projectId,
                           formId: widget.formId,
@@ -305,17 +304,17 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       // Validation Tab
                       SingleChildScrollView(
                         padding: const EdgeInsets.all(20),
-                      child: FieldValidationSettings(
-                          controllerKey: widget.controllerKey,
-                          formId: widget.formId,
+                        child: DynamicPropertiesPanel(
                           question: question,
-                          regexController: _regexController,
-                          minLengthController: _minLengthController,
-                          maxLengthController: _maxLengthController,
-                          minValueController: _minValueController,
-                          maxValueController: _maxValueController,
-                          inputMaskController: _inputMaskController,
-                          customErrorController: _customErrorController,
+                          onQuestionChanged: (updatedQuestion) {
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.controllerKey,
+                                  ).notifier,
+                                )
+                                .updateQuestion(updatedQuestion);
+                          },
                         ),
                       ),
 

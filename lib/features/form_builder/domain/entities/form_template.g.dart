@@ -12,7 +12,7 @@ _FormTemplate _$FormTemplateFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       description: json['description'] as String,
       category: $enumDecode(_$FormTemplateCategoryEnumMap, json['category']),
-      form: BuilderForm.fromJson(json['form'] as Map<String, dynamic>),
+      form: Form.fromJson(json['form'] as Map<String, dynamic>),
       thumbnailUrl: json['thumbnailUrl'] as String? ?? '',
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??

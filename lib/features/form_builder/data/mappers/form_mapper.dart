@@ -1,5 +1,4 @@
-import '../../domain/entities/builder_form.dart';
-import '../../domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../../../core/exceptions/app_exception.dart';
 import '../dto/form_dto.dart';
 
@@ -112,9 +111,7 @@ class FormMapper {
   // create — the backend initializes an empty version automatically.
   static Map<String, dynamic> toCreatePayload(BuilderForm form) {
     return {
-      'title': form.title is Map
-          ? (form.title as Map)['en'] ?? 'Untitled Form'
-          : form.title?.toString() ?? 'Untitled Form',
+      'title': form.title,
       'status': form.status,
       'description': '',
       'default_language': 'en',
@@ -126,9 +123,7 @@ class FormMapper {
   // For metadata-only updates. Sections are NOT included here.
   static Map<String, dynamic> toUpdatePayload(BuilderForm form) {
     return {
-      'title': form.title is Map
-          ? (form.title as Map)['en'] ?? 'Untitled Form'
-          : form.title?.toString() ?? 'Untitled Form',
+      'title': form.title,
       'status': form.status,
     };
   }
@@ -138,9 +133,7 @@ class FormMapper {
     final sectionJson = form.sections.map((s) => s.toJson()).toList();
     final workflowJson = _normalizeWorkflowMap(form.workflows);
     return {
-      'title': form.title is Map
-          ? (form.title as Map)['en'] ?? 'Untitled Form'
-          : form.title?.toString() ?? 'Untitled Form',
+      'title': form.title,
       'status': form.status,
       'slug': form.id,
       'sections': sectionJson,
@@ -154,9 +147,9 @@ class FormMapper {
       'active_version': form.version,
       'workflows': workflowJson,
       'metadata': {...form.metadata, 'workflowSettings': workflowJson},
-      'access_policy': form.accessPolicy.toJson(),
-      'accessPolicy': form.accessPolicy.toJson(),
-      'style': form.style.toJson(),
+      'access_policy': form.accessPolicy,
+      'accessPolicy': form.accessPolicy,
+      'style': form.style,
       'ui_type': _formLayoutToApi(form.layout),
     };
   }
@@ -164,17 +157,15 @@ class FormMapper {
   static Map<String, dynamic> toFormMetadataJson(BuilderForm form) {
     final workflowJson = _normalizeWorkflowMap(form.workflows);
     return {
-      'title': form.title is Map
-          ? (form.title as Map)['en'] ?? 'Untitled Form'
-          : form.title?.toString() ?? 'Untitled Form',
+      'title': form.title,
       'status': form.status,
       'slug': form.id,
       'active_version': form.version,
       'workflows': workflowJson,
       'metadata': {...form.metadata, 'workflowSettings': workflowJson},
-      'access_policy': form.accessPolicy.toJson(),
-      'accessPolicy': form.accessPolicy.toJson(),
-      'style': form.style.toJson(),
+      'access_policy': form.accessPolicy,
+      'accessPolicy': form.accessPolicy,
+      'style': form.style,
       'ui_type': _formLayoutToApi(form.layout),
       // 'is_template': form.isTemplate, // If applicable
       // versions are EXCLUDED to prevent overwrite

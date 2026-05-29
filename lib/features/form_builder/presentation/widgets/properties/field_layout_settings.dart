@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
@@ -22,7 +22,14 @@ class FieldLayoutSettings extends ConsumerWidget {
   void _updateStyle(WidgetRef ref, QuestionStyle newStyle) {
     ref
         .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-        .updateQuestion(question.copyWith(style: newStyle));
+        .updateQuestion(
+          question.copyWith(
+            ui: {
+              ...question.ui,
+              'style': newStyle.toJson(),
+            },
+          ),
+        );
   }
 
   @override
@@ -78,7 +85,9 @@ class FieldLayoutSettings extends ConsumerWidget {
         const SizedBox(height: 16),
         PropertyBuilderUtils.buildDropdown<String>(
           label: 'Width Preset',
-          value: (question.metadata?['layout']?['widthPreset'] as String?) ?? 'auto',
+          value:
+              (question.metadata['layout']?['widthPreset'] as String?) ??
+              'auto',
           items: const [
             DropdownMenuItem(value: 'auto', child: Text('Auto (Smart Span)')),
             DropdownMenuItem(value: 'small', child: Text('Small (1 Col)')),
@@ -88,10 +97,16 @@ class FieldLayoutSettings extends ConsumerWidget {
           ],
           onChanged: (val) {
             if (val != null) {
-              final layout = Map<String, dynamic>.from(question.metadata?['layout'] ?? {});
+              final layout = Map<String, dynamic>.from(
+                question.metadata['layout'] ?? {},
+              );
               layout['widthPreset'] = val;
               ref
-                  .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateQuestionMetadata(question.id, {'layout': layout});
             }
           },
@@ -99,7 +114,7 @@ class FieldLayoutSettings extends ConsumerWidget {
         const SizedBox(height: 12),
         PropertyBuilderUtils.buildDropdown<String>(
           label: 'Manual Span (Optional Override)',
-          value: (question.metadata?['layout']?['span'] as String?) ?? 'auto',
+          value: (question.metadata['layout']?['span'] as String?) ?? 'auto',
           items: const [
             DropdownMenuItem(value: 'auto', child: Text('Auto')),
             DropdownMenuItem(value: '1', child: Text('1 Column')),
@@ -110,10 +125,16 @@ class FieldLayoutSettings extends ConsumerWidget {
           ],
           onChanged: (val) {
             if (val != null) {
-              final layout = Map<String, dynamic>.from(question.metadata?['layout'] ?? {});
+              final layout = Map<String, dynamic>.from(
+                question.metadata['layout'] ?? {},
+              );
               layout['span'] = val;
               ref
-                  .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+                  .read(
+                    formBuilderControllerProvider(
+                      '$projectId::$formId',
+                    ).notifier,
+                  )
                   .updateQuestionMetadata(question.id, {'layout': layout});
             }
           },

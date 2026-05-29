@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/form_version_history.dart';
-import '../../domain/entities/form_section.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../data/repositories/form_builder_repository_impl.dart';

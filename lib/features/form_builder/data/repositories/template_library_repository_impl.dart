@@ -2,11 +2,7 @@ import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
 import '../../domain/entities/form_template.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/form_question_option.dart';
-import '../../domain/entities/form_section.dart';
-import '../../domain/entities/builder_form.dart';
-import '../../domain/entities/question_type.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/repositories/template_library_repository.dart';
 
 /// Implementation of TemplateLibraryRepository.
@@ -17,14 +13,14 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   final Logger _logger = Logger();
   final Uuid _uuid = const Uuid();
 
-  List<FormQuestionOption> _createOptions(List<String> labels) {
+  List<Map<String, dynamic>> _createOptions(List<String> labels) {
     return labels.asMap().entries.map((entry) {
-      return FormQuestionOption(
-        id: _uuid.v4(),
-        label: entry.value,
-        value: entry.value,
-        order: entry.key,
-      );
+      return {
+        'id': _uuid.v4(),
+        'label': entry.value,
+        'value': entry.value,
+        'order': entry.key,
+      };
     }).toList();
   }
 
@@ -115,12 +111,19 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       final newForm = BuilderForm(
         id: _uuid.v4(),
         title: formName,
-        sections: template.form.sections,
+        slug: formName.toLowerCase().replaceAll(' ', '-'),
+        organizationId: 'default',
+        createdBy: 'system',
         status: 'draft',
-        isPublished: false,
-        version: '1.0.0',
-        isLatest: true,
-        layout: template.form.layout,
+        activeVersion: '1.0.0',
+        versions: [
+          FormVersion(
+            id: _uuid.v4(),
+            version: '1.0.0',
+            sections: template.form.sections,
+          ),
+        ],
+        uiType: template.form.uiType,
         style: template.form.style,
       );
       // Save the form (this would normally call the form repository)
@@ -173,7 +176,14 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         name: templateName,
         description: description,
         category: category,
-        form: BuilderForm(id: formId, title: templateName, sections: []),
+        form: BuilderForm(
+          id: formId,
+          title: templateName,
+          slug: templateName.toLowerCase().replaceAll(' ', '-'),
+          organizationId: 'default',
+          createdBy: 'system',
+          versions: const [],
+        ),
         tags: tags,
         createdAt: DateTime.now(),
       );
@@ -220,42 +230,51 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.shortText,
-        label: {'en': 'Full Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Full Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.email,
-        label: {'en': 'Email Address'},
-        isRequired: true,
+        fieldType: 'email',
+        label: 'Email Address',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.mobile,
-        label: {'en': 'Phone Number'},
-        isRequired: false,
+        fieldType: 'mobile',
+        label: 'Phone Number',
+        validation: const {'is_required': false},
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.paragraph,
-        label: {'en': 'Message'},
-        isRequired: true,
+        fieldType: 'paragraph',
+        label: 'Message',
+        validation: const {'is_required': true},
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Contact Information'},
+      title: 'Contact Information',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'contact-template',
-      title: {'en': 'Contact Form'},
-      sections: [section],
+      title: 'Contact Form',
+      slug: 'contact-form',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'contact-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -265,7 +284,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
           'A simple contact form for collecting inquiries and messages.',
       category: FormTemplateCategory.contact,
       form: form,
-      tags: ['contact', 'simple', 'inquiry'],
+      tags: const ['contact', 'simple', 'inquiry'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );
@@ -275,22 +294,22 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.shortText,
-        label: {'en': 'Your Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Your Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.rating,
-        label: {'en': 'How satisfied are you with our service?'},
-        isRequired: true,
-        metadata: {'min': 1, 'max': 5},
+        fieldType: 'rating',
+        label: 'How satisfied are you with our service?',
+        validation: const {'is_required': true},
+        metadata: const {'min': 1, 'max': 5},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.multipleChoice,
-        label: {'en': 'How did you hear about us?'},
-        isRequired: true,
+        fieldType: 'multipleChoice',
+        label: 'How did you hear about us?',
+        validation: const {'is_required': true},
         options: _createOptions([
           'Social Media',
           'Friend/Family',
@@ -301,24 +320,33 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.paragraph,
-        label: {'en': 'Any additional comments or feedback?'},
-        isRequired: false,
+        fieldType: 'paragraph',
+        label: 'Any additional comments or feedback?',
+        validation: const {'is_required': false},
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Survey Questions'},
+      title: 'Survey Questions',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'survey-template',
-      title: {'en': 'Customer Satisfaction Survey'},
-      sections: [section],
+      title: 'Customer Satisfaction Survey',
+      slug: 'customer-satisfaction-survey',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'survey-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -327,7 +355,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       description: 'Collect feedback and measure customer satisfaction.',
       category: FormTemplateCategory.survey,
       form: form,
-      tags: ['survey', 'feedback', 'satisfaction'],
+      tags: const ['survey', 'feedback', 'satisfaction'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );
@@ -337,33 +365,33 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.shortText,
-        label: {'en': 'First Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'First Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.shortText,
-        label: {'en': 'Last Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Last Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.email,
-        label: {'en': 'Email Address'},
-        isRequired: true,
+        fieldType: 'email',
+        label: 'Email Address',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.mobile,
-        label: {'en': 'Phone Number'},
-        isRequired: true,
+        fieldType: 'mobile',
+        label: 'Phone Number',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q5',
-        type: QuestionType.dropdown,
-        label: {'en': 'Country'},
-        isRequired: true,
+        fieldType: 'dropdown',
+        label: 'Country',
+        validation: const {'is_required': true},
         options: _createOptions([
           'United States',
           'United Kingdom',
@@ -374,25 +402,34 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       ),
       FormQuestion(
         id: 'q6',
-        type: QuestionType.checkboxes,
-        label: {'en': 'I agree to the terms and conditions'},
-        isRequired: true,
+        fieldType: 'checkboxes',
+        label: 'I agree to the terms and conditions',
+        validation: const {'is_required': true},
         options: _createOptions(['I agree']),
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Personal Information'},
+      title: 'Personal Information',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'registration-template',
-      title: {'en': 'Event Registration'},
-      sections: [section],
+      title: 'Event Registration',
+      slug: 'event-registration',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'registration-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -402,7 +439,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
           'Register attendees for your event with this comprehensive form.',
       category: FormTemplateCategory.registration,
       form: form,
-      tags: ['registration', 'event', 'attendee'],
+      tags: const ['registration', 'event', 'attendee'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );
@@ -412,39 +449,39 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.shortText,
-        label: {'en': 'Event Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Event Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.date,
-        label: {'en': 'Event Date'},
-        isRequired: true,
+        fieldType: 'date',
+        label: 'Event Date',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.time,
-        label: {'en': 'Event Time'},
-        isRequired: true,
+        fieldType: 'time',
+        label: 'Event Time',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.shortText,
-        label: {'en': 'Venue/Location'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Venue/Location',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q5',
-        type: QuestionType.number,
-        label: {'en': 'Number of Attendees'},
-        isRequired: true,
+        fieldType: 'number',
+        label: 'Number of Attendees',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q6',
-        type: QuestionType.multipleChoice,
-        label: {'en': 'Event Type'},
-        isRequired: true,
+        fieldType: 'multipleChoice',
+        label: 'Event Type',
+        validation: const {'is_required': true},
         options: _createOptions([
           'Conference',
           'Workshop',
@@ -455,24 +492,33 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       ),
       FormQuestion(
         id: 'q7',
-        type: QuestionType.paragraph,
-        label: {'en': 'Event Description'},
-        isRequired: false,
+        fieldType: 'paragraph',
+        label: 'Event Description',
+        validation: const {'is_required': false},
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Event Details'},
+      title: 'Event Details',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'event-template',
-      title: {'en': 'Event Planning Form'},
-      sections: [section],
+      title: 'Event Planning Form',
+      slug: 'event-planning-form',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'event-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -482,7 +528,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
           'Plan and organize your events with this comprehensive form.',
       category: FormTemplateCategory.event,
       form: form,
-      tags: ['event', 'planning', 'organization'],
+      tags: const ['event', 'planning', 'organization'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );
@@ -492,23 +538,23 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.rating,
-        label: {'en': 'Overall Experience'},
-        isRequired: true,
-        metadata: {'min': 1, 'max': 10},
+        fieldType: 'rating',
+        label: 'Overall Experience',
+        validation: const {'is_required': true},
+        metadata: const {'min': 1, 'max': 10},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.rating,
-        label: {'en': 'Quality of Service'},
-        isRequired: true,
-        metadata: {'min': 1, 'max': 5},
+        fieldType: 'rating',
+        label: 'Quality of Service',
+        validation: const {'is_required': true},
+        metadata: const {'min': 1, 'max': 5},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.multipleChoice,
-        label: {'en': 'Would you recommend us?'},
-        isRequired: true,
+        fieldType: 'multipleChoice',
+        label: 'Would you recommend us?',
+        validation: const {'is_required': true},
         options: _createOptions([
           'Definitely',
           'Probably',
@@ -519,9 +565,9 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.checkboxes,
-        label: {'en': 'What did you like?'},
-        isRequired: false,
+        fieldType: 'checkboxes',
+        label: 'What did you like?',
+        validation: const {'is_required': false},
         options: _createOptions([
           'Customer Service',
           'Product Quality',
@@ -532,24 +578,33 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       ),
       FormQuestion(
         id: 'q5',
-        type: QuestionType.paragraph,
-        label: {'en': 'How can we improve?'},
-        isRequired: false,
+        fieldType: 'paragraph',
+        label: 'How can we improve?',
+        validation: const {'is_required': false},
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Feedback Questions'},
+      title: 'Feedback Questions',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'feedback-template',
-      title: {'en': 'Product Feedback Form'},
-      sections: [section],
+      title: 'Product Feedback Form',
+      slug: 'product-feedback-form',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'feedback-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -558,7 +613,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       description: 'Collect detailed feedback about your products or services.',
       category: FormTemplateCategory.feedback,
       form: form,
-      tags: ['feedback', 'product', 'improvement'],
+      tags: const ['feedback', 'product', 'improvement'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );
@@ -568,66 +623,75 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     final questions = [
       FormQuestion(
         id: 'q1',
-        type: QuestionType.shortText,
-        label: {'en': 'Customer Name'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Customer Name',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q2',
-        type: QuestionType.email,
-        label: {'en': 'Email Address'},
-        isRequired: true,
+        fieldType: 'email',
+        label: 'Email Address',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q3',
-        type: QuestionType.mobile,
-        label: {'en': 'Phone Number'},
-        isRequired: true,
+        fieldType: 'mobile',
+        label: 'Phone Number',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q4',
-        type: QuestionType.shortText,
-        label: {'en': 'Shipping Address'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'Shipping Address',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q5',
-        type: QuestionType.shortText,
-        label: {'en': 'City'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'City',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q6',
-        type: QuestionType.shortText,
-        label: {'en': 'State/Province'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'State/Province',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q7',
-        type: QuestionType.shortText,
-        label: {'en': 'ZIP/Postal Code'},
-        isRequired: true,
+        fieldType: 'shortText',
+        label: 'ZIP/Postal Code',
+        validation: const {'is_required': true},
       ),
       FormQuestion(
         id: 'q8',
-        type: QuestionType.paragraph,
-        label: {'en': 'Order Notes'},
-        isRequired: false,
+        fieldType: 'paragraph',
+        label: 'Order Notes',
+        validation: const {'is_required': false},
       ),
     ];
 
     final section = FormSection(
       id: 's1',
-      title: {'en': 'Shipping Information'},
+      title: 'Shipping Information',
       questions: questions,
     );
 
     final form = BuilderForm(
       id: 'order-template',
-      title: {'en': 'Order Form'},
-      sections: [section],
+      title: 'Order Form',
+      slug: 'order-form',
+      organizationId: 'default',
+      createdBy: 'system',
       status: 'template',
-      isPublished: true,
+      activeVersion: '1.0.0',
+      versions: [
+        FormVersion(
+          id: 'order-v1',
+          version: '1.0.0',
+          sections: [section],
+        ),
+      ],
     );
 
     return FormTemplate(
@@ -636,7 +700,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
       description: 'Collect shipping and order information from customers.',
       category: FormTemplateCategory.order,
       form: form,
-      tags: ['order', 'shipping', 'ecommerce'],
+      tags: const ['order', 'shipping', 'ecommerce'],
       usageCount: 0,
       createdAt: DateTime.now(),
     );

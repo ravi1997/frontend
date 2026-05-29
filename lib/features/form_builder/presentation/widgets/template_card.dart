@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/form_template.dart';
 
 class TemplateCard extends StatelessWidget {

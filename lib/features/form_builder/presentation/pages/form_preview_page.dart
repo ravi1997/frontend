@@ -12,9 +12,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/builder_form.dart';
-import '../../domain/entities/form_section.dart';
-import '../../domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import '../../domain/entities/question_type.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
@@ -25,6 +23,7 @@ import '../utils/form_logic_engine.dart';
 import '../utils/layout_engine.dart';
 import '../../domain/entities/form_question_option.dart';
 import '../../../../core/network/api_client_wrapper.dart';
+import '../../../../core/exceptions/app_exception.dart';
 
 final previewFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
@@ -56,6 +55,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   LogicEvaluationResult? _logicResult;
   final Map<String, String> _lastWebhookHashes = {};
   final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
+  final Map<String, String?> _fieldErrors = {};
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +125,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   _isReviewing = false;
                   _dynamicOptions.clear();
                   _lastWebhookHashes.clear();
+                  _fieldErrors.clear();
                 });
               },
               icon: const Icon(
@@ -452,7 +453,11 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
               constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
               child: Column(
                 children: [
-                  const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
+                  const Icon(
+                    Icons.rate_review,
+                    size: 48,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Review Your Answers',
@@ -481,12 +486,16 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             }
 
             final layout = section.layout;
-            final isFullWidth = layout == SectionLayoutType.fullWidth || layout == SectionLayoutType.dashboard || layout == SectionLayoutType.centered;
+            final isFullWidth =
+                layout == SectionLayoutType.fullWidth ||
+                layout == SectionLayoutType.dashboard ||
+                layout == SectionLayoutType.centered;
             final metadata = section.metaData;
-            final sectionMaxWidth = isFullWidth 
-                ? ((metadata['maxWidth'] as num?)?.toDouble() ?? (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
+            final sectionMaxWidth = isFullWidth
+                ? ((metadata['maxWidth'] as num?)?.toDouble() ??
+                      (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
                 : widget.form.style.maxWidth;
-                
+
             final alignStr = metadata['alignment']?.toString() ?? 'left';
             AlignmentGeometry alignment = Alignment.centerLeft;
             if (alignStr == 'center') alignment = Alignment.center;
@@ -641,8 +650,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           runSpacing: spacing,
           children: visibleSections.map((section) {
             final metadata = section.metaData;
-            final sectionMaxWidth = (metadata['maxWidth'] as num?)?.toDouble() ?? widget.form.style.maxWidth;
-                
+            final sectionMaxWidth =
+                (metadata['maxWidth'] as num?)?.toDouble() ??
+                widget.form.style.maxWidth;
+
             final alignStr = metadata['alignment']?.toString() ?? 'center';
             AlignmentGeometry alignment = Alignment.centerLeft;
             if (alignStr == 'center') alignment = Alignment.center;
@@ -853,6 +864,39 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     _showSubmitted = true;
                     _isReviewing = false;
                   });
+                } else {
+                  final errorState = ref
+                      .read(formSubmissionControllerProvider)
+                      .error;
+                  if (errorState is ApiException &&
+                      errorState.details != null &&
+                      mounted) {
+                    setState(() {
+                      if (errorState.details is Map) {
+                        (errorState.details as Map).forEach((key, value) {
+                          // Keep the preview aligned with the submit page by surfacing field-level errors.
+                          // The preview field widgets already read from the shared form data provider.
+                          //
+                          // field error handling is intentionally kept local to this page.
+                          //
+                          _fieldErrors[key.toString()] = value.toString();
+                        });
+                      } else if (errorState.details is List) {
+                        for (final err in (errorState.details as List)) {
+                          if (err is Map &&
+                              err.containsKey('field') &&
+                              err.containsKey('message')) {
+                            _fieldErrors[err['field'].toString()] =
+                                err['message'].toString();
+                          }
+                        }
+                      }
+                    });
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(errorState.message)));
+                  }
                 }
               },
         style: ElevatedButton.styleFrom(
@@ -1626,11 +1670,11 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           )
         : null;
 
-    final isActionField = q.actionConfig != null;
+    final isActionField = q.actionConfig.isNotEmpty;
 
     final fillColor = PreviewUtils.parseColor(
       style.backgroundColor,
-      isActionField ? const Color(0xFFF0F7FF) : const Color(0xFFF8FAFC),
+      const Color(0xFFF0F7FF),
     );
 
     final borderColor = PreviewUtils.parseColor(
@@ -1832,7 +1876,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         );
 
       case QuestionType.dropdown:
-        final options = widget.dynamicOptions ?? q.options ?? [];
+        final options = widget.dynamicOptions ?? q.options;
         final formData = ref.watch(previewFormDataProvider);
         const dropdownMenuTextStyle = TextStyle(
           color: AppColors.textDark,
@@ -1863,15 +1907,14 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.checkboxes:
       case QuestionType.multipleChoice:
-        final options = q.options ?? [];
+        final options = q.options;
         final isRadio = q.type == QuestionType.multipleChoice;
         final formData = ref.watch(previewFormDataProvider);
         final currentValue = formData[_fieldId];
 
         // Check if these are image choices (enhanced UI)
         final isImageChoice = options.any(
-          (opt) =>
-              opt.description != null && opt.description!.startsWith('http'),
+          (opt) => opt.description.startsWith('http'),
         );
 
         return FormField<dynamic>(
@@ -1893,7 +1936,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                           ? currentValue == opt.value
                           : (currentValue as List?)?.contains(opt.value) ??
                                 false;
-                      final imageUrl = opt.description ?? '';
+                      final imageUrl = opt.description;
                       if (!imageUrl.startsWith('http')) {
                         return const SizedBox.shrink();
                       }
@@ -2182,7 +2225,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
       case QuestionType.spacer:
         return SizedBox(
-          height: (q.metadata?['spacerHeight'] as num?)?.toDouble() ?? 24,
+          height: (q.metadata['spacerHeight'] as num?)?.toDouble() ?? 24,
         );
 
       case QuestionType.image:
@@ -2304,7 +2347,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     if (q.type == QuestionType.countrySelect ||
         q.type == QuestionType.stateSelect ||
         q.type == QuestionType.citySelect) {
-      final options = (q.options ?? [])
+      final options = (q.options)
           .map(
             (o) => o.label.translate(locale).isNotEmpty
                 ? o.label.translate(locale)
@@ -2398,7 +2441,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     WidgetRef ref,
   ) {
     final locale = ref.read(localeControllerProvider).languageCode;
-    final codeLength = (q.metadata?['codeLength'] as num?)?.toInt() ?? 6;
+    final codeLength = (q.metadata['codeLength'] as num?)?.toInt() ?? 6;
     final currentValue =
         ref.watch(previewFormDataProvider)[_fieldId]?.toString() ?? '';
     final controllers = _previewOtpControllers.putIfAbsent(
@@ -2663,7 +2706,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     String locale,
     TextStyle textStyle,
   ) {
-    final options = q.options ?? [];
+    final options = q.options;
     final currentValue = ref.read(previewFormDataProvider)[_fieldId];
     final current = currentValue is List
         ? currentValue.cast<String>()
@@ -2695,11 +2738,11 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   }
 
   bool get hasActionButton =>
-      widget.question.actionConfig?['hasButton'] ?? false;
+      widget.question.actionConfig['hasButton'] ?? false;
 
   Widget? _buildSuffix(BuildContext context, FormQuestion q, TextStyle style) {
     final actionConfig = q.actionConfig;
-    if (actionConfig != null && (actionConfig['hasButton'] ?? false)) {
+    if ((actionConfig['hasButton'] ?? false)) {
       return Container(
         margin: const EdgeInsets.only(right: 8),
         child: ElevatedButton(
@@ -2951,7 +2994,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     final fileSize = fileEntry is Map ? fileEntry['size'] as int? : null;
 
     // Determine allowed extensions from field validation config
-    final allowedTypes = q.allowedFileTypes ?? [];
+    final allowedTypes = q.allowedFileTypes;
     final List<String>? extensions = allowedTypes.isNotEmpty
         ? _extensionsForTypes(allowedTypes)
         : null;
@@ -3128,7 +3171,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         q.type == QuestionType.multiFileUpload ||
         q.type == QuestionType.fileList;
     final isGallery = q.type == QuestionType.imageGallery;
-    final allowedTypes = q.allowedFileTypes ?? [];
+    final allowedTypes = q.allowedFileTypes;
     final List<String>? extensions = allowedTypes.isNotEmpty
         ? _extensionsForTypes(allowedTypes)
         : null;
@@ -3518,7 +3561,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
   }
 
   Widget _buildCalculatedField(FormQuestion q, WidgetRef ref, String locale) {
-    final formula = q.metadata?['formula']?.toString();
+    final formula = q.metadata['formula']?.toString();
     final current = ref.watch(previewFormDataProvider)[q.id]?.toString();
     return Container(
       width: double.infinity,
@@ -3656,10 +3699,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     Color border,
     bool isAction,
   ) {
-    final rows = (q.metadata?['matrixRows'] as List? ?? [])
+    final rows = (q.metadata['matrixRows'] as List? ?? [])
         .map((e) => e.toString())
         .toList();
-    final cols = (q.metadata?['matrixCols'] as List? ?? [])
+    final cols = (q.metadata['matrixCols'] as List? ?? [])
         .map((e) => e.toString())
         .toList();
     final formData = ref.watch(previewFormDataProvider);

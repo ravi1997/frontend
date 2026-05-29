@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/core/localization/locale_controller.dart';
 import '../logic_rule_dialog.dart';
@@ -46,7 +45,14 @@ class FieldLogicSettings extends ConsumerWidget {
   void _updateLogic(WidgetRef ref, Map<String, dynamic> newLogic) {
     ref
         .read(formBuilderControllerProvider('$projectId::$formId').notifier)
-        .updateQuestion(question.copyWith(conditionalLogic: newLogic));
+        .updateQuestion(
+          question.copyWith(
+            logic: {
+              ...question.logic,
+              'conditional_logic': newLogic,
+            },
+          ),
+        );
   }
 
   @override

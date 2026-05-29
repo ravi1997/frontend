@@ -73,3 +73,24 @@ class DesignTokens {
   static const double fontXL  = 24.0;
   static const double fontXXL = 32.0;
 }
+
+/// Convenient global alias for standard spacing.
+abstract class AppSpacing {
+  static const double xs  = DesignTokens.spaceXS;
+  static const double sm  = DesignTokens.spaceS;
+  static const double md  = DesignTokens.spaceM;
+  static const double lg  = DesignTokens.spaceL;
+  static const double xl  = DesignTokens.spaceXL;
+  static const double xxl = DesignTokens.spaceXXL;
+}
+
+/// Convenient global alias for standard border radii.
+abstract class AppRadius {
+  static const double xs   = DesignTokens.radiusXS;
+  static const double sm   = DesignTokens.radiusS;
+  static const double md   = DesignTokens.radiusM;
+  static const double lg   = DesignTokens.radiusL;
+  static const double xl   = DesignTokens.radiusXL;
+  static const double full = DesignTokens.radiusFull;
+}
+

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/domain/entities/section_layout_type.dart';
 import 'property_builder_utils.dart';
 
@@ -49,14 +49,34 @@ class SectionLayoutSettings extends ConsumerWidget {
 
   void _updateMetadata(String key, dynamic value) {
     onSectionChanged(
-      section.copyWith(metaData: {...section.metaData, key: value}),
+      section.copyWith(metadata: {...section.metaData, key: value}),
     );
+  }
+
+  SectionLayoutType _parseLayout(String? raw) {
+    if (raw == null || raw.isEmpty) return SectionLayoutType.standard;
+    // Stored values vary across versions: enum name, JsonValue string, or legacy labels.
+    for (final v in SectionLayoutType.values) {
+      if (raw == v.name) return v;
+    }
+    switch (raw) {
+      case 'flex':
+        return SectionLayoutType.standard;
+      case 'grid-cols-2':
+        return SectionLayoutType.grid;
+      case 'grid-cols-3':
+        return SectionLayoutType.threeColumns;
+      case 'full-width':
+        return SectionLayoutType.fullWidth;
+      default:
+        return SectionLayoutType.standard;
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final metadata = section.metaData;
-    final layout = section.layout;
+    final layout = _parseLayout(section.layout);
     final subCount = section.sections.length;
 
     // Determine readiness of condition-dependent layouts
@@ -127,7 +147,7 @@ class SectionLayoutSettings extends ConsumerWidget {
           }).toList(),
           onChanged: (val) {
             if (val != null) {
-              _updateSection(section.copyWith(layout: val));
+              _updateSection(section.copyWith(layout: val.name));
             }
           },
         ),

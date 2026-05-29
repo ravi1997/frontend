@@ -1,7 +1,5 @@
-import '../../domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../domain/entities/form_question_option.dart';
-import '../../domain/entities/form_section.dart';
-import '../../domain/entities/form_question.dart';
 import 'package:expressions/expressions.dart';
 
 class LogicEvaluationResult {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/theme/app_colors.dart';
-import 'package:frontend/features/form_builder/domain/entities/builder_form.dart';
+import 'package:frontend/models/form_models.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'property_builder_utils.dart';
 
@@ -45,11 +45,12 @@ class FormStyleSettings extends ConsumerWidget {
         return;
     }
 
-    final newStyle = form.style.copyWith(
-      primaryColor: styles['primaryColor'],
-      globalBorderRadius: (styles['globalBorderRadius'] as num).toDouble(),
-      backgroundColor: styles['backgroundColor'],
-    );
+    final newStyle = {
+      ...form.style,
+      'primaryColor': styles['primaryColor'],
+      'globalBorderRadius': (styles['globalBorderRadius'] as num).toDouble(),
+      'backgroundColor': styles['backgroundColor'],
+    };
 
     ref
         .read(formBuilderControllerProvider('$projectId::$formId').notifier)
@@ -109,9 +110,7 @@ class FormStyleSettings extends ConsumerWidget {
                   formBuilderControllerProvider('$projectId::$formId').notifier,
                 )
                 .updateForm(
-                  form.copyWith(
-                    style: form.style.copyWith(backgroundColor: val),
-                  ),
+                  form.copyWith(style: {...form.style, 'backgroundColor': val}),
                 );
           },
         ),
@@ -125,7 +124,7 @@ class FormStyleSettings extends ConsumerWidget {
                   formBuilderControllerProvider('$projectId::$formId').notifier,
                 )
                 .updateForm(
-                  form.copyWith(style: form.style.copyWith(primaryColor: val)),
+                  form.copyWith(style: {...form.style, 'primaryColor': val}),
                 );
           },
         ),
@@ -157,7 +156,7 @@ class FormStyleSettings extends ConsumerWidget {
                     ).notifier,
                   )
                   .updateForm(
-                    form.copyWith(style: form.style.copyWith(fontFamily: val)),
+                    form.copyWith(style: {...form.style, 'fontFamily': val}),
                   );
             }
           },
@@ -185,7 +184,7 @@ class FormStyleSettings extends ConsumerWidget {
                 )
                 .updateForm(
                   form.copyWith(
-                    style: form.style.copyWith(globalBorderRadius: val),
+                    style: {...form.style, 'globalBorderRadius': val},
                   ),
                 );
           },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../form_builder/domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 import '../../../form_builder/domain/entities/question_type.dart';
 
 // ─────────────────────────────────────────────
@@ -219,7 +219,6 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
       ...widget.questions
           .where(
             (q) =>
-                q.label != null &&
                 q.label.toString().isNotEmpty &&
                 q.type != QuestionType.divider &&
                 q.type != QuestionType.spacer &&

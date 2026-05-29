@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/locale_controller.dart';
-import '../../domain/entities/form_question.dart';
-import '../../domain/entities/form_section.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import '../../domain/entities/question_type.dart';
 
 class WorkflowConfigurationDialog extends StatefulWidget {
@@ -1016,13 +1015,13 @@ class _WorkflowConfigurationDialogState
   ) {
     if (trigger == null) return const SizedBox();
 
-    if (trigger.options != null && trigger.options!.isNotEmpty) {
+    if (trigger.options.isNotEmpty) {
       return _buildDropdown(
         label: 'Select Value',
-        value: trigger.options!.any((o) => o.value == condition['value'])
+        value: trigger.options.any((o) => o.value == condition['value'])
             ? condition['value']
             : null,
-        items: trigger.options!
+        items: trigger.options
             .map(
               (o) => DropdownMenuItem(
                 value: o.value,

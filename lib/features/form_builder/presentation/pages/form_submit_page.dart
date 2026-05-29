@@ -14,9 +14,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/builder_form.dart';
-import '../../domain/entities/form_section.dart';
-import '../../domain/entities/form_question.dart';
+import 'package:frontend/models/form_models.dart' hide Form;
 import '../../domain/entities/question_type.dart';
 import '../../domain/entities/form_layout_type.dart';
 import '../../domain/entities/section_layout_type.dart';
@@ -552,7 +550,11 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               constraints: BoxConstraints(maxWidth: form.style.maxWidth),
               child: Column(
                 children: [
-                  const Icon(Icons.rate_review, size: 48, color: AppColors.primary),
+                  const Icon(
+                    Icons.rate_review,
+                    size: 48,
+                    color: AppColors.primary,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Review Your Answers',
@@ -584,12 +586,16 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 : 1;
 
             final layout = section.layout;
-            final isFullWidth = layout == SectionLayoutType.fullWidth || layout == SectionLayoutType.dashboard || layout == SectionLayoutType.centered;
+            final isFullWidth =
+                layout == SectionLayoutType.fullWidth ||
+                layout == SectionLayoutType.dashboard ||
+                layout == SectionLayoutType.centered;
             final metadata = section.metaData;
-            final sectionMaxWidth = isFullWidth 
-                ? ((metadata['maxWidth'] as num?)?.toDouble() ?? (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
+            final sectionMaxWidth = isFullWidth
+                ? ((metadata['maxWidth'] as num?)?.toDouble() ??
+                      (layout == SectionLayoutType.centered ? 760.0 : 1200.0))
                 : form.style.maxWidth;
-                
+
             final alignStr = metadata['alignment']?.toString() ?? 'left';
             AlignmentGeometry alignment = Alignment.centerLeft;
             if (alignStr == 'center') alignment = Alignment.center;
@@ -782,8 +788,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 : 1;
 
             final metadata = section.metaData;
-            final sectionMaxWidth = (metadata['maxWidth'] as num?)?.toDouble() ?? form.style.maxWidth;
-                
+            final sectionMaxWidth =
+                (metadata['maxWidth'] as num?)?.toDouble() ??
+                form.style.maxWidth;
+
             final alignStr = metadata['alignment']?.toString() ?? 'center';
             AlignmentGeometry alignment = Alignment.centerLeft;
             if (alignStr == 'center') alignment = Alignment.center;
@@ -1528,7 +1536,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
           )
         : null;
 
-    final isActionField = q.actionConfig != null;
+    final isActionField = q.actionConfig.isNotEmpty;
 
     final fillColor = PreviewUtils.parseColor(
       style.backgroundColor,
@@ -1740,7 +1748,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         );
 
       case QuestionType.dropdown:
-        final options = widget.dynamicOptions ?? q.options ?? [];
+        final options = widget.dynamicOptions ?? q.options;
         final formData = ref.watch(submitFormDataProvider);
         return DropdownButtonFormField<String>(
           initialValue: formData[_fieldId]?.toString(),
@@ -1765,15 +1773,14 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.checkboxes:
       case QuestionType.multipleChoice:
-        final options = q.options ?? [];
+        final options = q.options;
         final isRadio = q.type == QuestionType.multipleChoice;
         final formData = ref.watch(submitFormDataProvider);
         final currentValue = formData[_fieldId];
 
         // Check if these are image choices (enhanced UI)
         final isImageChoice = options.any(
-          (opt) =>
-              opt.description != null && opt.description!.startsWith('http'),
+          (opt) => opt.description.startsWith('http'),
         );
 
         return FormField<dynamic>(
@@ -1795,7 +1802,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                           ? currentValue == opt.value
                           : (currentValue as List?)?.contains(opt.value) ??
                                 false;
-                      final imageUrl = opt.description ?? '';
+                      final imageUrl = opt.description;
                       if (!imageUrl.startsWith('http')) {
                         return const SizedBox.shrink();
                       }
@@ -2084,7 +2091,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
       case QuestionType.spacer:
         return SizedBox(
-          height: (q.metadata?['spacerHeight'] as num?)?.toDouble() ?? 24,
+          height: (q.metadata['spacerHeight'] as num?)?.toDouble() ?? 24,
         );
 
       case QuestionType.image:
@@ -2216,7 +2223,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     if (q.type == QuestionType.countrySelect ||
         q.type == QuestionType.stateSelect ||
         q.type == QuestionType.citySelect) {
-      final options = (q.options ?? [])
+      final options = (q.options)
           .map(
             (o) => o.label.translate(locale).isNotEmpty
                 ? o.label.translate(locale)
@@ -2310,7 +2317,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     WidgetRef ref,
   ) {
     final locale = ref.read(localeControllerProvider).languageCode;
-    final codeLength = (q.metadata?['codeLength'] as num?)?.toInt() ?? 6;
+    final codeLength = (q.metadata['codeLength'] as num?)?.toInt() ?? 6;
     final currentValue =
         ref.watch(submitFormDataProvider)[_fieldId]?.toString() ?? '';
     final controllers = _submitOtpControllers.putIfAbsent(
@@ -2591,7 +2598,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     WidgetRef ref,
     TextStyle textStyle,
   ) {
-    final options = q.options ?? [];
+    final options = q.options;
     final currentValue = ref.read(submitFormDataProvider)[_fieldId];
     final current = currentValue is List
         ? currentValue.cast<String>()
@@ -2623,11 +2630,11 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
   }
 
   bool get hasActionButton =>
-      widget.question.actionConfig?['hasButton'] ?? false;
+      widget.question.actionConfig['hasButton'] ?? false;
 
   Widget? _buildSuffix(BuildContext context, FormQuestion q, TextStyle style) {
     final actionConfig = q.actionConfig;
-    if (actionConfig != null && (actionConfig['hasButton'] ?? false)) {
+    if ((actionConfig['hasButton'] ?? false)) {
       return Container(
         margin: const EdgeInsets.only(right: 8),
         child: ElevatedButton(
@@ -2879,7 +2886,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     final fileSize = fileEntry is Map ? fileEntry['size'] as int? : null;
 
     // Determine allowed extensions from field validation config
-    final allowedTypes = q.allowedFileTypes ?? [];
+    final allowedTypes = q.allowedFileTypes;
     final List<String>? extensions = allowedTypes.isNotEmpty
         ? _extensionsForTypes(allowedTypes)
         : null;
@@ -3066,7 +3073,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         q.type == QuestionType.multiFileUpload ||
         q.type == QuestionType.fileList;
     final isGallery = q.type == QuestionType.imageGallery;
-    final allowedTypes = q.allowedFileTypes ?? [];
+    final allowedTypes = q.allowedFileTypes;
     final List<String>? extensions = allowedTypes.isNotEmpty
         ? _extensionsForTypes(allowedTypes)
         : null;
@@ -3438,7 +3445,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     WidgetRef ref,
     TextStyle textStyle,
   ) {
-    final formula = q.metadata?['formula']?.toString();
+    final formula = q.metadata['formula']?.toString();
     final current = ref.watch(submitFormDataProvider)[_fieldId]?.toString();
     return Container(
       width: double.infinity,
@@ -3568,10 +3575,10 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     final matrixData = (formData[_fieldId] as Map<String, dynamic>?) ?? {};
 
     final rows =
-        (q.metadata?['rows'] as List?)?.map((e) => e.toString()).toList() ??
+        (q.metadata['rows'] as List?)?.map((e) => e.toString()).toList() ??
         ['Row 1', 'Row 2', 'Row 3'];
     final columns =
-        (q.metadata?['columns'] as List?)?.map((e) => e.toString()).toList() ??
+        (q.metadata['columns'] as List?)?.map((e) => e.toString()).toList() ??
         ['Poor', 'Average', 'Good', 'Excellent'];
 
     return Container(

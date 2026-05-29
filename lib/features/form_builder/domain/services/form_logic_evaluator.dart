@@ -1,4 +1,4 @@
-import '../entities/form_question.dart';
+import 'package:frontend/models/form_models.dart';
 
 class FormLogicEvaluator {
   /// Evaluates visibility for a question based on its logic rules and current form data.
