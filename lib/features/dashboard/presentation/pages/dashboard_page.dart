@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/design_system/tokens.dart';
+import '../../../../core/layout/responsive.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 import '../controllers/dashboard_controller.dart';
 import '../../domain/entities/project_summary.dart';
@@ -182,7 +184,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final authState = ref.watch(authControllerProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
       body: authState.when(
         data: (user) {
           if (user == null) {
@@ -192,114 +193,111 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           final dashboardState = ref.watch(dashboardControllerProvider);
           final data = dashboardState.asData?.value;
           final projects = _filteredProjects(data?.projects ?? const []);
+          final padding = Responsive.pagePadding(context);
 
-          return Column(
-            children: [
-              _TopBar(
-                userName: user.username,
-                userEmail: user.email,
-                onLogout: () =>
-                    ref.read(authControllerProvider.notifier).logout(),
-                onRefresh: () =>
-                    ref.read(dashboardControllerProvider.notifier).refresh(),
-              ),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () =>
-                      ref.read(dashboardControllerProvider.notifier).refresh(),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(24),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1280),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _HeroCard(
-                              onCreateProject: _createProject,
-                              onRefresh: () => ref
-                                  .read(dashboardControllerProvider.notifier)
-                                  .refresh(),
-                            ),
-                            const SizedBox(height: 24),
-                            dashboardState.when(
-                              data: (data) => _StatsRow(
-                                projectsCount: data.projects.length,
-                                formsCount: data.stats.totalForms,
-                                activeCount: data.stats.activeForms,
-                                responseCount: data.stats.totalResponses,
-                              ),
-                              loading: () => const _StatsSkeleton(),
-                              error: (error, _) => Padding(
-                                padding: const EdgeInsets.only(bottom: 24),
-                                child: _ErrorBanner(
-                                  error: error.toString(),
-                                  onRetry: () => ref
-                                      .read(dashboardControllerProvider.notifier)
-                                      .refresh(),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            _ProjectsToolbar(
-                              searchController: _searchController,
-                              currentFilter: _filter,
-                              onFilterChanged: (value) {
-                                setState(() => _filter = value);
-                              },
-                              onSearchChanged: (_) => setState(() {}),
-                              onCreateProject: _createProject,
-                            ),
-                            const SizedBox(height: 16),
-                            if (dashboardState.isLoading)
-                              const _ProjectsSkeleton()
-                            else if (projects.isEmpty)
-                              const _EmptyState(
-                                title: 'No projects yet',
-                                subtitle:
-                                    'Create your first project to group forms and workflows.',
-                              )
-                            else
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 420,
-                                      mainAxisExtent: 248,
-                                      crossAxisSpacing: 16,
-                                      mainAxisSpacing: 16,
-                                    ),
-                                itemCount: projects.length,
-                                itemBuilder: (context, index) {
-                                  final project = projects[index];
-                                  return _ProjectCard(
-                                    project: project,
-                                    onTap: () =>
-                                        context.push('/projects/${project.id}'),
-                                    onAddForm: () => _addForm(project),
-                                    onArchive: () => _archiveProject(project),
-                                  );
-                                },
-                              ),
-                          ],
+          return RefreshIndicator(
+            onRefresh: () =>
+                ref.read(dashboardControllerProvider.notifier).refresh(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: padding,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: Responsive.maxContentWidth(context),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _HeroCard(
+                        onCreateProject: _createProject,
+                        onRefresh: () => ref
+                            .read(dashboardControllerProvider.notifier)
+                            .refresh(),
+                      ),
+                      const SizedBox(height: 24),
+                      dashboardState.when(
+                        data: (data) => _StatsRow(
+                          projectsCount: data.projects.length,
+                          formsCount: data.stats.totalForms,
+                          activeCount: data.stats.activeForms,
+                          responseCount: data.stats.totalResponses,
+                        ),
+                        loading: () => const _StatsSkeleton(),
+                        error: (error, _) => Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: _ErrorBanner(
+                            error: error.toString(),
+                            onRetry: () => ref
+                                .read(dashboardControllerProvider.notifier)
+                                .refresh(),
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      _ProjectsToolbar(
+                        searchController: _searchController,
+                        currentFilter: _filter,
+                        onFilterChanged: (value) {
+                          setState(() => _filter = value);
+                        },
+                        onSearchChanged: (_) => setState(() {}),
+                        onCreateProject: _createProject,
+                      ),
+                      const SizedBox(height: 16),
+                      if (dashboardState.isLoading)
+                        const _ProjectsSkeleton()
+                      else if (projects.isEmpty)
+                        const _EmptyState(
+                          title: 'No projects yet',
+                          subtitle:
+                              'Create your first project to group forms and workflows.',
+                        )
+                      else
+                        LayoutBuilder(
+                          builder: (ctx, constraints) {
+                            final cols = Responsive.cardColumns(ctx);
+                            final extent = cols == 1
+                                ? constraints.maxWidth
+                                : (constraints.maxWidth - 16 * (cols - 1)) /
+                                    cols;
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent:
+                                        extent.clamp(200, 480),
+                                    mainAxisExtent: 248,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                  ),
+                              itemCount: projects.length,
+                              itemBuilder: (context, index) {
+                                final project = projects[index];
+                                return _ProjectCard(
+                                  project: project,
+                                  onTap: () =>
+                                      context.push('/projects/${project.id}'),
+                                  onAddForm: () => _addForm(project),
+                                  onArchive: () => _archiveProject(project),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Scaffold(
-          body: ErrorStateWidget(
-            message: 'Failed to load user profile.',
-            error: error.toString(),
-            onRetry: () => ref.refresh(authControllerProvider),
-          ),
+        error: (error, _) => ErrorStateWidget(
+          message: 'Failed to load user profile.',
+          error: error.toString(),
+          onRetry: () => ref.refresh(authControllerProvider),
         ),
       ),
     );
@@ -320,34 +318,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 }
 
-class _TopBar extends StatelessWidget {
+// _TopBar removed — replaced by AppShell's AppTopBar.
+
+class _TopBarOld extends StatelessWidget {
   final String userName;
   final String userEmail;
-  final VoidCallback onLogout;
   final VoidCallback onRefresh;
-
-  const _TopBar({
+  final VoidCallback onLogout;
+  
+  const _TopBarOld({
     required this.userName,
     required this.userEmail,
-    required this.onLogout,
     required this.onRefresh,
+    required this.onLogout,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 72,
+      height: DesignTokens.navbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.4),
+          ),
+        ),
       ),
       child: Row(
         children: [
           Text(
             'RIDP Form Platform',
             style: GoogleFonts.inter(
-              fontSize: 16,
+              fontSize: DesignTokens.fontBase,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF0F172A),
             ),
@@ -478,40 +481,50 @@ class _StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final items = [
+      (label: 'Projects',  value: projectsCount, icon: Icons.folder_outlined),
+      (label: 'Forms',     value: formsCount,    icon: Icons.description_outlined),
+      (label: 'Active',    value: activeCount,   icon: Icons.flash_on_outlined),
+      (label: 'Responses', value: responseCount, icon: Icons.mark_chat_read_outlined),
+    ];
+    final cols = Responsive.statColumns(context);
+    // On mobile/tablet show as a 2×2 wrap; on laptop/desktop show as single row.
+    if (cols == 2) {
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: items
+            .map(
+              (e) => SizedBox(
+                width: (MediaQuery.sizeOf(context).width -
+                        Responsive.pageHPad(context) * 2 -
+                        12) /
+                    2,
+                child: _StatCard(
+                  label: e.label,
+                  value: e.value.toString(),
+                  icon: e.icon,
+                ),
+              ),
+            )
+            .toList(),
+      );
+    }
     return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            label: 'Projects',
-            value: projectsCount.toString(),
-            icon: Icons.folder_outlined,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            label: 'Forms',
-            value: formsCount.toString(),
-            icon: Icons.description_outlined,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            label: 'Active',
-            value: activeCount.toString(),
-            icon: Icons.flash_on_outlined,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            label: 'Responses',
-            value: responseCount.toString(),
-            icon: Icons.mark_chat_read_outlined,
-          ),
-        ),
-      ],
+      children: items
+          .expand(
+            (e) => [
+              Expanded(
+                child: _StatCard(
+                  label: e.label,
+                  value: e.value.toString(),
+                  icon: e.icon,
+                ),
+              ),
+              if (e != items.last) const SizedBox(width: 16),
+            ],
+          )
+          .toList(),
     );
   }
 }
@@ -529,12 +542,13 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(DesignTokens.spaceM),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: cs.outline),
       ),
       child: Row(
         children: [
@@ -542,10 +556,10 @@ class _StatCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0F2FE),
-              borderRadius: BorderRadius.circular(14),
+              color: DesignTokens.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
             ),
-            child: Icon(icon, color: const Color(0xFF0369A1)),
+            child: Icon(icon, color: DesignTokens.primary, size: 22),
           ),
           const SizedBox(width: 14),
           Column(
@@ -554,16 +568,16 @@ class _StatCard extends StatelessWidget {
               Text(
                 value,
                 style: GoogleFonts.inter(
-                  fontSize: 24,
+                  fontSize: DesignTokens.fontXL,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF0F172A),
+                  color: cs.onSurface,
                 ),
               ),
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: const Color(0xFF64748B),
+                  fontSize: DesignTokens.fontS,
+                  color: cs.onSurface.withValues(alpha: 0.55),
                 ),
               ),
             ],
@@ -643,24 +657,25 @@ class _ProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final color = switch (project.status.toLowerCase()) {
-      'active' => const Color(0xFF16A34A),
-      'live' => const Color(0xFF2563EB),
-      'archived' => const Color(0xFF6B7280),
-      _ => const Color(0xFFF59E0B),
+      'active'   => DesignTokens.success,
+      'live'     => DesignTokens.info,
+      'archived' => DesignTokens.darkTextMuted,
+      _          => DesignTokens.warning,
     };
 
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
+      color: cs.surface,
+      borderRadius: BorderRadius.circular(DesignTokens.radiusL),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(DesignTokens.spaceM),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+            border: Border.all(color: cs.outline),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,25 +686,26 @@ class _ProjectCard extends StatelessWidget {
                     child: Text(
                       project.title,
                       style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF0F172A),
+                        fontSize: DesignTokens.fontL,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
                       ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 6,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius:
+                          BorderRadius.circular(DesignTokens.radiusFull),
                     ),
                     child: Text(
                       project.status,
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: DesignTokens.fontXS,
                         fontWeight: FontWeight.w700,
                         color: color,
                       ),
@@ -703,15 +719,15 @@ class _ProjectCard extends StatelessWidget {
                     ? 'No description yet'
                     : project.description,
                 style: GoogleFonts.inter(
-                  fontSize: 13,
+                  fontSize: DesignTokens.fontS,
                   height: 1.5,
-                  color: const Color(0xFF64748B),
+                  color: cs.onSurface.withValues(alpha: 0.55),
                 ),
               ),
               const Spacer(),
               Wrap(
-                spacing: 10,
-                runSpacing: 10,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _Pill(label: 'Forms', value: project.forms.toString()),
                   _Pill(label: 'Members', value: project.members.toString()),
@@ -721,7 +737,7 @@ class _ProjectCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -730,8 +746,8 @@ class _ProjectCard extends StatelessWidget {
                           ? 'Updated recently'
                           : 'Updated ${project.updatedAt}',
                       style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF64748B),
+                        fontSize: DesignTokens.fontXS,
+                        color: cs.onSurface.withValues(alpha: 0.45),
                       ),
                     ),
                   ),
@@ -761,18 +777,22 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceM,
+        vertical: DesignTokens.spaceXS + 2,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(999),
+        color: cs.onSurface.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
       ),
       child: Text(
         '$label: $value',
         style: GoogleFonts.inter(
-          fontSize: 12,
+          fontSize: DesignTokens.fontXS,
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF334155),
+          color: cs.onSurface.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -789,15 +809,16 @@ class _ErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(DesignTokens.spaceM),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.18)),
+        color: DesignTokens.error.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: DesignTokens.error.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Expanded(child: Text(error)),
+          const SizedBox(width: 12),
           FilledButton(onPressed: onRetry, child: const Text('Retry')),
         ],
       ),
@@ -846,12 +867,13 @@ class _SkeletonBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: cs.outline),
       ),
     );
   }
@@ -865,31 +887,38 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: cs.outline),
       ),
       child: Column(
         children: [
+          Icon(
+            Icons.folder_open_rounded,
+            size: 48,
+            color: cs.onSurface.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 16),
           Text(
             title,
             style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
+              fontSize: DesignTokens.fontBase,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             subtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 13,
-              color: const Color(0xFF64748B),
+              fontSize: DesignTokens.fontS,
+              color: cs.onSurface.withValues(alpha: 0.5),
             ),
           ),
         ],

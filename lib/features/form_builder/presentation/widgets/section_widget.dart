@@ -89,11 +89,46 @@ class SectionWidget extends ConsumerWidget {
     }
   }
 
+  BoxBorder _buildSectionBorder(Map<String, dynamic> metadata) {
+    final borderColor = _parseColor(
+      metadata['borderColor']?.toString() ?? section.style.borderColor,
+      AppColors.borderLight,
+    );
+    final borderWidth = (metadata['borderWidth'] as num?)?.toDouble() ??
+        section.style.borderWidth;
+    final borderStyle = metadata['borderStyle']?.toString() ?? 'solid';
+    final style = switch (borderStyle) {
+      'dashed' || 'dotted' => BorderStyle.solid,
+      _ => BorderStyle.solid,
+    };
+    return Border.all(
+      color: borderColor,
+      width: borderWidth,
+      style: style,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSectionSelected =
         selectedSectionId == section.id && selectedQuestionId == null;
     final sectionStyle = section.style;
+    final metadata = section.metaData;
+    final double fieldGap =
+        (metadata['fieldGap'] as num?)?.toDouble() ?? 16.0;
+    final double verticalPadding =
+        (metadata['verticalPadding'] as num?)?.toDouble() ??
+        sectionStyle.padding;
+    final double horizontalPadding =
+        (metadata['horizontalPadding'] as num?)?.toDouble() ??
+        sectionStyle.padding;
+    final alignStr = metadata['alignment']?.toString() ?? 'left';
+    AlignmentGeometry sectionAlignment = Alignment.centerLeft;
+    if (alignStr == 'center') sectionAlignment = Alignment.center;
+    if (alignStr == 'right') sectionAlignment = Alignment.centerRight;
+    final double sectionMaxWidth =
+        (metadata['maxWidth'] as num?)?.toDouble() ??
+        (section.layout == SectionLayoutType.centered ? 760.0 : 1200.0);
 
     Color sectionBg;
     Color headerBg;
@@ -146,6 +181,7 @@ class SectionWidget extends ConsumerWidget {
       },
       builder: (context, candidateData, rejectedData) {
         final isHovered = candidateData.isNotEmpty;
+        final questionSpacing = fieldGap;
 
         final sectionShell = Container(
           margin: const EdgeInsets.only(bottom: 24),
@@ -156,12 +192,9 @@ class SectionWidget extends ConsumerWidget {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-                border: Border.all(
-                  color: isHovered || isSectionSelected
-                      ? AppColors.primary
-                      : AppColors.borderLight,
-                  width: 2,
-                ),
+                border: isHovered || isSectionSelected
+                    ? Border.all(color: AppColors.primary, width: 2)
+                    : _buildSectionBorder(metadata),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,18 +407,13 @@ class SectionWidget extends ConsumerWidget {
 
                   // Questions List
                   Padding(
-                    padding: EdgeInsets.all(sectionStyle.padding),
+                    padding: EdgeInsets.symmetric(
+                      vertical: verticalPadding,
+                      horizontal: horizontalPadding,
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final availableWidth = constraints.maxWidth;
-                        final builderState = ref.watch(
-                          formBuilderControllerProvider(controllerKey),
-                        );
-                        final questionSpacing = builderState.when(
-                          data: (s) => s.form.style.questionSpacing,
-                          loading: () => 16.0,
-                          error: (e, s) => 16.0,
-                        );
 
                         int crossAxisCount = _sectionCrossAxisCount(
                           section.layout,
@@ -400,7 +428,7 @@ class SectionWidget extends ConsumerWidget {
 
                         final itemWidth =
                             (availableWidth -
-                                (questionSpacing * (crossAxisCount - 1))) /
+                                (fieldGap * (crossAxisCount - 1))) /
                             crossAxisCount;
 
                         return Wrap(
@@ -428,7 +456,7 @@ class SectionWidget extends ConsumerWidget {
                               // Calculate width based on span or fixed mode
                               double width = itemWidth; // Default to 1 column
 
-                              if (q.style.widthMode == 'fixed') {
+                            if (q.style.widthMode == 'fixed') {
                                 // Fixed widths
                                 switch (q.style.fixedWidth) {
                                   case 'small':
@@ -445,13 +473,16 @@ class SectionWidget extends ConsumerWidget {
                                 }
                               } else {
                                 // Auto mode (Smart Grid Span)
-                                int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
+                                int span = LayoutEngine.getFieldSpan(
+                                  q,
+                                  crossAxisCount,
+                                );
 
                                 // Calculate spanned width:
                                 // (single_col_width * span) + (spacing * (span - 1))
                                 width =
                                     (itemWidth * span) +
-                                    (questionSpacing * (span - 1));
+                                    (fieldGap * (span - 1));
                               }
 
                               // Ensure we don't exceed available width (with some buffer)
@@ -619,11 +650,19 @@ class SectionWidget extends ConsumerWidget {
           ),
         );
 
-        return _wrapSectionByLayout(
+        final wrappedSection = _wrapSectionByLayout(
           section.layout,
           sectionShell,
           sectionStyle,
           sectionBg,
+        );
+
+        return Align(
+          alignment: sectionAlignment,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+            child: wrappedSection,
+          ),
         );
       },
     );

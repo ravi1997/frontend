@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/core/theme/app_colors.dart';
 import 'package:frontend/features/form_builder/domain/entities/form_question.dart';
+import 'package:frontend/features/form_builder/domain/entities/form_section.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_general_settings.dart';
 import 'package:frontend/features/form_builder/presentation/widgets/properties/field_style_settings.dart';
@@ -131,6 +132,18 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
     }
   }
 
+  FormQuestion? _findQuestionById(List<FormSection> sections, String id) {
+    for (final section in sections) {
+      final found = section.questions.where((q) => q.id == id).firstOrNull;
+      if (found != null) return found;
+      if (section.sections.isNotEmpty) {
+        final nested = _findQuestionById(section.sections, id);
+        if (nested != null) return nested;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final builderState = ref.watch(
@@ -139,16 +152,10 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
     return builderState.when(
       data: (state) {
-        FormQuestion? question;
-        for (final section in state.form.sections) {
-          final found = section.questions
-              .where((q) => q.id == widget.selectedQuestionId)
-              .firstOrNull;
-          if (found != null) {
-            question = found;
-            break;
-          }
-        }
+        final question = _findQuestionById(
+          state.form.sections,
+          widget.selectedQuestionId,
+        );
 
         if (question == null) return const SizedBox();
 
@@ -201,7 +208,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                               ref
                                   .read(customFieldsProvider.notifier)
                                   .saveAsTemplate(
-                                    question!.label.translate(
+                                    question.label.translate(
                                       state.editingLocale,
                                     ),
                                     'My Fields',

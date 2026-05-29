@@ -7,14 +7,14 @@ class AppDesignSystem {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: DesignTokens.background,
+      scaffoldBackgroundColor: DesignTokens.darkBackground,
       colorScheme: const ColorScheme.dark(
-        primary: DesignTokens.primary,
-        onPrimary: DesignTokens.textPrimary,
-        secondary: DesignTokens.secondary,
-        surface: DesignTokens.surface,
-        onSurface: DesignTokens.textPrimary,
-        error: DesignTokens.error,
+        primary: Color(0xFF6366F1),
+        onPrimary: Color(0xFFFFFFFF),
+        secondary: Color(0xFF8B5CF6),
+        surface: Color(0xFF1E293B),
+        onSurface: Color(0xFFFFFFFF),
+        error: Color(0xFFEF4444),
       ),
       
       // Typography
@@ -23,47 +23,47 @@ class AppDesignSystem {
           fontSize: DesignTokens.fontXXL,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.5,
-          color: DesignTokens.textPrimary,
+          color: DesignTokens.darkTextPrimary,
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: DesignTokens.fontM,
-          color: DesignTokens.textSecondary,
+          color: DesignTokens.darkTextSecondary,
         ),
       ),
       
       // Components
       cardTheme: CardThemeData(
-        color: DesignTokens.surface,
+        color: DesignTokens.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-          side: const BorderSide(color: DesignTokens.glassBorder),
+          side: BorderSide(color: DesignTokens.glassBorder),
         ),
       ),
       
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: DesignTokens.surface,
+        fillColor: DesignTokens.darkSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-          borderSide: const BorderSide(color: DesignTokens.border),
+          borderSide: BorderSide(color: DesignTokens.darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-          borderSide: BorderSide(color: DesignTokens.border.withAlpha(128)),
+          borderSide: BorderSide(color: DesignTokens.darkBorder.withAlpha(128)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-          borderSide: const BorderSide(color: DesignTokens.primary, width: 2),
+          borderSide: BorderSide(color: DesignTokens.primary, width: 2),
         ),
       ),
       
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primary,
-          foregroundColor: DesignTokens.textPrimary,
+          foregroundColor: DesignTokens.darkTextPrimary,
           minimumSize: const Size(88, 48),
-          padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceM),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusM),
           ),

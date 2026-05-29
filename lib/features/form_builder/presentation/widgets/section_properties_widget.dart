@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/form_section.dart';
 import '../controllers/form_builder_controller.dart';
 import 'properties/general_settings_panels.dart';
 import 'properties/section_layout_settings.dart';
@@ -55,9 +56,10 @@ class _SectionPropertiesWidgetState
 
     return builderState.when(
       data: (state) {
-        final section = state.form.sections
-            .where((s) => s.id == widget.selectedSectionId)
-            .firstOrNull;
+        final section = _findSectionById(
+          state.form.sections,
+          widget.selectedSectionId,
+        );
 
         if (section == null) return const SizedBox();
 
@@ -223,5 +225,15 @@ class _SectionPropertiesWidgetState
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, s) => const SizedBox(),
     );
+  }
+
+  FormSection? _findSectionById(List<FormSection> sections, String id) {
+    for (final section in sections) {
+      if (section.id == id) return section;
+      if (section.sections.isEmpty) continue;
+      final nested = _findSectionById(section.sections, id);
+      if (nested != null) return nested;
+    }
+    return null;
   }
 }

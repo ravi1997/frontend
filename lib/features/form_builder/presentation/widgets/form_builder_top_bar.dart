@@ -8,6 +8,8 @@ import '../../../../core/localization/locale_controller.dart';
 import '../../domain/entities/form_section.dart';
 import '../controllers/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
+import '../controllers/git_controller.dart';
+import 'git_merge_dialog.dart';
 
 import 'workflow_configuration_dialog.dart';
 import 'publish_success_dialog.dart';
@@ -128,10 +130,43 @@ class FormBuilderTopBar extends ConsumerWidget {
                     formId: formId,
                     currentLocale: editingLocale,
                   ),
+                  _GitBranchSelector(
+                    controllerKey: controllerKey,
+                    projectId: projectId,
+                    formId: formId,
+                  ),
                 ],
               ),
             ),
           ),
+          _TopBarActionButton(
+            icon: FontAwesomeIcons.codeBranch,
+            label: 'Merge & Sync',
+            onTap: () async {
+              final gitNotifier = ref.read(gitControllerProvider(controllerKey).notifier);
+              final success = await gitNotifier.mergeBranches(
+                projectId,
+                formId,
+                'a8a8a8a8-b9b9-c0c0-d1d1-e2e2e2e2e2e2',
+                'f3f3f3f3-a4a4-b5b5-c6c6-d7d7d7d7d7d7',
+              );
+
+              if (!success && context.mounted) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => GitMergeDialog(
+                    controllerKey: controllerKey,
+                    projectId: projectId,
+                    formId: formId,
+                    theirsCommitId: 'a8a8a8a8-b9b9-c0c0-d1d1-e2e2e2e2e2e2',
+                    mineCommitId: 'f3f3f3f3-a4a4-b5b5-c6c6-d7d7d7d7d7d7',
+                  ),
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
           _TopBarActionButton(
             icon: FontAwesomeIcons.wandMagicSparkles,
             label: 'AI Assistant',
@@ -672,6 +707,65 @@ class _PublishButton extends ConsumerWidget {
       ),
       child: Text(
         mode != null && mode != 'form' ? 'Publish Template' : 'Publish',
+      ),
+    );
+  }
+}
+
+class _GitBranchSelector extends ConsumerWidget {
+  final String controllerKey;
+  final String projectId;
+  final String formId;
+
+  const _GitBranchSelector({
+    required this.controllerKey,
+    required this.projectId,
+    required this.formId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gitState = ref.watch(gitControllerProvider(controllerKey));
+    final gitNotifier = ref.read(gitControllerProvider(controllerKey).notifier);
+
+    return Container(
+      margin: const EdgeInsets.only(left: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: gitState.activeBranch,
+          icon: const Icon(FontAwesomeIcons.codeBranch, size: 14, color: AppColors.primary),
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              gitNotifier.switchBranch(newValue);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Switched to branch: $newValue'),
+                  backgroundColor: AppColors.primary,
+                ),
+              );
+            }
+          },
+          items: gitState.branches.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Text(value),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
