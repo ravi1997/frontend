@@ -1,10 +1,28 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/form_builder/data/repositories/ai_repository_impl.dart';
 
-part 'ai_controller.g.dart';
+final aiControllerProvider = AsyncNotifierProvider<AIController, void>(
+  AIController.new,
+);
 
-@riverpod
-class AIController extends _$AIController {
+// Backwards-compatible alias for the previous codegen name.
+final aIControllerProvider = aiControllerProvider;
+
+final sentimentTrendsProvider =
+    FutureProvider.family<Map<String, dynamic>, String>((ref, formId) {
+      return ref.watch(aiRepositoryProvider).getFormSentimentTrends(formId);
+    });
+
+final anomaliesProvider = FutureProvider.family<Map<String, dynamic>, String>((
+  ref,
+  formId,
+) {
+  return ref.watch(aiRepositoryProvider).detectAnomalies(formId);
+});
+
+class AIController extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
     return null;
@@ -14,15 +32,19 @@ class AIController extends _$AIController {
     String formId,
     String responseId,
   ) async {
-    state = const AsyncLoading();
+    state = const AsyncValue<void>.loading();
     try {
       final results = await ref
           .read(aiRepositoryProvider)
           .analyzeResponse(formId, responseId);
-      state = const AsyncData(null);
+      if (ref.mounted) {
+        state = const AsyncValue<void>.data(null);
+      }
       return results;
     } catch (e, s) {
-      state = AsyncError(e, s);
+      if (ref.mounted) {
+        state = AsyncValue<void>.error(e, s);
+      }
       rethrow;
     }
   }
@@ -31,26 +53,20 @@ class AIController extends _$AIController {
     String formId,
     String responseId,
   ) async {
-    state = const AsyncLoading();
+    state = const AsyncValue<void>.loading();
     try {
       final results = await ref
           .read(aiRepositoryProvider)
           .moderateResponse(formId, responseId);
-      state = const AsyncData(null);
+      if (ref.mounted) {
+        state = const AsyncValue<void>.data(null);
+      }
       return results;
     } catch (e, s) {
-      state = AsyncError(e, s);
+      if (ref.mounted) {
+        state = AsyncValue<void>.error(e, s);
+      }
       rethrow;
     }
   }
-}
-
-@riverpod
-Future<Map<String, dynamic>> sentimentTrends(Ref ref, String formId) {
-  return ref.watch(aiRepositoryProvider).getFormSentimentTrends(formId);
-}
-
-@riverpod
-Future<Map<String, dynamic>> anomalies(Ref ref, String formId) {
-  return ref.watch(aiRepositoryProvider).detectAnomalies(formId);
 }

@@ -196,19 +196,32 @@ extension QuestionLogicCompatibility on Question {
   String? get inputMask => metadata['inputMask']?.toString();
 
   // Common numeric constraints live in metadata for slider/range-like fields.
-  num? get minValue => (metadata['min'] as num?) ?? (validation['min'] as num?);
-  num? get maxValue => (metadata['max'] as num?) ?? (validation['max'] as num?);
+  num? get minValue {
+    final val = metadata['min'] ?? validation['min'];
+    if (val is num) return val;
+    if (val is String) return num.tryParse(val);
+    return null;
+  }
+
+  num? get maxValue {
+    final val = metadata['max'] ?? validation['max'];
+    if (val is num) return val;
+    if (val is String) return num.tryParse(val);
+    return null;
+  }
 
   // Date constraints are stored in validation/metadata depending on flow.
   DateTime? get dateMin {
     final raw = validation['min_date'] ?? metadata['min_date'];
     if (raw == null) return null;
+    if (raw is DateTime) return raw;
     return DateTime.tryParse(raw.toString());
   }
 
   DateTime? get dateMax {
     final raw = validation['max_date'] ?? metadata['max_date'];
     if (raw == null) return null;
+    if (raw is DateTime) return raw;
     return DateTime.tryParse(raw.toString());
   }
 
@@ -222,8 +235,19 @@ extension QuestionLogicCompatibility on Question {
       (validation['regex'] ?? validation['pattern'] ?? metadata['regex'])
           ?.toString();
 
-  int? get minLength => (validation['min_length'] ?? validation['minLength']) as int?;
-  int? get maxLength => (validation['max_length'] ?? validation['maxLength']) as int?;
+  int? get minLength {
+    final val = validation['min_length'] ?? validation['minLength'];
+    if (val is num) return val.toInt();
+    if (val is String) return int.tryParse(val);
+    return null;
+  }
+
+  int? get maxLength {
+    final val = validation['max_length'] ?? validation['maxLength'];
+    if (val is num) return val.toInt();
+    if (val is String) return int.tryParse(val);
+    return null;
+  }
 
   String? get customErrorMessage =>
       (validation['error_message'] ?? validation['customErrorMessage'])
@@ -239,7 +263,11 @@ extension QuestionLogicCompatibility on Question {
   QuestionStyle get style {
     final raw = ui['style'];
     if (raw is Map) {
-      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+      try {
+        return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+      } catch (_) {
+        return const QuestionStyle();
+      }
     }
     return const QuestionStyle();
   }
@@ -298,7 +326,11 @@ extension SectionLogicCompatibility on Section {
   SectionStyle get style {
     final raw = ui['style'];
     if (raw is Map) {
-      return SectionStyle.fromJson(Map<String, dynamic>.from(raw));
+      try {
+        return SectionStyle.fromJson(Map<String, dynamic>.from(raw));
+      } catch (_) {
+        return const SectionStyle();
+      }
     }
     return const SectionStyle();
   }
@@ -310,7 +342,13 @@ extension FormSectionsCompatibility on Form {
   Map<String, dynamic> get metadata => const <String, dynamic>{};
 
   // Convenience: parse `style` map into typed style for new code.
-  FormStyle get formStyle => FormStyle.fromJson(style);
+  FormStyle get formStyle {
+    try {
+      return FormStyle.fromJson(style);
+    } catch (_) {
+      return const FormStyle();
+    }
+  }
 
   FormLayoutType get layout {
     switch (uiType) {
@@ -353,7 +391,13 @@ extension FormSectionsCompatibility on Form {
 // Back-compat: allow `form.style.sectionSpacing` style access even though
 // `Form.style` is stored as a JSON map.
 extension FormStyleMapGetters on Map<String, dynamic> {
-  FormStyle get _typed => FormStyle.fromJson(this);
+  FormStyle get _typed {
+    try {
+      return FormStyle.fromJson(this);
+    } catch (_) {
+      return const FormStyle();
+    }
+  }
   String get backgroundColor => _typed.backgroundColor;
   String get fontFamily => _typed.fontFamily;
   String get primaryColor => _typed.primaryColor;
@@ -376,9 +420,9 @@ extension OptionMapGetters on Map<String, dynamic> {
 // Provide tolerant getters so `opt.value`/`opt.label` keep working.
 extension DynamicOptionGetters on Object {
   String get value =>
-      this is Map ? OptionMapGetters(Map<String, dynamic>.from(this as Map)).value : toString();
+      this is Map ? Map<String, dynamic>.from(this as Map).value : toString();
   String get label =>
-      this is Map ? OptionMapGetters(Map<String, dynamic>.from(this as Map)).label : toString();
+      this is Map ? Map<String, dynamic>.from(this as Map).label : toString();
   String get description =>
-      this is Map ? OptionMapGetters(Map<String, dynamic>.from(this as Map)).description : '';
+      this is Map ? Map<String, dynamic>.from(this as Map).description : '';
 }

@@ -104,9 +104,13 @@ class ResponseMapper {
     nested.forEach((key, value) {
       if (value is List) {
         // Only keep if the list has data
-        final nonEmptyInstances = value
-            .where((inst) => inst.isNotEmpty)
-            .toList();
+        final nonEmptyInstances = value.where((inst) {
+          if (inst == null) return true;
+          if (inst is Map) return inst.isNotEmpty;
+          if (inst is List) return inst.isNotEmpty;
+          if (inst is String) return inst.isNotEmpty;
+          return true; // Keep other primitives (int, bool, double)
+        }).toList();
         if (nonEmptyInstances.isNotEmpty) {
           result[key] = nonEmptyInstances;
         }

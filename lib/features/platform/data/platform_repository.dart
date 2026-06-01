@@ -10,7 +10,11 @@ class PlatformRepository {
 
   Future<Map<String, dynamic>> getTaskStatus(String taskId) async {
     final response = await _apiClient.get(ApiEndpoints.taskStatus(taskId));
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
   }
 
   Future<List<Map<String, dynamic>>> listThemes() async {
@@ -18,7 +22,8 @@ class PlatformRepository {
     final data = response.data;
     if (data is List) {
       return data
-          .map((item) => Map<String, dynamic>.from(item as Map))
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
           .toList();
     }
     return const [];
@@ -26,7 +31,11 @@ class PlatformRepository {
 
   Future<Map<String, dynamic>> createTheme(Map<String, dynamic> payload) async {
     final response = await _apiClient.post(ApiEndpoints.themes, data: payload);
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
   }
 
   Future<Map<String, dynamic>> updateTheme(
@@ -37,7 +46,11 @@ class PlatformRepository {
       ApiEndpoints.theme(themeId),
       data: payload,
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
   }
 
   Future<void> deleteTheme(String themeId) async {
@@ -53,7 +66,11 @@ class PlatformRepository {
       ApiEndpoints.applyFormTheme(projectId, formId),
       data: payload,
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
   }
 
   Future<Map<String, dynamic>> getFormAudit(
@@ -73,7 +90,11 @@ class PlatformRepository {
         if (actorId != null && actorId.isNotEmpty) 'actor_id': actorId,
       },
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    final data = response.data;
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return const {};
   }
 }
 

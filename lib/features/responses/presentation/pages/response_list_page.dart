@@ -17,8 +17,9 @@ import 'package:frontend/features/responses/presentation/widgets/export_options_
 import 'package:frontend/features/responses/presentation/widgets/filter_builder_dialog.dart';
 import '../../../../features/auth/presentation/controllers/auth_controller.dart';
 
-final _searchQueryProvider = StateProvider<String?>((ref) => null);
-final _activeFiltersProvider = StateProvider<List<Map<String, dynamic>>>(
+// Fix 1: Auto-dispose providers to prevent stale filters/queries leaking between different forms
+final _searchQueryProvider = StateProvider.autoDispose<String?>((ref) => null);
+final _activeFiltersProvider = StateProvider.autoDispose<List<Map<String, dynamic>>>(
   (ref) => const [],
 );
 
@@ -79,34 +80,27 @@ class ResponseListPage extends ConsumerWidget {
                     ).future,
                   );
                 },
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 48,
-                    vertical: 32,
+                child: responsesAsync.when(
+                  // Fix 2: Render single, optimized list to allow lazy loading/item recycling
+                  data: (responses) => _ResponseListContent(
+                    formId: formId,
+                    projectId: projectId,
+                    responses: responses,
+                    searchQuery: searchQuery,
+                    activeFilters: activeFilters,
                   ),
-                  child: Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _HeaderSection(formId: formId),
-                          const SizedBox(height: 32),
-                          responsesAsync.when(
-                            data: (responses) => _ResponseListContent(
-                              formId: formId,
-                              projectId: projectId,
-                              responses: responses,
-                              searchQuery: searchQuery,
-                              activeFilters: activeFilters,
-                            ),
-                            loading: () => const _LoadingSkeleton(),
-                            error: (err, stack) =>
-                                _ErrorSection(error: err.toString()),
-                          ),
-                        ],
-                      ),
+                  loading: () => const SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: _LoadingSkeleton(),
+                    ),
+                  ),
+                  error: (err, stack) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: _ErrorSection(error: err.toString()),
                     ),
                   ),
                 ),
@@ -133,9 +127,13 @@ class _TopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Fix 3: Responsive horizontal padding
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth > 900 ? 48.0 : 16.0;
+
     return Container(
       height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 48),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
@@ -275,36 +273,112 @@ class _ResponseListContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _StatsGrid(responses: responses),
-        const SizedBox(height: 48),
-        _FilterBar(formId: formId, projectId: projectId),
-        if (activeFilters.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _ActiveFilterChips(filters: activeFilters),
-        ],
-        const SizedBox(height: 24),
-        if (responses.isEmpty)
-          _EmptyState()
-        else
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = screenWidth > 900 ? 48.0 : 16.0;
+    final verticalPadding = screenWidth > 900 ? 32.0 : 20.0;
+
+    // Fix 4: Combined list layout using ListView.builder to allow item recycling and lazy loading
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
+      itemCount: responses.isEmpty ? 3 : responses.length + 2,
+      itemBuilder: (context, index) {
+        Widget wrapWithWidthConstraint(Widget child) {
+          return Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              width: double.infinity,
+              child: child,
             ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: responses.length,
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, color: Color(0xFFF3F4F6)),
-              itemBuilder: (context, index) =>
-                  _ResponseCard(formId: formId, response: responses[index]),
+          );
+        }
+
+        // Row 1: Header + Stats Grid
+        if (index == 0) {
+          return wrapWithWidthConstraint(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HeaderSection(formId: formId),
+                const SizedBox(height: 32),
+                _StatsGrid(responses: responses),
+              ],
             ),
-          ),
-      ],
+          );
+        }
+
+        // Row 2: Filters + Chips Bar
+        if (index == 1) {
+          return wrapWithWidthConstraint(
+            Column(
+              children: [
+                const SizedBox(height: 48),
+                _FilterBar(formId: formId, projectId: projectId),
+                if (activeFilters.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _ActiveFilterChips(filters: activeFilters),
+                ],
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        }
+
+        // Row 3: Empty State (if list is empty)
+        if (responses.isEmpty) {
+          if (index == 2) {
+            return wrapWithWidthConstraint(_EmptyState());
+          }
+          return const SizedBox.shrink();
+        }
+
+        // Dynamic Card Row (Lazy-loaded cards with rounded corner decoration wrapper)
+        final cardIndex = index - 2;
+        if (cardIndex < responses.length) {
+          final isFirst = cardIndex == 0;
+          final isLast = cardIndex == responses.length - 1;
+
+          Widget card = _ResponseCard(
+            formId: formId,
+            response: responses[cardIndex],
+          );
+
+          if (!isLast) {
+            card = Column(
+              children: [
+                card,
+                const Divider(height: 1, color: Color(0xFFF3F4F6)),
+              ],
+            );
+          }
+
+          return wrapWithWidthConstraint(
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  left: const BorderSide(color: Color(0xFFE5E7EB)),
+                  right: const BorderSide(color: Color(0xFFE5E7EB)),
+                  top: isFirst ? const BorderSide(color: Color(0xFFE5E7EB)) : BorderSide.none,
+                  bottom: isLast ? const BorderSide(color: Color(0xFFE5E7EB)) : BorderSide.none,
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: isFirst ? const Radius.circular(12) : Radius.zero,
+                  topRight: isFirst ? const Radius.circular(12) : Radius.zero,
+                  bottomLeft: isLast ? const Radius.circular(12) : Radius.zero,
+                  bottomRight: isLast ? const Radius.circular(12) : Radius.zero,
+                ),
+              ),
+              child: card,
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }
@@ -315,20 +389,24 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Fix 5: Extract DateTime.now() outside of loop to save CPU cycles
+    final now = DateTime.now();
     final todayCount = responses
         .where(
           (r) =>
               r.submittedAt != null &&
-              r.submittedAt!.day == DateTime.now().day &&
-              r.submittedAt!.month == DateTime.now().month &&
-              r.submittedAt!.year == DateTime.now().year,
+              r.submittedAt!.day == now.day &&
+              r.submittedAt!.month == now.month &&
+              r.submittedAt!.year == now.year,
         )
         .length;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         const double spacing = 24;
-        int columns = constraints.maxWidth < 600 ? 1 : 3;
+        
+        // Fix 6: Two-column breakpoint on tablets/medium screens
+        int columns = constraints.maxWidth < 600 ? 1 : (constraints.maxWidth < 900 ? 2 : 3);
         final double cardWidth =
             (constraints.maxWidth - (spacing * (columns - 1))) / columns;
 
@@ -499,7 +577,6 @@ class _FilterBar extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 12),
-        // Filter button
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
@@ -513,7 +590,6 @@ class _FilterBar extends ConsumerWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () async {
-              // Load form questions for the filter builder
               final form = await ref
                   .read(formBuilderRepositoryProvider)
                   .getForm(projectId, formId);
@@ -576,10 +652,7 @@ class _ActiveFilterChips extends ConsumerWidget {
     final op = f['operator'] as String? ?? '';
     final val = f['value'];
 
-    // Friendly field label
     final fieldLabel = field == 'submitted_at' ? 'Submission Date' : field;
-
-    // Friendly operator label
     final opLabel = _opLabel(op);
 
     if (val == null) return '$fieldLabel $opLabel';
@@ -662,7 +735,6 @@ class _ActiveFilterChips extends ConsumerWidget {
             ),
           );
         }),
-        // Clear all chip
         ActionChip(
           backgroundColor: Colors.transparent,
           side: BorderSide(color: Colors.red.shade300),

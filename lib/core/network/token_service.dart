@@ -1,8 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'token_service.g.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthTokens {
   final String? accessToken;
@@ -12,8 +11,11 @@ class AuthTokens {
   AuthTokens({this.accessToken, this.refreshToken, this.organizationId});
 }
 
-@Riverpod(keepAlive: true)
-class TokenService extends _$TokenService {
+final tokenServiceProvider = AsyncNotifierProvider<TokenService, AuthTokens>(
+  TokenService.new,
+);
+
+class TokenService extends AsyncNotifier<AuthTokens> {
   static const String _boxName = 'auth_box';
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
@@ -28,8 +30,10 @@ class TokenService extends _$TokenService {
 
     if (accessToken != null && isTokenExpired(accessToken)) {
       await box.delete(_accessTokenKey);
-      await box.delete(_refreshTokenKey);
-      return AuthTokens();
+      return AuthTokens(
+        refreshToken: refreshToken,
+        organizationId: organizationId,
+      );
     }
 
     return AuthTokens(
@@ -60,7 +64,14 @@ class TokenService extends _$TokenService {
   Future<void> checkAndClearIfExpired() async {
     final tokens = state.value;
     if (tokens?.accessToken != null && isTokenExpired(tokens!.accessToken!)) {
-      await clearTokens();
+      final box = await Hive.openBox(_boxName);
+      await box.delete(_accessTokenKey);
+      state = AsyncData(
+        AuthTokens(
+          refreshToken: tokens.refreshToken,
+          organizationId: tokens.organizationId,
+        ),
+      );
     }
   }
 

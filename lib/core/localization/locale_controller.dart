@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-part 'locale_controller.g.dart';
+final localeControllerProvider = NotifierProvider<LocaleController, Locale>(
+  LocaleController.new,
+);
 
-@riverpod
-class LocaleController extends _$LocaleController {
+class LocaleController extends Notifier<Locale> {
   @override
   Locale build() {
     // Default to English

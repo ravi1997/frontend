@@ -64,7 +64,10 @@ class FormUtils {
     return null;
   }
 
-  static Section? _findParentSectionOfQuestionInTree(Section current, String questionId) {
+  static Section? _findParentSectionOfQuestionInTree(
+    Section current,
+    String questionId,
+  ) {
     for (final q in current.questions) {
       if (q.id == questionId) return current;
     }
@@ -98,7 +101,11 @@ class FormUtils {
   /// =========================================================================
 
   /// Inserts a new Section either at the top-level active version or nested inside a parent.
-  static Form addSection(Form form, Section newSection, {String? parentSectionId}) {
+  static Form addSection(
+    Form form,
+    Section newSection, {
+    String? parentSectionId,
+  }) {
     if (form.versions.isEmpty) {
       // If no version exists, initialize one
       final version = FormVersion(
@@ -109,14 +116,21 @@ class FormUtils {
       return form.copyWith(versions: [version], activeVersion: '1.0.0');
     }
 
+    final targetVersion = form.activeVersion ?? form.versions.first.version;
+
     return form.copyWith(
       versions: form.versions.map((v) {
-        if (v.version == (form.activeVersion ?? '1.0.0') || form.versions.length == 1) {
+        if (form.versions.length == 1 || v.version == targetVersion) {
           if (parentSectionId == null) {
             return v.copyWith(sections: [...v.sections, newSection]);
           } else {
             return v.copyWith(
-              sections: v.sections.map((s) => _addNestedSectionInTree(s, parentSectionId, newSection)).toList(),
+              sections: v.sections
+                  .map(
+                    (s) =>
+                        _addNestedSectionInTree(s, parentSectionId, newSection),
+                  )
+                  .toList(),
             );
           }
         }
@@ -125,22 +139,32 @@ class FormUtils {
     );
   }
 
-  static Section _addNestedSectionInTree(Section current, String targetParentId, Section newSection) {
+  static Section _addNestedSectionInTree(
+    Section current,
+    String targetParentId,
+    Section newSection,
+  ) {
     if (current.id == targetParentId) {
       return current.copyWith(sections: [...current.sections, newSection]);
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _addNestedSectionInTree(s, targetParentId, newSection)).toList(),
+      sections: current.sections
+          .map((s) => _addNestedSectionInTree(s, targetParentId, newSection))
+          .toList(),
     );
   }
 
   /// Inserts a new Question inside a target Section.
   static Form addQuestion(Form form, String sectionId, Question newQuestion) {
+    final targetVersion = form.activeVersion ?? form.versions.first.version;
+
     return form.copyWith(
       versions: form.versions.map((v) {
-        if (v.version == (form.activeVersion ?? '1.0.0') || form.versions.length == 1) {
+        if (form.versions.length == 1 || v.version == targetVersion) {
           return v.copyWith(
-            sections: v.sections.map((s) => _addQuestionInTree(s, sectionId, newQuestion)).toList(),
+            sections: v.sections
+                .map((s) => _addQuestionInTree(s, sectionId, newQuestion))
+                .toList(),
           );
         }
         return v;
@@ -148,12 +172,18 @@ class FormUtils {
     );
   }
 
-  static Section _addQuestionInTree(Section current, String targetSectionId, Question newQuestion) {
+  static Section _addQuestionInTree(
+    Section current,
+    String targetSectionId,
+    Question newQuestion,
+  ) {
     if (current.id == targetSectionId) {
       return current.copyWith(questions: [...current.questions, newQuestion]);
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _addQuestionInTree(s, targetSectionId, newQuestion)).toList(),
+      sections: current.sections
+          .map((s) => _addQuestionInTree(s, targetSectionId, newQuestion))
+          .toList(),
     );
   }
 
@@ -166,17 +196,23 @@ class FormUtils {
     return form.copyWith(
       versions: form.versions.map((v) {
         return v.copyWith(
-          sections: v.sections.map((s) => _updateQuestionInTree(s, updatedQuestion)).toList(),
+          sections: v.sections
+              .map((s) => _updateQuestionInTree(s, updatedQuestion))
+              .toList(),
         );
       }).toList(),
     );
   }
 
   static Section _updateQuestionInTree(Section current, Question target) {
-    final updatedQuestions = current.questions.map((q) => q.id == target.id ? target : q).toList();
+    final updatedQuestions = current.questions
+        .map((q) => q.id == target.id ? target : q)
+        .toList();
     return current.copyWith(
       questions: updatedQuestions,
-      sections: current.sections.map((s) => _updateQuestionInTree(s, target)).toList(),
+      sections: current.sections
+          .map((s) => _updateQuestionInTree(s, target))
+          .toList(),
     );
   }
 
@@ -185,7 +221,9 @@ class FormUtils {
     return form.copyWith(
       versions: form.versions.map((v) {
         return v.copyWith(
-          sections: v.sections.map((s) => _updateSectionInTree(s, updatedSection)).toList(),
+          sections: v.sections
+              .map((s) => _updateSectionInTree(s, updatedSection))
+              .toList(),
         );
       }).toList(),
     );
@@ -196,7 +234,9 @@ class FormUtils {
       return target;
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _updateSectionInTree(s, target)).toList(),
+      sections: current.sections
+          .map((s) => _updateSectionInTree(s, target))
+          .toList(),
     );
   }
 
@@ -209,7 +249,9 @@ class FormUtils {
     return form.copyWith(
       versions: form.versions.map((v) {
         return v.copyWith(
-          sections: v.sections.map((s) => _deleteQuestionInTree(s, questionId)).toList(),
+          sections: v.sections
+              .map((s) => _deleteQuestionInTree(s, questionId))
+              .toList(),
         );
       }).toList(),
     );
@@ -218,7 +260,9 @@ class FormUtils {
   static Section _deleteQuestionInTree(Section current, String targetId) {
     return current.copyWith(
       questions: current.questions.where((q) => q.id != targetId).toList(),
-      sections: current.sections.map((s) => _deleteQuestionInTree(s, targetId)).toList(),
+      sections: current.sections
+          .map((s) => _deleteQuestionInTree(s, targetId))
+          .toList(),
     );
   }
 
@@ -266,13 +310,27 @@ class FormUtils {
     return cleanedForm.copyWith(
       versions: cleanedForm.versions.map((v) {
         return v.copyWith(
-          sections: v.sections.map((s) => _insertQuestionAtIndex(s, targetSectionId, question, targetIndex)).toList(),
+          sections: v.sections
+              .map(
+                (s) => _insertQuestionAtIndex(
+                  s,
+                  targetSectionId,
+                  question,
+                  targetIndex,
+                ),
+              )
+              .toList(),
         );
       }).toList(),
     );
   }
 
-  static Section _insertQuestionAtIndex(Section current, String targetSectionId, Question question, int index) {
+  static Section _insertQuestionAtIndex(
+    Section current,
+    String targetSectionId,
+    Question question,
+    int index,
+  ) {
     if (current.id == targetSectionId) {
       final List<Question> mutableQs = List.from(current.questions);
       final safeIndex = index.clamp(0, mutableQs.length);
@@ -280,7 +338,11 @@ class FormUtils {
       return current.copyWith(questions: mutableQs);
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _insertQuestionAtIndex(s, targetSectionId, question, index)).toList(),
+      sections: current.sections
+          .map(
+            (s) => _insertQuestionAtIndex(s, targetSectionId, question, index),
+          )
+          .toList(),
     );
   }
 
@@ -297,7 +359,9 @@ class FormUtils {
     final copy = original.copyWith(
       id: _uuid.v4(),
       label: '${original.label} (Copy)',
-      variableName: original.variableName != null ? '${original.variableName}_copy' : null,
+      variableName: original.variableName != null
+          ? '${original.variableName}_copy'
+          : null,
     );
 
     return form.copyWith(
@@ -317,7 +381,12 @@ class FormUtils {
     );
   }
 
-  static Section _insertQuestionClone(Section current, String parentId, String originalId, Question clone) {
+  static Section _insertQuestionClone(
+    Section current,
+    String parentId,
+    String originalId,
+    Question clone,
+  ) {
     if (current.id == parentId) {
       final idx = current.questions.indexWhere((q) => q.id == originalId);
       final List<Question> list = List.from(current.questions);
@@ -325,7 +394,9 @@ class FormUtils {
       return current.copyWith(questions: list);
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _insertQuestionClone(s, parentId, originalId, clone)).toList(),
+      sections: current.sections
+          .map((s) => _insertQuestionClone(s, parentId, originalId, clone))
+          .toList(),
     );
   }
 
@@ -345,13 +416,19 @@ class FormUtils {
           return v.copyWith(sections: list);
         }
         return v.copyWith(
-          sections: v.sections.map((s) => _insertSectionCloneInTree(s, sectionId, clone)).toList(),
+          sections: v.sections
+              .map((s) => _insertSectionCloneInTree(s, sectionId, clone))
+              .toList(),
         );
       }).toList(),
     );
   }
 
-  static Section _insertSectionCloneInTree(Section current, String originalId, Section clone) {
+  static Section _insertSectionCloneInTree(
+    Section current,
+    String originalId,
+    Section clone,
+  ) {
     final idx = current.sections.indexWhere((s) => s.id == originalId);
     if (idx != -1) {
       final List<Section> list = List.from(current.sections);
@@ -359,7 +436,9 @@ class FormUtils {
       return current.copyWith(sections: list);
     }
     return current.copyWith(
-      sections: current.sections.map((s) => _insertSectionCloneInTree(s, originalId, clone)).toList(),
+      sections: current.sections
+          .map((s) => _insertSectionCloneInTree(s, originalId, clone))
+          .toList(),
     );
   }
 
@@ -371,7 +450,9 @@ class FormUtils {
       );
     }).toList();
 
-    final List<Section> clonedSubsections = original.sections.map((s) => _cloneSectionTree(s)).toList();
+    final List<Section> clonedSubsections = original.sections
+        .map((s) => _cloneSectionTree(s))
+        .toList();
 
     return original.copyWith(
       id: _uuid.v4(),

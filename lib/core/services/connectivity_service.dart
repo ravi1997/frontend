@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'connectivity_service.g.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ConnectivityStatus { online, offline }
 
-@riverpod
-class ConnectivityService extends _$ConnectivityService {
+final connectivityServiceProvider =
+    NotifierProvider<ConnectivityService, ConnectivityStatus>(
+      ConnectivityService.new,
+    );
+
+class ConnectivityService extends Notifier<ConnectivityStatus> {
   late StreamSubscription<List<ConnectivityResult>> _subscription;
 
   @override
@@ -18,7 +20,7 @@ class ConnectivityService extends _$ConnectivityService {
     _checkInitialStatus();
 
     ref.onDispose(() {
-      _subscription.cancel();
+      unawaited(_subscription.cancel());
     });
 
     return ConnectivityStatus.online; // Default to online until check completes
@@ -26,10 +28,12 @@ class ConnectivityService extends _$ConnectivityService {
 
   Future<void> _checkInitialStatus() async {
     final result = await Connectivity().checkConnectivity();
+    if (!ref.mounted) return;
     _updateStatus(result);
   }
 
   void _updateStatus(List<ConnectivityResult> results) {
+    if (!ref.mounted) return;
     // If any result is not 'none', we are online
     final isOnline = results.any((result) => result != ConnectivityResult.none);
     state = isOnline ? ConnectivityStatus.online : ConnectivityStatus.offline;

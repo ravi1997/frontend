@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../domain/entities/user.dart';
-
-part 'auth_remote_source.g.dart';
 
 abstract class AuthRemoteSource {
   Future<Map<String, dynamic>> login(String email, String password);
@@ -38,7 +37,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       // Backend LoginSchema uses `identifier` (accepts username or email).
       data: {'identifier': email, 'password': password},
     );
-    return response.data as Map<String, dynamic>;
+    return _responseMap(response);
   }
 
   @override
@@ -47,7 +46,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       ApiEndpoints.loginWithOtp,
       data: {'mobile': mobile, 'otp': otp},
     );
-    return response.data as Map<String, dynamic>;
+    return _responseMap(response);
   }
 
   @override
@@ -64,24 +63,10 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<User?> getCurrentUser() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.userStatus);
-      dynamic data = response.data;
-
-      // Unpack string manually if DIO doesn't map it to JSON due to content-type issues
-      if (data is String) {
-        try {
-          data = jsonDecode(data);
-        } catch (_) {}
-      }
-
-      if (data is Map) {
-        final mapData = Map<String, dynamic>.from(data);
-        if (mapData.containsKey('user')) {
-          return User.fromJson(mapData['user'] as Map<String, dynamic>);
-        }
-        // If the entire data object is the user
-        if (mapData.containsKey('id') && mapData.containsKey('username')) {
-          return User.fromJson(mapData);
-        }
+      final mapData = _responseMap(response);
+      final userData = _extractUserMap(mapData);
+      if (userData != null) {
+        return User.fromJson(userData);
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -102,7 +87,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       ApiEndpoints.refreshToken,
       options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
     );
-    return response.data as Map<String, dynamic>;
+    return _responseMap(response);
   }
 
   @override
@@ -124,7 +109,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         if (mobile != null) 'mobile': mobile,
       },
     );
-    return response.data as Map<String, dynamic>;
+    return _responseMap(response);
   }
 
   @override
@@ -150,10 +135,51 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       data: {'current_password': currentPassword, 'new_password': newPassword},
     );
   }
+
+  Map<String, dynamic> _responseMap(Response response) {
+    dynamic data = response.data;
+
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {
+        throw FormatException(
+          'Expected JSON response for auth endpoint, got string payload',
+        );
+      }
+    }
+
+    if (data is! Map) {
+      throw FormatException(
+        'Expected JSON object for auth endpoint, got ${data.runtimeType}',
+      );
+    }
+
+    final mapData = Map<String, dynamic>.from(data);
+    final envelopeData = mapData['data'];
+
+    if (mapData['success'] == true && envelopeData is Map) {
+      return Map<String, dynamic>.from(envelopeData);
+    }
+
+    return mapData;
+  }
+
+  Map<String, dynamic>? _extractUserMap(Map<String, dynamic> data) {
+    final userData = data['user'];
+    if (userData is Map) {
+      return Map<String, dynamic>.from(userData);
+    }
+
+    if (data.containsKey('id') && data.containsKey('username')) {
+      return data;
+    }
+
+    return null;
+  }
 }
 
-@riverpod
-AuthRemoteSource authRemoteSource(Ref ref) {
+final authRemoteSourceProvider = Provider<AuthRemoteSource>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return AuthRemoteSourceImpl(apiClient);
-}
+});

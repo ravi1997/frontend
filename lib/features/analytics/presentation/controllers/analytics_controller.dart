@@ -6,6 +6,8 @@ import '../../domain/repositories/analytics_repository.dart';
 
 part 'analytics_controller.g.dart';
 
+const Object _analyticsErrorUnset = Object();
+
 /// State class for analytics data containing all three analytics types.
 class AnalyticsState {
   final AnalyticsSummary? summary;
@@ -33,7 +35,7 @@ class AnalyticsState {
     bool? isLoadingSummary,
     bool? isLoadingTimeline,
     bool? isLoadingDistribution,
-    String? error,
+    Object? error = _analyticsErrorUnset,
   }) {
     return AnalyticsState(
       summary: summary ?? this.summary,
@@ -43,7 +45,9 @@ class AnalyticsState {
       isLoadingTimeline: isLoadingTimeline ?? this.isLoadingTimeline,
       isLoadingDistribution:
           isLoadingDistribution ?? this.isLoadingDistribution,
-      error: error,
+      error: identical(error, _analyticsErrorUnset)
+          ? this.error
+          : error as String?,
     );
   }
 
@@ -88,6 +92,8 @@ class AnalyticsController extends _$AnalyticsController {
         repository.getAnalyticsDistribution(formId),
       ]);
 
+      if (!ref.mounted) return;
+
       state = AnalyticsState(
         summary: results[0] as AnalyticsSummary,
         timeline: results[1] as AnalyticsTimeline,
@@ -115,6 +121,8 @@ class AnalyticsController extends _$AnalyticsController {
       final repository = ref.read(analyticsRepositoryProvider);
       final summary = await repository.getAnalyticsSummary(formId);
 
+      if (!ref.mounted) return;
+
       state = state.copyWith(summary: summary, isLoadingSummary: false);
     } catch (e) {
       state = state.copyWith(isLoadingSummary: false, error: e.toString());
@@ -135,6 +143,8 @@ class AnalyticsController extends _$AnalyticsController {
         days: days,
       );
 
+      if (!ref.mounted) return;
+
       state = state.copyWith(timeline: timeline, isLoadingTimeline: false);
     } catch (e) {
       state = state.copyWith(isLoadingTimeline: false, error: e.toString());
@@ -148,6 +158,8 @@ class AnalyticsController extends _$AnalyticsController {
     try {
       final repository = ref.read(analyticsRepositoryProvider);
       final distribution = await repository.getAnalyticsDistribution(formId);
+
+      if (!ref.mounted) return;
 
       state = state.copyWith(
         distribution: distribution,

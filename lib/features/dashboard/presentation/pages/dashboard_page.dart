@@ -117,12 +117,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'triggers': const [],
       },
     );
+    if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
   }
 
   Future<void> _archiveProject(ProjectSummary project) async {
     final api = ref.read(apiClientProvider);
     await api.delete(ApiEndpoints.deleteProject(project.id));
+    if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
   }
 
@@ -176,6 +178,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         'sections': const [],
       },
     );
+    if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
   }
 
@@ -260,14 +263,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                             final extent = cols == 1
                                 ? constraints.maxWidth
                                 : (constraints.maxWidth - 16 * (cols - 1)) /
-                                    cols;
+                                      cols;
                             return GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
                                   SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent:
-                                        extent.clamp(200, 480),
+                                    maxCrossAxisExtent: extent.clamp(200, 480),
                                     mainAxisExtent: 248,
                                     crossAxisSpacing: 16,
                                     mainAxisSpacing: 16,
@@ -406,10 +408,14 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (label: 'Projects',  value: projectsCount, icon: Icons.folder_outlined),
-      (label: 'Forms',     value: formsCount,    icon: Icons.description_outlined),
-      (label: 'Active',    value: activeCount,   icon: Icons.flash_on_outlined),
-      (label: 'Responses', value: responseCount, icon: Icons.mark_chat_read_outlined),
+      (label: 'Projects', value: projectsCount, icon: Icons.folder_outlined),
+      (label: 'Forms', value: formsCount, icon: Icons.description_outlined),
+      (label: 'Active', value: activeCount, icon: Icons.flash_on_outlined),
+      (
+        label: 'Responses',
+        value: responseCount,
+        icon: Icons.mark_chat_read_outlined,
+      ),
     ];
     final cols = Responsive.statColumns(context);
     // On mobile/tablet show as a 2×2 wrap; on laptop/desktop show as single row.
@@ -420,7 +426,8 @@ class _StatsRow extends StatelessWidget {
         children: items
             .map(
               (e) => SizedBox(
-                width: (MediaQuery.sizeOf(context).width -
+                width:
+                    (MediaQuery.sizeOf(context).width -
                         Responsive.pageHPad(context) * 2 -
                         12) /
                     2,
@@ -529,20 +536,11 @@ class _ProjectsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: searchController,
-            onChanged: onSearchChanged,
-            decoration: const InputDecoration(
-              hintText: 'Search projects',
-              prefixIcon: Icon(Icons.search),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        DropdownButton<String>(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 720;
+
+        final filterDropdown = DropdownButton<String>(
           value: currentFilter,
           items:
               const ['All', 'draft', 'Active', 'Planning', 'Live', 'Archived']
@@ -554,14 +552,50 @@ class _ProjectsToolbar extends StatelessWidget {
           onChanged: (value) {
             if (value != null) onFilterChanged(value);
           },
-        ),
-        const SizedBox(width: 12),
-        FilledButton.icon(
+        );
+
+        final createButton = FilledButton.icon(
           onPressed: onCreateProject,
           icon: const Icon(Icons.add),
           label: const Text('New project'),
-        ),
-      ],
+        );
+
+        final searchField = TextField(
+          controller: searchController,
+          onChanged: onSearchChanged,
+          decoration: const InputDecoration(
+            hintText: 'Search projects',
+            prefixIcon: Icon(Icons.search),
+          ),
+        );
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              searchField,
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [filterDropdown, createButton],
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: searchField),
+            const SizedBox(width: 12),
+            filterDropdown,
+            const SizedBox(width: 12),
+            createButton,
+          ],
+        );
+      },
     );
   }
 }
@@ -583,10 +617,10 @@ class _ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final color = switch (project.status.toLowerCase()) {
-      'active'   => DesignTokens.success,
-      'live'     => DesignTokens.info,
+      'active' => DesignTokens.success,
+      'live' => DesignTokens.info,
       'archived' => DesignTokens.darkTextMuted,
-      _          => DesignTokens.warning,
+      _ => DesignTokens.warning,
     };
 
     return Material(
@@ -623,8 +657,9 @@ class _ProjectCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.12),
-                      borderRadius:
-                          BorderRadius.circular(DesignTokens.radiusFull),
+                      borderRadius: BorderRadius.circular(
+                        DesignTokens.radiusFull,
+                      ),
                     ),
                     child: Text(
                       project.status,
@@ -755,6 +790,26 @@ class _StatsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cols = Responsive.statColumns(context);
+
+    if (cols == 2) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = (constraints.maxWidth - 12) / 2;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: const [
+              _SkeletonBox(height: 92),
+              _SkeletonBox(height: 92),
+              _SkeletonBox(height: 92),
+              _SkeletonBox(height: 92),
+            ].map((box) => SizedBox(width: width, child: box)).toList(),
+          );
+        },
+      );
+    }
+
     return const Row(
       children: [
         Expanded(child: _SkeletonBox(height: 92)),

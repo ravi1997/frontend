@@ -10,7 +10,8 @@ class ErrorHandler {
     // English messages
     const en = {
       'auth': 'Session expired or authentication failed. Please login again.',
-      'network': 'Server unreachable or connection blocked. This may be due to a security policy or CORS mismatch.',
+      'network':
+          'Server unreachable or connection blocked. This may be due to a security policy or CORS mismatch.',
       'not_found': 'The requested resource was not found.',
       'forbidden': 'You do not have permission to perform this action.',
       'timeout': 'Connection timed out. Please try again.',
@@ -21,7 +22,8 @@ class ErrorHandler {
     const es = {
       'auth':
           'La sesión ha caducado o ha fallado la autenticación. Inicie sesión de nuevo.',
-      'network': 'Servidor inaccesible o conexión bloqueada. Esto puede deberse a una política de seguridad o falta de coincidencia de CORS.',
+      'network':
+          'Servidor inaccesible o conexión bloqueada. Esto puede deberse a una política de seguridad o falta de coincidencia de CORS.',
       'not_found': 'No se ha encontrado el recurso solicitado.',
       'forbidden': 'No tiene permiso para realizar esta acción.',
       'timeout': 'Tiempo de espera agotado. Inténtelo de nuevo.',
@@ -40,9 +42,15 @@ class ErrorHandler {
 
     if (error is DioException) {
       // 1. Check for backend provided message first
-      if (error.response?.data is Map<String, dynamic>) {
-        final data = error.response?.data as Map<String, dynamic>;
-        final backendMessage = (data['error'] ?? data['msg'] ?? data['message'])?.toString();
+      final responseData = error.response?.data;
+      if (responseData is Map) {
+        // Be permissive on key/value types; some decoders produce Map<dynamic, dynamic>.
+        final backendMessage =
+            (responseData['error'] ??
+                    responseData['msg'] ??
+                    responseData['message'])
+                ?.toString()
+                .trim();
         if (backendMessage != null && backendMessage.isNotEmpty) {
           return backendMessage;
         }
@@ -69,14 +77,17 @@ class ErrorHandler {
     }
 
     if (error is AppException) {
-      if (error.message.toLowerCase().contains('not found')) {
+      final message = error.message.trim();
+      if (message.isEmpty) return messages['default']!;
+
+      final lowered = message.toLowerCase();
+      if (lowered.contains('not found')) {
         return messages['not_found']!;
       }
-      if (error.message.toLowerCase().contains('permission') ||
-          error.message.toLowerCase().contains('forbidden')) {
+      if (lowered.contains('permission') || lowered.contains('forbidden')) {
         return messages['forbidden']!;
       }
-      return error.message;
+      return message;
     }
 
     return messages['default']!;

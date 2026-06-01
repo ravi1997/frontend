@@ -528,6 +528,87 @@ class _FilterBuilderDialogState extends State<FilterBuilderDialog>
   }
 
   Widget _buildBottomBar() {
+    final screenW = MediaQuery.of(context).size.width;
+    final useVerticalLayout = screenW < 480;
+
+    if (useVerticalLayout) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton.icon(
+              onPressed: _addRule,
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: Text(
+                'Add Rule',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _accent,
+                side: const BorderSide(color: _accent, width: 1.2),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_rules.isNotEmpty)
+                  TextButton(
+                    onPressed: () {
+                      final count = _rules.length;
+                      for (int i = count - 1; i >= 0; i--) {
+                        final rule = _rules.removeAt(i);
+                        _listKey.currentState?.removeItem(
+                          i,
+                          (context, animation) =>
+                              _buildAnimatedRow(rule, i, animation),
+                          duration: const Duration(milliseconds: 200),
+                        );
+                      }
+                      setState(() {});
+                    },
+                    child: Text(
+                      'Clear All',
+                      style: GoogleFonts.inter(
+                        color: Colors.red.shade400,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
+                ElevatedButton(
+                  onPressed: _applyFilters,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _accent,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Apply Filters',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
       child: Row(
@@ -650,6 +731,15 @@ class _FilterRuleRowState extends State<_FilterRuleRow> {
     _valueCtrl.dispose();
     _value2Ctrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _FilterRuleRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.rule != widget.rule) {
+      _valueCtrl.text = widget.rule.value?.toString() ?? '';
+      _value2Ctrl.text = widget.rule.value2?.toString() ?? '';
+    }
   }
 
   List<(String, String)> get _operators {

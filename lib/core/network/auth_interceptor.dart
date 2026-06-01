@@ -47,13 +47,16 @@ class AuthInterceptor extends QueuedInterceptor {
       if (organizationId != null) {
         options.headers['X-Organization-ID'] = organizationId;
       }
+    }
 
-      final needsCsrf = _requiresCsrf(options.method);
-      if (needsCsrf) {
-        final csrfToken = _getCsrfToken();
-        if (csrfToken != null && csrfToken.isNotEmpty) {
-          options.headers['X-CSRF-TOKEN-ACCESS'] = csrfToken;
-        }
+    // CSRF is orthogonal to Bearer token injection: in cookie-auth mode the
+    // backend can require `X-CSRF-TOKEN-ACCESS` even for credential-less auth
+    // endpoints (e.g. login/refresh) that set cookies.
+    final needsCsrf = _requiresCsrf(options.method);
+    if (needsCsrf) {
+      final csrfToken = _getCsrfToken();
+      if (csrfToken != null && csrfToken.isNotEmpty) {
+        options.headers['X-CSRF-TOKEN-ACCESS'] = csrfToken;
       }
     }
 

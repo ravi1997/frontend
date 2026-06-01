@@ -83,7 +83,7 @@ final class AnalyticsControllerProvider
 }
 
 String _$analyticsControllerHash() =>
-    r'2e3e71cc5d6b65ddcebb48db960fa1fd143c652f';
+    r'fb643ce91fc9877967f6c7cfcecb71466299376f';
 
 /// Controller for managing analytics data using Riverpod state management.
 ///

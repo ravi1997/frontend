@@ -1,12 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
 
 import '../../features/form_builder/data/dto/form_dto.dart';
-
-part 'api_service.g.dart';
 
 /// Comprehensive API service providing typed methods for all backend endpoints.
 ///
@@ -156,7 +154,7 @@ class ApiService {
       },
     );
     final data = response.data as Map<String, dynamic>;
-    final items = data['items'] as List? ?? (response.data as List? ?? []);
+    final items = _extractListPayload(data);
     return (items)
         .map((e) => FormDto.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -286,7 +284,7 @@ class ApiService {
     final response = await _client.get(
       ApiEndpoints.getFormVersions(projectId, formId),
     );
-    return response.data as List<dynamic>;
+    return _extractListPayload(response.data);
   }
 
   /// Get specific form version
@@ -356,7 +354,7 @@ class ApiService {
         if (status != null) 'status': status,
       },
     );
-    return response.data as List<dynamic>;
+    return _extractListPayload(response.data);
   }
 
   Future<List<dynamic>> listProjectResponses({
@@ -374,12 +372,7 @@ class ApiService {
         if (status != null) 'status': status,
       },
     );
-    final data = response.data;
-    if (data is List) return data;
-    if (data is Map<String, dynamic>) {
-      return data['items'] as List<dynamic>? ?? const [];
-    }
-    return const [];
+    return _extractListPayload(response.data);
   }
 
   /// Get single response by ID
@@ -537,7 +530,7 @@ class ApiService {
         if (search != null) 'search': search,
       },
     );
-    return response.data as List<dynamic>;
+    return _extractListPayload(response.data);
   }
 
   /// Get template by ID
@@ -555,7 +548,7 @@ class ApiService {
   /// List workflows
   Future<List<dynamic>> listWorkflows() async {
     final response = await _client.get(ApiEndpoints.listWorkflows);
-    return response.data as List<dynamic>;
+    return _extractListPayload(response.data);
   }
 
   /// Create workflow
@@ -646,6 +639,17 @@ class ApiService {
     };
   }
 
+  List<dynamic> _extractListPayload(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      for (final key in const ['items', 'responses', 'results', 'data']) {
+        final value = data[key];
+        if (value is List) return value;
+      }
+    }
+    return const [];
+  }
+
   /// GET - Fetch the dynamic builder metadata schema
   Future<Map<String, dynamic>> getBuilderMetadata() async {
     final response = await _client.get(ApiEndpoints.builderMetadata);
@@ -654,8 +658,7 @@ class ApiService {
 }
 
 /// Riverpod provider for ApiService
-@riverpod
-ApiService apiService(Ref ref) {
+final apiServiceProvider = Provider<ApiService>((ref) {
   final dioClient = ref.watch(dioProvider);
   return ApiService(dioClient);
-}
+});

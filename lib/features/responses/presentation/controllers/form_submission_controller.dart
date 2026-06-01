@@ -1,5 +1,5 @@
 import 'package:frontend/core/exceptions/app_exception.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/form_response.dart';
 import '../../data/services/sync_service.dart';
 import '../../../../core/services/connectivity_service.dart';
@@ -7,10 +7,12 @@ import 'package:uuid/uuid.dart';
 import '../../data/repositories/response_repository_impl.dart';
 import '../../data/mappers/response_mapper.dart';
 
-part 'form_submission_controller.g.dart';
+final formSubmissionControllerProvider =
+    NotifierProvider<FormSubmissionController, AsyncValue<void>>(
+      FormSubmissionController.new,
+    );
 
-@riverpod
-class FormSubmissionController extends _$FormSubmissionController {
+class FormSubmissionController extends Notifier<AsyncValue<void>> {
   @override
   AsyncValue<void> build() {
     return const AsyncValue.data(null);
@@ -27,7 +29,7 @@ class FormSubmissionController extends _$FormSubmissionController {
 
     // Prune hidden fields and transform to nested structure
     final prunedAnswers = ResponseMapper.toBackendPayload(
-      answers, 
+      answers,
       visibilityMap,
       repeatInstances: repeatInstances,
     );
@@ -45,7 +47,7 @@ class FormSubmissionController extends _$FormSubmissionController {
     if (!isOnline) {
       await ref
           .read(syncServiceProvider.notifier)
-          .addPendingSubmission(response);
+          .addPendingSubmission(response, projectId: projectId);
       state = const AsyncValue.data(null);
       return true; // Success in terms of being queued
     }
@@ -60,12 +62,12 @@ class FormSubmissionController extends _$FormSubmissionController {
         state = AsyncValue.error(e, st);
         return false;
       }
-      
+
       // Fallback to offline storage on network failure
       await ref
           .read(syncServiceProvider.notifier)
-          .addPendingSubmission(response);
-      state = AsyncValue.error(e, st);
+          .addPendingSubmission(response, projectId: projectId);
+      state = const AsyncValue.data(null);
       return true; // Still "success" because it's queued
     }
   }

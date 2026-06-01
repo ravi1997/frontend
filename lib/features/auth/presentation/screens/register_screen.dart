@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../controllers/auth_controller.dart';
-import '../../../../core/widgets/snackbar_service.dart';
-import '../widgets/auth_background.dart';
+import 'package:frontend/shared/widgets/snackbar.dart';
+import '../widgets/auth_widgets.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -43,13 +43,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncData && next.value == null && previous is AsyncLoading) {
         ref
-            .read(snackbarServiceProvider.notifier)
+            .read(snackbarServiceProvider)
             .showSuccess('Account created successfully! Please sign in.');
         context.go('/login');
       } else if (next is AsyncError) {
-        ref
-            .read(snackbarServiceProvider.notifier)
-            .showError(next.error.toString());
+        ref.read(snackbarServiceProvider).showError(next.error.toString());
       }
     });
 
@@ -259,11 +257,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             const SizedBox(height: 24),
 
-            _buildModernField(
+            AuthTextFormField(
               controller: _usernameController,
               label: 'Username',
               placeholder: 'johndoe',
-              icon: Icons.person_outline,
+              prefixIcon: Icons.person_outline,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Username is required';
@@ -272,11 +270,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
             ),
             const SizedBox(height: 16),
-            _buildModernField(
+            AuthTextFormField(
               controller: _emailController,
               label: 'Email',
               placeholder: 'name@example.com',
-              icon: Icons.alternate_email,
+              prefixIcon: Icons.alternate_email,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -289,11 +287,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
             ),
             const SizedBox(height: 16),
-            _buildModernField(
+            AuthTextFormField(
               controller: _mobileController,
               label: 'Mobile Number',
               placeholder: '9876543210',
-              icon: Icons.phone_android,
+              prefixIcon: Icons.phone_android,
               keyboardType: TextInputType.phone,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -306,11 +304,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
             ),
             const SizedBox(height: 16),
-            _buildModernField(
+            AuthTextFormField(
               controller: _passwordController,
               label: 'Password',
               placeholder: 'Create a password',
-              icon: Icons.lock_outline,
+              prefixIcon: Icons.lock_outline,
               obscureText: _obscurePassword,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -332,13 +330,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildModernField(
+            AuthTextFormField(
               controller: _confirmPasswordController,
               label: 'Confirm Password',
               placeholder: 'Confirm your password',
-              icon: Icons.lock_outline,
+              prefixIcon: Icons.lock_outline,
               obscureText: _obscureConfirmPassword,
               validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Confirm password is required';
+                }
                 if (value != _passwordController.text) {
                   return 'Passwords do not match';
                 }
@@ -393,75 +394,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildModernField({
-    required TextEditingController controller,
-    required String label,
-    required String placeholder,
-    required IconData icon,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF374151),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          validator: validator,
-          keyboardType: keyboardType,
-          style: GoogleFonts.inter(
-            color: const Color(0xFF111827),
-            fontSize: 14,
-          ),
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 18),
-            suffixIcon: suffixIcon,
-            hintText: placeholder,
-            hintStyle: GoogleFonts.inter(
-              color: const Color(0xFF9CA3AF),
-              fontSize: 14,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: Color(0xFF2563EB),
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildRegisterButton(AsyncValue authState) {
     return SizedBox(

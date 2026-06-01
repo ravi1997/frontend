@@ -1,31 +1,39 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
 import '../../data/repositories/auth_repository_impl.dart';
-import '../../../../core/controllers/base_controller_mixin.dart';
 
-part 'auth_controller.g.dart';
+final authControllerProvider = AsyncNotifierProvider<AuthController, User?>(
+  AuthController.new,
+);
 
-@Riverpod(keepAlive: true)
-class AuthController extends _$AuthController with BaseControllerMixin {
+class AuthController extends AsyncNotifier<User?> {
   String? _cachedAccessToken;
   User? _cachedUser;
 
   @override
   FutureOr<User?> build() async {
-    final tokens = await ref.watch(tokenServiceProvider.future);
+    final tokenState = ref.watch(tokenServiceProvider);
+    final tokens = tokenState.asData?.value;
+    final accessToken = tokens?.accessToken;
 
-    if (tokens.accessToken == null) return null;
+    if (accessToken == null) {
+      _cachedAccessToken = null;
+      _cachedUser = null;
+      return null;
+    }
 
-    if (_cachedAccessToken == tokens.accessToken && _cachedUser != null) {
+    if (_cachedAccessToken == accessToken && _cachedUser != null) {
       return _cachedUser;
     }
 
     try {
       final repo = ref.read(authRepositoryImplProvider);
       final user = await repo.getCurrentUser();
-      _cachedAccessToken = tokens.accessToken;
+      if (!ref.mounted) return null;
+      _cachedAccessToken = accessToken;
       _cachedUser = user;
       return user;
     } catch (e) {
@@ -36,37 +44,33 @@ class AuthController extends _$AuthController with BaseControllerMixin {
 
   Future<void> login(String identifier, String password) async {
     state = const AsyncValue.loading();
-    final result = await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        return repo.login(identifier, password);
-      },
-    );
-    if (result != null) {
-      state = AsyncValue.data(result);
-    }
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      return repo.login(identifier, password);
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> loginWithOtp(String mobile, String otp) async {
     state = const AsyncValue.loading();
-    final result = await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        return repo.loginWithOtp(mobile, otp);
-      },
-    );
-    if (result != null) {
-      state = AsyncValue.data(result);
-    }
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      return repo.loginWithOtp(mobile, otp);
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> requestOtp(String mobile) async {
-    await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        await repo.requestOtp(mobile);
-      },
-    );
+    state = const AsyncValue.loading();
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.requestOtp(mobile);
+      return null;
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> logout() async {
@@ -77,7 +81,9 @@ class AuthController extends _$AuthController with BaseControllerMixin {
     } finally {
       _cachedAccessToken = null;
       _cachedUser = null;
-      state = const AsyncValue.data(null);
+      if (ref.mounted) {
+        state = const AsyncValue.data(null);
+      }
     }
   }
 
@@ -89,41 +95,41 @@ class AuthController extends _$AuthController with BaseControllerMixin {
     String? mobile,
   }) async {
     state = const AsyncValue.loading();
-    await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        await repo.register(
-          username: username,
-          email: email,
-          password: password,
-          employeeId: employeeId,
-          mobile: mobile,
-        );
-        state = const AsyncValue.data(null);
-      },
-    );
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.register(
+        username: username,
+        email: email,
+        password: password,
+        employeeId: employeeId,
+        mobile: mobile,
+      );
+      return null;
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> requestPasswordReset(String email) async {
     state = const AsyncValue.loading();
-    await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        await repo.requestPasswordReset(email);
-        state = const AsyncValue.data(null);
-      },
-    );
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.requestPasswordReset(email);
+      return null;
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> revokeAll() async {
     state = const AsyncValue.loading();
-    await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        await repo.revokeAll();
-        state = const AsyncValue.data(null);
-      },
-    );
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.revokeAll();
+      return null;
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 
   Future<void> changePassword(
@@ -131,12 +137,12 @@ class AuthController extends _$AuthController with BaseControllerMixin {
     String newPassword,
   ) async {
     state = const AsyncValue.loading();
-    await executeOperation(
-      operation: () async {
-        final repo = ref.read(authRepositoryImplProvider);
-        await repo.changePassword(currentPassword, newPassword);
-        state = const AsyncValue.data(null);
-      },
-    );
+    final result = await AsyncValue.guard<User?>(() async {
+      final repo = ref.read(authRepositoryImplProvider);
+      await repo.changePassword(currentPassword, newPassword);
+      return null;
+    });
+    if (!ref.mounted) return;
+    state = result;
   }
 }

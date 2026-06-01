@@ -76,6 +76,7 @@ class RecentFormsList extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 32),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.search_off, size: 48, color: Color(0xFF9CA3AF)),
             const SizedBox(height: 16),
@@ -84,6 +85,7 @@ class RecentFormsList extends ConsumerWidget {
                   ? 'No forms yet. Create your first form!'
                   : 'No forms found matching "$searchQuery"',
               style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -105,43 +107,55 @@ class _RecentFormItem extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: Wrap(
-        spacing: 16,
-        runSpacing: 16,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Icon(
-              Icons.description_outlined,
-              color: Color(0xFF2563EB),
-              size: 20,
-            ),
-          ),
-          Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                form.title,
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.description_outlined,
+                  color: Color(0xFF2563EB),
+                  size: 20,
                 ),
               ),
-              Text(
-                '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: const Color(0xFF6B7280),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      form.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                    Text(
+                      '${form.status} • ${DateFormat.yMMMd().format(form.updatedAt)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 12),
           _buildActions(context, ref),
         ],
       ),
@@ -150,73 +164,49 @@ class _RecentFormItem extends ConsumerWidget {
 
   Widget _buildActions(BuildContext context, WidgetRef ref) {
     return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        TextButton(
+        TextButton.icon(
           onPressed: () => context.push('/f/${form.id}'),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFF10B981), // Green for Submit
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Send Response',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.send_outlined, size: 14),
-            ],
+          icon: const Icon(Icons.send_outlined, size: 14),
+          label: Text(
+            'Send Response',
+            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
-        TextButton(
+        TextButton.icon(
           onPressed: () => context.push('/forms/${form.id}/responses'),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFF2563EB),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Responses',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.analytics_outlined, size: 14),
-            ],
+          icon: const Icon(Icons.analytics_outlined, size: 14),
+          label: Text(
+            'Responses',
+            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
-        TextButton(
+        TextButton.icon(
           onPressed: () => context.push('/forms/${form.id}/analytics'),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFF8B5CF6), // Purple for Analytics
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Analytics',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.show_chart, size: 14),
-            ],
+          icon: const Icon(Icons.show_chart, size: 14),
+          label: Text(
+            'Analytics',
+            style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
           ),
         ),
         PopupMenuButton<String>(
           key: Key('form_menu_btn_${form.id}'),
+          tooltip: 'More actions',
           icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF6B7280)),
           onSelected: (value) async {
             if (value == 'edit') {
@@ -225,7 +215,7 @@ class _RecentFormItem extends ConsumerWidget {
             } else if (value == 'delete') {
               _showDeleteDialog(context, ref);
             } else if (value == 'duplicate') {
-              ref
+              await ref
                   .read(dashboardControllerProvider.notifier)
                   .duplicateForm(form.id, form.title);
             } else if (value == 'share') {

@@ -1,12 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/token_service.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_source.dart';
-
-part 'auth_repository_impl.g.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteSource _remoteSource;
@@ -21,6 +19,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final user = await getCurrentUser();
     if (user == null) {
+      // Avoid leaving persisted tokens behind when the session cannot be
+      // rehydrated into a usable user profile.
+      await _tokenService.clearTokens();
       throw Exception('Failed to retrieve user info after login');
     }
     return user;
@@ -33,6 +34,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final user = await getCurrentUser();
     if (user == null) {
+      // Avoid leaving persisted tokens behind when the session cannot be
+      // rehydrated into a usable user profile.
+      await _tokenService.clearTokens();
       throw Exception('Failed to retrieve user info after login');
     }
     return user;
@@ -55,7 +59,9 @@ class AuthRepositoryImpl implements AuthRepository {
       } else {
         // Log other network / server errors but do not surface them to the UI;
         // the product contract is "client-side logout always succeeds".
-        debugPrint('logout: backend call failed (${e.type}), clearing locally. $e');
+        debugPrint(
+          'logout: backend call failed (${e.type}), clearing locally. $e',
+        );
       }
     } catch (e) {
       // Catch any unexpected error so local sign-out is never blocked.
@@ -127,9 +133,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 }
 
-@riverpod
-AuthRepository authRepositoryImpl(Ref ref) {
+final authRepositoryImplProvider = Provider<AuthRepository>((ref) {
   final remote = ref.watch(authRemoteSourceProvider);
   final tokenService = ref.watch(tokenServiceProvider.notifier);
   return AuthRepositoryImpl(remote, tokenService);
-}
+});

@@ -1,14 +1,16 @@
 import 'package:frontend/core/services/connectivity_service.dart';
+import 'package:frontend/core/exceptions/app_exception.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/responses/data/repositories/response_repository_impl.dart';
 import 'package:frontend/features/auth/presentation/controllers/auth_controller.dart';
 
-part 'sync_service.g.dart';
+final syncServiceProvider = AsyncNotifierProvider<SyncService, void>(
+  SyncService.new,
+);
 
-@Riverpod(keepAlive: true)
-class SyncService extends _$SyncService {
+class SyncService extends AsyncNotifier<void> {
   Box? _box;
   String? _currentUserId;
 
@@ -19,7 +21,8 @@ class SyncService extends _$SyncService {
 
     if (user == null) {
       if (_box != null) {
-        await _box!.clear();
+        // Only close the box, DO NOT clear it, so that pending submissions
+        // are preserved and can be synced once the user logs back in.
         await _box!.close();
         _box = null;
         _currentUserId = null;
@@ -52,9 +55,16 @@ class SyncService extends _$SyncService {
     }
   }
 
-  Future<void> addPendingSubmission(FormResponse response) async {
+  Future<void> addPendingSubmission(
+    FormResponse response, {
+    String? projectId,
+  }) async {
     if (_box == null) return;
-    await _box!.put(response.id, response.toJson());
+    // Wrapping the response along with the optional projectId to preserve project scoping on sync
+    await _box!.put(response.id, {
+      'response': response.toJson(),
+      'projectId': projectId,
+    });
     ref.notifyListeners();
   }
 
@@ -65,21 +75,47 @@ class SyncService extends _$SyncService {
     final keys = List<String>.from(_box!.keys);
 
     for (final key in keys) {
-      final json = _box!.get(key);
+      final value = _box!.get(key);
       try {
-        final Map<String, dynamic> data = Map<String, dynamic>.from(json);
-        final response = FormResponse.fromJson(data);
+        if (value == null) continue;
+
+        final FormResponse response;
+        final String? projectId;
+
+        // Backward compatibility support for legacy responses stored as plain Maps
+        if (value is Map && value.containsKey('response')) {
+          final Map<String, dynamic> data = Map<String, dynamic>.from(
+            value['response'] as Map,
+          );
+          response = FormResponse.fromJson(data);
+          projectId = value['projectId'] as String?;
+        } else if (value is Map) {
+          final Map<String, dynamic> data = Map<String, dynamic>.from(value);
+          response = FormResponse.fromJson(data);
+          projectId = null;
+        } else {
+          continue;
+        }
 
         // Ensure we only sync if the user is still logged in and matches
         if (_currentUserId == null) break;
 
-        await repository.submitResponse(response);
+        if (projectId != null) {
+          await repository.submitProjectResponse(projectId, response);
+        } else {
+          await repository.submitResponse(response);
+        }
         await _box!.delete(key);
         // ignore: avoid_print
         print('Synced submission: $key for user $_currentUserId');
       } catch (e) {
         // ignore: avoid_print
         print('Failed to sync submission $key: $e');
+        // Handle permanently invalid submissions (e.g. 400 Bad Request, 403 Forbidden)
+        // by deleting them from the queue so they do not block subsequent submissions.
+        if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
+          await _box!.delete(key);
+        }
       }
     }
     ref.notifyListeners();
@@ -96,9 +132,14 @@ class SyncService extends _$SyncService {
 
   List<FormResponse> getPendingSubmissions() {
     if (_box == null) return [];
-    return _box!.values
-        .map((json) => FormResponse.fromJson(Map<String, dynamic>.from(json)))
-        .toList();
+    return _box!.values.map((value) {
+      if (value is Map && value.containsKey('response')) {
+        return FormResponse.fromJson(
+          Map<String, dynamic>.from(value['response'] as Map),
+        );
+      }
+      return FormResponse.fromJson(Map<String, dynamic>.from(value as Map));
+    }).toList();
   }
 
   bool get hasPendingSubmissions => _box?.isNotEmpty ?? false;

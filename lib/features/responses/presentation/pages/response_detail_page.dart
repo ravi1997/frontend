@@ -62,6 +62,7 @@ class _ResponseDetailView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -69,7 +70,7 @@ class _ResponseDetailView extends ConsumerWidget {
           _TopBar(formId: formId, responseId: response.id),
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 48),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 48),
             child: Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 1200),
@@ -126,9 +127,13 @@ class _AnswersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 48,
+        vertical: isMobile ? 20 : 32,
+      ),
       child: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1200),
@@ -168,9 +173,10 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
     return Container(
       height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 48),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 48),
       decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
@@ -212,6 +218,7 @@ class _SubmissionHeader extends StatelessWidget {
     final dateStr = response.submittedAt != null
         ? DateFormat('MMMM dd, yyyy • HH:mm:ss').format(response.submittedAt!)
         : 'Unknown Date';
+    final isMobile = MediaQuery.of(context).size.width < 768;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -221,6 +228,7 @@ class _SubmissionHeader extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -248,10 +256,10 @@ class _SubmissionHeader extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                SelectableText(
                   response.id,
                   style: GoogleFonts.inter(
-                    fontSize: 20,
+                    fontSize: isMobile ? 16 : 20,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF111827),
                   ),
@@ -264,10 +272,14 @@ class _SubmissionHeader extends StatelessWidget {
                     color: const Color(0xFF9CA3AF),
                   ),
                 ),
+                if (isMobile) ...[
+                  const SizedBox(height: 12),
+                  _StatusBadge(status: response.status),
+                ],
               ],
             ),
           ),
-          _StatusBadge(status: response.status),
+          if (!isMobile) _StatusBadge(status: response.status),
         ],
       ),
     );
@@ -327,9 +339,65 @@ class _AIInsightsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final aiState = ref.watch(aIControllerProvider);
+    final isLoading = aiState.isLoading;
+
     final aiResults = response.aiResults;
     final sentiment = aiResults['sentiment'];
     final moderation = aiResults['moderation'];
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
+    final runAnalysisButton = ElevatedButton.icon(
+      onPressed: isLoading
+          ? null
+          : () async {
+              try {
+                await ref
+                    .read(aIControllerProvider.notifier)
+                    .analyzeResponse(response.formId, response.id);
+                if (context.mounted) {
+                  ref.invalidate(
+                    responseDetailProvider(projectId, response.formId, response.id),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('AI Analysis completed successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to run AI Analysis: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+      icon: isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF374151),
+              ),
+            )
+          : const Icon(Icons.psychology_outlined, size: 18),
+      label: Text(isLoading ? 'Analyzing...' : 'Run Analysis'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF374151),
+        elevation: 0,
+        side: const BorderSide(color: Color(0xFFD1D5DB)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -341,79 +409,118 @@ class _AIInsightsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                FontAwesomeIcons.wandMagicSparkles,
-                color: Color(0xFF2563EB),
-                size: 18,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'AI Analysis Hub',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF111827),
+          isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          FontAwesomeIcons.wandMagicSparkles,
+                          color: Color(0xFF2563EB),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'AI Analysis Hub',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: runAnalysisButton,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    const Icon(
+                      FontAwesomeIcons.wandMagicSparkles,
+                      color: Color(0xFF2563EB),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'AI Analysis Hub',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF111827),
+                      ),
+                    ),
+                    const Spacer(),
+                    runAnalysisButton,
+                  ],
                 ),
-              ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  await ref
-                      .read(aIControllerProvider.notifier)
-                      .analyzeResponse(response.formId, response.id);
-                  ref.invalidate(
-                    responseDetailProvider(projectId, response.formId, response.id),
-                  );
-                },
-                icon: const Icon(Icons.psychology_outlined, size: 18),
-                label: const Text('Run Analysis'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF374151),
-                  elevation: 0,
-                  side: const BorderSide(color: Color(0xFFD1D5DB)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 20),
           if (sentiment != null || moderation != null)
-            Row(
-              children: [
-                if (sentiment != null)
-                  Expanded(
-                    child: _InsightCard(
-                      title: 'Sentiment',
-                      value: sentiment['label'].toString().toUpperCase(),
-                      subtitle:
-                          'Confidence: ${(sentiment['score'] * 100).toStringAsFixed(1)}%',
-                      icon: Icons.face_outlined,
-                      color: _getSentimentColor(sentiment['label']),
-                    ),
-                  ),
-                const SizedBox(width: 16),
-                if (moderation != null)
-                  Expanded(
-                    child: _InsightCard(
-                      title: 'Safety Check',
-                      value: moderation['is_safe'] == true
-                          ? 'PASSED'
-                          : 'FLAGGED',
-                      subtitle:
-                          '${moderation['flags']?.length ?? 0} security issues',
-                      icon: Icons.security_outlined,
-                      color: moderation['is_safe'] == true
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                  ),
-              ],
-            )
+            isMobile
+                ? Column(
+                    children: [
+                      if (sentiment != null) ...[
+                        _InsightCard(
+                          title: 'Sentiment',
+                          value: sentiment['label'].toString().toUpperCase(),
+                          subtitle:
+                              'Confidence: ${(sentiment['score'] * 100).toStringAsFixed(1)}%',
+                          icon: Icons.face_outlined,
+                          color: _getSentimentColor(sentiment['label']),
+                        ),
+                        if (moderation != null) const SizedBox(height: 12),
+                      ],
+                      if (moderation != null)
+                        _InsightCard(
+                          title: 'Safety Check',
+                          value: moderation['is_safe'] == true
+                              ? 'PASSED'
+                              : 'FLAGGED',
+                          subtitle:
+                              '${moderation['flags']?.length ?? 0} security issues',
+                          icon: Icons.security_outlined,
+                          color: moderation['is_safe'] == true
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      if (sentiment != null)
+                        Expanded(
+                          child: _InsightCard(
+                            title: 'Sentiment',
+                            value: sentiment['label'].toString().toUpperCase(),
+                            subtitle:
+                                'Confidence: ${(sentiment['score'] * 100).toStringAsFixed(1)}%',
+                            icon: Icons.face_outlined,
+                            color: _getSentimentColor(sentiment['label']),
+                          ),
+                        ),
+                      if (sentiment != null && moderation != null)
+                        const SizedBox(width: 16),
+                      if (moderation != null)
+                        Expanded(
+                          child: _InsightCard(
+                            title: 'Safety Check',
+                            value: moderation['is_safe'] == true
+                                ? 'PASSED'
+                                : 'FLAGGED',
+                            subtitle:
+                                '${moderation['flags']?.length ?? 0} security issues',
+                            icon: Icons.security_outlined,
+                            color: moderation['is_safe'] == true
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                    ],
+                  )
           else
             Center(
               child: Padding(
@@ -652,12 +759,16 @@ class _HistoryTab extends ConsumerWidget {
     final historyAsync = ref.watch(
       responseHistoryProvider(projectId, formId, responseId),
     );
+    final isMobile = MediaQuery.of(context).size.width < 768;
 
     return historyAsync.when(
       data: (historyList) => historyList.isEmpty
           ? _EmptyHistory()
           : SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 48,
+                vertical: isMobile ? 20 : 32,
+              ),
               child: Center(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 1200),

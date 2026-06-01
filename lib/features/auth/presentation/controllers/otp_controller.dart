@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/auth_controller.dart';
 
-part 'otp_controller.g.dart';
+final otpControllerProvider = NotifierProvider<OtpController, int>(
+  OtpController.new,
+);
 
-@riverpod
-class OtpController extends _$OtpController {
+class OtpController extends Notifier<int> {
   Timer? _timer;
 
   @override

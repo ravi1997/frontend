@@ -20,14 +20,18 @@ class IdReader {
   /// Usage: `@JsonKey(readValue: IdReader.readIdWithSlugCallback)`
   static Object? readIdWithSlugCallback(Map json, String key) {
     final id = json['id'] ?? json['_id'] ?? json['form_id'];
-    return id ?? '';
+    // Generated code typically casts the callback result `as String` for non-nullable
+    // `id` fields, so normalize to a String to avoid runtime cast errors.
+    return id?.toString() ?? '';
   }
 
   /// Freezed-compatible `readValue` callback for `@JsonKey`.
   /// Usage: `@JsonKey(readValue: IdReader.readIdCallback)`
   static Object? readIdCallback(Map json, String key) {
     if (key == 'id') {
-      return json['id'] ?? json['_id'];
+      final id = json['id'] ?? json['_id'];
+      // See `readIdWithSlugCallback` note: keep this safe for `as String` casts.
+      return id?.toString() ?? '';
     }
     return json[key];
   }

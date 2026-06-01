@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import '../exceptions/app_exception.dart';
-import '../widgets/snackbar_service.dart';
+import 'package:frontend/shared/widgets/snackbar.dart';
 
 /// Unified network interceptor that combines error handling and envelope parsing.
 ///
@@ -21,7 +21,13 @@ class UnifiedNetworkInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final parsedEnvelopeError = _parseEnvelopeError(err);
+    if (parsedEnvelopeError != null) {
+      _handleEnvelopeError(parsedEnvelopeError, handler);
+      return;
+    }
+
     // Check if this is an envelope error
     if (_isEnvelopeError(err)) {
       _handleEnvelopeError(err, handler);
@@ -100,6 +106,30 @@ class UnifiedNetworkInterceptor extends Interceptor {
           'Unknown API error',
       details: envelope['details'],
       requestId: requestId,
+    );
+  }
+
+  /// Convert a structured API error response into a DioException carrying ApiException.
+  DioException? _parseEnvelopeError(DioException err) {
+    final response = err.response;
+    final data = response?.data;
+
+    if (data is! Map<String, dynamic> || data['success'] != false) {
+      return null;
+    }
+
+    final parsed = _parseError(data);
+
+    return err.copyWith(
+      error: ApiException(
+        parsed.message,
+        code: parsed.code,
+        details: parsed.details,
+        fieldErrors: parsed.fieldErrors,
+        requestId: parsed.requestId,
+        retryAfter: parsed.retryAfter,
+        statusCode: response?.statusCode,
+      ),
     );
   }
 

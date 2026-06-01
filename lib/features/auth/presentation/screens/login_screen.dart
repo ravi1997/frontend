@@ -5,24 +5,26 @@ import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../controllers/auth_controller.dart';
-import '../../../../core/widgets/snackbar_service.dart';
-import '../widgets/auth_background.dart';
+import 'package:frontend/shared/widgets/snackbar.dart';
+import '../widgets/auth_widgets.dart';
 import '../../../../core/network/token_service.dart';
 
 // ─── Auth Design Tokens ───────────────────────────────────────────────────────
 abstract class _AuthTokens {
   // Palette
-  static const Color primary = Color(0xFF4338CA); // Darkened from 4F46E5 for contrast (Indigo 700)
-  static const Color primaryLight = Color(0xFFEEF2FF); // Indigo 50
-
+  static const Color primary = Color(
+    0xFF4338CA,
+  ); // Darkened from 4F46E5 for contrast (Indigo 700)
   static const Color surface = Color(0xFFFFFFFF);
   static const Color border = Color(0xFFE2E8F0);
-  static const Color borderFocus = Color(0xFF4338CA);
-  static const Color borderError = Color(0xFFDC2626); // Darker red for contrast
 
   static const Color textPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color textSecondary = Color(0xFF334155); // Darkened from 475569 for contrast (Slate 700)
-  static const Color textMuted = Color(0xFF475569); // Darkened from 94A3B8 for contrast (Slate 600)
+  static const Color textSecondary = Color(
+    0xFF334155,
+  ); // Darkened from 475569 for contrast (Slate 700)
+  static const Color textMuted = Color(
+    0xFF475569,
+  ); // Darkened from 94A3B8 for contrast (Slate 600)
   static const Color textLink = Color(0xFF4338CA);
 
   static const Color divider = Color(0xFFE2E8F0);
@@ -31,7 +33,10 @@ abstract class _AuthTokens {
   static const Gradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF3730A3), Color(0xFF5B21B6)], // Darkened for accessibility
+    colors: [
+      Color(0xFF3730A3),
+      Color(0xFF5B21B6),
+    ], // Darkened for accessibility
   );
 
   // Spacing
@@ -152,9 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncError) {
-        ref
-            .read(snackbarServiceProvider.notifier)
-            .showError(next.error.toString());
+        ref.read(snackbarServiceProvider).showError(next.error.toString());
       }
       if (next is AsyncData && next.value != null && previous is AsyncLoading) {
         if (context.mounted) {
@@ -266,9 +269,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (_isEmailTab) {
         await notifier.login(_emailController.text, _passwordController.text);
       } else {
-        final mobile = _phoneController.text;
+        final mobile = _phoneController.text.trim();
         await notifier.requestOtp(mobile);
         if (!mounted) return;
+        if (ref.read(authControllerProvider) is AsyncError) return;
         context.push('/verify-otp?mobile=$mobile');
       }
     }
@@ -335,7 +339,9 @@ class _HeroPanel extends StatelessWidget {
             'and gain real-time insights — all from one platform.',
             style: GoogleFonts.inter(
               fontSize: 15,
-              color: Colors.white.withValues(alpha: 0.95), // Darkened for contrast
+              color: Colors.white.withValues(
+                alpha: 0.95,
+              ), // Darkened for contrast
               height: 1.6,
             ),
           ),
@@ -1011,7 +1017,9 @@ class _ToggleTab extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 12.5,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                       color: isSelected
                           ? _AuthTokens.textPrimary
                           : _AuthTokens.textMuted,
@@ -1046,11 +1054,11 @@ class _EmailFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _PremiumField(
+        AuthTextFormField(
           controller: emailController,
           label: 'Email address',
           placeholder: 'name@company.com',
-          icon: Icons.alternate_email_rounded,
+          prefixIcon: Icons.alternate_email_rounded,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           validator: (value) {
@@ -1062,11 +1070,11 @@ class _EmailFields extends StatelessWidget {
           },
         ),
         const SizedBox(height: 16),
-        _PremiumField(
+        AuthTextFormField(
           controller: passwordController,
           label: 'Password',
           placeholder: 'Enter your password',
-          icon: Icons.lock_outline_rounded,
+          prefixIcon: Icons.lock_outline_rounded,
           obscureText: obscurePassword,
           textInputAction: TextInputAction.done,
           validator: (value) {
@@ -1099,11 +1107,11 @@ class _PhoneField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PremiumField(
+    return AuthTextFormField(
       controller: phoneController,
       label: 'Mobile number',
       placeholder: '9876543210',
-      icon: Icons.phone_android_rounded,
+      prefixIcon: Icons.phone_android_rounded,
       keyboardType: TextInputType.phone,
       textInputAction: TextInputAction.done,
       validator: (value) {
@@ -1118,147 +1126,7 @@ class _PhoneField extends StatelessWidget {
   }
 }
 
-// ─── Premium Text Field ───────────────────────────────────────────────────────
-class _PremiumField extends StatefulWidget {
-  final TextEditingController controller;
-  final String label;
-  final String placeholder;
-  final IconData icon;
-  final bool obscureText;
-  final Widget? suffixIcon;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final String? Function(String?)? validator;
-  final String? helperText;
 
-  const _PremiumField({
-    required this.controller,
-    required this.label,
-    required this.placeholder,
-    required this.icon,
-    this.obscureText = false,
-    this.suffixIcon,
-    this.keyboardType,
-    this.textInputAction,
-    this.validator,
-    this.helperText,
-  });
-
-  @override
-  State<_PremiumField> createState() => _PremiumFieldState();
-}
-
-class _PremiumFieldState extends State<_PremiumField> {
-  bool _isFocused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: _AuthTokens.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Focus(
-          onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
-          child: TextFormField(
-            controller: widget.controller,
-            obscureText: widget.obscureText,
-            validator: widget.validator,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            style: GoogleFonts.inter(
-              color: _AuthTokens.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-            decoration: InputDecoration(
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(left: 14, right: 10),
-                child: Icon(
-                  widget.icon,
-                  color: _isFocused
-                      ? _AuthTokens.primary
-                      : _AuthTokens.textMuted,
-                  size: 18,
-                ),
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                minWidth: 0,
-                minHeight: 0,
-              ),
-              suffixIcon: widget.suffixIcon,
-              hintText: widget.placeholder,
-              hintStyle: GoogleFonts.inter(
-                color: _AuthTokens.textMuted,
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-              ),
-              filled: true,
-              fillColor: _isFocused
-                  ? _AuthTokens.primaryLight.withValues(alpha: 0.5)
-                  : const Color(0xFFF8FAFC),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 14,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-                borderSide: const BorderSide(color: _AuthTokens.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-                borderSide: BorderSide(color: _AuthTokens.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-                borderSide: const BorderSide(
-                  color: _AuthTokens.borderFocus,
-                  width: 2,
-                ),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-                borderSide: const BorderSide(
-                  color: _AuthTokens.borderError,
-                  width: 1.5,
-                ),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-                borderSide: const BorderSide(
-                  color: _AuthTokens.borderError,
-                  width: 2,
-                ),
-              ),
-              errorStyle: GoogleFonts.inter(
-                fontSize: 12,
-                color: _AuthTokens.borderError,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-        if (widget.helperText != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            widget.helperText!,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: _AuthTokens.textMuted,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
 
 // ─── Primary Button ───────────────────────────────────────────────────────────
 class _PrimaryButton extends StatefulWidget {

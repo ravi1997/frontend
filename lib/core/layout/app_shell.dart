@@ -12,36 +12,68 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final String route;
+  final bool Function(String currentLocation) isActive;
+  final String? Function(String currentLocation) resolveRoute;
 
   const _NavItem({
     required this.icon,
     required this.activeIcon,
     required this.label,
-    required this.route,
+    required this.isActive,
+    required this.resolveRoute,
   });
 }
 
-const _navItems = [
+final _navItems = [
   _NavItem(
     icon: Icons.grid_view_outlined,
     activeIcon: Icons.grid_view_rounded,
     label: 'Dashboard',
-    route: '/',
+    isActive: _isDashboardLocation,
+    resolveRoute: _dashboardRouteForLocation,
   ),
   _NavItem(
     icon: Icons.folder_outlined,
     activeIcon: Icons.folder_rounded,
     label: 'Projects',
-    route: '/',
+    isActive: _isProjectsLocation,
+    resolveRoute: _projectRouteForLocation,
   ),
   _NavItem(
     icon: Icons.bar_chart_outlined,
     activeIcon: Icons.bar_chart_rounded,
     label: 'Analytics',
-    route: '/',
+    isActive: _isAnalyticsLocation,
+    resolveRoute: _analyticsRouteForLocation,
   ),
 ];
+
+bool _isDashboardLocation(String currentLocation) => currentLocation == '/';
+
+String? _dashboardRouteForLocation(String currentLocation) => '/';
+
+String? _projectRouteForLocation(String currentLocation) {
+  final segments = Uri.parse(currentLocation).pathSegments;
+  if (segments.length < 2 || segments.first != 'projects') return null;
+  return '/projects/${segments[1]}';
+}
+
+String? _analyticsRouteForLocation(String currentLocation) {
+  final segments = Uri.parse(currentLocation).pathSegments;
+  if (segments.length < 4 ||
+      segments.first != 'projects' ||
+      segments[2] != 'forms') {
+    return null;
+  }
+  return '/projects/${segments[1]}/forms/${segments[3]}/analytics';
+}
+
+bool _isProjectsLocation(String currentLocation) =>
+    _projectRouteForLocation(currentLocation) != null &&
+    !_isAnalyticsLocation(currentLocation);
+
+bool _isAnalyticsLocation(String currentLocation) =>
+    Uri.parse(currentLocation).path.endsWith('/analytics');
 
 /// Authenticated app shell.
 /// Wraps every authenticated page with a shared [AppTopBar] + sidebar
@@ -61,7 +93,7 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final screen = Responsive.of(context);
-    final currentLocation = GoRouterState.of(context).uri.toString();
+    final currentLocation = GoRouterState.of(context).uri.path;
 
     return switch (screen) {
       ScreenSize.mobile => _MobileShell(
@@ -180,9 +212,10 @@ class _MobileShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    int selectedIndex = 0;
-    if (currentLocation.startsWith('/projects')) selectedIndex = 1;
-    if (currentLocation.contains('/analytics')) selectedIndex = 2;
+    final selectedIndex = _navItems.indexWhere(
+      (item) => item.isActive(currentLocation),
+    );
+    final effectiveIndex = selectedIndex == -1 ? 0 : selectedIndex;
 
     return Scaffold(
       body: Column(
@@ -192,13 +225,15 @@ class _MobileShell extends ConsumerWidget {
         ],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
+        selectedIndex: effectiveIndex,
         backgroundColor: cs.surface,
         surfaceTintColor: Colors.transparent,
         indicatorColor: DesignTokens.primary.withValues(alpha: 0.12),
         onDestinationSelected: (i) {
-          final routes = ['/', '/', '/'];
-          context.go(routes[i]);
+          final route = _navItems[i].resolveRoute(currentLocation);
+          if (route != null && route != currentLocation) {
+            context.go(route);
+          }
         },
         destinations: _navItems
             .map(
@@ -370,15 +405,16 @@ class AppSidebar extends ConsumerWidget {
         children: [
           const SizedBox(height: 8),
           ..._navItems.map((item) {
-            final active =
-                currentLocation == item.route ||
-                (item.route != '/' && currentLocation.startsWith(item.route));
+            final active = item.isActive(currentLocation);
+            final route = item.resolveRoute(currentLocation);
             return _SidebarItem(
               item: item,
               active: active,
               collapsed: collapsed,
               onTap: () {
-                context.go(item.route);
+                if (route != null && route != currentLocation) {
+                  context.go(route);
+                }
                 onNavTap?.call();
               },
             );
@@ -386,11 +422,12 @@ class AppSidebar extends ConsumerWidget {
           const Spacer(),
           const Divider(),
           _SidebarItem(
-            item: const _NavItem(
+            item: _NavItem(
               icon: Icons.settings_outlined,
               activeIcon: Icons.settings_rounded,
               label: 'Settings',
-              route: '/',
+              isActive: _neverActive,
+              resolveRoute: _nullRoute,
             ),
             active: false,
             collapsed: collapsed,
@@ -402,6 +439,10 @@ class AppSidebar extends ConsumerWidget {
     );
   }
 }
+
+bool _neverActive(String currentLocation) => false;
+
+String? _nullRoute(String currentLocation) => null;
 
 class _SidebarItem extends StatelessWidget {
   final _NavItem item;

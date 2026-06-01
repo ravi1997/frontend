@@ -9,28 +9,29 @@ class AppDesignSystem {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: DesignTokens.darkBackground,
       colorScheme: const ColorScheme.dark(
-        primary: Color(0xFF6366F1),
-        onPrimary: Color(0xFFFFFFFF),
-        secondary: Color(0xFF8B5CF6),
-        surface: Color(0xFF1E293B),
-        onSurface: Color(0xFFFFFFFF),
-        error: Color(0xFFEF4444),
+        primary: DesignTokens.primary,
+        onPrimary: DesignTokens.darkTextPrimary,
+        secondary: DesignTokens.secondary,
+        surface: DesignTokens.darkSurface,
+        onSurface: DesignTokens.darkTextPrimary,
+        error: DesignTokens.error,
       ),
-      
+
       // Typography
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.orbitron(
-          fontSize: DesignTokens.fontXXL,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.5,
-          color: DesignTokens.darkTextPrimary,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: DesignTokens.fontM,
-          color: DesignTokens.darkTextSecondary,
-        ),
-      ),
-      
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.orbitron(
+              fontSize: DesignTokens.fontXXL,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              color: DesignTokens.darkTextPrimary,
+            ),
+            bodyMedium: GoogleFonts.inter(
+              fontSize: DesignTokens.fontM,
+              color: DesignTokens.darkTextSecondary,
+            ),
+          ),
+
       // Components
       cardTheme: CardThemeData(
         color: DesignTokens.darkSurface,
@@ -40,7 +41,7 @@ class AppDesignSystem {
           side: BorderSide(color: DesignTokens.glassBorder),
         ),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: DesignTokens.darkSurface,
@@ -57,7 +58,7 @@ class AppDesignSystem {
           borderSide: BorderSide(color: DesignTokens.primary, width: 2),
         ),
       ),
-      
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primary,

@@ -1,15 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
 import 'unified_network_interceptor.dart';
-import '../widgets/snackbar_service.dart';
+import 'package:frontend/shared/widgets/snackbar.dart';
 import 'api_endpoints.dart';
 import 'app_config.dart';
 import 'web_cookie_store.dart';
-
-part 'api_client.g.dart';
 
 /// Dio HTTP client provider with authentication, error handling, and retry logic.
 ///
@@ -18,8 +16,7 @@ part 'api_client.g.dart';
 /// - Request/response logging for debugging
 /// - Centralized error handling and user notifications
 /// - Connection and timeout configurations
-@Riverpod(keepAlive: true)
-Dio dio(Ref ref) {
+final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: ApiEndpoints.baseUrl,
@@ -39,9 +36,7 @@ Dio dio(Ref ref) {
       //
       // Controlled by AppConfig.useCookieCredentials (dart-define:
       // USE_COOKIE_CREDENTIALS=true/false, default false).
-      extra: {
-        if (kIsWeb) 'withCredentials': AppConfig.useCookieCredentials,
-      },
+      extra: {if (kIsWeb) 'withCredentials': AppConfig.useCookieCredentials},
       validateStatus: (status) {
         return status != null && status >= 200 && status < 400;
       },
@@ -49,7 +44,7 @@ Dio dio(Ref ref) {
   );
 
   final tokenService = ref.read(tokenServiceProvider.notifier);
-  final snackbarService = ref.read(snackbarServiceProvider.notifier);
+  final snackbarService = ref.read(snackbarServiceProvider);
 
   // Add unified network interceptor (handles retry, error, and envelope parsing)
   dio.interceptors.add(
@@ -91,7 +86,7 @@ Dio dio(Ref ref) {
   });
 
   return dio;
-}
+});
 
 /// HTTP API client wrapper around Dio for making REST requests.
 class ApiClient {
@@ -101,7 +96,6 @@ class ApiClient {
 
   Future<Response<T>> get<T>(
     String path, {
-    Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -109,7 +103,6 @@ class ApiClient {
   }) {
     return _dio.get<T>(
       path,
-      data: data,
       queryParameters: queryParameters,
       options: options,
       cancelToken: cancelToken,
@@ -194,9 +187,7 @@ class ApiClient {
   }
 }
 
-@riverpod
-ApiClient apiClient(Ref ref) {
+final apiClientProvider = Provider<ApiClient>((ref) {
   final dioClient = ref.watch(dioProvider);
   return ApiClient(dioClient);
-}
-
+});

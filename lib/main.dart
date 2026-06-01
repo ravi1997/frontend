@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/design_system/design_system.dart';
-import 'core/router/app_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'core/widgets/snackbar_service.dart';
+import 'package:frontend/app/app.dart';
+import 'package:frontend/shared/ui/design_system.dart';
 
-void main() async {
+Future<void> main() async {
   // 1. Capture early Flutter errors
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -24,14 +23,10 @@ void main() async {
   try {
     // 3. Deliberate initialization
     await Hive.initFlutter();
-    
-    // We wrap in ProviderScope here. Riverpod providers will initialize 
+
+    // We wrap in ProviderScope here. Riverpod providers will initialize
     // when first watched, but critical ones can be warmed up if needed.
-    runApp(
-      const ProviderScope(
-        child: AgentOSApp(),
-      ),
-    );
+    runApp(const ProviderScope(child: AgentOSApp()));
   } catch (e, stack) {
     debugPrint('Critical startup failure: $e\n$stack');
     runApp(InitializationErrorApp(error: e.toString()));
@@ -43,16 +38,8 @@ class AgentOSApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final snackbarService = ref.watch(snackbarServiceProvider.notifier);
-    final router = ref.watch(appRouterProvider);
-
-    return MaterialApp.router(
-      title: 'MahaSangrah Setu',
-      debugShowCheckedModeBanner: false,
-      theme: AppDesignSystem.enterpriseDarkTheme,
-      routerConfig: router,
-      scaffoldMessengerKey: snackbarService.messengerKey,
-    );
+    // Backwards-compatible wrapper: keep name but delegate to new app widget.
+    return const RidpApp();
   }
 }
 
@@ -98,7 +85,10 @@ class InitializationErrorApp extends StatelessWidget {
                   ),
                   child: SelectableText(
                     error,
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),

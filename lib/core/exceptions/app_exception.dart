@@ -6,8 +6,22 @@ sealed class AppException implements Exception {
 
   const AppException(this.message, {this.originalError, this.stackTrace});
 
+  /// Log/debug oriented representation.
+  ///
+  /// Intentionally does not include [originalError] (it may carry sensitive data)
+  /// and avoids multi-line / unbounded output.
+  String _debugString() {
+    // Keep logs single-line and avoid very large payloads (e.g. raw HTML bodies).
+    final normalized = message.replaceAll('\n', r'\n').replaceAll('\r', r'\r');
+    const maxLen = 500;
+    final clipped = normalized.length <= maxLen
+        ? normalized
+        : '${normalized.substring(0, maxLen)}...';
+    return clipped.isEmpty ? '$runtimeType' : '$runtimeType: $clipped';
+  }
+
   @override
-  String toString() => message;
+  String toString() => _debugString();
 }
 
 /// Form-related exceptions

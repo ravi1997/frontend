@@ -1,7 +1,4 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../entities/user.dart';
-
-part 'auth_repository.g.dart';
 
 abstract class AuthRepository {
   Future<User> login(String identifier, String password);
@@ -20,11 +17,4 @@ abstract class AuthRepository {
   Future<String> refreshToken(String refreshToken);
   Future<void> revokeAll();
   Future<void> changePassword(String currentPassword, String newPassword);
-}
-
-@riverpod
-AuthRepository authRepository(Ref ref) {
-  throw UnimplementedError(
-    'authRepository must be overridden by a provider scope',
-  );
 }

@@ -1,56 +1,96 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
 import 'package:frontend/features/responses/data/repositories/response_repository_impl.dart';
 import 'package:frontend/features/responses/domain/entities/response_history.dart';
 
-part 'responses_controller.g.dart';
+typedef _ListArgs = ({String projectId, String formId, String? searchQuery});
+typedef _DetailArgs = ({String projectId, String formId, String responseId});
+typedef _FilterArgs = ({
+  String projectId,
+  String formId,
+  List<Map<String, dynamic>>? filters,
+});
 
-@riverpod
-Future<List<FormResponse>> formResponses(
-  Ref ref,
+final _formResponsesProvider =
+    FutureProvider.family<List<FormResponse>, _ListArgs>((ref, args) async {
+      final repository = ref.watch(responseRepositoryProvider);
+      final searchQuery = args.searchQuery;
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        return repository.aiSearch(args.formId, searchQuery);
+      }
+      return repository.getProjectResponses(args.projectId, args.formId);
+    });
+
+final _responseDetailProvider =
+    FutureProvider.family<FormResponse, _DetailArgs>((ref, args) {
+      final repository = ref.watch(responseRepositoryProvider);
+      return repository.getProjectResponseDetail(
+        args.projectId,
+        args.formId,
+        args.responseId,
+      );
+    });
+
+final _responseHistoryProvider =
+    FutureProvider.family<List<ResponseHistory>, _DetailArgs>((ref, args) {
+      final repository = ref.watch(responseRepositoryProvider);
+      return repository.getProjectResponseHistory(
+        args.projectId,
+        args.formId,
+        args.responseId,
+      );
+    });
+
+final _filteredFormResponsesProvider =
+    FutureProvider.family<List<FormResponse>, _FilterArgs>((ref, args) {
+      final repository = ref.watch(responseRepositoryProvider);
+      final filters = args.filters;
+      if (filters != null && filters.isNotEmpty) {
+        return repository.getFilteredResponses(
+          args.projectId,
+          args.formId,
+          filters,
+        );
+      }
+      return repository.getProjectResponses(args.projectId, args.formId);
+    });
+
+dynamic formResponsesProvider(
   String projectId,
   String formId, {
   String? searchQuery,
-}) {
-  final repository = ref.watch(responseRepositoryProvider);
-  if (searchQuery != null && searchQuery.isNotEmpty) {
-    return repository.aiSearch(formId, searchQuery);
-  }
-  return repository.getProjectResponses(projectId, formId);
-}
+}) => _formResponsesProvider((
+  projectId: projectId,
+  formId: formId,
+  searchQuery: searchQuery,
+));
 
-@riverpod
-Future<FormResponse> responseDetail(
-  Ref ref,
+dynamic responseDetailProvider(
   String projectId,
   String formId,
   String responseId,
-) {
-  final repository = ref.watch(responseRepositoryProvider);
-  return repository.getProjectResponseDetail(projectId, formId, responseId);
-}
+) => _responseDetailProvider((
+  projectId: projectId,
+  formId: formId,
+  responseId: responseId,
+));
 
-@riverpod
-Future<List<ResponseHistory>> responseHistory(
-  Ref ref,
+dynamic responseHistoryProvider(
   String projectId,
   String formId,
   String responseId,
-) {
-  final repository = ref.watch(responseRepositoryProvider);
-  return repository.getProjectResponseHistory(projectId, formId, responseId);
-}
+) => _responseHistoryProvider((
+  projectId: projectId,
+  formId: formId,
+  responseId: responseId,
+));
 
-@riverpod
-Future<List<FormResponse>> filteredFormResponses(
-  Ref ref,
+dynamic filteredFormResponsesProvider(
   String projectId,
   String formId, {
   List<Map<String, dynamic>>? filters,
-}) {
-  final repository = ref.watch(responseRepositoryProvider);
-  if (filters != null && filters.isNotEmpty) {
-    return repository.getFilteredResponses(projectId, formId, filters);
-  }
-  return repository.getProjectResponses(projectId, formId);
-}
+}) => _filteredFormResponsesProvider((
+  projectId: projectId,
+  formId: formId,
+  filters: filters,
+));

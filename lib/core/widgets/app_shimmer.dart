@@ -67,13 +67,17 @@ class AppShimmer extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: baseColor,
       highlightColor: highlightColor,
-      child: Container(
-        width: width,
-        height: height,
-        decoration: ShapeDecoration(
-          color: Colors.white,
-          shape: shape ?? RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
+      child: ExcludeSemantics(
+        child: Container(
+          width: width,
+          height: height,
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape:
+                shape ??
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                ),
           ),
         ),
       ),
@@ -111,10 +115,7 @@ class SkeletonBox extends StatelessWidget {
 class SkeletonCircle extends StatelessWidget {
   final double size;
 
-  const SkeletonCircle({
-    super.key,
-    required this.size,
-  });
+  const SkeletonCircle({super.key, required this.size});
 
   @override
   Widget build(BuildContext context) {

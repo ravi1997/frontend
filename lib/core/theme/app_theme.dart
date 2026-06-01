@@ -10,9 +10,9 @@ class AppTheme {
       scaffoldBackgroundColor: DesignTokens.lightBackground,
       colorScheme: const ColorScheme.light(
         primary: DesignTokens.primary,
-        onPrimary: Colors.white,
+        onPrimary: Colors.black,
         secondary: DesignTokens.secondary,
-        onSecondary: Colors.white,
+        onSecondary: Colors.black,
         surface: DesignTokens.lightSurface,
         onSurface: DesignTokens.lightTextPrimary,
         error: DesignTokens.error,
@@ -92,7 +92,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.black,
           minimumSize: const Size(88, 44),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spaceL,
@@ -111,7 +111,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: DesignTokens.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.black,
           minimumSize: const Size(88, 44),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusS),
@@ -132,9 +132,9 @@ class AppTheme {
       scaffoldBackgroundColor: DesignTokens.darkBackground,
       colorScheme: const ColorScheme.dark(
         primary: DesignTokens.primary,
-        onPrimary: Colors.white,
+        onPrimary: Colors.black,
         secondary: DesignTokens.secondary,
-        onSecondary: Colors.white,
+        onSecondary: Colors.black,
         surface: DesignTokens.darkSurface,
         onSurface: DesignTokens.darkTextPrimary,
         error: DesignTokens.error,
@@ -214,7 +214,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: DesignTokens.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.black,
           minimumSize: const Size(88, 44),
           padding: const EdgeInsets.symmetric(
             horizontal: DesignTokens.spaceL,
@@ -233,7 +233,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: DesignTokens.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.black,
           minimumSize: const Size(88, 44),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusS),

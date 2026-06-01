@@ -8,24 +8,26 @@ part of 'response_history.dart';
 
 _ResponseHistory _$ResponseHistoryFromJson(Map<String, dynamic> json) =>
     _ResponseHistory(
-      id: json['id'] as String,
-      responseId: json['responseId'] as String,
-      formId: json['formId'] as String,
-      dataBefore: json['dataBefore'] as Map<String, dynamic>,
-      dataAfter: json['dataAfter'] as Map<String, dynamic>,
-      changedBy: json['changedBy'] as String,
-      changedAt: DateTime.parse(json['changedAt'] as String),
-      changeType: json['changeType'] as String,
+      id: _readId(json, 'id') as String,
+      responseId: json['response_id'] as String,
+      formId: json['form_id'] as String,
+      dataBefore: json['data_before'] as Map<String, dynamic>,
+      dataAfter: json['data_after'] as Map<String, dynamic>,
+      changedBy: json['changed_by'] as String,
+      changedAt: DateTime.parse(json['changed_at'] as String),
+      changeType: json['change_type'] as String,
+      version: json['version'] as String?,
     );
 
 Map<String, dynamic> _$ResponseHistoryToJson(_ResponseHistory instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'responseId': instance.responseId,
-      'formId': instance.formId,
-      'dataBefore': instance.dataBefore,
-      'dataAfter': instance.dataAfter,
-      'changedBy': instance.changedBy,
-      'changedAt': instance.changedAt.toIso8601String(),
-      'changeType': instance.changeType,
+      'response_id': instance.responseId,
+      'form_id': instance.formId,
+      'data_before': instance.dataBefore,
+      'data_after': instance.dataAfter,
+      'changed_by': instance.changedBy,
+      'changed_at': instance.changedAt.toIso8601String(),
+      'change_type': instance.changeType,
+      'version': instance.version,
     };

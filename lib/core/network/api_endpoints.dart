@@ -483,7 +483,7 @@ class ApiEndpoints {
 
   /// POST - Trigger hooks for a project
   static String triggerProjectHooks(String projectId) =>
-      '/forms/projects/$projectId/hooks/trigger';
+      '/projects/$projectId/forms/hooks/trigger';
 
   // ============================================================================
   // Submission History (§11)
@@ -614,8 +614,7 @@ class ApiEndpoints {
   /// GET - Get translation job details
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "job_id": string, "status": string, "progress": int, ... }
-  static String getTranslationJob(String jobId) =>
-      '/translations/jobs/$jobId';
+  static String getTranslationJob(String jobId) => '/translations/jobs/$jobId';
 
   /// PATCH - Cancel a translation job
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -638,8 +637,7 @@ class ApiEndpoints {
   /// GET - List available languages for translation
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: [{ "code": string, "name": string, "native_name": string }]
-  static const String listTranslationLanguages =
-      '/translations/languages';
+  static const String listTranslationLanguages = '/translations/languages';
 
   /// GET - Get translated content for a job (completed jobs only)
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -836,8 +834,11 @@ class ApiEndpoints {
   // Health Check
   // ============================================================================
 
-  /// GET - API health check (registered at /form/health)
-  static const String healthCheck = '/health';
+  /// GET - API health check.
+  ///
+  /// Note: backend registers this outside `/api/v1` at `/mahasangraha/health`,
+  /// so this is an absolute URL (not a path appended to [baseUrl]).
+  static String get healthCheck => '$serverBaseUrl/mahasangraha/health';
 
   // ============================================================================
   // File Management Endpoints

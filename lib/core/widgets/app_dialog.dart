@@ -19,17 +19,22 @@ class AppDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext buildContext) {
+    final screenSize = MediaQuery.sizeOf(buildContext);
+
     return Center(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.xl),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: Container(
-            constraints: BoxConstraints(maxWidth: maxWidth),
+            constraints: BoxConstraints(
+              maxWidth: maxWidth,
+              maxHeight: screenSize.height * 0.85,
+            ),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: Colors.white.withOpacity(0.08)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),
             child: Material(
               color: Colors.transparent,
@@ -39,19 +44,22 @@ class AppDialog extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Dialog Header
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                         IconButton(
+                          tooltip: 'Close dialog',
                           icon: const Icon(Icons.close, color: Colors.white60),
                           onPressed: () => Navigator.of(buildContext).pop(),
                         ),
@@ -59,20 +67,22 @@ class AppDialog extends StatelessWidget {
                     ),
                     const Divider(color: Colors.white10),
                     const SizedBox(height: AppSpacing.md),
-                    
-                    // Dialog Body
-                    Flexible(child: SingleChildScrollView(child: child)),
-                    
-                    // Dialog Actions (Footer)
+
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: screenSize.height * 0.6,
+                      ),
+                      child: SingleChildScrollView(child: child),
+                    ),
+
                     if (actions != null && actions!.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.lg),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: AppSpacing.sm,
+                        runSpacing: AppSpacing.sm,
                         children: actions!.map((action) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: AppSpacing.sm),
-                            child: action,
-                          );
+                          return action;
                         }).toList(),
                       ),
                     ],

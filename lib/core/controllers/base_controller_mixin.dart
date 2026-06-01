@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/error_handler.dart';
 
 /// Base mixin for all controllers providing common error handling and state management.
@@ -7,6 +7,14 @@ import '../../../core/utils/error_handler.dart';
 /// This mixin provides standardized error handling, loading states, and common
 /// CRUD operations that are repeated across multiple controllers.
 mixin BaseControllerMixin {
+  void _logError(String context, Object error, StackTrace st) {
+    final message = ErrorHandler.handle(error);
+    debugPrint('$context: $message');
+    if (kDebugMode) {
+      debugPrint(st.toString());
+    }
+  }
+
   /// Wrapper for async operations with standardized error handling.
   ///
   /// Usage:
@@ -25,9 +33,11 @@ mixin BaseControllerMixin {
   }) async {
     try {
       return await operation();
-    } catch (e) {
+    } catch (e, st) {
       if (onError != null) {
         onError(e);
+      } else {
+        _logError('Operation failed', e, st);
       }
       return null;
     }
@@ -42,8 +52,8 @@ mixin BaseControllerMixin {
   }) async {
     try {
       await refreshOperation();
-    } catch (e) {
-      debugPrint('Refresh failed: ${ErrorHandler.handle(e)}');
+    } catch (e, st) {
+      _logError('Refresh failed', e, st);
     }
   }
 
@@ -60,9 +70,8 @@ mixin BaseControllerMixin {
       await deleteOperation(id);
       await refreshAfterDelete();
       return true;
-    } catch (e) {
-      final error = ErrorHandler.handle(e);
-      debugPrint('Failed to delete ${entityName ?? 'entity'}: $error');
+    } catch (e, st) {
+      _logError('Failed to delete ${entityName ?? 'entity'}', e, st);
       return false;
     }
   }
@@ -78,9 +87,8 @@ mixin BaseControllerMixin {
     try {
       await updateOperation(item);
       return true;
-    } catch (e) {
-      final error = ErrorHandler.handle(e);
-      debugPrint('Failed to update ${entityName ?? 'entity'}: $error');
+    } catch (e, st) {
+      _logError('Failed to update ${entityName ?? 'entity'}', e, st);
       return false;
     }
   }
@@ -94,9 +102,8 @@ mixin BaseControllerMixin {
   }) async {
     try {
       return await createOperation();
-    } catch (e) {
-      final error = ErrorHandler.handle(e);
-      debugPrint('Failed to create ${entityName ?? 'entity'}: $error');
+    } catch (e, st) {
+      _logError('Failed to create ${entityName ?? 'entity'}', e, st);
       return null;
     }
   }

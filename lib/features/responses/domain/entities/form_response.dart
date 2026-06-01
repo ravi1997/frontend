@@ -8,6 +8,9 @@ import '../../../../core/utils/date_utils.dart';
 class FormResponse {
   final String id;
   final String formId;
+  final String? projectId;
+  final String? formVersion;
+  final String? version;
   final String? organizationId;
   final String? submittedBy;
   final DateTime? submittedAt;
@@ -16,10 +19,14 @@ class FormResponse {
   final String? userAgent;
   final Map<String, dynamic> aiResults;
   final String status;
+  final String? reviewStatus;
 
   const FormResponse({
     required this.id,
     required this.formId,
+    this.projectId,
+    this.formVersion,
+    this.version,
     this.organizationId,
     this.submittedBy,
     this.submittedAt,
@@ -28,6 +35,7 @@ class FormResponse {
     this.userAgent,
     this.aiResults = const <String, dynamic>{},
     this.status = 'pending',
+    this.reviewStatus,
   });
 
   factory FormResponse.fromJson(Map<String, dynamic> json) {
@@ -39,6 +47,9 @@ class FormResponse {
     return FormResponse(
       id: id,
       formId: (normalized['form'] ?? normalized['form_id'] ?? '').toString(),
+      projectId: normalized['project']?.toString(),
+      formVersion: normalized['form_version']?.toString(),
+      version: normalized['version']?.toString(),
       organizationId: normalized['organization_id']?.toString(),
       submittedBy: normalized['submitted_by']?.toString(),
       submittedAt: AppDateUtils.parse(normalized['submitted_at']),
@@ -49,6 +60,7 @@ class FormResponse {
         normalized['ai_results'] as Map? ?? const {},
       ),
       status: (normalized['status'] ?? 'pending').toString(),
+      reviewStatus: normalized['review_status']?.toString(),
     );
   }
 
@@ -57,6 +69,9 @@ class FormResponse {
       '_id': id,
       'id': id,
       'form': formId,
+      'project': projectId,
+      'form_version': formVersion,
+      'version': version,
       'organization_id': organizationId,
       'submitted_by': submittedBy,
       'submitted_at': AppDateUtils.toIso8601(submittedAt),
@@ -65,7 +80,7 @@ class FormResponse {
       'user_agent': userAgent,
       'ai_results': aiResults,
       'status': status,
+      'review_status': reviewStatus,
     }..removeWhere((k, v) => v == null);
   }
 }
-

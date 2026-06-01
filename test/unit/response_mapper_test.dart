@@ -65,5 +65,20 @@ void main() {
       expect(result['section1'].length, 1);
       expect(result['section1'][0]['name'], 'John');
     });
+
+    test('Maps list of primitives and handles null/empty/primitives without crashing', () {
+      final flatAnswers = {
+        'tags[0]': 123,
+        'tags[1]': null,
+        'tags[2]': 'second',
+      };
+
+      final visibilityMap = {
+        'tags': true,
+      };
+
+      final result = ResponseMapper.toBackendPayload(flatAnswers, visibilityMap);
+      expect(result['tags'], equals([123, null, 'second']));
+    });
   });
 }

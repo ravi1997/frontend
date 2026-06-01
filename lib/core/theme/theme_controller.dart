@@ -9,26 +9,48 @@ const _kThemeModeKey = 'theme_mode';
 /// Usage: `ref.watch(themeControllerProvider)` → current [ThemeMode]
 /// Toggle: `ref.read(themeControllerProvider.notifier).toggle()`
 class ThemeController extends Notifier<ThemeMode> {
+  Future<void>? _restoreFuture;
+
   @override
   ThemeMode build() {
-    // Start with system default; Hive will override on first load
-    _restoreFromHive();
+    // Hydrate once. If the box is already open, we can return immediately.
+    if (Hive.isBoxOpen(_kHiveBox)) {
+      final box = Hive.box(_kHiveBox);
+      final stored = box.get(_kThemeModeKey, defaultValue: 'light') as String;
+      return stored == 'dark' ? ThemeMode.dark : ThemeMode.light;
+    }
+
+    _restoreFuture ??= _restoreFromHive();
     return ThemeMode.light;
   }
 
   Future<void> _restoreFromHive() async {
-    final box = await Hive.openBox(_kHiveBox);
-    final stored = box.get(_kThemeModeKey, defaultValue: 'light') as String;
-    final mode = stored == 'dark' ? ThemeMode.dark : ThemeMode.light;
-    if (state != mode) state = mode;
+    try {
+      final box = Hive.isBoxOpen(_kHiveBox)
+          ? Hive.box(_kHiveBox)
+          : await Hive.openBox(_kHiveBox);
+      final stored = box.get(_kThemeModeKey, defaultValue: 'light') as String;
+      final mode = stored == 'dark' ? ThemeMode.dark : ThemeMode.light;
+      if (ref.mounted && state != mode) state = mode;
+    } catch (error, stackTrace) {
+      debugPrint('Failed to restore theme mode: $error\n$stackTrace');
+    }
   }
 
   /// Toggle between light and dark.
   Future<void> toggle() async {
+    await (_restoreFuture ??= _restoreFromHive());
+
     final next = state == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-    state = next;
-    final box = await Hive.openBox(_kHiveBox);
-    await box.put(_kThemeModeKey, next == ThemeMode.dark ? 'dark' : 'light');
+    try {
+      final box = Hive.isBoxOpen(_kHiveBox)
+          ? Hive.box(_kHiveBox)
+          : await Hive.openBox(_kHiveBox);
+      await box.put(_kThemeModeKey, next == ThemeMode.dark ? 'dark' : 'light');
+      if (ref.mounted) state = next;
+    } catch (error, stackTrace) {
+      debugPrint('Failed to persist theme mode: $error\n$stackTrace');
+    }
   }
 
   bool get isDark => state == ThemeMode.dark;
