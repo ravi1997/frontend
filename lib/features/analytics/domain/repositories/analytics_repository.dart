@@ -1,12 +1,10 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../entities/form_analytics.dart';
 import '../entities/analytics_summary.dart';
 import '../entities/analytics_timeline.dart';
 import '../entities/analytics_distribution.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../data/repositories/analytics_repository_impl.dart';
-
-part 'analytics_repository.g.dart';
 
 /// Repository interface for analytics data operations.
 ///
@@ -33,8 +31,7 @@ abstract class AnalyticsRepository {
   Future<AnalyticsDistribution> getAnalyticsDistribution(String formId);
 }
 
-@riverpod
-AnalyticsRepository analyticsRepository(Ref ref) {
+final analyticsRepositoryProvider = Provider<AnalyticsRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return AnalyticsRepositoryImpl(apiClient);
-}
+});

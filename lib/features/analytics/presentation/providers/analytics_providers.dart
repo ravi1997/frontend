@@ -1,4 +1,4 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/repositories/analysis_dashboard_repository.dart';
 import '../controllers/analytics_controller.dart';
@@ -6,45 +6,46 @@ import '../../domain/entities/analytics_summary.dart';
 import '../../domain/entities/analytics_timeline.dart';
 import '../../domain/entities/analytics_distribution.dart';
 
-part 'analytics_providers.g.dart';
+final analysisDashboardRepositoryProvider =
+    Provider<AnalysisDashboardRepository>((ref) {
+      final dioClient = ref.watch(dioProvider);
+      return AnalysisDashboardRepository(dioClient);
+    });
 
-@riverpod
-AnalysisDashboardRepository analysisDashboardRepository(Ref ref) {
-  final dioClient = ref.watch(dioProvider);
-  return AnalysisDashboardRepository(dioClient);
-}
-
-@riverpod
-AnalyticsState analyticsState(Ref ref, String formId) {
+final analyticsStateProvider = Provider.family<AnalyticsState, String>((
+  ref,
+  formId,
+) {
   return ref.watch(analyticsControllerProvider(formId));
-}
+});
 
-@riverpod
-AnalyticsSummary? analyticsSummary(Ref ref, String formId) {
+final analyticsSummaryProvider = Provider.family<AnalyticsSummary?, String>((
+  ref,
+  formId,
+) {
   return ref.watch(analyticsControllerProvider(formId)).summary;
-}
+});
 
-@riverpod
-AnalyticsTimeline? analyticsTimeline(Ref ref, String formId) {
+final analyticsTimelineProvider = Provider.family<AnalyticsTimeline?, String>((
+  ref,
+  formId,
+) {
   return ref.watch(analyticsControllerProvider(formId)).timeline;
-}
+});
 
-@riverpod
-AnalyticsDistribution? analyticsDistribution(Ref ref, String formId) {
-  return ref.watch(analyticsControllerProvider(formId)).distribution;
-}
+final analyticsDistributionProvider =
+    Provider.family<AnalyticsDistribution?, String>((ref, formId) {
+      return ref.watch(analyticsControllerProvider(formId)).distribution;
+    });
 
-@riverpod
-bool analyticsIsLoading(Ref ref, String formId) {
+final analyticsIsLoadingProvider = Provider.family<bool, String>((ref, formId) {
   return ref.watch(analyticsControllerProvider(formId)).isLoading;
-}
+});
 
-@riverpod
-String? analyticsError(Ref ref, String formId) {
+final analyticsErrorProvider = Provider.family<String?, String>((ref, formId) {
   return ref.watch(analyticsControllerProvider(formId)).error;
-}
+});
 
-@riverpod
-bool analyticsHasError(Ref ref, String formId) {
+final analyticsHasErrorProvider = Provider.family<bool, String>((ref, formId) {
   return ref.watch(analyticsControllerProvider(formId)).hasError;
-}
+});

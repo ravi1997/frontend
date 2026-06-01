@@ -1,9 +1,7 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../domain/repositories/ai_repository.dart';
-
-part 'ai_repository_impl.g.dart';
 
 class AIRepositoryImpl implements AIRepository {
   final ApiClient _apiClient;
@@ -49,7 +47,6 @@ class AIRepositoryImpl implements AIRepository {
   }
 }
 
-@riverpod
-AIRepository aiRepository(Ref ref) {
+final aiRepositoryProvider = Provider<AIRepository>((ref) {
   return AIRepositoryImpl(ref.watch(apiClientProvider));
-}
+});

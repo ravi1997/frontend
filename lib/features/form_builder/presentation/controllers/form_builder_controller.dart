@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/utils/error_handler.dart';
 import 'package:frontend/models/form_models.dart';
@@ -13,10 +14,19 @@ import '../../domain/services/field_registry.dart';
 import '../../domain/entities/custom_field_template.dart';
 import '../../domain/entities/access_policy.dart';
 
-part 'form_builder_controller.g.dart';
+final formBuilderControllerProvider = StateNotifierProvider.autoDispose
+    .family<FormBuilderController, AsyncValue<FormBuilderState>, String>(
+      (ref, formKey) => FormBuilderController(ref: ref, formKey: formKey),
+    );
 
-@riverpod
-class FormBuilderController extends _$FormBuilderController {
+class FormBuilderController
+    extends StateNotifier<AsyncValue<FormBuilderState>> {
+  FormBuilderController({required this.ref, required String formKey})
+    : super(const AsyncValue.loading()) {
+    _init(formKey);
+  }
+
+  final Ref ref;
   final _uuid = const Uuid();
   String _projectId = '';
   String _formId = '';
@@ -25,43 +35,47 @@ class FormBuilderController extends _$FormBuilderController {
   final List<BuilderForm> _redoStack = [];
   BuilderForm? _lastHistoryForm;
 
-  @override
-  FutureOr<FormBuilderState> build(String formKey) async {
-    final parts = formKey.split('::');
-    _projectId = parts.first;
-    _formId = parts.sublist(1).join('::');
+  Future<void> _init(String formKey) async {
+    try {
+      final parts = formKey.split('::');
+      _projectId = parts.first;
+      _formId = parts.sublist(1).join('::');
 
-    // For now, let's create an empty form if formId is 'new'
-    if (_formId == 'new') {
-      final initialSection = FormSection(
-        id: _uuid.v4(),
-        title: 'Untitled Section',
-      );
-      final initialVersion = FormVersion(
-        id: _uuid.v4(),
-        version: '1.0.0',
-        sections: [initialSection],
-      );
-      final initialForm = BuilderForm(
-        id: _uuid.v4(),
-        title: 'Untitled Form',
-        slug: _uuid.v4(),
-        organizationId: _projectId,
-        createdBy: 'system',
-        activeVersion: initialVersion.version,
-        versions: [initialVersion],
-      );
-      _savedFormSnapshot = initialForm;
-      _lastHistoryForm = initialForm;
-      return FormBuilderState(form: initialForm);
+      // For now, let's create an empty form if formId is 'new'
+      if (_formId == 'new') {
+        final initialSection = FormSection(
+          id: _uuid.v4(),
+          title: 'Untitled Section',
+        );
+        final initialVersion = FormVersion(
+          id: _uuid.v4(),
+          version: '1.0.0',
+          sections: [initialSection],
+        );
+        final initialForm = BuilderForm(
+          id: _uuid.v4(),
+          title: 'Untitled Form',
+          slug: _uuid.v4(),
+          organizationId: _projectId,
+          createdBy: 'system',
+          activeVersion: initialVersion.version,
+          versions: [initialVersion],
+        );
+        _savedFormSnapshot = initialForm;
+        _lastHistoryForm = initialForm;
+        state = AsyncValue.data(FormBuilderState(form: initialForm));
+        return;
+      }
+
+      // Otherwise fetch from repository
+      final repository = ref.read(formBuilderRepositoryProvider);
+      final form = await repository.getForm(_projectId, _formId);
+      _savedFormSnapshot = form;
+      _lastHistoryForm = form;
+      state = AsyncValue.data(FormBuilderState(form: form));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
-
-    // Otherwise fetch from repository
-    final repository = ref.read(formBuilderRepositoryProvider);
-    final form = await repository.getForm(_projectId, _formId);
-    _savedFormSnapshot = form;
-    _lastHistoryForm = form;
-    return FormBuilderState(form: form);
   }
 
   void _captureHistorySnapshot() {
@@ -177,10 +191,12 @@ class FormBuilderController extends _$FormBuilderController {
     if (form.versions.isEmpty) return const [];
     final activeVersion = form.activeVersion;
     if (activeVersion == null) return form.versions.first.sections;
-    return form.versions.firstWhere(
-      (version) => version.version == activeVersion,
-      orElse: () => form.versions.first,
-    ).sections;
+    return form.versions
+        .firstWhere(
+          (version) => version.version == activeVersion,
+          orElse: () => form.versions.first,
+        )
+        .sections;
   }
 
   FormSection? _updateSectionById(
@@ -228,7 +244,10 @@ class FormBuilderController extends _$FormBuilderController {
       if (nested != null) {
         final updatedSection = section.copyWith(sections: nested.sections);
         final updatedSections = [...sections]..[i] = updatedSection;
-        return (sections: updatedSections, updatedSection: nested.updatedSection);
+        return (
+          sections: updatedSections,
+          updatedSection: nested.updatedSection,
+        );
       }
     }
     return null;
@@ -369,12 +388,7 @@ class FormBuilderController extends _$FormBuilderController {
   void updateQuestionRequired(String questionId, bool required) {
     _updateQuestion(
       questionId,
-      (q) => q.copyWith(
-        validation: {
-          ...q.validation,
-          'is_required': required,
-        },
-      ),
+      (q) => q.copyWith(validation: {...q.validation, 'is_required': required}),
     );
   }
 
@@ -409,10 +423,10 @@ class FormBuilderController extends _$FormBuilderController {
 
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: _replaceFormSections(
-          state.value!.form,
-          [..._currentSections(state.value!.form), newSection],
-        ),
+        form: _replaceFormSections(state.value!.form, [
+          ..._currentSections(state.value!.form),
+          newSection,
+        ]),
         selectedSectionId: newSection.id,
         selectedQuestionId: null,
         isFormSelected: false,
@@ -523,15 +537,15 @@ class FormBuilderController extends _$FormBuilderController {
       final newSection = section.copyWith(id: _uuid.v4());
 
       state = AsyncValue.data(
-      state.value!.copyWith(
-        form: _replaceFormSections(
-          state.value!.form,
-          [..._currentSections(state.value!.form), newSection],
+        state.value!.copyWith(
+          form: _replaceFormSections(state.value!.form, [
+            ..._currentSections(state.value!.form),
+            newSection,
+          ]),
+          selectedSectionId: newSection.id,
+          selectedQuestionId: null,
+          isFormSelected: false,
         ),
-        selectedSectionId: newSection.id,
-        selectedQuestionId: null,
-        isFormSelected: false,
-      ),
       );
       _markDirty();
     } else if (template.template_type == 'workflow') {
@@ -586,9 +600,8 @@ class FormBuilderController extends _$FormBuilderController {
     final sections = _updateQuestionRecursive(
       state.value!.form.sections,
       questionId,
-      (question) => question.copyWith(
-        metadata: {...question.metadata, ...metadata},
-      ),
+      (question) =>
+          question.copyWith(metadata: {...question.metadata, ...metadata}),
     );
 
     state = AsyncValue.data(
@@ -688,10 +701,8 @@ class FormBuilderController extends _$FormBuilderController {
     final sections = _updateQuestionRecursive(
       state.value!.form.sections,
       questionId,
-      (currentQuestion) => FieldRegistry.convertQuestionType(
-        currentQuestion,
-        newType,
-      ),
+      (currentQuestion) =>
+          FieldRegistry.convertQuestionType(currentQuestion, newType),
     );
 
     state = AsyncValue.data(
@@ -860,7 +871,10 @@ class FormBuilderController extends _$FormBuilderController {
     if (state.value == null) return;
     state = AsyncValue.data(
       state.value!.copyWith(
-        form: _replaceFormSections(updatedForm, _currentSections(state.value!.form)),
+        form: _replaceFormSections(
+          updatedForm,
+          _currentSections(state.value!.form),
+        ),
       ),
     );
     _markDirty();
@@ -1089,7 +1103,9 @@ class FormBuilderController extends _$FormBuilderController {
       );
       if (questionIndex != -1) {
         final updatedQuestions = [...section.questions];
-        updatedQuestions[questionIndex] = updater(updatedQuestions[questionIndex]);
+        updatedQuestions[questionIndex] = updater(
+          updatedQuestions[questionIndex],
+        );
         return section.copyWith(questions: updatedQuestions);
       }
 
@@ -1181,9 +1197,7 @@ class FormBuilderController extends _$FormBuilderController {
 
       if (!result.containsKey('task_id')) {
         state = AsyncValue.data(
-          state.value!.copyWith(
-            error: 'Publish did not return a task_id',
-          ),
+          state.value!.copyWith(error: 'Publish did not return a task_id'),
         );
       }
       return true;

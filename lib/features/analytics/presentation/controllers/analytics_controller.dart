@@ -1,10 +1,9 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../../domain/entities/analytics_summary.dart';
 import '../../domain/entities/analytics_timeline.dart';
 import '../../domain/entities/analytics_distribution.dart';
 import '../../domain/repositories/analytics_repository.dart';
-
-part 'analytics_controller.g.dart';
 
 const Object _analyticsErrorUnset = Object();
 
@@ -65,17 +64,20 @@ class AnalyticsState {
 /// - Distribution data
 ///
 /// Supports individual loading of each analytics type and batch refresh.
-@riverpod
-class AnalyticsController extends _$AnalyticsController {
-  @override
-  AnalyticsState build(String formId) {
-    // Don't load data in build - it causes circular dependency
-    // Load initial data asynchronously via refresh() if needed
-    return const AnalyticsState();
-  }
+final analyticsControllerProvider =
+    StateNotifierProvider.family<AnalyticsController, AnalyticsState, String>(
+      (ref, formId) => AnalyticsController(ref: ref, formId: formId),
+    );
+
+class AnalyticsController extends StateNotifier<AnalyticsState> {
+  AnalyticsController({required this.ref, required this.formId})
+    : super(const AnalyticsState());
+
+  final Ref ref;
+  final String formId;
 
   /// Loads all three types of analytics data in parallel.
-  Future<void> _loadAllAnalytics(String formId) async {
+  Future<void> _loadAllAnalytics() async {
     state = state.copyWith(
       isLoadingSummary: true,
       isLoadingTimeline: true,
@@ -87,9 +89,9 @@ class AnalyticsController extends _$AnalyticsController {
       final repository = ref.read(analyticsRepositoryProvider);
 
       final results = await Future.wait([
-        repository.getAnalyticsSummary(formId),
-        repository.getAnalyticsTimeline(formId, days: 30),
-        repository.getAnalyticsDistribution(formId),
+        repository.getAnalyticsSummary(this.formId),
+        repository.getAnalyticsTimeline(this.formId, days: 30),
+        repository.getAnalyticsDistribution(this.formId),
       ]);
 
       if (!ref.mounted) return;
@@ -119,7 +121,7 @@ class AnalyticsController extends _$AnalyticsController {
 
     try {
       final repository = ref.read(analyticsRepositoryProvider);
-      final summary = await repository.getAnalyticsSummary(formId);
+      final summary = await repository.getAnalyticsSummary(this.formId);
 
       if (!ref.mounted) return;
 
@@ -139,7 +141,7 @@ class AnalyticsController extends _$AnalyticsController {
     try {
       final repository = ref.read(analyticsRepositoryProvider);
       final timeline = await repository.getAnalyticsTimeline(
-        formId,
+        this.formId,
         days: days,
       );
 
@@ -157,7 +159,9 @@ class AnalyticsController extends _$AnalyticsController {
 
     try {
       final repository = ref.read(analyticsRepositoryProvider);
-      final distribution = await repository.getAnalyticsDistribution(formId);
+      final distribution = await repository.getAnalyticsDistribution(
+        this.formId,
+      );
 
       if (!ref.mounted) return;
 
@@ -172,7 +176,7 @@ class AnalyticsController extends _$AnalyticsController {
 
   /// Refreshes all analytics data.
   Future<void> refresh() async {
-    await _loadAllAnalytics(formId);
+    await _loadAllAnalytics();
   }
 
   /// Clears any error state.
