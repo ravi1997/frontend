@@ -211,7 +211,7 @@ class TemplateCard extends StatelessWidget {
         return [const Color(0xFF6366F1), const Color(0xFF4B5563)];
       case FormTemplateCategory.application:
         return [const Color(0xFF14B8A6), const Color(0xFF0D9488)];
-      case FormTemplateCategory.other:
+      default:
         return [const Color(0xFF6B7280), const Color(0xFF4B5563)];
     }
   }
@@ -234,7 +234,7 @@ class TemplateCard extends StatelessWidget {
         return FontAwesomeIcons.cartShopping;
       case FormTemplateCategory.application:
         return FontAwesomeIcons.fileSignature;
-      case FormTemplateCategory.other:
+      default:
         return FontAwesomeIcons.file;
     }
   }

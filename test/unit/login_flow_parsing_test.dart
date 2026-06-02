@@ -1,18 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/auth/data/datasources/auth_remote_source.dart';
-import 'package:frontend/core/network/api_client_wrapper.dart';
+import 'package:frontend/core/network/api_client.dart';
+import 'package:frontend/core/network/token_service.dart';
+import 'package:frontend/features/auth/auth_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
+class MockTokenService extends Mock implements TokenService {}
 
 void main() {
-  late AuthRemoteSourceImpl remoteSource;
+  late AuthService authService;
   late MockApiClient mockApiClient;
+  late MockTokenService mockTokenService;
 
   setUp(() {
     mockApiClient = MockApiClient();
-    remoteSource = AuthRemoteSourceImpl(mockApiClient);
+    mockTokenService = MockTokenService();
+    authService = AuthService(mockApiClient, mockTokenService);
+    
+    registerFallbackValue(Uri());
   });
 
   group('getCurrentUser parsing tests', () {
@@ -35,7 +41,7 @@ void main() {
         ),
       );
 
-      final user = await remoteSource.getCurrentUser();
+      final user = await authService.getCurrentUser();
       expect(user, isNotNull);
       expect(user!.id, 'u1');
       expect(user.username, 'testuser');
@@ -58,7 +64,7 @@ void main() {
         ),
       );
 
-      final user = await remoteSource.getCurrentUser();
+      final user = await authService.getCurrentUser();
       expect(user, isNotNull);
       expect(user!.id, 'u2');
       expect(user.username, 'admin_user');
@@ -75,7 +81,7 @@ void main() {
         ),
       );
 
-      final user = await remoteSource.getCurrentUser();
+      final user = await authService.getCurrentUser();
       expect(user, isNull);
     });
   });

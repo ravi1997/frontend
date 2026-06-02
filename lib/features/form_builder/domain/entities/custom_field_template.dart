@@ -1,24 +1,51 @@
-// ignore_for_file: non_constant_identifier_names
+class CustomFieldTemplate {
+  final String id;
+  final String name;
+  final String category;
+  final String template_type;
+  final Map<String, dynamic> data;
 
-import 'package:freezed_annotation/freezed_annotation.dart';
+  CustomFieldTemplate({
+    required this.id,
+    required this.name,
+    required this.category,
+    this.template_type = 'question',
+    this.data = const {},
+  });
 
-part 'custom_field_template.freezed.dart';
-part 'custom_field_template.g.dart';
+  factory CustomFieldTemplate.fromJson(Map<String, dynamic> json) {
+    return CustomFieldTemplate(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      category: json['category'] as String? ?? '',
+      template_type: json['template_type'] as String? ?? 'question',
+      data: json['data'] as Map<String, dynamic>? ?? const {},
+    );
+  }
 
-@freezed
-abstract class CustomFieldTemplate with _$CustomFieldTemplate {
-  const factory CustomFieldTemplate({
-    required String id,
-    required String name,
-    required String category,
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'template_type': template_type,
+      'data': data,
+    };
+  }
 
-    /// Type of template: 'question', 'section', 'workflow', etc.
-    @Default('question') String template_type,
-
-    /// Raw JSON representing the template
-    @Default({}) Map<String, dynamic> data,
-  }) = _CustomFieldTemplate;
-
-  factory CustomFieldTemplate.fromJson(Map<String, dynamic> json) =>
-      _$CustomFieldTemplateFromJson(json);
+  CustomFieldTemplate copyWith({
+    String? id,
+    String? name,
+    String? category,
+    String? template_type,
+    Map<String, dynamic>? data,
+  }) {
+    return CustomFieldTemplate(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      template_type: template_type ?? this.template_type,
+      data: data ?? this.data,
+    );
+  }
 }

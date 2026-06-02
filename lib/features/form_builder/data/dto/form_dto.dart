@@ -1,49 +1,118 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../core/utils/id_reader.dart';
 
-part 'form_dto.freezed.dart';
-part 'form_dto.g.dart';
-
 // Updated for custom date parsing
-@freezed
-abstract class FormDto with _$FormDto {
-  const FormDto._();
+class FormDto {
+  // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
+  @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)
+  final String id;
+  final String title;
+  final String status;
+  final String? uiType;
+  final String? activeVersion;
 
-  const factory FormDto({
-    // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
-    @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)
-    required String id,
-    @Default('Untitled Form') String title,
-    @Default('draft') String status,
-    @JsonKey(name: 'ui_type') String? uiType,
-    @JsonKey(name: 'active_version') String? activeVersion,
+  // The backend returns a list of version objects under 'versions'
+  final List<FormVersionDto> versions;
 
-    // The backend returns a list of version objects under 'versions'
-    @Default(<FormVersionDto>[]) List<FormVersionDto> versions,
+  @JsonKey(
+    name: 'created_at',
+    fromJson: AppDateUtils.parse,
+    toJson: AppDateUtils.toIso8601,
+  )
+  final DateTime? createdAt;
+  
+  @JsonKey(
+    name: 'updated_at',
+    fromJson: AppDateUtils.parse,
+    toJson: AppDateUtils.toIso8601,
+  )
+  final DateTime? updatedAt;
 
-    @JsonKey(
-      name: 'created_at',
-      fromJson: AppDateUtils.parse,
-      toJson: AppDateUtils.toIso8601,
-    )
+  // Workflows might be a Map or dynamic
+  final Map<String, dynamic> workflows;
+
+  // Access Policy
+  @JsonKey(name: 'accessPolicy')
+  final Map<String, dynamic>? accessPolicy;
+
+  const FormDto({
+    required this.id,
+    this.title = 'Untitled Form',
+    this.status = 'draft',
+    this.uiType,
+    this.activeVersion,
+    this.versions = const [],
+    this.createdAt,
+    this.updatedAt,
+    this.workflows = const {},
+    this.accessPolicy,
+  });
+
+  FormDto copyWith({
+    String? id,
+    String? title,
+    String? status,
+    String? uiType,
+    String? activeVersion,
+    List<FormVersionDto>? versions,
     DateTime? createdAt,
-    @JsonKey(
-      name: 'updated_at',
-      fromJson: AppDateUtils.parse,
-      toJson: AppDateUtils.toIso8601,
-    )
     DateTime? updatedAt,
+    Map<String, dynamic>? workflows,
+    Map<String, dynamic>? accessPolicy,
+  }) {
+    return FormDto(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      status: status ?? this.status,
+      uiType: uiType ?? this.uiType,
+      activeVersion: activeVersion ?? this.activeVersion,
+      versions: versions ?? this.versions,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      workflows: workflows ?? this.workflows,
+      accessPolicy: accessPolicy ?? this.accessPolicy,
+    );
+  }
 
-    // Workflows might be a Map or dynamic
-    @Default(<String, dynamic>{}) Map<String, dynamic> workflows,
+  factory FormDto.fromJson(Map<String, dynamic> json) {
+    final normalizedJson = _normalizeJson(json);
+    return FormDto(
+      id: IdReader.readIdWithSlugCallback(normalizedJson, 'id') as String,
+      title: normalizedJson['title'] as String? ?? 'Untitled Form',
+      status: normalizedJson['status'] as String? ?? 'draft',
+      uiType: normalizedJson['ui_type'] as String?,
+      activeVersion: normalizedJson['active_version'] as String?,
+      versions: (normalizedJson['versions'] as List?)
+          ?.map((e) => FormVersionDto.fromJson(Map<String, dynamic>.from(e)))
+          .toList() ?? <FormVersionDto>[],
+      createdAt: normalizedJson['created_at'] != null 
+          ? AppDateUtils.parse(normalizedJson['created_at']) 
+          : null,
+      updatedAt: normalizedJson['updated_at'] != null 
+          ? AppDateUtils.parse(normalizedJson['updated_at']) 
+          : null,
+      workflows: Map<String, dynamic>.from(normalizedJson['workflows'] ?? {}),
+      accessPolicy: normalizedJson['accessPolicy'] != null
+          ? Map<String, dynamic>.from(normalizedJson['accessPolicy'])
+          : null,
+    );
+  }
 
-    // Access Policy
-    @JsonKey(name: 'accessPolicy') Map<String, dynamic>? accessPolicy,
-  }) = _FormDto;
-
-  factory FormDto.fromJson(Map<String, dynamic> json) =>
-      _$FormDtoFromJson(_normalizeJson(json));
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'status': status,
+      'ui_type': uiType,
+      'active_version': activeVersion,
+      'versions': versions.map((e) => e.toJson()).toList(),
+      'created_at': createdAt != null ? AppDateUtils.toIso8601(createdAt!) : null,
+      'updated_at': updatedAt != null ? AppDateUtils.toIso8601(updatedAt!) : null,
+      'workflows': workflows,
+      'accessPolicy': accessPolicy,
+    };
+  }
 
   static Map<String, dynamic> _normalizeJson(Map<String, dynamic> json) {
     // If the backend returns sections at the top level (no versions array),
@@ -74,23 +143,52 @@ abstract class FormDto with _$FormDto {
   }
 }
 
-@freezed
-abstract class FormVersionDto with _$FormVersionDto {
-  const factory FormVersionDto({
-    @Default('1.0') String version,
-    @JsonKey(fromJson: _sectionsFromJson)
-    @Default(<Map<String, dynamic>>[])
-    List<Map<String, dynamic>> sections,
-    @JsonKey(
-      name: 'created_at',
-      fromJson: AppDateUtils.parse,
-      toJson: AppDateUtils.toIso8601,
-    )
-    DateTime? createdAt,
-  }) = _FormVersionDto;
+class FormVersionDto {
+  final String version;
+  final List<Map<String, dynamic>> sections;
+  
+  @JsonKey(
+    name: 'created_at',
+    fromJson: AppDateUtils.parse,
+    toJson: AppDateUtils.toIso8601,
+  )
+  final DateTime? createdAt;
 
-  factory FormVersionDto.fromJson(Map<String, dynamic> json) =>
-      _$FormVersionDtoFromJson(json);
+  const FormVersionDto({
+    this.version = '1.0',
+    this.sections = const [],
+    this.createdAt,
+  });
+
+  FormVersionDto copyWith({
+    String? version,
+    List<Map<String, dynamic>>? sections,
+    DateTime? createdAt,
+  }) {
+    return FormVersionDto(
+      version: version ?? this.version,
+      sections: sections ?? this.sections,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  factory FormVersionDto.fromJson(Map<String, dynamic> json) {
+    return FormVersionDto(
+      version: json['version'] as String? ?? '1.0',
+      sections: _sectionsFromJson(json['sections']),
+      createdAt: json['created_at'] != null 
+          ? AppDateUtils.parse(json['created_at']) 
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'version': version,
+      'sections': sections,
+      'created_at': createdAt != null ? AppDateUtils.toIso8601(createdAt!) : null,
+    };
+  }
 }
 
 List<Map<String, dynamic>> _sectionsFromJson(dynamic value) {

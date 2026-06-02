@@ -340,7 +340,7 @@ class TemplatePreviewDialog extends StatelessWidget {
         return const Color(0xFF6366F1);
       case FormTemplateCategory.application:
         return const Color(0xFF14B8A6);
-      case FormTemplateCategory.other:
+      default:
         return const Color(0xFF6B7280);
     }
   }

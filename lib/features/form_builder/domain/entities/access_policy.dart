@@ -1,30 +1,131 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+class AccessPolicy {
+  final List<String> canViewResponses;
+  final List<String> canEditResponses;
+  final List<String> canDeleteResponses;
+  final String responseVisibility; // 'all', 'own_only', 'department_only'
 
-part 'access_policy.freezed.dart';
-part 'access_policy.g.dart';
+  final List<String> canCreateVersions;
+  final List<String> canEditDesign;
+  final List<String> canCloneForm;
 
-@freezed
-abstract class AccessPolicy with _$AccessPolicy {
-  const factory AccessPolicy({
-    @Default([]) List<String> canViewResponses,
-    @Default([]) List<String> canEditResponses,
-    @Default([]) List<String> canDeleteResponses,
-    @Default('all')
-    String responseVisibility, // 'all', 'own_only', 'department_only'
+  final List<String> canManageAccess;
+  final List<String> canViewAuditLogs;
+  final List<String> canDeleteForm;
 
-    @Default([]) List<String> canCreateVersions,
-    @Default([]) List<String> canEditDesign,
-    @Default([]) List<String> canCloneForm,
+  final String formVisibility; // 'public', 'private', 'restricted'
+  final List<String> allowedDepartments;
 
-    @Default([]) List<String> canManageAccess,
-    @Default([]) List<String> canViewAuditLogs,
-    @Default([]) List<String> canDeleteForm,
+  AccessPolicy({
+    this.canViewResponses = const [],
+    this.canEditResponses = const [],
+    this.canDeleteResponses = const [],
+    this.responseVisibility = 'all',
+    this.canCreateVersions = const [],
+    this.canEditDesign = const [],
+    this.canCloneForm = const [],
+    this.canManageAccess = const [],
+    this.canViewAuditLogs = const [],
+    this.canDeleteForm = const [],
+    this.formVisibility = 'private',
+    this.allowedDepartments = const [],
+  });
 
-    @Default('private')
-    String formVisibility, // 'public', 'private', 'restricted'
-    @Default([]) List<String> allowedDepartments,
-  }) = _AccessPolicy;
+  factory AccessPolicy.fromJson(Map<String, dynamic> json) {
+    return AccessPolicy(
+      canViewResponses: List<String>.from(json['canViewResponses'] ?? []),
+      canEditResponses: List<String>.from(json['canEditResponses'] ?? []),
+      canDeleteResponses: List<String>.from(json['canDeleteResponses'] ?? []),
+      responseVisibility: json['responseVisibility'] as String? ?? 'all',
+      canCreateVersions: List<String>.from(json['canCreateVersions'] ?? []),
+      canEditDesign: List<String>.from(json['canEditDesign'] ?? []),
+      canCloneForm: List<String>.from(json['canCloneForm'] ?? []),
+      canManageAccess: List<String>.from(json['canManageAccess'] ?? []),
+      canViewAuditLogs: List<String>.from(json['canViewAuditLogs'] ?? []),
+      canDeleteForm: List<String>.from(json['canDeleteForm'] ?? []),
+      formVisibility: json['formVisibility'] as String? ?? 'private',
+      allowedDepartments: List<String>.from(json['allowedDepartments'] ?? []),
+    );
+  }
 
-  factory AccessPolicy.fromJson(Map<String, dynamic> json) =>
-      _$AccessPolicyFromJson(json);
+  Map<String, dynamic> toJson() {
+    return {
+      'canViewResponses': canViewResponses,
+      'canEditResponses': canEditResponses,
+      'canDeleteResponses': canDeleteResponses,
+      'responseVisibility': responseVisibility,
+      'canCreateVersions': canCreateVersions,
+      'canEditDesign': canEditDesign,
+      'canCloneForm': canCloneForm,
+      'canManageAccess': canManageAccess,
+      'canViewAuditLogs': canViewAuditLogs,
+      'canDeleteForm': canDeleteForm,
+      'formVisibility': formVisibility,
+      'allowedDepartments': allowedDepartments,
+    };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    
+    return other is AccessPolicy &&
+      other.canViewResponses.toString() == canViewResponses.toString() &&
+      other.canEditResponses.toString() == canEditResponses.toString() &&
+      other.canDeleteResponses.toString() == canDeleteResponses.toString() &&
+      other.responseVisibility == responseVisibility &&
+      other.canCreateVersions.toString() == canCreateVersions.toString() &&
+      other.canEditDesign.toString() == canEditDesign.toString() &&
+      other.canCloneForm.toString() == canCloneForm.toString() &&
+      other.canManageAccess.toString() == canManageAccess.toString() &&
+      other.canViewAuditLogs.toString() == canViewAuditLogs.toString() &&
+      other.canDeleteForm.toString() == canDeleteForm.toString() &&
+      other.formVisibility == formVisibility &&
+      other.allowedDepartments.toString() == allowedDepartments.toString();
+  }
+
+  @override
+  int get hashCode {
+    return canViewResponses.hashCode ^
+      canEditResponses.hashCode ^
+      canDeleteResponses.hashCode ^
+      responseVisibility.hashCode ^
+      canCreateVersions.hashCode ^
+      canEditDesign.hashCode ^
+      canCloneForm.hashCode ^
+      canManageAccess.hashCode ^
+      canViewAuditLogs.hashCode ^
+      canDeleteForm.hashCode ^
+      formVisibility.hashCode ^
+      allowedDepartments.hashCode;
+  }
+
+  AccessPolicy copyWith({
+    List<String>? canViewResponses,
+    List<String>? canEditResponses,
+    List<String>? canDeleteResponses,
+    String? responseVisibility,
+    List<String>? canCreateVersions,
+    List<String>? canEditDesign,
+    List<String>? canCloneForm,
+    List<String>? canManageAccess,
+    List<String>? canViewAuditLogs,
+    List<String>? canDeleteForm,
+    String? formVisibility,
+    List<String>? allowedDepartments,
+  }) {
+    return AccessPolicy(
+      canViewResponses: canViewResponses ?? this.canViewResponses,
+      canEditResponses: canEditResponses ?? this.canEditResponses,
+      canDeleteResponses: canDeleteResponses ?? this.canDeleteResponses,
+      responseVisibility: responseVisibility ?? this.responseVisibility,
+      canCreateVersions: canCreateVersions ?? this.canCreateVersions,
+      canEditDesign: canEditDesign ?? this.canEditDesign,
+      canCloneForm: canCloneForm ?? this.canCloneForm,
+      canManageAccess: canManageAccess ?? this.canManageAccess,
+      canViewAuditLogs: canViewAuditLogs ?? this.canViewAuditLogs,
+      canDeleteForm: canDeleteForm ?? this.canDeleteForm,
+      formVisibility: formVisibility ?? this.formVisibility,
+      allowedDepartments: allowedDepartments ?? this.allowedDepartments,
+    );
+  }
 }

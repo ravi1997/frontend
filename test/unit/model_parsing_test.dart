@@ -1,24 +1,28 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/auth/data/datasources/auth_remote_source.dart';
-import 'package:frontend/features/auth/domain/entities/user.dart';
-import 'package:frontend/core/network/api_client_wrapper.dart';
+import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_endpoints.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:frontend/core/network/token_service.dart';
+import 'package:frontend/features/auth/auth_models.dart';
+import 'package:frontend/features/auth/auth_service.dart';
 import 'package:frontend/features/responses/domain/entities/form_response.dart';
+import 'package:mocktail/mocktail.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
+class MockTokenService extends Mock implements TokenService {}
 
 void main() {
-  late AuthRemoteSourceImpl remoteSource;
+  late AuthService authService;
   late MockApiClient mockApiClient;
+  late MockTokenService mockTokenService;
 
   setUp(() {
     mockApiClient = MockApiClient();
-    remoteSource = AuthRemoteSourceImpl(mockApiClient);
+    mockTokenService = MockTokenService();
+    authService = AuthService(mockApiClient, mockTokenService);
   });
 
-  group('User entity parsing tests', () {
+  group('UserModel entity parsing tests', () {
     test('parses organization_id correctly', () async {
       final responseData = {
         'user': {
@@ -38,7 +42,7 @@ void main() {
         ),
       );
 
-      final user = await remoteSource.getCurrentUser();
+      final user = await authService.getCurrentUser();
       expect(user, isNotNull);
       expect(user!.organizationId, 'org-123');
     });
@@ -61,7 +65,7 @@ void main() {
         ),
       );
 
-      final user = await remoteSource.getCurrentUser();
+      final user = await authService.getCurrentUser();
       expect(user, isNotNull);
       expect(user!.id, 'u2');
       expect(user.organizationId, 'org-456');
@@ -69,7 +73,7 @@ void main() {
     });
 
     test('isAdmin computed correctly from roles', () {
-      final user = User(
+      final user = UserModel(
         id: '1',
         username: 'test',
         email: 'test@test.com',
@@ -80,7 +84,7 @@ void main() {
     });
 
     test('isAdmin computed correctly from isAdminFlag', () {
-      final user = User(
+      final user = UserModel(
         id: '1',
         username: 'test',
         email: 'test@test.com',
@@ -91,7 +95,7 @@ void main() {
     });
 
     test('isAdmin computed correctly from superadmin role', () {
-      final user = User(
+      final user = UserModel(
         id: '1',
         username: 'test',
         email: 'test@test.com',
@@ -102,7 +106,7 @@ void main() {
     });
 
     test('hasAtLeastRole respects role order', () {
-      final user = User(
+      final user = UserModel(
         id: '1',
         username: 'test',
         email: 'test@test.com',
@@ -174,7 +178,7 @@ void main() {
         ),
       );
 
-      await remoteSource.register(
+      await authService.register(
         username: 'testuser',
         email: 'test@example.com',
         password: 'password123',
@@ -182,7 +186,7 @@ void main() {
         mobile: '1234567890',
       );
 
-        verify(
+      verify(
         () => mockApiClient.post(
           ApiEndpoints.register,
           data: {

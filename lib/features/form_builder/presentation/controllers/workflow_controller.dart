@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
+import 'package:frontend/features/auth/auth_controller.dart';
 import '../../domain/entities/workflow.dart';
 import '../../domain/entities/workflow_enums.dart';
 import '../../domain/entities/workflow_step.dart';

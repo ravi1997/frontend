@@ -88,13 +88,11 @@ class ApiEndpoints {
   /// Query: ?page=int&page_size=int
   /// Returns: [{ "id": string, "username": string, "email": string, ... }]
   static const String adminListUsers = '/user/users';
-  static const String adminListUsersAlt = '/users/users';
 
   /// GET - Get user by ID
   /// Headers: { "Authorization": "Bearer {token}" }
   /// Returns: { "id": string, "username": string, "email": string, ... }
   static String adminGetUser(String userId) => '/user/users/$userId';
-  static String adminGetUserAlt(String userId) => '/users/users/$userId';
 
   /// GET - List departments (admin only)
   static const String adminListDepartments = '/user/departments';

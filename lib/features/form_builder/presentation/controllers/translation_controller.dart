@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../auth/presentation/controllers/auth_controller.dart';
+import 'package:frontend/features/auth/auth_controller.dart';
 import '../../domain/entities/translation_job.dart';
 import '../../domain/entities/translation_language.dart';
 import '../../domain/repositories/translation_repository.dart';

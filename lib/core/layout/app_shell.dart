@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../design_system/tokens.dart';
 import '../theme/theme_controller.dart';
 import '../layout/responsive.dart';
-import '../../features/auth/presentation/controllers/auth_controller.dart';
+import 'package:frontend/features/auth/auth_controller.dart';
 
 /// Navigation item definition for the app sidebar.
 class _NavItem {

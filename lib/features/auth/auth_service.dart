@@ -1,20 +1,30 @@
+// lib/features/auth/auth_service.dart
+
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:frontend/core/network/api_client.dart';
+import 'package:frontend/core/network/api_endpoints.dart';
 import 'package:frontend/core/network/token_service.dart';
-import 'package:frontend/features/auth/data/datasources/auth_remote_source.dart';
-import 'package:frontend/features/auth/domain/entities/user.dart';
+import 'package:frontend/features/auth/auth_models.dart';
 
-/// Lean replacement for the repository chain.
-///
-/// For now this composes the existing remote source + token store logic.
-/// Next steps will inline the remote calls and delete the old layers.
 class AuthService {
-  AuthService(this._remoteSource, this._tokenService);
-
-  final AuthRemoteSource _remoteSource;
+  final ApiClient _apiClient;
   final TokenService _tokenService;
 
-  Future<User> login(String identifier, String password) async {
-    final response = await _remoteSource.login(identifier, password);
-    await _handleAuthResponse(response);
+  AuthService(this._apiClient, this._tokenService);
+
+  Future<UserModel> login(String identifier, String password) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.login,
+      data: {'identifier': identifier, 'password': password},
+    );
+    final mapData = _responseMap(response);
+    await _handleAuthResponse(mapData);
+    final responseUser = _extractUserMap(mapData);
+    if (responseUser != null) {
+      return UserModel.fromJson(responseUser);
+    }
     final user = await getCurrentUser();
     if (user == null) {
       await _tokenService.clearTokens();
@@ -23,9 +33,17 @@ class AuthService {
     return user;
   }
 
-  Future<User> loginWithOtp(String mobile, String otp) async {
-    final response = await _remoteSource.loginWithOtp(mobile, otp);
-    await _handleAuthResponse(response);
+  Future<UserModel> loginWithOtp(String mobile, String otp) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.loginWithOtp,
+      data: {'mobile': mobile, 'otp': otp},
+    );
+    final mapData = _responseMap(response);
+    await _handleAuthResponse(mapData);
+    final responseUser = _extractUserMap(mapData);
+    if (responseUser != null) {
+      return UserModel.fromJson(responseUser);
+    }
     final user = await getCurrentUser();
     if (user == null) {
       await _tokenService.clearTokens();
@@ -34,17 +52,38 @@ class AuthService {
     return user;
   }
 
-  Future<void> requestOtp(String mobile) => _remoteSource.requestOtp(mobile);
+  Future<void> requestOtp(String mobile) async {
+    await _apiClient.post(ApiEndpoints.requestOtp, data: {'mobile': mobile});
+  }
 
   Future<void> logout() async {
     try {
-      await _remoteSource.logout();
+      await _apiClient.post(ApiEndpoints.logout);
     } finally {
       await _tokenService.clearTokens();
     }
   }
 
-  Future<User?> getCurrentUser() => _remoteSource.getCurrentUser();
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final response = await _apiClient.get(ApiEndpoints.userStatus);
+      final mapData = _responseMap(response);
+      final userData = _extractUserMap(mapData);
+      if (userData != null) {
+        return UserModel.fromJson(userData);
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return null;
+      }
+      debugPrint('Error in getCurrentUser: $e');
+      rethrow;
+    } catch (e) {
+      debugPrint('Error in getCurrentUser: $e');
+      rethrow;
+    }
+    return null;
+  }
 
   Future<void> register({
     required String username,
@@ -52,27 +91,47 @@ class AuthService {
     required String password,
     String? employeeId,
     String? mobile,
-  }) => _remoteSource.register(
-    username: username,
-    email: email,
-    password: password,
-    employeeId: employeeId,
-    mobile: mobile,
-  );
-
-  Future<void> requestPasswordReset(String email) =>
-      _remoteSource.requestPasswordReset(email);
-
-  Future<String> refreshToken(String refreshToken) async {
-    final response = await _remoteSource.refreshToken(refreshToken);
-    await _handleAuthResponse(response);
-    return response['access_token'] as String;
+  }) async {
+    await _apiClient.post(
+      ApiEndpoints.register,
+      data: {
+        'username': username,
+        'email': email,
+        'password': password,
+        'user_type': 'general',
+        if (employeeId != null) 'employee_id': employeeId,
+        if (mobile != null) 'mobile': mobile,
+      },
+    );
   }
 
-  Future<void> revokeAll() => _remoteSource.revokeAll();
+  Future<void> requestPasswordReset(String email) async {
+    await _apiClient.post(
+      ApiEndpoints.requestPasswordReset,
+      data: {'email': email},
+    );
+  }
 
-  Future<void> changePassword(String currentPassword, String newPassword) =>
-      _remoteSource.changePassword(currentPassword, newPassword);
+  Future<String> refreshToken(String refreshToken) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.refreshToken,
+      options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
+    );
+    final mapData = _responseMap(response);
+    await _handleAuthResponse(mapData);
+    return mapData['access_token'] as String;
+  }
+
+  Future<void> revokeAll() async {
+    await _apiClient.post(ApiEndpoints.revokeAll);
+  }
+
+  Future<void> changePassword(String currentPassword, String newPassword) async {
+    await _apiClient.post(
+      ApiEndpoints.changePassword,
+      data: {'current_password': currentPassword, 'new_password': newPassword},
+    );
+  }
 
   Future<void> _handleAuthResponse(Map<String, dynamic> response) async {
     final accessToken = response['access_token'] as String;
@@ -85,5 +144,47 @@ class AuthService {
       refreshToken: refreshToken,
       organizationId: organizationId,
     );
+  }
+
+  Map<String, dynamic> _responseMap(Response response) {
+    dynamic data = response.data;
+
+    if (data is String) {
+      try {
+        data = jsonDecode(data);
+      } catch (_) {
+        throw const FormatException(
+          'Expected JSON response for auth endpoint, got string payload',
+        );
+      }
+    }
+
+    if (data is! Map) {
+      throw FormatException(
+        'Expected JSON object for auth endpoint, got ${data.runtimeType}',
+      );
+    }
+
+    final mapData = Map<String, dynamic>.from(data);
+    final envelopeData = mapData['data'];
+
+    if (mapData['success'] == true && envelopeData is Map) {
+      return Map<String, dynamic>.from(envelopeData);
+    }
+
+    return mapData;
+  }
+
+  Map<String, dynamic>? _extractUserMap(Map<String, dynamic> data) {
+    final userData = data['user'];
+    if (userData is Map) {
+      return Map<String, dynamic>.from(userData);
+    }
+
+    if (data.containsKey('id') && data.containsKey('username')) {
+      return data;
+    }
+
+    return null;
   }
 }

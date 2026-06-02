@@ -10,7 +10,26 @@ import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
 import 'package:frontend/features/form_builder/presentation/controllers/form_builder_controller.dart';
 import 'package:frontend/features/form_builder/presentation/utils/layout_engine.dart';
 import 'builder_field_widget.dart';
-import 'form_drag_data.dart';
+
+// Drag and drop data classes
+class SectionDragData {
+  final String sectionId;
+  final int index;
+
+  SectionDragData({required this.sectionId, required this.index});
+}
+
+class QuestionDragData {
+  final String sectionId;
+  final String questionId;
+  final int index;
+
+  QuestionDragData({
+    required this.sectionId,
+    required this.questionId,
+    required this.index,
+  });
+}
 
 class SectionWidget extends ConsumerWidget {
   final String controllerKey;

@@ -1,22 +1,49 @@
-// ignore_for_file: non_constant_identifier_names, invalid_annotation_target
-
-import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/utils/date_utils.dart';
 
-part 'form_version_history.freezed.dart';
-part 'form_version_history.g.dart';
+class FormVersionHistory {
+  final String version;
+  final DateTime created_at;
+  final String? authorId;
+  final String? changeLog;
 
-@freezed
-abstract class FormVersionHistory with _$FormVersionHistory {
-  const factory FormVersionHistory({
-    required String version,
-    @JsonKey(fromJson: _parseDate) required DateTime created_at,
+  FormVersionHistory({
+    required this.version,
+    required this.created_at,
+    this.authorId,
+    this.changeLog,
+  });
+
+  factory FormVersionHistory.fromJson(Map<String, dynamic> json) {
+    return FormVersionHistory(
+      version: json['version'] as String? ?? '',
+      created_at: _parseDate(json['created_at']),
+      authorId: json['authorId'] as String?,
+      changeLog: json['changeLog'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'version': version,
+      'created_at': created_at.toIso8601String(),
+      'authorId': authorId,
+      'changeLog': changeLog,
+    };
+  }
+
+  FormVersionHistory copyWith({
+    String? version,
+    DateTime? created_at,
     String? authorId,
     String? changeLog,
-  }) = _FormVersionHistory;
-
-  factory FormVersionHistory.fromJson(Map<String, dynamic> json) =>
-      _$FormVersionHistoryFromJson(json);
+  }) {
+    return FormVersionHistory(
+      version: version ?? this.version,
+      created_at: created_at ?? this.created_at,
+      authorId: authorId ?? this.authorId,
+      changeLog: changeLog ?? this.changeLog,
+    );
+  }
 }
 
 DateTime _parseDate(dynamic date) => AppDateUtils.parse(date) ?? DateTime.now();
