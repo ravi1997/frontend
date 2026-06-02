@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 /// Represents export format options for analytics data.
 enum ExportFormat { pdf, png, csv }

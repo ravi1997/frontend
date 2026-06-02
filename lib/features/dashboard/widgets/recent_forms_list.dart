@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:frontend/features/dashboard/dashboard_controller.dart';
 import 'package:frontend/features/dashboard/dashboard_models.dart';
-import 'package:frontend/features/form_builder/presentation/widgets/publish_success_dialog.dart';
+import 'package:frontend/features/form_builder/widgets/publish_success_dialog.dart';
 
 class RecentFormsList extends ConsumerWidget {
   const RecentFormsList({super.key});

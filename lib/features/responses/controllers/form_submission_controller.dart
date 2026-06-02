@@ -1,11 +1,11 @@
 import 'package:frontend/core/exceptions/app_exception.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/form_response.dart';
-import '../../data/services/sync_service.dart';
+import '../form_response.dart';
+import '../sync_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import 'package:uuid/uuid.dart';
-import '../../data/repositories/response_repository_impl.dart';
-import '../../data/mappers/response_mapper.dart';
+import '../response_repository_provider.dart';
+import '../response_mapper.dart';
 
 final formSubmissionControllerProvider =
     NotifierProvider<FormSubmissionController, AsyncValue<void>>(
@@ -37,12 +37,13 @@ class FormSubmissionController extends Notifier<AsyncValue<void>> {
     final response = FormResponse(
       id: const Uuid().v4(),
       formId: formId,
+      organizationId: '',
+      submittedBy: '',
       submittedAt: DateTime.now(),
       answers: prunedAnswers,
     );
 
-    final isOnline =
-        ref.read(connectivityServiceProvider) == ConnectivityStatus.online;
+    final isOnline = await ref.read(connectivityServiceProvider).isConnected;
 
     if (!isOnline) {
       await ref

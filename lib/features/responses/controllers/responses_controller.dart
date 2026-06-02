@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/features/responses/domain/entities/form_response.dart';
-import 'package:frontend/features/responses/data/repositories/response_repository_impl.dart';
-import 'package:frontend/features/responses/domain/entities/response_history.dart';
+import 'package:frontend/features/responses/form_response.dart';
+import 'package:frontend/features/responses/response_repository_provider.dart';
 
 typedef _ListArgs = ({String projectId, String formId, String? searchQuery});
 typedef _DetailArgs = ({String projectId, String formId, String responseId});

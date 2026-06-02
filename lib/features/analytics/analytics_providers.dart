@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
-import '../../data/repositories/analysis_dashboard_repository.dart';
-import '../controllers/analytics_controller.dart';
-import '../../domain/entities/analytics_summary.dart';
-import '../../domain/entities/analytics_timeline.dart';
-import '../../domain/entities/analytics_distribution.dart';
+import 'analysis_dashboard_repository.dart';
+import 'analytics_controller.dart';
+import 'analytics_summary.dart';
+import 'analytics_timeline.dart';
+import 'analytics_distribution.dart';
 
 final analysisDashboardRepositoryProvider =
     Provider<AnalysisDashboardRepository>((ref) {

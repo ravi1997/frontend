@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
 
 /// AI Service for form analysis and AI-powered features

@@ -4,10 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
 import 'unified_network_interceptor.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import 'api_endpoints.dart';
 import 'app_config.dart';
-import 'web_cookie_store.dart';
+import 'web_cookie_store.dart'
+    if (dart.library.html) 'web_cookie_store_web.dart';
 
 /// Dio HTTP client provider with authentication, error handling, and retry logic.
 ///

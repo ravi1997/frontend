@@ -1,7 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
-import 'package:frontend/features/form_builder/domain/entities/question_type.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_layout_type.dart';
-import 'package:frontend/features/form_builder/domain/entities/form_style.dart';
+import 'package:frontend/features/form_builder/models/question_type.dart';
+import 'package:frontend/features/form_builder/models/form_layout_type.dart';
+import 'package:frontend/features/form_builder/models/form_style.dart';
 
 /// =========================================================================
 /// 1. MASTER QUESTION MODEL

@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
-import '../../domain/entities/condition_rule.dart';
-import '../../domain/repositories/condition_repository.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/features/form_builder/models/condition_rule.dart';
+import 'package:frontend/features/form_builder/services/condition_repository.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 
 /// Implementation of [ConditionRepository] for conditional rule operations.
 ///

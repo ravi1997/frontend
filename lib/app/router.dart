@@ -8,22 +8,22 @@ import 'package:frontend/features/auth/auth_screens.dart';
 import 'package:frontend/features/dashboard/dashboard_page.dart';
 import 'package:frontend/features/dashboard/form_dashboard_page.dart';
 import 'package:frontend/features/dashboard/project_dashboard_page.dart';
-import 'package:frontend/features/form_builder/presentation/pages/form_builder_page.dart';
-import 'package:frontend/features/form_builder/presentation/pages/form_preview_page.dart';
-import 'package:frontend/features/form_builder/presentation/pages/form_submit_page.dart';
-import 'package:frontend/features/responses/presentation/pages/response_detail_page.dart';
-import 'package:frontend/features/responses/presentation/pages/response_list_page.dart';
-import 'package:frontend/models/form_models.dart';
-import 'package:frontend/shared/widgets/states.dart';
+import 'package:frontend/features/form_builder/pages/form_builder_page.dart';
+import 'package:frontend/features/form_builder/pages/form_preview_page.dart';
+import 'package:frontend/features/form_builder/pages/form_submit_page.dart';
+import '../features/responses/pages/response_detail_page.dart';
+import '../features/responses/pages/response_list_page.dart';
+import 'package:frontend/core/form_models.dart';
+import 'package:frontend/core/widgets/error_state_widget.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
     initialLocation: '/',
-    errorBuilder: (context, state) => Scaffold(
-      body: ErrorStateWidget(
-        title: 'Page not found',
-        message: 'The page you are looking for doesn\'t exist or was moved.',
-        error: state.error?.toString(),
+      errorBuilder: (context, state) => Scaffold(
+        body: ErrorStateWidget(
+          title: 'Page not found',
+          message: 'The page you are looking for doesn\'t exist or was moved.',
+          error: state.error?.toString(),
         onBack: () => context.go('/'),
       ),
     ),
@@ -152,13 +152,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
           final projectId = state.pathParameters['projectId']!;
-          return AnalyticsPage(formId: formId, projectId: projectId);
+          return AnalyticsPage(projectId: projectId, formId: formId);
         },
       ),
     ],
   );
 
-  ref.listen<AsyncValue>(authControllerProvider, (_, __) => router.refresh());
+  ref.listen<AsyncValue>(authControllerProvider, (_, _) => router.refresh());
   ref.onDispose(router.dispose);
   return router;
 });

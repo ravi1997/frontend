@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'global_filter.dart';
 
 class AnalysisDashboard {

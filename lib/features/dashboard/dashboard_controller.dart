@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/controllers/base_controller_mixin.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_endpoints.dart';
 import 'package:frontend/features/dashboard/dashboard_models.dart';
@@ -52,8 +51,7 @@ final filteredRecentFormsProvider = Provider<List<RecentForm>>((ref) {
   return forms;
 });
 
-class DashboardController extends AsyncNotifier<DashboardData>
-    with BaseControllerMixin {
+class DashboardController extends AsyncNotifier<DashboardData> {
   @override
   FutureOr<DashboardData> build() async => _fetch();
 
@@ -63,37 +61,23 @@ class DashboardController extends AsyncNotifier<DashboardData>
   }
 
   Future<void> refresh() async {
-    await executeRefresh(
-      refreshOperation: () async {
-        state = const AsyncValue.loading();
-        state = await AsyncValue.guard(() => _fetch());
-      },
-    );
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(_fetch);
   }
 
   Future<void> deleteForm(String id) async {
-    await executeDelete(
-      id: id,
-      deleteOperation: (formId) async {
-        final service = ref.read(dashboardServiceProvider);
-        await service.deleteForm(formId);
-      },
-      refreshAfterDelete: refresh,
-      entityName: 'form',
-    );
+    final service = ref.read(dashboardServiceProvider);
+    await service.deleteForm(id);
+    await refresh();
   }
 
   Future<void> duplicateForm(String id, String title) async {
-    await executeOperation(
-      operation: () async {
-        final api = ref.read(apiClientProvider);
-        await api.post(
-          ApiEndpoints.cloneForm(id),
-          data: {'title': '$title (Copy)'},
-        );
-        await refresh();
-      },
+    final api = ref.read(apiClientProvider);
+    await api.post(
+      ApiEndpoints.cloneForm(id),
+      data: {'title': '$title (Copy)'},
     );
+    await refresh();
   }
 }
 

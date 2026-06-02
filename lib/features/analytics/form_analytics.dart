@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 /// Represents analytics data for a form including submission metrics and trends.
 ///

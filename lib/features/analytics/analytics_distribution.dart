@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 /// Represents distribution data for form analytics.
 ///

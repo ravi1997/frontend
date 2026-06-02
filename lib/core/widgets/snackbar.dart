@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-final snackbarServiceProvider = Provider<SnackbarService>((ref) {
-  return SnackbarService();
-});
 
 class SnackbarService {
   final GlobalKey<ScaffoldMessengerState> messengerKey =

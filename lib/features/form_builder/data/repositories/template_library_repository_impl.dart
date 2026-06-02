@@ -1,9 +1,9 @@
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dio/dio.dart';
-import '../../domain/entities/form_template.dart';
-import 'package:frontend/models/form_models.dart';
-import '../../domain/repositories/template_library_repository.dart';
+import 'package:frontend/features/form_builder/models/form_template.dart';
+import 'package:frontend/core/form_models.dart';
+import 'package:frontend/features/form_builder/services/template_library_repository.dart';
 
 /// Implementation of TemplateLibraryRepository.
 ///

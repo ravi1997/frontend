@@ -96,7 +96,7 @@ class _ReportBuilderPageState extends State<ReportBuilderPage> {
                   const SizedBox(height: 12),
                   Expanded(
                     child: ReorderableListView(
-                      onReorder: (oldIndex, newIndex) {
+                      onReorderItem: (oldIndex, newIndex) {
                         setState(() {
                           if (newIndex > oldIndex) newIndex -= 1;
                           final block = _blocks.removeAt(oldIndex);

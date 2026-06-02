@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 class GlobalFilter {
   final String id;

@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../entities/form_analytics.dart';
-import '../entities/analytics_summary.dart';
-import '../entities/analytics_timeline.dart';
-import '../entities/analytics_distribution.dart';
-import '../../../../core/network/api_client_wrapper.dart';
-import '../../data/repositories/analytics_repository_impl.dart';
+import 'package:frontend/core/network/api_client.dart';
+import 'form_analytics.dart';
+import 'analytics_summary.dart';
+import 'analytics_timeline.dart';
+import 'analytics_distribution.dart';
+import 'analytics_repository_impl.dart';
 
 /// Repository interface for analytics data operations.
 ///

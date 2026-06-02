@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../../../../core/utils/date_utils.dart';
+import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/id_reader.dart';
 
 // Updated for custom date parsing

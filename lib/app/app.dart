@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router.dart';
 import '../shared/ui/design_system.dart';
-import '../shared/widgets/snackbar.dart';
+import '../core/services/snackbar_service.dart';
 
 class RidpApp extends ConsumerWidget {
   const RidpApp({super.key});

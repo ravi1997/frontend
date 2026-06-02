@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import '../exceptions/app_exception.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 
 /// Unified network interceptor that combines error handling and envelope parsing.
 ///
@@ -56,15 +56,7 @@ class UnifiedNetworkInterceptor extends Interceptor {
           throw DioException(
             requestOptions: response.requestOptions,
             response: response,
-            error: ApiException(
-              parsed.message,
-              code: parsed.code,
-              details: parsed.details,
-              fieldErrors: parsed.fieldErrors,
-              requestId: parsed.requestId,
-              retryAfter: parsed.retryAfter,
-              statusCode: response.statusCode,
-            ),
+            error: ApiException(response.statusCode ?? 500, parsed.message),
             type: DioExceptionType.badResponse,
           );
         }
@@ -121,15 +113,7 @@ class UnifiedNetworkInterceptor extends Interceptor {
     final parsed = _parseError(data);
 
     return err.copyWith(
-      error: ApiException(
-        parsed.message,
-        code: parsed.code,
-        details: parsed.details,
-        fieldErrors: parsed.fieldErrors,
-        requestId: parsed.requestId,
-        retryAfter: parsed.retryAfter,
-        statusCode: response?.statusCode,
-      ),
+      error: ApiException(response?.statusCode ?? 500, parsed.message),
     );
   }
 

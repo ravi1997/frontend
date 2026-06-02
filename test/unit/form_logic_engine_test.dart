@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/form_builder/presentation/utils/form_logic_engine.dart';
-import 'package:frontend/models/form_models.dart';
+import 'package:frontend/features/form_builder/utility/form_logic_engine.dart';
+import 'package:frontend/core/form_models.dart';
 
 void main() {
   group('FormLogicEngine', () {

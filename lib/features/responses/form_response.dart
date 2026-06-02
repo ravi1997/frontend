@@ -1,86 +1,100 @@
-import '../../../../core/utils/date_utils.dart';
-
-/// Lightweight response model.
-///
-/// This used to rely on json_serializable/freezed generated code, but the
-/// generated `form_response.g.dart` is not present in the repo, which breaks
-/// analysis and builds. Keep this file generator-free.
 class FormResponse {
-  final String id;
+  final String? id;
   final String formId;
-  final String? projectId;
-  final String? formVersion;
-  final String? version;
-  final String? organizationId;
-  final String? submittedBy;
+  final String organizationId;
+  final String submittedBy;
   final DateTime? submittedAt;
   final Map<String, dynamic> answers;
   final String? ipAddress;
   final String? userAgent;
-  final Map<String, dynamic> aiResults;
+  final Map<String, dynamic>? aiResults;
   final String status;
-  final String? reviewStatus;
 
   const FormResponse({
-    required this.id,
+    this.id,
     required this.formId,
-    this.projectId,
-    this.formVersion,
-    this.version,
-    this.organizationId,
-    this.submittedBy,
+    required this.organizationId,
+    required this.submittedBy,
     this.submittedAt,
     required this.answers,
     this.ipAddress,
     this.userAgent,
-    this.aiResults = const <String, dynamic>{},
-    this.status = 'pending',
-    this.reviewStatus,
+    this.aiResults,
+    this.status = 'submitted',
   });
 
   factory FormResponse.fromJson(Map<String, dynamic> json) {
-    final normalized = Map<String, dynamic>.from(json);
-
-    // Backend may return `_id` while some callers use `id`.
-    final String id = (normalized['_id'] ?? normalized['id'] ?? '').toString();
-
     return FormResponse(
-      id: id,
-      formId: (normalized['form'] ?? normalized['form_id'] ?? '').toString(),
-      projectId: normalized['project']?.toString(),
-      formVersion: normalized['form_version']?.toString(),
-      version: normalized['version']?.toString(),
-      organizationId: normalized['organization_id']?.toString(),
-      submittedBy: normalized['submitted_by']?.toString(),
-      submittedAt: AppDateUtils.parse(normalized['submitted_at']),
-      answers: Map<String, dynamic>.from(normalized['data'] as Map? ?? const {}),
-      ipAddress: normalized['ip_address']?.toString(),
-      userAgent: normalized['user_agent']?.toString(),
-      aiResults: Map<String, dynamic>.from(
-        normalized['ai_results'] as Map? ?? const {},
-      ),
-      status: (normalized['status'] ?? 'pending').toString(),
-      reviewStatus: normalized['review_status']?.toString(),
+      id: json['id'] as String?,
+      formId: json['form_id'] as String,
+      organizationId: json['organization_id'] as String? ?? '',
+      submittedBy: json['submitted_by'] as String? ?? '',
+      submittedAt: json['submitted_at'] != null
+          ? DateTime.parse(json['submitted_at'] as String)
+          : null,
+      answers: Map<String, dynamic>.from(json['answers'] ?? {}),
+      ipAddress: json['ip_address'] as String?,
+      userAgent: json['user_agent'] as String?,
+      aiResults: json['ai_results'] != null
+          ? Map<String, dynamic>.from(json['ai_results'])
+          : null,
+      status: json['status'] as String? ?? 'submitted',
     );
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      '_id': id,
+    return {
       'id': id,
-      'form': formId,
-      'project': projectId,
-      'form_version': formVersion,
-      'version': version,
+      'form_id': formId,
       'organization_id': organizationId,
       'submitted_by': submittedBy,
-      'submitted_at': AppDateUtils.toIso8601(submittedAt),
-      'data': answers,
+      'submitted_at': submittedAt?.toIso8601String(),
+      'answers': answers,
       'ip_address': ipAddress,
       'user_agent': userAgent,
       'ai_results': aiResults,
       'status': status,
-      'review_status': reviewStatus,
-    }..removeWhere((k, v) => v == null);
+    };
+  }
+}
+
+class ResponseHistory {
+  final String id;
+  final String responseId;
+  final String action;
+  final String performedBy;
+  final DateTime performedAt;
+  final Map<String, dynamic> changes;
+
+  const ResponseHistory({
+    required this.id,
+    required this.responseId,
+    required this.action,
+    required this.performedBy,
+    required this.performedAt,
+    required this.changes,
+  });
+
+  factory ResponseHistory.fromJson(Map<String, dynamic> json) {
+    return ResponseHistory(
+      id: json['id'] as String? ?? '',
+      responseId: json['response_id'] as String? ?? '',
+      action: json['action'] as String? ?? '',
+      performedBy: json['performed_by'] as String? ?? '',
+      performedAt: DateTime.tryParse(json['performed_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      changes: Map<String, dynamic>.from(json['changes'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'response_id': responseId,
+      'action': action,
+      'performed_by': performedBy,
+      'performed_at': performedAt.toIso8601String(),
+      'changes': changes,
+    };
   }
 }

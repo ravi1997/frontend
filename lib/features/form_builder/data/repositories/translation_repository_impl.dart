@@ -1,8 +1,8 @@
 import 'package:logger/logger.dart';
-import '../../domain/entities/translation_job.dart';
-import '../../domain/entities/translation_language.dart';
-import '../../domain/repositories/translation_repository.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/features/form_builder/models/translation_job.dart';
+import 'package:frontend/features/form_builder/models/translation_language.dart';
+import 'package:frontend/features/form_builder/services/translation_repository.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 import '../../../../core/network/api_endpoints.dart';
 
 /// Implementation of [TranslationRepository] for translation operations.

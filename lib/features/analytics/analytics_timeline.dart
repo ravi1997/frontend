@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 /// Represents timeline data for form analytics.
 ///

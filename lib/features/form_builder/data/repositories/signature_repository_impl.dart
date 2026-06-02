@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
-import '../../domain/entities/signature_request.dart';
-import '../../domain/repositories/signature_repository.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/features/form_builder/models/signature_request.dart';
+import 'package:frontend/features/form_builder/services/signature_repository.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 
 /// Implementation of [SignatureRepository] for signature operations.
 ///

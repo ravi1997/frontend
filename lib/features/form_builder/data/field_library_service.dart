@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/custom_field_template.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/features/form_builder/models/custom_field_template.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 
 /// Service for custom field template operations.
 ///

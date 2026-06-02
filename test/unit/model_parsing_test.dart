@@ -5,7 +5,7 @@ import 'package:frontend/core/network/api_endpoints.dart';
 import 'package:frontend/core/network/token_service.dart';
 import 'package:frontend/features/auth/auth_models.dart';
 import 'package:frontend/features/auth/auth_service.dart';
-import 'package:frontend/features/responses/domain/entities/form_response.dart';
+import 'package:frontend/features/responses/form_response.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockApiClient extends Mock implements ApiClient {}

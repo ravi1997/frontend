@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
-import '../../domain/entities/workflow.dart';
-import '../../domain/repositories/workflow_repository.dart';
-import '../../../../core/network/api_client_wrapper.dart';
+import 'package:frontend/features/form_builder/models/workflow.dart';
+import 'package:frontend/features/form_builder/services/workflow_repository.dart';
+import 'package:frontend/core/network/api_client_wrapper.dart';
 
 /// Implementation of [WorkflowRepository] for workflow operations.
 ///

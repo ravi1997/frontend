@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 
 /// Represents time range options for analytics filtering.
 enum TimeRange { last7Days, last30Days, last90Days, custom }

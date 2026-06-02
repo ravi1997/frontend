@@ -1,4 +1,3 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'analytics_summary.dart';
 
 /// Represents the percentage change between two periods.

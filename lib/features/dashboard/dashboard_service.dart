@@ -3,7 +3,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/core/network/api_client.dart';
 import 'package:frontend/core/network/api_endpoints.dart';
-import 'package:frontend/core/utils/date_utils.dart';
 import 'package:frontend/features/dashboard/dashboard_models.dart';
 
 class DashboardService {
@@ -50,10 +49,10 @@ class DashboardService {
         title: project.title,
         status: project.status,
         updatedAt:
-            AppDateUtils.parse(project.updatedAt) ??
-            AppDateUtils.parse(projectMap['created_at']) ??
+            _parseDate(project.updatedAt) ??
+            _parseDate(projectMap['created_at']) ??
             DateTime.now(),
-        createdAt: AppDateUtils.parse(projectMap['created_at']),
+        createdAt: _parseDate(projectMap['created_at']),
       );
     }).toList();
 
@@ -100,6 +99,12 @@ class DashboardService {
       return value;
     }
     return const [];
+  }
+
+  DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 }
 

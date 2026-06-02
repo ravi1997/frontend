@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../../domain/entities/analysis_dashboard.dart';
+import 'analysis_dashboard.dart';
 
 class AnalysisDashboardRepository {
   final Dio _dio;
