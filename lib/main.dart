@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:frontend/app/app.dart';
-import 'package:frontend/shared/ui/design_system.dart';
+import 'package:frontend/app/theme/design_system.dart';
 
 Future<void> main() async {
   // 1. Capture early Flutter errors

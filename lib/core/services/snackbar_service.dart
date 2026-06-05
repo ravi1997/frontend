@@ -2,35 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SnackbarService {
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
+  final GlobalKey<ScaffoldMessengerState> messengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
-  SnackbarService(this.scaffoldMessengerKey);
+  void showSuccess(String message) => _showSnackBar(message, Colors.green);
+  void showError(String message) => _showSnackBar(message, Colors.red);
+  void showInfo(String message) => _showSnackBar(message, Colors.blue);
 
-  GlobalKey<ScaffoldMessengerState> get messengerKey => scaffoldMessengerKey;
+  void _showSnackBar(String message, Color backgroundColor) {
+    final messengerState = messengerKey.currentState;
+    if (messengerState == null) return;
 
-  void show(String message, {bool isError = false}) {
-    scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+    messengerState
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          backgroundColor: backgroundColor,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
         ),
-      ),
-    );
-  }
-
-  void showError(String message) {
-    show(message, isError: true);
-  }
-
-  void showSuccess(String message) {
-    show(message, isError: false);
+      );
   }
 }
 
 final snackbarServiceProvider = Provider<SnackbarService>((ref) {
-  return SnackbarService(GlobalKey<ScaffoldMessengerState>());
+  return SnackbarService();
 });

@@ -1,38 +1,15 @@
-/// Shared utility for reading ID fields from JSON maps.
-///
-/// The backend may return IDs as either `id` or `_id` (MongoDB convention).
-/// This utility centralizes the fallback logic.
 class IdReader {
-  /// Read an ID value from a JSON map, trying `id` then `_id`.
-  /// Returns null if neither key exists.
-  static Object? readId(Map<String, dynamic> map) {
-    return map['id'] ?? map['_id'];
+  static Object? readIdCallback(
+    Map<dynamic, dynamic> json,
+    String key,
+  ) {
+    return json[key] ?? json['_id'];
   }
 
-  /// Read an ID value from a JSON map with a fallback to `_id`.
-  /// Keep identifiers UUID-based for API calls; slug is not a stable id.
-  static Object? readIdWithSlug(Map<String, dynamic> map) {
-    return map['id'] ?? map['_id'];
-  }
-
-  /// Freezed-compatible `readValue` callback for `@JsonKey` with slug fallback.
-  /// Matches the required signature: `Object? Function(Map<dynamic, dynamic>, String)`
-  /// Usage: `@JsonKey(readValue: IdReader.readIdWithSlugCallback)`
-  static Object? readIdWithSlugCallback(Map json, String key) {
-    final id = json['id'] ?? json['_id'] ?? json['form_id'];
-    // Generated code typically casts the callback result `as String` for non-nullable
-    // `id` fields, so normalize to a String to avoid runtime cast errors.
-    return id?.toString() ?? '';
-  }
-
-  /// Freezed-compatible `readValue` callback for `@JsonKey`.
-  /// Usage: `@JsonKey(readValue: IdReader.readIdCallback)`
-  static Object? readIdCallback(Map json, String key) {
-    if (key == 'id') {
-      final id = json['id'] ?? json['_id'];
-      // See `readIdWithSlugCallback` note: keep this safe for `as String` casts.
-      return id?.toString() ?? '';
-    }
-    return json[key];
+  static Object? readIdWithSlugCallback(
+    Map<dynamic, dynamic> json,
+    String key,
+  ) {
+    return json[key] ?? json['_id'] ?? json['slug'];
   }
 }

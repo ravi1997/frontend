@@ -1,1 +1,1 @@
-export 'api_client.dart';
+export 'package:frontend/core/networking/api_client_wrapper.dart';

@@ -1,31 +1,46 @@
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum ConnectivityStatus {
-  connected,
-  disconnected,
-  checking,
-  online,
-}
+enum ConnectivityStatus { online, offline }
 
-class ConnectivityService {
-  ConnectivityStatus _status = ConnectivityStatus.checking;
-  
-  ConnectivityStatus get status => _status;
-  
-  Stream<ConnectivityStatus> get statusStream async* {
-    yield* Stream.periodic(const Duration(seconds: 5), (_) {
-      // In a real app, this would check actual connectivity
-      _status = ConnectivityStatus.connected;
-      return _status;
+final connectivityServiceProvider =
+    NotifierProvider<ConnectivityService, ConnectivityStatus>(
+      ConnectivityService.new,
+    );
+
+class ConnectivityService extends Notifier<ConnectivityStatus> {
+  late StreamSubscription<List<ConnectivityResult>> _subscription;
+
+  @override
+  ConnectivityStatus build() {
+    _subscription = Connectivity().onConnectivityChanged.listen(_updateStatus);
+    _checkInitialStatus();
+
+    ref.onDispose(() {
+      unawaited(_subscription.cancel());
     });
+
+    return ConnectivityStatus.online;
   }
-  
-  Future<bool> get isConnected async {
-    // In a real app, this would check actual connectivity
-    return true;
+
+  Future<void> _checkInitialStatus() async {
+    final result = await Connectivity().checkConnectivity();
+    if (!ref.mounted) return;
+    _updateStatus(result);
   }
+
+  void _updateStatus(List<ConnectivityResult> results) {
+    if (!ref.mounted) return;
+    final isOnline = results.any((result) => result != ConnectivityResult.none);
+    state = isOnline ? ConnectivityStatus.online : ConnectivityStatus.offline;
+  }
+
+  bool get isOnline => state == ConnectivityStatus.online;
+  bool get isOffline => state == ConnectivityStatus.offline;
+  bool get isConnected => isOnline;
 }
 
-final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
-  return ConnectivityService();
-});
+extension ConnectivityStatusX on ConnectivityStatus {
+  bool get isConnected => this == ConnectivityStatus.online;
+}

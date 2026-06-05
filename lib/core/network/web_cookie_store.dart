@@ -1,1 +1,1 @@
-String? readCookieValue(String cookieName) => null;
+export 'package:frontend/core/networking/web_cookie_store.dart';
