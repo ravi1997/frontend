@@ -29,8 +29,8 @@ class AdminTasksApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminTasksTaskIdGet({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1AdminTasksTaskIdGet({ 
     required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class AdminTasksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
+    final _path = r'/mahasangraha/api/v1/admin/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

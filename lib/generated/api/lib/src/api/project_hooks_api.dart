@@ -31,7 +31,7 @@ class ProjectHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsHooksTriggerPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsHooksTriggerPost({ 
     required String projectId,
     Object? body,
     CancelToken? cancelToken,
@@ -41,7 +41,7 @@ class ProjectHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/hooks/trigger'.replaceAll('{' r'project_id' '}', projectId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/hooks/trigger'.replaceAll('{' r'project_id' '}', projectId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

@@ -9,8 +9,8 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
-import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
 
 class FormHooksApi {
 
@@ -33,9 +33,9 @@ class FormHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePost({ 
     required String hookId,
-    FormApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest? body,
+    MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -43,7 +43,7 @@ class FormHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/external-hooks/{hook_id}/approve'.replaceAll('{' r'hook_id' '}', hookId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/external-hooks/{hook_id}/approve'.replaceAll('{' r'hook_id' '}', hookId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -99,8 +99,8 @@ class FormHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsExternalHooksRegisterPost({ 
-    FormApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest? body,
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsExternalHooksRegisterPost({ 
+    MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -108,7 +108,7 @@ class FormHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/external-hooks/register';
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/external-hooks/register';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -165,7 +165,7 @@ class FormHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdHooksTriggerPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdHooksTriggerPost({ 
     required String formId,
     Object? body,
     CancelToken? cancelToken,
@@ -175,7 +175,7 @@ class FormHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -233,7 +233,7 @@ class FormHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdQuestionsQuestionIdHooksTriggerPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdQuestionsQuestionIdHooksTriggerPost({ 
     required String formId,
     required String questionId,
     Object? body,
@@ -244,7 +244,7 @@ class FormHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/questions/{question_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'question_id' '}', questionId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/questions/{question_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'question_id' '}', questionId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

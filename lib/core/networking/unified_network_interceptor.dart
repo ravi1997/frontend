@@ -56,7 +56,14 @@ class UnifiedNetworkInterceptor extends Interceptor {
           throw DioException(
             requestOptions: response.requestOptions,
             response: response,
-            error: ApiException(response.statusCode ?? 500, parsed.message),
+            error: ApiException(
+              response.statusCode ?? 500,
+              parsed.message,
+              code: parsed.code,
+              details: parsed.details,
+              fieldErrors: parsed.fieldErrors,
+              requestId: parsed.requestId,
+            ),
             type: DioExceptionType.badResponse,
           );
         }
@@ -113,7 +120,14 @@ class UnifiedNetworkInterceptor extends Interceptor {
     final parsed = _parseError(data);
 
     return err.copyWith(
-      error: ApiException(response?.statusCode ?? 500, parsed.message),
+      error: ApiException(
+        response?.statusCode ?? 500,
+        parsed.message,
+        code: parsed.code,
+        details: parsed.details,
+        fieldErrors: parsed.fieldErrors,
+        requestId: parsed.requestId,
+      ),
     );
   }
 

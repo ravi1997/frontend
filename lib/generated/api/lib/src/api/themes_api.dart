@@ -16,7 +16,7 @@ class ThemesApi {
 
   const ThemesApi(this._dio);
 
-  /// formApiV1ThemesGet
+  /// List all themes for the organization.
   /// 
   ///
   /// Parameters:
@@ -29,7 +29,7 @@ class ThemesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ThemesGet({ 
+  Future<Response<void>> mahasangrahaApiV1ThemesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class ThemesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/themes/';
+    final _path = r'/mahasangraha/api/v1/themes/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -61,7 +61,7 @@ class ThemesApi {
     return _response;
   }
 
-  /// formApiV1ThemesPost
+  /// Create a new custom theme.
   /// 
   ///
   /// Parameters:
@@ -74,7 +74,7 @@ class ThemesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ThemesPost({ 
+  Future<Response<void>> mahasangrahaApiV1ThemesPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class ThemesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/themes/';
+    final _path = r'/mahasangraha/api/v1/themes/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -106,7 +106,7 @@ class ThemesApi {
     return _response;
   }
 
-  /// formApiV1ThemesThemeIdDelete
+  /// Delete a custom theme.
   /// 
   ///
   /// Parameters:
@@ -119,7 +119,7 @@ class ThemesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ThemesThemeIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1ThemesThemeIdDelete({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -127,7 +127,7 @@ class ThemesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/themes/{theme_id}';
+    final _path = r'/mahasangraha/api/v1/themes/{theme_id}';
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -151,7 +151,7 @@ class ThemesApi {
     return _response;
   }
 
-  /// formApiV1ThemesThemeIdPut
+  /// Update custom theme settings.
   /// 
   ///
   /// Parameters:
@@ -164,7 +164,7 @@ class ThemesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ThemesThemeIdPut({ 
+  Future<Response<void>> mahasangrahaApiV1ThemesThemeIdPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -172,7 +172,7 @@ class ThemesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/themes/{theme_id}';
+    final _path = r'/mahasangraha/api/v1/themes/{theme_id}';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{

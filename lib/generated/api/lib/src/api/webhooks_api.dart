@@ -29,7 +29,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksDeliverPost({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksDeliverPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/deliver';
+    final _path = r'/mahasangraha/api/v1/webhooks/deliver';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -75,7 +75,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksDeliveryIdCancelDelete({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksDeliveryIdCancelDelete({ 
     required String deliveryId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -84,7 +84,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/{delivery_id}/cancel'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
+    final _path = r'/mahasangraha/api/v1/webhooks/{delivery_id}/cancel'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -121,7 +121,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksDeliveryIdHistoryGet({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksDeliveryIdHistoryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -129,7 +129,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/{delivery_id}/history';
+    final _path = r'/mahasangraha/api/v1/webhooks/{delivery_id}/history';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -167,7 +167,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksDeliveryIdRetryPost({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksDeliveryIdRetryPost({ 
     required String deliveryId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/{delivery_id}/retry'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
+    final _path = r'/mahasangraha/api/v1/webhooks/{delivery_id}/retry'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -214,7 +214,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksDeliveryIdStatusGet({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksDeliveryIdStatusGet({ 
     required String deliveryId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -223,7 +223,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/{delivery_id}/status'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
+    final _path = r'/mahasangraha/api/v1/webhooks/{delivery_id}/status'.replaceAll('{' r'delivery_id' '}', deliveryId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -260,7 +260,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksHistoryGet({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksHistoryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -268,7 +268,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/history';
+    final _path = r'/mahasangraha/api/v1/webhooks/history';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -305,7 +305,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksLogsGet({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksLogsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -313,7 +313,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/logs';
+    final _path = r'/mahasangraha/api/v1/webhooks/logs';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -350,7 +350,7 @@ class WebhooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WebhooksTestPost({ 
+  Future<Response<void>> mahasangrahaApiV1WebhooksTestPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -358,7 +358,7 @@ class WebhooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/webhooks/test';
+    final _path = r'/mahasangraha/api/v1/webhooks/test';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

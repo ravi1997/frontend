@@ -16,7 +16,7 @@ class TasksApi {
 
   const TasksApi(this._dio);
 
-  /// formApiV1TasksTaskIdGet
+  /// mahasangrahaApiV1TasksTaskIdGet
   /// 
   ///
   /// Parameters:
@@ -30,7 +30,7 @@ class TasksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1TasksTaskIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1TasksTaskIdGet({ 
     required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class TasksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
+    final _path = r'/mahasangraha/api/v1/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

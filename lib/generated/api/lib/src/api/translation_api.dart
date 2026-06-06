@@ -16,7 +16,7 @@ class TranslationApi {
 
   const TranslationApi(this._dio);
 
-  /// formApiV1FormsTranslationsGet
+  /// mahasangrahaApiV1TranslationsGet
   /// 
   ///
   /// Parameters:
@@ -29,7 +29,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsGet({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations';
+    final _path = r'/mahasangraha/api/v1/translations';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -61,7 +61,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsGet
+  /// mahasangrahaApiV1TranslationsJobsGet
   /// 
   ///
   /// Parameters:
@@ -74,7 +74,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsGet({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs';
+    final _path = r'/mahasangraha/api/v1/translations/jobs';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -106,7 +106,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsJobIdCancelPatch
+  /// mahasangrahaApiV1TranslationsJobsJobIdCancelPatch
   /// 
   ///
   /// Parameters:
@@ -120,7 +120,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsJobIdCancelPatch({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsJobIdCancelPatch({ 
     required String jobId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -129,7 +129,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs/{job_id}/cancel'.replaceAll('{' r'job_id' '}', jobId.toString());
+    final _path = r'/mahasangraha/api/v1/translations/jobs/{job_id}/cancel'.replaceAll('{' r'job_id' '}', jobId.toString());
     final _options = Options(
       method: r'PATCH',
       headers: <String, dynamic>{
@@ -153,7 +153,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsJobIdContentGet
+  /// mahasangrahaApiV1TranslationsJobsJobIdContentGet
   /// 
   ///
   /// Parameters:
@@ -167,7 +167,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsJobIdContentGet({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsJobIdContentGet({ 
     required String jobId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs/{job_id}/content'.replaceAll('{' r'job_id' '}', jobId.toString());
+    final _path = r'/mahasangraha/api/v1/translations/jobs/{job_id}/content'.replaceAll('{' r'job_id' '}', jobId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -200,7 +200,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsJobIdDelete
+  /// mahasangrahaApiV1TranslationsJobsJobIdDelete
   /// 
   ///
   /// Parameters:
@@ -214,7 +214,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsJobIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsJobIdDelete({ 
     required String jobId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -223,7 +223,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs/{job_id}'.replaceAll('{' r'job_id' '}', jobId.toString());
+    final _path = r'/mahasangraha/api/v1/translations/jobs/{job_id}'.replaceAll('{' r'job_id' '}', jobId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -247,7 +247,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsJobIdGet
+  /// mahasangrahaApiV1TranslationsJobsJobIdGet
   /// 
   ///
   /// Parameters:
@@ -261,7 +261,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsJobIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsJobIdGet({ 
     required String jobId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -270,7 +270,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs/{job_id}'.replaceAll('{' r'job_id' '}', jobId.toString());
+    final _path = r'/mahasangraha/api/v1/translations/jobs/{job_id}'.replaceAll('{' r'job_id' '}', jobId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -294,7 +294,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsJobsPost
+  /// mahasangrahaApiV1TranslationsJobsPost
   /// 
   ///
   /// Parameters:
@@ -307,7 +307,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsJobsPost({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsJobsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -315,7 +315,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/jobs';
+    final _path = r'/mahasangraha/api/v1/translations/jobs';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -339,7 +339,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsLanguagesGet
+  /// mahasangrahaApiV1TranslationsLanguagesGet
   /// 
   ///
   /// Parameters:
@@ -352,7 +352,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsLanguagesGet({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsLanguagesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -360,7 +360,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/languages';
+    final _path = r'/mahasangraha/api/v1/translations/languages';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -384,7 +384,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsPost
+  /// mahasangrahaApiV1TranslationsPost
   /// 
   ///
   /// Parameters:
@@ -397,7 +397,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsPost({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -405,7 +405,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations';
+    final _path = r'/mahasangraha/api/v1/translations';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -429,7 +429,7 @@ class TranslationApi {
     return _response;
   }
 
-  /// formApiV1FormsTranslationsPreviewPost
+  /// mahasangrahaApiV1TranslationsPreviewPost
   /// 
   ///
   /// Parameters:
@@ -442,7 +442,7 @@ class TranslationApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsTranslationsPreviewPost({ 
+  Future<Response<void>> mahasangrahaApiV1TranslationsPreviewPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -450,7 +450,7 @@ class TranslationApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/translations/preview';
+    final _path = r'/mahasangraha/api/v1/translations/preview';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

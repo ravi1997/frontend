@@ -9,10 +9,10 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
-import 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_refresh_post200_response.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_request_otp_post_request.dart';
 import 'package:ridp_api/src/model/login_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_login_post200_response.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_refresh_post200_response.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_request_otp_post_request.dart';
 import 'package:ridp_api/src/model/user_create_schema.dart';
 import 'package:ridp_api/src/model/user_out.dart';
 
@@ -34,9 +34,9 @@ class AuthApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [FormApiV1AuthLoginPost200Response] as data
+  /// Returns a [Future] containing a [Response] with a [MahasangrahaApiV1AuthLoginPost200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<FormApiV1AuthLoginPost200Response>> formApiV1AuthLoginPost({ 
+  Future<Response<MahasangrahaApiV1AuthLoginPost200Response>> mahasangrahaApiV1AuthLoginPost({ 
     required LoginRequest body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -45,7 +45,7 @@ class AuthApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/login';
+    final _path = r'/mahasangraha/api/v1/auth/login';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -84,11 +84,11 @@ class AuthApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    FormApiV1AuthLoginPost200Response? _responseData;
+    MahasangrahaApiV1AuthLoginPost200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Response, FormApiV1AuthLoginPost200Response>(rawData, 'FormApiV1AuthLoginPost200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<MahasangrahaApiV1AuthLoginPost200Response, MahasangrahaApiV1AuthLoginPost200Response>(rawData, 'MahasangrahaApiV1AuthLoginPost200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -100,7 +100,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
       );
     }
 
-    return Response<FormApiV1AuthLoginPost200Response>(
+    return Response<MahasangrahaApiV1AuthLoginPost200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -125,7 +125,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AuthLogoutPost({ 
+  Future<Response<void>> mahasangrahaApiV1AuthLogoutPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -133,7 +133,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/logout';
+    final _path = r'/mahasangraha/api/v1/auth/logout';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -175,9 +175,9 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [FormApiV1AuthRefreshPost200Response] as data
+  /// Returns a [Future] containing a [Response] with a [MahasangrahaApiV1AuthRefreshPost200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<FormApiV1AuthRefreshPost200Response>> formApiV1AuthRefreshPost({ 
+  Future<Response<MahasangrahaApiV1AuthRefreshPost200Response>> mahasangrahaApiV1AuthRefreshPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -185,7 +185,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/refresh';
+    final _path = r'/mahasangraha/api/v1/auth/refresh';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -213,11 +213,11 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthLoginPost200Re
       onReceiveProgress: onReceiveProgress,
     );
 
-    FormApiV1AuthRefreshPost200Response? _responseData;
+    MahasangrahaApiV1AuthRefreshPost200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<FormApiV1AuthRefreshPost200Response, FormApiV1AuthRefreshPost200Response>(rawData, 'FormApiV1AuthRefreshPost200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<MahasangrahaApiV1AuthRefreshPost200Response, MahasangrahaApiV1AuthRefreshPost200Response>(rawData, 'MahasangrahaApiV1AuthRefreshPost200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -229,7 +229,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthRefreshPost200
       );
     }
 
-    return Response<FormApiV1AuthRefreshPost200Response>(
+    return Response<MahasangrahaApiV1AuthRefreshPost200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -255,7 +255,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthRefreshPost200
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1AuthRegisterPost({ 
+  Future<Response<UserOut>> mahasangrahaApiV1AuthRegisterPost({ 
     required UserCreateSchema body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -264,7 +264,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1AuthRefreshPost200
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/register';
+    final _path = r'/mahasangraha/api/v1/auth/register';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -345,8 +345,8 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AuthRequestOtpPost({ 
-    required FormApiV1AuthRequestOtpPostRequest body,
+  Future<Response<void>> mahasangrahaApiV1AuthRequestOtpPost({ 
+    required MahasangrahaApiV1AuthRequestOtpPostRequest body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -354,7 +354,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/request-otp';
+    final _path = r'/mahasangraha/api/v1/auth/request-otp';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -409,7 +409,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AuthRevokeAllPost({ 
+  Future<Response<void>> mahasangrahaApiV1AuthRevokeAllPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -417,7 +417,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/auth/revoke-all';
+    final _path = r'/mahasangraha/api/v1/auth/revoke-all';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

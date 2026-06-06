@@ -16,7 +16,7 @@ class DashboardSettingsApi {
 
   const DashboardSettingsApi(this._dio);
 
-  /// Update only the layout configuration.  Request Body:     {         \&quot;columns\&quot;: 4,         \&quot;rowHeight\&quot;: 120,         \&quot;margin\&quot;: [15, 15],         \&quot;compactType\&quot;: \&quot;vertical\&quot;,         \&quot;positions\&quot;: {             \&quot;widget_id_1\&quot;: {\&quot;x\&quot;: 0, \&quot;y\&quot;: 0}         }     }  Returns:     200: Updated settings object     400: Validation error     401: Unauthorized
+  /// Update only the layout configuration.
   /// 
   ///
   /// Parameters:
@@ -29,7 +29,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsLayoutPut({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsLayoutPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/layout';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/layout';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -74,7 +74,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsResetPost({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsResetPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/reset';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/reset';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -119,7 +119,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsSettingsGet({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsSettingsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -127,7 +127,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/settings';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/settings';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -164,7 +164,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsSettingsPut({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsSettingsPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -172,7 +172,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/settings';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/settings';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -209,7 +209,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsWidgetsGet({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsWidgetsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -217,7 +217,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/widgets';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/widgets';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -241,7 +241,7 @@ class DashboardSettingsApi {
     return _response;
   }
 
-  /// Update positions for multiple widgets.  Used for drag-and-drop reordering of widgets.  Request Body:     {         \&quot;positions\&quot;: {             \&quot;widget_id_1\&quot;: {\&quot;x\&quot;: 0, \&quot;y\&quot;: 0},             \&quot;widget_id_2\&quot;: {\&quot;x\&quot;: 2, \&quot;y\&quot;: 0}         }     }  Returns:     200: List of updated widgets     400: Validation error     401: Unauthorized
+  /// Update positions for multiple widgets.
   /// 
   ///
   /// Parameters:
@@ -254,7 +254,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsWidgetsPositionsPut({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsWidgetsPositionsPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -262,7 +262,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/widgets/positions';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/widgets/positions';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -286,7 +286,7 @@ class DashboardSettingsApi {
     return _response;
   }
 
-  /// formApiV1DashboardSettingsWidgetsPost
+  /// mahasangrahaApiV1DashboardSettingsWidgetsPost
   /// 
   ///
   /// Parameters:
@@ -299,7 +299,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsWidgetsPost({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsWidgetsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -307,7 +307,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/widgets';
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/widgets';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -331,7 +331,7 @@ class DashboardSettingsApi {
     return _response;
   }
 
-  /// Remove a widget from the user&#39;s dashboard.  Args:     widget_id: ID of the widget to remove  Returns:     200: Success message     404: Widget not found     401: Unauthorized
+  /// Remove a widget from the user&#39;s dashboard.
   /// 
   ///
   /// Parameters:
@@ -345,7 +345,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsWidgetsWidgetIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsWidgetsWidgetIdDelete({ 
     required String widgetId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -354,7 +354,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/widgets/{widget_id}'.replaceAll('{' r'widget_id' '}', widgetId.toString());
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/widgets/{widget_id}'.replaceAll('{' r'widget_id' '}', widgetId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -378,7 +378,7 @@ class DashboardSettingsApi {
     return _response;
   }
 
-  /// Update a widget&#39;s configuration.  Args:     widget_id: ID of the widget to update  Request Body:     {         \&quot;position\&quot;: {\&quot;x\&quot;: 0, \&quot;y\&quot;: 4},  // Optional new position         \&quot;size\&quot;: {\&quot;w\&quot;: 2, \&quot;h\&quot;: 2},      // Optional new size         \&quot;config\&quot;: {...},               // Optional config updates         \&quot;is_visible\&quot;: True             // Optional visibility     }  Returns:     200: Updated widget object     404: Widget not found     401: Unauthorized
+  /// Update a widget&#39;s configuration.
   /// 
   ///
   /// Parameters:
@@ -392,7 +392,7 @@ class DashboardSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardSettingsWidgetsWidgetIdPut({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardSettingsWidgetsWidgetIdPut({ 
     required String widgetId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -401,7 +401,7 @@ class DashboardSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboard-settings/widgets/{widget_id}'.replaceAll('{' r'widget_id' '}', widgetId.toString());
+    final _path = r'/mahasangraha/api/v1/dashboard-settings/widgets/{widget_id}'.replaceAll('{' r'widget_id' '}', widgetId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{

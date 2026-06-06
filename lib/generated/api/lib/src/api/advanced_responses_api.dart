@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_form_id_responses_filter_post_request.dart';
 
 class AdvancedResponsesApi {
 
@@ -29,7 +30,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFetchExternalGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFetchExternalGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +38,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/fetch/external';
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/fetch/external';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -75,7 +76,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdAccessControlGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdAccessControlGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -84,7 +85,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/access-control'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/access-control'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -122,7 +123,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdAccessPolicyPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdAccessPolicyPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -131,7 +132,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/access-policy'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/access-policy'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -169,7 +170,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdAccessPolicyPut({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdAccessPolicyPut({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -178,7 +179,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/access-policy'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/access-policy'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -216,7 +217,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdFetchSameGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdFetchSameGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -225,7 +226,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/fetch/same'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/fetch/same'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -249,6 +250,73 @@ class AdvancedResponsesApi {
     return _response;
   }
 
+  /// POST /advanced_responses/&lt;form_id&gt;/responses/filter  Accept a JSON body with a &#x60;&#x60;filters&#x60;&#x60; array and return paginated FormResponse documents matching all supplied criteria.  The filter engine guarantees: - Every query is scoped to the caller&#39;s organisation and the specified form. - No MongoDB operator injection is possible via filter input. - Unsupported operators or invalid types raise a 400 error.
+  /// 
+  ///
+  /// Parameters:
+  /// * [formId] - ID of the form whose responses to filter
+  /// * [body] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPost({ 
+    required String formId,
+    required MahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPostRequest body,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/responses/filter'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      _bodyData = jsonEncode(body);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
   /// Fetching meta information about a form response like number of response etc.
   /// 
   ///
@@ -263,7 +331,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdResponsesMetaGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesMetaGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -272,7 +340,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/responses/meta'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/responses/meta'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -310,7 +378,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsFormIdResponsesQuestionsGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesQuestionsGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -319,7 +387,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/{form_id}/responses/questions'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/responses/questions'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -343,7 +411,7 @@ class AdvancedResponsesApi {
     return _response;
   }
 
-  /// Compatibility endpoint for the dashboard client.  The Flutter dashboard expects GET /form/api/v1/forms/, so we expose a tenant-scoped listing here that mirrors the newer form listing behavior.
+  /// Compatibility endpoint for the dashboard client.  The Flutter dashboard expects GET /mahasangraha/api/v1/forms/, so we expose a tenant-scoped listing here that mirrors the newer form listing behavior.
   /// 
   ///
   /// Parameters:
@@ -356,7 +424,7 @@ class AdvancedResponsesApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1FormsGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -364,7 +432,7 @@ class AdvancedResponsesApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/forms/';
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

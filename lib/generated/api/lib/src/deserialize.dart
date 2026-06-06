@@ -7,19 +7,25 @@ import 'package:ridp_api/src/model/base_embedded_schema.dart';
 import 'package:ridp_api/src/model/base_schema.dart';
 import 'package:ridp_api/src/model/conditional_validation_schema.dart';
 import 'package:ridp_api/src/model/dynamic_view_definition_schema.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_login_post200_response_data.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_refresh_post200_response.dart';
-import 'package:ridp_api/src/model/form_api_v1_auth_request_otp_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
-import 'package:ridp_api/src/model/form_api_v1_user_security_lock_status_user_id_get200_response.dart';
 import 'package:ridp_api/src/model/form_blueprint_schema.dart';
 import 'package:ridp_api/src/model/form_response_schema.dart';
 import 'package:ridp_api/src/model/form_schema.dart';
 import 'package:ridp_api/src/model/form_version_schema.dart';
 import 'package:ridp_api/src/model/logic_component_schema.dart';
 import 'package:ridp_api/src/model/login_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_feature_flags_flag_key_put_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_admin_put_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_status_put_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_login_post200_response.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_login_post200_response_data.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_refresh_post200_response.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_auth_request_otp_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_external_hooks_register_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_form_id_responses_filter_post_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_projects_project_id_forms_form_id_responses_filter_post_request_filters_inner.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_user_security_lock_status_user_id_get200_response.dart';
 import 'package:ridp_api/src/model/option_schema.dart';
 import 'package:ridp_api/src/model/paginated_result.dart';
 import 'package:ridp_api/src/model/project_blueprint_schema.dart';
@@ -84,20 +90,6 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ConditionalValidationSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DynamicViewDefinitionSchema':
           return DynamicViewDefinitionSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1AuthLoginPost200Response':
-          return FormApiV1AuthLoginPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1AuthLoginPost200ResponseData':
-          return FormApiV1AuthLoginPost200ResponseData.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1AuthRefreshPost200Response':
-          return FormApiV1AuthRefreshPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1AuthRequestOtpPostRequest':
-          return FormApiV1AuthRequestOtpPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest':
-          return FormApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest':
-          return FormApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
-        case 'FormApiV1UserSecurityLockStatusUserIdGet200Response':
-          return FormApiV1UserSecurityLockStatusUserIdGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FormBlueprintSchema':
           return FormBlueprintSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FormResponseSchema':
@@ -110,6 +102,32 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LogicComponentSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LoginRequest':
           return LoginRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest':
+          return MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest':
+          return MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AdminOrgsOrgIdStatusPutRequest':
+          return MahasangrahaApiV1AdminOrgsOrgIdStatusPutRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AdminOrgsPostRequest':
+          return MahasangrahaApiV1AdminOrgsPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AuthLoginPost200Response':
+          return MahasangrahaApiV1AuthLoginPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AuthLoginPost200ResponseData':
+          return MahasangrahaApiV1AuthLoginPost200ResponseData.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AuthRefreshPost200Response':
+          return MahasangrahaApiV1AuthRefreshPost200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AuthRequestOtpPostRequest':
+          return MahasangrahaApiV1AuthRequestOtpPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest':
+          return MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksHookIdApprovePostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest':
+          return MahasangrahaApiV1ProjectsProjectIdFormsExternalHooksRegisterPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPostRequest':
+          return MahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPostRequestFiltersInner':
+          return MahasangrahaApiV1ProjectsProjectIdFormsFormIdResponsesFilterPostRequestFiltersInner.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response':
+          return MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'OptionSchema':
           return OptionSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PaginatedResult':

@@ -29,7 +29,7 @@ class WorkflowApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WorkflowsGet({ 
+  Future<Response<void>> mahasangrahaApiV1WorkflowsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class WorkflowApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/workflows/';
+    final _path = r'/mahasangraha/api/v1/workflows/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -74,7 +74,7 @@ class WorkflowApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WorkflowsPost({ 
+  Future<Response<void>> mahasangrahaApiV1WorkflowsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class WorkflowApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/workflows/';
+    final _path = r'/mahasangraha/api/v1/workflows/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -120,7 +120,7 @@ class WorkflowApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WorkflowsWorkflowIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1WorkflowsWorkflowIdDelete({ 
     required String workflowId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -129,7 +129,7 @@ class WorkflowApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
+    final _path = r'/mahasangraha/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -167,7 +167,7 @@ class WorkflowApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WorkflowsWorkflowIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1WorkflowsWorkflowIdGet({ 
     required String workflowId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class WorkflowApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
+    final _path = r'/mahasangraha/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -214,7 +214,7 @@ class WorkflowApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1WorkflowsWorkflowIdPut({ 
+  Future<Response<void>> mahasangrahaApiV1WorkflowsWorkflowIdPut({ 
     required String workflowId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -223,7 +223,7 @@ class WorkflowApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
+    final _path = r'/mahasangraha/api/v1/workflows/{workflow_id}'.replaceAll('{' r'workflow_id' '}', workflowId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{

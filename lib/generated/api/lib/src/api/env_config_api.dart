@@ -29,7 +29,7 @@ class EnvConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminEnvConfigGet({ 
+  Future<Response<void>> mahasangrahaApiV1AdminEnvConfigGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class EnvConfigApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/env-config/';
+    final _path = r'/mahasangraha/api/v1/admin/env-config/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -74,7 +74,7 @@ class EnvConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminEnvConfigPost({ 
+  Future<Response<void>> mahasangrahaApiV1AdminEnvConfigPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class EnvConfigApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/env-config/';
+    final _path = r'/mahasangraha/api/v1/admin/env-config/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -119,7 +119,7 @@ class EnvConfigApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminEnvConfigPut({ 
+  Future<Response<void>> mahasangrahaApiV1AdminEnvConfigPut({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -127,7 +127,7 @@ class EnvConfigApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/env-config/';
+    final _path = r'/mahasangraha/api/v1/admin/env-config/';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{

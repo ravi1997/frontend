@@ -30,7 +30,7 @@ class ViewApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ViewFormIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1ViewFormIdGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class ViewApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/view/{form_id}'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/view/{form_id}'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -77,7 +77,7 @@ class ViewApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ViewFormIdInfoGet({ 
+  Future<Response<void>> mahasangrahaApiV1ViewFormIdInfoGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -86,7 +86,7 @@ class ViewApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/view/{form_id}/info'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/view/{form_id}/info'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -110,7 +110,7 @@ class ViewApi {
     return _response;
   }
 
-  /// formApiV1ViewGet
+  /// mahasangrahaApiV1ViewGet
   /// 
   ///
   /// Parameters:
@@ -123,7 +123,7 @@ class ViewApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ViewGet({ 
+  Future<Response<void>> mahasangrahaApiV1ViewGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -131,7 +131,7 @@ class ViewApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/view/';
+    final _path = r'/mahasangraha/api/v1/view/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

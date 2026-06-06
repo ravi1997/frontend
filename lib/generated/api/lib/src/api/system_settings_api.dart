@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:ridp_api/src/model/system_settings_update_schema.dart';
 
 class SystemSettingsApi {
 
@@ -29,7 +30,7 @@ class SystemSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminSystemSettingsGet({ 
+  Future<Response<void>> mahasangrahaApiV1AdminSystemSettingsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +38,7 @@ class SystemSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/system-settings/';
+    final _path = r'/mahasangraha/api/v1/admin/system-settings/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -75,8 +76,8 @@ class SystemSettingsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AdminSystemSettingsPut({ 
-    Map<String, Object>? body,
+  Future<Response<void>> mahasangrahaApiV1AdminSystemSettingsPut({ 
+    SystemSettingsUpdateSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -84,7 +85,7 @@ class SystemSettingsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/admin/system-settings/';
+    final _path = r'/mahasangraha/api/v1/admin/system-settings/';
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{

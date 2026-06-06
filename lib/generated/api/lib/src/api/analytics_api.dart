@@ -29,7 +29,7 @@ class AnalyticsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AnalyticsDashboardGet({ 
+  Future<Response<void>> mahasangrahaApiV1AnalyticsDashboardGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class AnalyticsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/analytics/dashboard';
+    final _path = r'/mahasangraha/api/v1/analytics/dashboard';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -74,7 +74,7 @@ class AnalyticsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AnalyticsSummaryGet({ 
+  Future<Response<void>> mahasangrahaApiV1AnalyticsSummaryGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class AnalyticsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/analytics/summary';
+    final _path = r'/mahasangraha/api/v1/analytics/summary';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

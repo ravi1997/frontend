@@ -16,7 +16,7 @@ class LibraryApi {
 
   const LibraryApi(this._dio);
 
-  /// formApiV1CustomFieldsGet
+  /// mahasangrahaApiV1CustomFieldsGet
   /// 
   ///
   /// Parameters:
@@ -29,7 +29,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1CustomFieldsGet({ 
+  Future<Response<void>> mahasangrahaApiV1CustomFieldsGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/custom-fields/';
+    final _path = r'/mahasangraha/api/v1/custom-fields/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -61,7 +61,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1CustomFieldsPost
+  /// mahasangrahaApiV1CustomFieldsPost
   /// 
   ///
   /// Parameters:
@@ -74,7 +74,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1CustomFieldsPost({ 
+  Future<Response<void>> mahasangrahaApiV1CustomFieldsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/custom-fields/';
+    final _path = r'/mahasangraha/api/v1/custom-fields/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -106,7 +106,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1CustomFieldsTemplateIdDelete
+  /// mahasangrahaApiV1CustomFieldsTemplateIdDelete
   /// 
   ///
   /// Parameters:
@@ -120,7 +120,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1CustomFieldsTemplateIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1CustomFieldsTemplateIdDelete({ 
     required String templateId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -129,7 +129,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/custom-fields/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
+    final _path = r'/mahasangraha/api/v1/custom-fields/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -153,7 +153,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1CustomFieldsTemplateIdGet
+  /// mahasangrahaApiV1CustomFieldsTemplateIdGet
   /// 
   ///
   /// Parameters:
@@ -167,7 +167,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1CustomFieldsTemplateIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1CustomFieldsTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/custom-fields/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
+    final _path = r'/mahasangraha/api/v1/custom-fields/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -200,7 +200,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1TemplatesGet
+  /// mahasangrahaApiV1TemplatesGet
   /// 
   ///
   /// Parameters:
@@ -213,7 +213,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1TemplatesGet({ 
+  Future<Response<void>> mahasangrahaApiV1TemplatesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -221,7 +221,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/templates/';
+    final _path = r'/mahasangraha/api/v1/templates/';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -245,7 +245,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1TemplatesPost
+  /// mahasangrahaApiV1TemplatesPost
   /// 
   ///
   /// Parameters:
@@ -258,7 +258,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1TemplatesPost({ 
+  Future<Response<void>> mahasangrahaApiV1TemplatesPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -266,7 +266,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/templates/';
+    final _path = r'/mahasangraha/api/v1/templates/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -290,7 +290,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1TemplatesTemplateIdDelete
+  /// mahasangrahaApiV1TemplatesTemplateIdDelete
   /// 
   ///
   /// Parameters:
@@ -304,7 +304,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1TemplatesTemplateIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1TemplatesTemplateIdDelete({ 
     required String templateId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -313,7 +313,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
+    final _path = r'/mahasangraha/api/v1/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -337,7 +337,7 @@ class LibraryApi {
     return _response;
   }
 
-  /// formApiV1TemplatesTemplateIdGet
+  /// mahasangrahaApiV1TemplatesTemplateIdGet
   /// 
   ///
   /// Parameters:
@@ -351,7 +351,7 @@ class LibraryApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1TemplatesTemplateIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1TemplatesTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -360,7 +360,7 @@ class LibraryApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
+    final _path = r'/mahasangraha/api/v1/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

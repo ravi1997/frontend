@@ -30,7 +30,7 @@ class SystemApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SystemAnalyticsTrendsOrgIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1SystemAnalyticsTrendsOrgIdGet({ 
     required String orgId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class SystemApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/system/analytics-trends/{org_id}'.replaceAll('{' r'org_id' '}', orgId.toString());
+    final _path = r'/mahasangraha/api/v1/system/analytics-trends/{org_id}'.replaceAll('{' r'org_id' '}', orgId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -76,7 +76,7 @@ class SystemApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SystemEventHealthGet({ 
+  Future<Response<void>> mahasangrahaApiV1SystemEventHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -84,7 +84,7 @@ class SystemApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/system/event-health';
+    final _path = r'/mahasangraha/api/v1/system/event-health';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -121,7 +121,7 @@ class SystemApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SystemGdprCleanupPost({ 
+  Future<Response<void>> mahasangrahaApiV1SystemGdprCleanupPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -129,7 +129,7 @@ class SystemApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/system/gdpr-cleanup';
+    final _path = r'/mahasangraha/api/v1/system/gdpr-cleanup';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -167,7 +167,7 @@ class SystemApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SystemTasksTaskIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1SystemTasksTaskIdGet({ 
     required String taskId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class SystemApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/system/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
+    final _path = r'/mahasangraha/api/v1/system/tasks/{task_id}'.replaceAll('{' r'task_id' '}', taskId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

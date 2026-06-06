@@ -32,8 +32,8 @@ class AnalysisBoardApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsBoardIdDelete({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsBoardIdDelete({ 
     required String projectId,
     required String boardId,
     CancelToken? cancelToken,
@@ -43,7 +43,7 @@ class AnalysisBoardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -81,8 +81,8 @@ class AnalysisBoardApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsBoardIdExecuteGet({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsBoardIdExecuteGet({ 
     required String projectId,
     required String boardId,
     CancelToken? cancelToken,
@@ -92,7 +92,7 @@ class AnalysisBoardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/{board_id}/execute'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/{board_id}/execute'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -130,8 +130,8 @@ class AnalysisBoardApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsBoardIdGet({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsBoardIdGet({ 
     required String projectId,
     required String boardId,
     CancelToken? cancelToken,
@@ -141,7 +141,7 @@ class AnalysisBoardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -180,8 +180,8 @@ class AnalysisBoardApi {
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsBoardIdPut({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsBoardIdPut({ 
     required String projectId,
     required String boardId,
     required AnalysisBoardUpdateSchema body,
@@ -192,7 +192,7 @@ class AnalysisBoardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/{board_id}'.replaceAll('{' r'project_id' '}', projectId.toString()).replaceAll('{' r'board_id' '}', boardId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -208,14 +208,15 @@ class AnalysisBoardApi {
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );
@@ -248,8 +249,8 @@ _bodyData=jsonEncode(body);
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsGet({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsGet({ 
     required String projectId,
     int? page = 1,
     int? pageSize = 50,
@@ -260,7 +261,7 @@ _bodyData=jsonEncode(body);
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/'.replaceAll('{' r'project_id' '}', projectId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/'.replaceAll('{' r'project_id' '}', projectId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -304,8 +305,8 @@ _bodyData=jsonEncode(body);
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
   /// Returns a [Future]
-  /// Throws [DioError] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdAnalysisBoardsPost({ 
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdAnalysisBoardsPost({ 
     required String projectId,
     required AnalysisBoardCreateSchema body,
     CancelToken? cancelToken,
@@ -315,7 +316,7 @@ _bodyData=jsonEncode(body);
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/analysis-boards/'.replaceAll('{' r'project_id' '}', projectId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/analysis-boards/'.replaceAll('{' r'project_id' '}', projectId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -331,14 +332,15 @@ _bodyData=jsonEncode(body);
     dynamic _bodyData;
 
     try {
-_bodyData=jsonEncode(body);
+      _bodyData = jsonEncode(body);
+
     } catch(error, stackTrace) {
-      throw DioError(
+      throw DioException(
          requestOptions: _options.compose(
           _dio.options,
           _path,
         ),
-        type: DioErrorType.unknown,
+        type: DioExceptionType.unknown,
         error: error,
         stackTrace: stackTrace,
       );

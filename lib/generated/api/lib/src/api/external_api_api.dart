@@ -30,7 +30,7 @@ class ExternalApiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ExternalEmployeeEmployeeIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1ExternalEmployeeEmployeeIdGet({ 
     required String employeeId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class ExternalApiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/external/employee/{employee_id}'.replaceAll('{' r'employee_id' '}', employeeId.toString());
+    final _path = r'/mahasangraha/api/v1/external/employee/{employee_id}'.replaceAll('{' r'employee_id' '}', employeeId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -76,7 +76,7 @@ class ExternalApiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ExternalMailPost({ 
+  Future<Response<void>> mahasangrahaApiV1ExternalMailPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -84,7 +84,7 @@ class ExternalApiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/external/mail';
+    final _path = r'/mahasangraha/api/v1/external/mail';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -121,7 +121,7 @@ class ExternalApiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ExternalSmsPost({ 
+  Future<Response<void>> mahasangrahaApiV1ExternalSmsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -129,7 +129,7 @@ class ExternalApiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/external/sms';
+    final _path = r'/mahasangraha/api/v1/external/sms';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -167,7 +167,7 @@ class ExternalApiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ExternalUhidUhidGet({ 
+  Future<Response<void>> mahasangrahaApiV1ExternalUhidUhidGet({ 
     required String uhid,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -176,7 +176,7 @@ class ExternalApiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/external/uhid/{uhid}'.replaceAll('{' r'uhid' '}', uhid.toString());
+    final _path = r'/mahasangraha/api/v1/external/uhid/{uhid}'.replaceAll('{' r'uhid' '}', uhid.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

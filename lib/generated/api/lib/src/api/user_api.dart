@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
-import 'package:ridp_api/src/model/form_api_v1_user_security_lock_status_user_id_get200_response.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_user_security_lock_status_user_id_get200_response.dart';
 import 'package:ridp_api/src/model/user_out.dart';
 import 'package:ridp_api/src/model/user_update_schema.dart';
 
@@ -30,9 +30,9 @@ class UserApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [UserOut] as data
+  /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserChangePasswordPost({ 
+  Future<Response<void>> mahasangrahaApiV1UserChangePasswordPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -40,7 +40,7 @@ class UserApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/change-password';
+    final _path = r'/mahasangraha/api/v1/user/change-password';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -61,32 +61,7 @@ class UserApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    UserOut? _responseData;
-
-    try {
-final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
-
-    } catch (error, stackTrace) {
-      throw DioException(
-        requestOptions: _response.requestOptions,
-        response: _response,
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    return Response<UserOut>(
-      data: _responseData,
-      headers: _response.headers,
-      isRedirect: _response.isRedirect,
-      requestOptions: _response.requestOptions,
-      redirects: _response.redirects,
-      statusCode: _response.statusCode,
-      statusMessage: _response.statusMessage,
-      extra: _response.extra,
-    );
+    return _response;
   }
 
   /// Return currently authenticated user&#39;s profile.
@@ -102,7 +77,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserProfileGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserProfileGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -110,7 +85,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/profile';
+    final _path = r'/mahasangraha/api/v1/user/profile';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -171,9 +146,9 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [FormApiV1UserSecurityLockStatusUserIdGet200Response] as data
+  /// Returns a [Future] containing a [Response] with a [MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>> formApiV1UserSecurityLockStatusUserIdGet({ 
+  Future<Response<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>> mahasangrahaApiV1UserSecurityLockStatusUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -182,7 +157,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/security/lock-status/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/security/lock-status/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -203,11 +178,11 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
       onReceiveProgress: onReceiveProgress,
     );
 
-    FormApiV1UserSecurityLockStatusUserIdGet200Response? _responseData;
+    MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockStatusUserIdGet200Response, FormApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'FormApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response, MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -219,7 +194,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
       );
     }
 
-    return Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>(
+    return Response<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -244,7 +219,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserStatusGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserStatusGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -252,7 +227,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/status';
+    final _path = r'/mahasangraha/api/v1/user/status';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -314,7 +289,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserUsersGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserUsersGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -322,7 +297,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users';
+    final _path = r'/mahasangraha/api/v1/user/users';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -385,7 +360,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserUsersPost({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserUsersPost({ 
     UserUpdateSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -394,7 +369,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users';
+    final _path = r'/mahasangraha/api/v1/user/users';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -475,7 +450,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UserUsersUserIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1UserUsersUserIdDelete({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -484,7 +459,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -522,7 +497,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserUsersUserIdGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserUsersUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -531,7 +506,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -594,7 +569,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UserUsersUserIdLockPost({ 
+  Future<Response<void>> mahasangrahaApiV1UserUsersUserIdLockPost({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -603,7 +578,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}/lock'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}/lock'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -642,7 +617,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserUsersUserIdPut({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserUsersUserIdPut({ 
     required String userId,
     UserUpdateSchema? body,
     CancelToken? cancelToken,
@@ -652,7 +627,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -733,7 +708,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UserUsersUserIdRolesPut({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UserUsersUserIdRolesPut({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -742,7 +717,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}/roles'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}/roles'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -805,7 +780,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UserUsersUserIdUnlockPost({ 
+  Future<Response<void>> mahasangrahaApiV1UserUsersUserIdUnlockPost({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -814,7 +789,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/user/users/{user_id}/unlock'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/user/users/{user_id}/unlock'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -849,9 +824,9 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [UserOut] as data
+  /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersChangePasswordPost({ 
+  Future<Response<void>> mahasangrahaApiV1UsersChangePasswordPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -859,7 +834,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/change-password';
+    final _path = r'/mahasangraha/api/v1/users/change-password';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -880,32 +855,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
       onReceiveProgress: onReceiveProgress,
     );
 
-    UserOut? _responseData;
-
-    try {
-final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 'UserOut', growable: true);
-
-    } catch (error, stackTrace) {
-      throw DioException(
-        requestOptions: _response.requestOptions,
-        response: _response,
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    return Response<UserOut>(
-      data: _responseData,
-      headers: _response.headers,
-      isRedirect: _response.isRedirect,
-      requestOptions: _response.requestOptions,
-      redirects: _response.redirects,
-      statusCode: _response.statusCode,
-      statusMessage: _response.statusMessage,
-      extra: _response.extra,
-    );
+    return _response;
   }
 
   /// Return currently authenticated user&#39;s profile.
@@ -921,7 +871,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersProfileGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersProfileGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -929,7 +879,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/profile';
+    final _path = r'/mahasangraha/api/v1/users/profile';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -990,9 +940,9 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future] containing a [Response] with a [FormApiV1UserSecurityLockStatusUserIdGet200Response] as data
+  /// Returns a [Future] containing a [Response] with a [MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>> formApiV1UsersSecurityLockStatusUserIdGet({ 
+  Future<Response<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>> mahasangrahaApiV1UsersSecurityLockStatusUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1001,7 +951,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/security/lock-status/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/security/lock-status/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -1022,11 +972,11 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
       onReceiveProgress: onReceiveProgress,
     );
 
-    FormApiV1UserSecurityLockStatusUserIdGet200Response? _responseData;
+    MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response? _responseData;
 
     try {
 final rawData = _response.data;
-_responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockStatusUserIdGet200Response, FormApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'FormApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
+_responseData = rawData == null ? null : deserialize<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response, MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>(rawData, 'MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response', growable: true);
 
     } catch (error, stackTrace) {
       throw DioException(
@@ -1038,7 +988,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
       );
     }
 
-    return Response<FormApiV1UserSecurityLockStatusUserIdGet200Response>(
+    return Response<MahasangrahaApiV1UserSecurityLockStatusUserIdGet200Response>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -1063,7 +1013,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersStatusGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersStatusGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1071,7 +1021,7 @@ _responseData = rawData == null ? null : deserialize<FormApiV1UserSecurityLockSt
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/status';
+    final _path = r'/mahasangraha/api/v1/users/status';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -1133,7 +1083,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersUsersGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersUsersGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -1141,7 +1091,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users';
+    final _path = r'/mahasangraha/api/v1/users/users';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -1204,7 +1154,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersUsersPost({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersUsersPost({ 
     UserUpdateSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1213,7 +1163,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users';
+    final _path = r'/mahasangraha/api/v1/users/users';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -1294,7 +1244,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UsersUsersUserIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1UsersUsersUserIdDelete({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1303,7 +1253,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -1341,7 +1291,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersUsersUserIdGet({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersUsersUserIdGet({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1350,7 +1300,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -1413,7 +1363,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UsersUsersUserIdLockPost({ 
+  Future<Response<void>> mahasangrahaApiV1UsersUsersUserIdLockPost({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1422,7 +1372,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}/lock'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}/lock'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -1461,7 +1411,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersUsersUserIdPut({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersUsersUserIdPut({ 
     required String userId,
     UserUpdateSchema? body,
     CancelToken? cancelToken,
@@ -1471,7 +1421,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -1552,7 +1502,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future] containing a [Response] with a [UserOut] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<UserOut>> formApiV1UsersUsersUserIdRolesPut({ 
+  Future<Response<UserOut>> mahasangrahaApiV1UsersUsersUserIdRolesPut({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1561,7 +1511,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}/roles'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}/roles'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -1624,7 +1574,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1UsersUsersUserIdUnlockPost({ 
+  Future<Response<void>> mahasangrahaApiV1UsersUsersUserIdUnlockPost({ 
     required String userId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -1633,7 +1583,7 @@ _responseData = rawData == null ? null : deserialize<UserOut, UserOut>(rawData, 
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/users/users/{user_id}/unlock'.replaceAll('{' r'user_id' '}', userId.toString());
+    final _path = r'/mahasangraha/api/v1/users/users/{user_id}/unlock'.replaceAll('{' r'user_id' '}', userId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

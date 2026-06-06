@@ -30,7 +30,7 @@ class SectionApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdSectionsPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdSectionsPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class SectionApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/sections'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/sections'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

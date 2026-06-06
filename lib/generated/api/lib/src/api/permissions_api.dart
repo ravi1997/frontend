@@ -16,7 +16,7 @@ class PermissionsApi {
 
   const PermissionsApi(this._dio);
 
-  /// formApiV1ProjectsProjectIdFormsFormIdPermissionsGet
+  /// mahasangrahaApiV1ProjectsProjectIdFormsFormIdPermissionsGet
   /// 
   ///
   /// Parameters:
@@ -30,7 +30,7 @@ class PermissionsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdPermissionsGet({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdPermissionsGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class PermissionsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/permissions'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/permissions'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -63,7 +63,7 @@ class PermissionsApi {
     return _response;
   }
 
-  /// formApiV1ProjectsProjectIdFormsFormIdPermissionsPost
+  /// mahasangrahaApiV1ProjectsProjectIdFormsFormIdPermissionsPost
   /// 
   ///
   /// Parameters:
@@ -77,7 +77,7 @@ class PermissionsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdPermissionsPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdPermissionsPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -86,7 +86,7 @@ class PermissionsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/permissions'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/permissions'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

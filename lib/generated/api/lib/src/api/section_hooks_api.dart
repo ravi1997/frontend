@@ -32,7 +32,7 @@ class SectionHooksApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsProjectIdFormsFormIdSectionsSectionIdHooksTriggerPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsProjectIdFormsFormIdSectionsSectionIdHooksTriggerPost({ 
     required String formId,
     required String sectionId,
     Object? body,
@@ -43,7 +43,7 @@ class SectionHooksApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/{project_id}/forms/{form_id}/sections/{section_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'section_id' '}', sectionId.toString());
+    final _path = r'/mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/sections/{section_id}/hooks/trigger'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'section_id' '}', sectionId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

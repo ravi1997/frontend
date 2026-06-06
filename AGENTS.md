@@ -5,6 +5,24 @@ Flutter/Dart frontend for the RIDP Form Platform. Keep this file as the durable 
 ## Durable Subagent Orchestration
 Prefer the narrowest relevant skill for non-trivial work. Use the specialized `ridp-*` skills when the task clearly matches them, but do not force subagent orchestration for small, local edits.
 
+## Codex Integration
+Codex is installed locally at `/usr/bin/codex` and can be leveraged to delegate subtasks, generate/refactor code, or perform automated reviews.
+- **How to delegate a task**: Run `codex exec` with the prompt as an argument.
+- **How to retrieve output**: Use the `-o` option to write the result to a file or capture stdout.
+- **How to run code reviews**: Run `codex review` in the workspace directory.
+
+Example commands:
+```bash
+# Delegate a code modification task non-interactively
+codex exec "Write a Flutter unit test for the custom grid widget under test/widgets/"
+
+# Execute a read-only sandboxed task and write output to a file
+codex exec --sandbox read-only -o codex_output.md "Explain the structure of routing in this project"
+
+# Run a code review
+codex review
+```
+
 ## Skill Router
 - `ridp-frontend-flutter`: UI, routing, state, form rendering, Smart Grid, accessibility, frontend tests.
 - `ridp-api-contract-sync`: backend/frontend API compatibility, OpenAPI, generated Dart client, auth headers, response envelopes.

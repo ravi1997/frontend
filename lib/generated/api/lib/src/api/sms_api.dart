@@ -29,7 +29,7 @@ class SmsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SmsHealthGet({ 
+  Future<Response<void>> mahasangrahaApiV1SmsHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class SmsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/sms/health';
+    final _path = r'/mahasangraha/api/v1/sms/health';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -74,7 +74,7 @@ class SmsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SmsNotifyPost({ 
+  Future<Response<void>> mahasangrahaApiV1SmsNotifyPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -82,7 +82,7 @@ class SmsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/sms/notify';
+    final _path = r'/mahasangraha/api/v1/sms/notify';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -119,7 +119,7 @@ class SmsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SmsOtpPost({ 
+  Future<Response<void>> mahasangrahaApiV1SmsOtpPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -127,7 +127,7 @@ class SmsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/sms/otp';
+    final _path = r'/mahasangraha/api/v1/sms/otp';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -164,7 +164,7 @@ class SmsApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1SmsSinglePost({ 
+  Future<Response<void>> mahasangrahaApiV1SmsSinglePost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -172,7 +172,7 @@ class SmsApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/sms/single';
+    final _path = r'/mahasangraha/api/v1/sms/single';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

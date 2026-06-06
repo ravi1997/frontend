@@ -17,7 +17,7 @@ class ProjectApi {
 
   const ProjectApi(this._dio);
 
-  /// formApiV1ProjectsPost
+  /// Create a new project for the current organization.
   /// 
   ///
   /// Parameters:
@@ -31,7 +31,7 @@ class ProjectApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1ProjectsPost({ 
+  Future<Response<void>> mahasangrahaApiV1ProjectsPost({ 
     ProjectSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -40,7 +40,7 @@ class ProjectApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/projects/';
+    final _path = r'/mahasangraha/api/v1/projects/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{

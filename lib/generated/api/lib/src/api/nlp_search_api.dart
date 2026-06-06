@@ -30,7 +30,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdNlpSearchPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdNlpSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -39,7 +39,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/nlp-search'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/nlp-search'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -77,7 +77,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdPopularQueriesGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdPopularQueriesGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -86,7 +86,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/popular-queries'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/popular-queries'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -124,7 +124,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdQuerySuggestionsGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdQuerySuggestionsGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -133,7 +133,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/query-suggestions'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/query-suggestions'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -171,7 +171,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryDelete({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSearchHistoryDelete({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -180,7 +180,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -218,7 +218,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSearchHistoryGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -227,7 +227,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -265,7 +265,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSearchHistoryPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSearchHistoryPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -274,7 +274,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/search-history'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -313,7 +313,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSearchHistorySearchIdDelete({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSearchHistorySearchIdDelete({ 
     required String formId,
     required String searchId,
     CancelToken? cancelToken,
@@ -323,7 +323,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/search-history/{search_id}'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'search_id' '}', searchId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/search-history/{search_id}'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'search_id' '}', searchId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -361,7 +361,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSearchStatsGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSearchStatsGet({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -370,7 +370,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/search-stats'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/search-stats'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -408,7 +408,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSemanticSearchPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSemanticSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -417,7 +417,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/semantic-search'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/semantic-search'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -455,7 +455,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchFormIdSemanticSearchStreamPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchFormIdSemanticSearchStreamPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -464,7 +464,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/{form_id}/semantic-search/stream'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/search/{form_id}/semantic-search/stream'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -501,7 +501,7 @@ class NlpSearchApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSearchHealthGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiSearchHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -509,7 +509,7 @@ class NlpSearchApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/search/health';
+    final _path = r'/mahasangraha/api/v1/ai/search/health';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

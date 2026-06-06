@@ -9,6 +9,8 @@ import 'dart:convert';
 import 'package:ridp_api/src/deserialize.dart';
 import 'package:dio/dio.dart';
 
+import 'package:ridp_api/src/model/dashboard_create_schema.dart';
+import 'package:ridp_api/src/model/dashboard_update_schema.dart';
 
 class DashboardApi {
 
@@ -31,9 +33,9 @@ class DashboardApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardsDashboardIdPut({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardsDashboardIdPut({ 
     required String dashboardId,
-    Map<String, Object>? body,
+    DashboardUpdateSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -41,7 +43,7 @@ class DashboardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboards/{dashboard_id}'.replaceAll('{' r'dashboard_id' '}', dashboardId.toString());
+    final _path = r'/mahasangraha/api/v1/dashboards/{dashboard_id}'.replaceAll('{' r'dashboard_id' '}', dashboardId.toString());
     final _options = Options(
       method: r'PUT',
       headers: <String, dynamic>{
@@ -97,8 +99,8 @@ class DashboardApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardsPost({ 
-    Map<String, Object>? body,
+  Future<Response<void>> mahasangrahaApiV1DashboardsPost({ 
+    DashboardCreateSchema? body,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -106,7 +108,7 @@ class DashboardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboards/';
+    final _path = r'/mahasangraha/api/v1/dashboards/';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -162,7 +164,7 @@ class DashboardApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1DashboardsSlugGet({ 
+  Future<Response<void>> mahasangrahaApiV1DashboardsSlugGet({ 
     required String slug,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -171,7 +173,7 @@ class DashboardApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/dashboards/{slug}'.replaceAll('{' r'slug' '}', slug.toString());
+    final _path = r'/mahasangraha/api/v1/dashboards/{slug}'.replaceAll('{' r'slug' '}', slug.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

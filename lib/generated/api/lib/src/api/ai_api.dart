@@ -29,7 +29,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiCrossAnalysisPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiCrossAnalysisPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -37,7 +37,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/cross-analysis';
+    final _path = r'/mahasangraha/api/v1/ai/cross-analysis';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -61,7 +61,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdAnomaliesPost
+  /// mahasangrahaApiV1AiFormIdAnomaliesPost
   /// 
   ///
   /// Parameters:
@@ -75,7 +75,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdAnomaliesPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdAnomaliesPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -84,7 +84,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/anomalies'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/anomalies'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -108,7 +108,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdAnomalyDetectPost
+  /// mahasangrahaApiV1AiFormIdAnomalyDetectPost
   /// 
   ///
   /// Parameters:
@@ -122,7 +122,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdAnomalyDetectPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdAnomalyDetectPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -131,7 +131,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/anomaly-detect'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/anomaly-detect'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -169,7 +169,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdCacheDelete({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdCacheDelete({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -178,7 +178,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/cache'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/cache'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'DELETE',
       headers: <String, dynamic>{
@@ -216,7 +216,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdCacheInvalidatePost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdCacheInvalidatePost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -225,7 +225,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/cache/invalidate'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/cache/invalidate'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -249,7 +249,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdExportPost
+  /// mahasangrahaApiV1AiFormIdExportPost
   /// 
   ///
   /// Parameters:
@@ -263,7 +263,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdExportPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdExportPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -272,7 +272,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/export'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/export'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -296,56 +296,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdResponsesResponseIdAnalyzePost
-  /// 
-  ///
-  /// Parameters:
-  /// * [formId] 
-  /// * [responseId] 
-  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
-  /// * [headers] - Can be used to add additional headers to the request
-  /// * [extras] - Can be used to add flags to the request
-  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
-  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
-  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
-  ///
-  /// Returns a [Future]
-  /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdResponsesResponseIdAnalyzePost({ 
-    required String formId,
-    required String responseId,
-    CancelToken? cancelToken,
-    Map<String, dynamic>? headers,
-    Map<String, dynamic>? extra,
-    ValidateStatus? validateStatus,
-    ProgressCallback? onSendProgress,
-    ProgressCallback? onReceiveProgress,
-  }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/responses/{response_id}/analyze'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'response_id' '}', responseId.toString());
-    final _options = Options(
-      method: r'POST',
-      headers: <String, dynamic>{
-        ...?headers,
-      },
-      extra: <String, dynamic>{
-        'secure': <Map<String, String>>[],
-        ...?extra,
-      },
-      validateStatus: validateStatus,
-    );
-
-    final _response = await _dio.request<Object>(
-      _path,
-      options: _options,
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      onReceiveProgress: onReceiveProgress,
-    );
-
-    return _response;
-  }
-
-  /// formApiV1AiFormIdResponsesResponseIdModeratePost
+  /// mahasangrahaApiV1AiFormIdResponsesResponseIdAnalyzePost
   /// 
   ///
   /// Parameters:
@@ -360,7 +311,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdResponsesResponseIdModeratePost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdResponsesResponseIdAnalyzePost({ 
     required String formId,
     required String responseId,
     CancelToken? cancelToken,
@@ -370,7 +321,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/responses/{response_id}/moderate'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'response_id' '}', responseId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/responses/{response_id}/analyze'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'response_id' '}', responseId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -394,11 +345,12 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdSearchPost
+  /// Manually triggers AI auto-tagging and classification for a specific response. Returns 202 with scheduled task ID.
   /// 
   ///
   /// Parameters:
   /// * [formId] 
+  /// * [responseId] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -408,8 +360,9 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdSearchPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdResponsesResponseIdClassifyPost({ 
     required String formId,
+    required String responseId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -417,7 +370,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/search'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/responses/{response_id}/classify'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'response_id' '}', responseId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -441,11 +394,12 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdSecurityScanPost
+  /// mahasangrahaApiV1AiFormIdResponsesResponseIdModeratePost
   /// 
   ///
   /// Parameters:
   /// * [formId] 
+  /// * [responseId] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -455,8 +409,9 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdSecurityScanPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdResponsesResponseIdModeratePost({ 
     required String formId,
+    required String responseId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -464,7 +419,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/security-scan'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/responses/{response_id}/moderate'.replaceAll('{' r'form_id' '}', formId.toString()).replaceAll('{' r'response_id' '}', responseId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -488,7 +443,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiFormIdSentimentGet
+  /// mahasangrahaApiV1AiFormIdSearchPost
   /// 
   ///
   /// Parameters:
@@ -502,7 +457,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdSentimentGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdSearchPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -511,7 +466,101 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/sentiment'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/search'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// mahasangrahaApiV1AiFormIdSecurityScanPost
+  /// 
+  ///
+  /// Parameters:
+  /// * [formId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1AiFormIdSecurityScanPost({ 
+    required String formId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/security-scan'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// mahasangrahaApiV1AiFormIdSentimentGet
+  /// 
+  ///
+  /// Parameters:
+  /// * [formId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1AiFormIdSentimentGet({ 
+    required String formId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/sentiment'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -549,7 +598,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdSummarizePost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdSummarizePost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -558,9 +607,56 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/summarize'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/summarize'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// Retrieve classification configuration details (enabled status and taxonomy list) for a form.
+  /// 
+  ///
+  /// Parameters:
+  /// * [formId] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> mahasangrahaApiV1AiFormIdTaxonomyGet({ 
+    required String formId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/taxonomy'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _options = Options(
+      method: r'GET',
       headers: <String, dynamic>{
         ...?headers,
       },
@@ -596,7 +692,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiFormIdValidateDesignPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiFormIdValidateDesignPost({ 
     required String formId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -605,7 +701,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/{form_id}/validate-design'.replaceAll('{' r'form_id' '}', formId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/{form_id}/validate-design'.replaceAll('{' r'form_id' '}', formId.toString());
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -629,7 +725,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiGeneratePost
+  /// mahasangrahaApiV1AiGeneratePost
   /// 
   ///
   /// Parameters:
@@ -642,7 +738,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiGeneratePost({ 
+  Future<Response<void>> mahasangrahaApiV1AiGeneratePost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -650,7 +746,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/generate';
+    final _path = r'/mahasangraha/api/v1/ai/generate';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -674,7 +770,7 @@ class AiApi {
     return _response;
   }
 
-  /// formApiV1AiHealthGet
+  /// mahasangrahaApiV1AiHealthGet
   /// 
   ///
   /// Parameters:
@@ -687,7 +783,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiHealthGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiHealthGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -695,7 +791,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/health';
+    final _path = r'/mahasangraha/api/v1/ai/health';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -732,7 +828,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiSuggestionsPost({ 
+  Future<Response<void>> mahasangrahaApiV1AiSuggestionsPost({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -740,7 +836,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/suggestions';
+    final _path = r'/mahasangraha/api/v1/ai/suggestions';
     final _options = Options(
       method: r'POST',
       headers: <String, dynamic>{
@@ -777,7 +873,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiTemplatesGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiTemplatesGet({ 
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -785,7 +881,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/templates';
+    final _path = r'/mahasangraha/api/v1/ai/templates';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{
@@ -823,7 +919,7 @@ class AiApi {
   ///
   /// Returns a [Future]
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> formApiV1AiTemplatesTemplateIdGet({ 
+  Future<Response<void>> mahasangrahaApiV1AiTemplatesTemplateIdGet({ 
     required String templateId,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -832,7 +928,7 @@ class AiApi {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final _path = r'/form/api/v1/ai/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
+    final _path = r'/mahasangraha/api/v1/ai/templates/{template_id}'.replaceAll('{' r'template_id' '}', templateId.toString());
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

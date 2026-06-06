@@ -157,6 +157,34 @@ class ApiEndpoints {
   static const String systemSettingsReset = '/admin/system-settings/reset';
 
   // ============================================================================
+  // Enterprise Orgs & Feature Flags Endpoints
+  // ============================================================================
+
+  /// POST - Create an Enterprise Organization (Superadmin only)
+  static const String createOrg = '/admin/orgs/';
+
+  /// GET - List all organizations (Superadmin only)
+  static const String listOrgs = '/admin/orgs/';
+
+  /// PUT - Suspend or activate an organization (Superadmin only)
+  static String updateOrgStatus(String orgId) => '/admin/orgs/$orgId/status';
+
+  /// PUT - Assign primary organization administrator (Superadmin only)
+  static String assignOrgAdmin(String orgId) => '/admin/orgs/$orgId/admin';
+
+  /// GET - Retrieve tenant-wide usage statistics (Superadmin only)
+  static String getOrgStats(String orgId) => '/admin/orgs/$orgId/stats';
+
+  /// GET - Get all feature flags and overrides (Superadmin only)
+  static const String listFeatureFlags = '/admin/feature-flags/';
+
+  /// PUT - Update global feature flag default state (Superadmin only)
+  static String updateGlobalFeatureFlag(String flagKey) => '/admin/feature-flags/$flagKey';
+
+  /// PUT - Configure feature flag override for a specific organization (Superadmin only)
+  static String updateFeatureFlagOverride(String flagKey, String orgId) => '/admin/feature-flags/$flagKey/override/$orgId';
+
+  // ============================================================================
   // Form Management Endpoints (§5-6)
   // ============================================================================
 

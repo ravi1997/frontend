@@ -7,8 +7,10 @@ import 'package:ridp_api/src/auth/api_key_auth.dart';
 import 'package:ridp_api/src/auth/basic_auth.dart';
 import 'package:ridp_api/src/auth/bearer_auth.dart';
 import 'package:ridp_api/src/auth/oauth.dart';
+import 'package:ridp_api/src/api/admin_tasks_api.dart';
 import 'package:ridp_api/src/api/advanced_responses_api.dart';
 import 'package:ridp_api/src/api/ai_api.dart';
+import 'package:ridp_api/src/api/analysis_board_api.dart';
 import 'package:ridp_api/src/api/analytics_api.dart';
 import 'package:ridp_api/src/api/anomaly_api.dart';
 import 'package:ridp_api/src/api/auth_api.dart';
@@ -16,10 +18,12 @@ import 'package:ridp_api/src/api/dashboard_api.dart';
 import 'package:ridp_api/src/api/dashboard_settings_api.dart';
 import 'package:ridp_api/src/api/env_config_api.dart';
 import 'package:ridp_api/src/api/external_api_api.dart';
+import 'package:ridp_api/src/api/feature_flags_api.dart';
 import 'package:ridp_api/src/api/form_api.dart';
 import 'package:ridp_api/src/api/form_hooks_api.dart';
 import 'package:ridp_api/src/api/library_api.dart';
 import 'package:ridp_api/src/api/nlp_search_api.dart';
+import 'package:ridp_api/src/api/organization_management_api.dart';
 import 'package:ridp_api/src/api/permissions_api.dart';
 import 'package:ridp_api/src/api/project_api.dart';
 import 'package:ridp_api/src/api/project_hooks_api.dart';
@@ -127,6 +131,12 @@ class RidpApi {
     }
   }
 
+  /// Get AdminTasksApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AdminTasksApi getAdminTasksApi() {
+    return AdminTasksApi(dio);
+  }
+
   /// Get AdvancedResponsesApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   AdvancedResponsesApi getAdvancedResponsesApi() {
@@ -137,6 +147,12 @@ class RidpApi {
   /// by doing that all interceptors will not be executed
   AiApi getAiApi() {
     return AiApi(dio);
+  }
+
+  /// Get AnalysisBoardApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AnalysisBoardApi getAnalysisBoardApi() {
+    return AnalysisBoardApi(dio);
   }
 
   /// Get AnalyticsApi instance, base route and serializer can be overridden by a given but be careful,
@@ -181,6 +197,12 @@ class RidpApi {
     return ExternalApiApi(dio);
   }
 
+  /// Get FeatureFlagsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  FeatureFlagsApi getFeatureFlagsApi() {
+    return FeatureFlagsApi(dio);
+  }
+
   /// Get FormApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   FormApi getFormApi() {
@@ -203,6 +225,12 @@ class RidpApi {
   /// by doing that all interceptors will not be executed
   NlpSearchApi getNlpSearchApi() {
     return NlpSearchApi(dio);
+  }
+
+  /// Get OrganizationManagementApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  OrganizationManagementApi getOrganizationManagementApi() {
+    return OrganizationManagementApi(dio);
   }
 
   /// Get PermissionsApi instance, base route and serializer can be overridden by a given but be careful,
