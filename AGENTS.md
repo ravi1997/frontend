@@ -5,23 +5,36 @@ Flutter/Dart frontend for the RIDP Form Platform. Keep this file as the durable 
 ## Durable Subagent Orchestration
 Prefer the narrowest relevant skill for non-trivial work. Use the specialized `ridp-*` skills when the task clearly matches them, but do not force subagent orchestration for small, local edits.
 
-## Codex Integration
+## Codex & Antigravity (AGY) Integration
+
 Codex is installed locally at `/usr/bin/codex` and can be leveraged to delegate subtasks, generate/refactor code, or perform automated reviews.
-- **How to delegate a task**: Run `codex exec` with the prompt as an argument.
-- **How to retrieve output**: Use the `-o` option to write the result to a file or capture stdout.
-- **How to run code reviews**: Run `codex review` in the workspace directory.
 
-Example commands:
-```bash
-# Delegate a code modification task non-interactively
-codex exec "Write a Flutter unit test for the custom grid widget under test/widgets/"
+### Bidirectional Master-Worker Orchestration
+Codex and Antigravity can operate in a bidirectional loop where Codex acts as the Master architect and Antigravity behaves as the coding agent, or vice versa.
 
-# Execute a read-only sandboxed task and write output to a file
-codex exec --sandbox read-only -o codex_output.md "Explain the structure of routing in this project"
+* **Codex as Master**:
+  To run Codex in Master mode with full access to execute commands and coordinate progress:
+  ```bash
+  /usr/bin/codex exec -s danger-full-access - <<'EOF'
+  You are the Lead Master Software Architect. Execute the following goals.
+  If you need Antigravity to perform a task (e.g., read code, execute tests), run:
+  agy --print "Find all references to widget X"
+  EOF
+  ```
 
-# Run a code review
-codex review
-```
+* **Delegating tasks from Codex to Antigravity (AGY)**:
+  Within Codex execution, use the `agy` CLI to request help or run sub-commands:
+  - `agy --print "Run flutter test on test/widgets/custom_widget_test.dart and return the summary"`
+  - `agy --print "Read and explain lib/router.dart"`
+
+* **Delegating tasks from Antigravity to Codex**:
+  Run `codex exec` with the prompt as an argument or via stdin:
+  - `codex exec "Write a Flutter unit test for the custom grid widget under test/widgets/"`
+  - `codex exec --sandbox read-only -o codex_output.md "Explain the structure of routing"`
+
+* **Code Reviews**:
+  - `codex review` (runs in the workspace directory)
+
 
 ## Skill Router
 - `ridp-frontend-flutter`: UI, routing, state, form rendering, Smart Grid, accessibility, frontend tests.
