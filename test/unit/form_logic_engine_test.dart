@@ -5,13 +5,13 @@ import 'package:frontend/core/form_models.dart';
 void main() {
   group('FormLogicEngine', () {
     test('Calculated expression A + B works', () {
-      const questionA = Question(id: 'qA', fieldType: 'number', label: 'A');
-      const questionB = Question(id: 'qB', fieldType: 'number', label: 'B');
-      const questionC = Question(
+      final questionA = Question(id: 'qA', fieldType: 'number', label: 'A');
+      final questionB = Question(id: 'qB', fieldType: 'number', label: 'B');
+      final questionC = Question(
         id: 'qC',
         fieldType: 'number',
         label: 'C',
-        logic: {
+        metadata: {
           'conditional_logic': {
             'rules': [
               {
@@ -36,12 +36,19 @@ void main() {
         organizationId: 'org1',
         createdBy: 'user1',
         activeVersion: '1.0.0',
+        sections: [
+          FormSection(
+            id: 's1',
+            title: 'S1',
+            questions: [questionA, questionB, questionC],
+          ),
+        ],
         versions: [
-          const FormVersion(
+          FormVersion(
             id: 'v1',
             version: '1.0.0',
             sections: [
-              Section(
+              FormSection(
                 id: 's1',
                 title: 'S1',
                 questions: [questionA, questionB, questionC],
@@ -57,11 +64,11 @@ void main() {
 
     test('Cycle detection avoids infinite loop', () {
       // Simulate A depends on B, B depends on A
-      const qA = Question(
+      final qA = Question(
         id: 'qA',
         fieldType: 'number',
         label: 'A',
-        logic: {
+        metadata: {
           'conditional_logic': {
             'rules': [
               {
@@ -77,11 +84,11 @@ void main() {
           }
         },
       );
-      const qB = Question(
+      final qB = Question(
         id: 'qB',
         fieldType: 'number',
         label: 'B',
-        logic: {
+        metadata: {
           'conditional_logic': {
             'rules': [
               {
@@ -105,12 +112,19 @@ void main() {
         organizationId: 'org1',
         createdBy: 'user1',
         activeVersion: '1.0.0',
+        sections: [
+          FormSection(
+            id: 's1',
+            title: 'S1',
+            questions: [qA, qB],
+          ),
+        ],
         versions: [
-          const FormVersion(
+          FormVersion(
             id: 'v1',
             version: '1.0.0',
             sections: [
-              Section(
+              FormSection(
                 id: 's1',
                 title: 'S1',
                 questions: [qA, qB],

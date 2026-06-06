@@ -9,6 +9,7 @@ export 'package:ridp_api/src/auth/bearer_auth.dart';
 export 'package:ridp_api/src/auth/oauth.dart';
 
 
+export 'package:ridp_api/src/api/ai_ops_api.dart';
 export 'package:ridp_api/src/api/admin_tasks_api.dart';
 export 'package:ridp_api/src/api/advanced_responses_api.dart';
 export 'package:ridp_api/src/api/ai_api.dart';
@@ -57,6 +58,7 @@ export 'package:ridp_api/src/model/form_schema.dart';
 export 'package:ridp_api/src/model/form_version_schema.dart';
 export 'package:ridp_api/src/model/logic_component_schema.dart';
 export 'package:ridp_api/src/model/login_request.dart';
+export 'package:ridp_api/src/model/mahasangraha_api_v1_admin_ai_ops_lora_improve_post_request.dart';
 export 'package:ridp_api/src/model/mahasangraha_api_v1_admin_feature_flags_flag_key_put_request.dart';
 export 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_admin_put_request.dart';
 export 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_status_put_request.dart';

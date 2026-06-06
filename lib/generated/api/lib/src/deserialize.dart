@@ -13,6 +13,7 @@ import 'package:ridp_api/src/model/form_schema.dart';
 import 'package:ridp_api/src/model/form_version_schema.dart';
 import 'package:ridp_api/src/model/logic_component_schema.dart';
 import 'package:ridp_api/src/model/login_request.dart';
+import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_ai_ops_lora_improve_post_request.dart';
 import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_feature_flags_flag_key_put_request.dart';
 import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_admin_put_request.dart';
 import 'package:ridp_api/src/model/mahasangraha_api_v1_admin_orgs_org_id_status_put_request.dart';
@@ -102,6 +103,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return LogicComponentSchema.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LoginRequest':
           return LoginRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest':
+          return MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest':
           return MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest':

@@ -2,6 +2,7 @@
 README.md
 analysis_options.yaml
 build.yaml
+doc/AIOpsApi.md
 doc/AccessEntrySchema.md
 doc/AdminTasksApi.md
 doc/AdvancedResponsesApi.md
@@ -32,6 +33,7 @@ doc/FormVersionSchema.md
 doc/LibraryApi.md
 doc/LogicComponentSchema.md
 doc/LoginRequest.md
+doc/MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest.md
 doc/MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest.md
 doc/MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest.md
 doc/MahasangrahaApiV1AdminOrgsOrgIdStatusPutRequest.md
@@ -94,6 +96,7 @@ lib/src/api.dart
 lib/src/api/admin_tasks_api.dart
 lib/src/api/advanced_responses_api.dart
 lib/src/api/ai_api.dart
+lib/src/api/ai_ops_api.dart
 lib/src/api/analysis_board_api.dart
 lib/src/api/analytics_api.dart
 lib/src/api/anomaly_api.dart
@@ -144,6 +147,7 @@ lib/src/model/form_schema.dart
 lib/src/model/form_version_schema.dart
 lib/src/model/logic_component_schema.dart
 lib/src/model/login_request.dart
+lib/src/model/mahasangraha_api_v1_admin_ai_ops_lora_improve_post_request.dart
 lib/src/model/mahasangraha_api_v1_admin_feature_flags_flag_key_put_request.dart
 lib/src/model/mahasangraha_api_v1_admin_orgs_org_id_admin_put_request.dart
 lib/src/model/mahasangraha_api_v1_admin_orgs_org_id_status_put_request.dart
@@ -185,20 +189,3 @@ lib/src/model/validation_schema.dart
 lib/src/model/version_schema.dart
 lib/src/model/workflow_instance_schema.dart
 pubspec.yaml
-test/admin_tasks_api_test.dart
-test/analysis_board_api_test.dart
-test/feature_flags_api_test.dart
-test/mahasangraha_api_v1_admin_feature_flags_flag_key_put_request_test.dart
-test/mahasangraha_api_v1_admin_orgs_org_id_admin_put_request_test.dart
-test/mahasangraha_api_v1_admin_orgs_org_id_status_put_request_test.dart
-test/mahasangraha_api_v1_admin_orgs_post_request_test.dart
-test/mahasangraha_api_v1_auth_login_post200_response_data_test.dart
-test/mahasangraha_api_v1_auth_login_post200_response_test.dart
-test/mahasangraha_api_v1_auth_refresh_post200_response_test.dart
-test/mahasangraha_api_v1_auth_request_otp_post_request_test.dart
-test/mahasangraha_api_v1_projects_project_id_forms_external_hooks_hook_id_approve_post_request_test.dart
-test/mahasangraha_api_v1_projects_project_id_forms_external_hooks_register_post_request_test.dart
-test/mahasangraha_api_v1_projects_project_id_forms_form_id_responses_filter_post_request_filters_inner_test.dart
-test/mahasangraha_api_v1_projects_project_id_forms_form_id_responses_filter_post_request_test.dart
-test/mahasangraha_api_v1_user_security_lock_status_user_id_get200_response_test.dart
-test/organization_management_api_test.dart

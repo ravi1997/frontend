@@ -48,13 +48,13 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:ridp_api/ridp_api.dart';
 
 
-final api = RidpApi().getAdminTasksApi();
-final String taskId = taskId_example; // String | 
+final api = RidpApi().getAIOpsApi();
+final MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest body = ; // MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest | 
 
 try {
-    api.mahasangrahaApiV1AdminTasksTaskIdGet(taskId);
+    api.mahasangrahaApiV1AdminAiOpsLoraImprovePost(body);
 } on DioException catch (e) {
-    print("Exception when calling AdminTasksApi->mahasangrahaApiV1AdminTasksTaskIdGet: $e\n");
+    print("Exception when calling AIOpsApi->mahasangrahaApiV1AdminAiOpsLoraImprovePost: $e\n");
 }
 
 ```
@@ -65,6 +65,8 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AIOpsApi*](doc/AIOpsApi.md) | [**mahasangrahaApiV1AdminAiOpsLoraImprovePost**](doc/AIOpsApi.md#mahasangrahaapiv1adminaiopsloraimprovepost) | **POST** /mahasangraha/api/v1/admin/ai-ops/lora/improve | Trigger the LoRA dataset building, validation, and training loop asynchronously.
+[*AIOpsApi*](doc/AIOpsApi.md) | [**mahasangrahaApiV1AdminAiOpsLoraStatusGet**](doc/AIOpsApi.md#mahasangrahaapiv1adminaiopslorastatusget) | **GET** /mahasangraha/api/v1/admin/ai-ops/lora/status | Retrieve current pipeline cycles, last execution timing, and performance scores.
 [*AdminTasksApi*](doc/AdminTasksApi.md) | [**mahasangrahaApiV1AdminTasksTaskIdGet**](doc/AdminTasksApi.md#mahasangrahaapiv1admintaskstaskidget) | **GET** /mahasangraha/api/v1/admin/tasks/{task_id} | Get the status, progress, and results of any Celery task (admin only).
 [*AdvancedResponsesApi*](doc/AdvancedResponsesApi.md) | [**mahasangrahaApiV1ProjectsProjectIdFormsFetchExternalGet**](doc/AdvancedResponsesApi.md#mahasangrahaapiv1projectsprojectidformsfetchexternalget) | **GET** /mahasangraha/api/v1/projects/{project_id}/forms/fetch/external | Fetch data from another form response where some question may have match for a value. Query Params: form_id, question_id, value
 [*AdvancedResponsesApi*](doc/AdvancedResponsesApi.md) | [**mahasangrahaApiV1ProjectsProjectIdFormsFormIdAccessControlGet**](doc/AdvancedResponsesApi.md#mahasangrahaapiv1projectsprojectidformsformidaccesscontrolget) | **GET** /mahasangraha/api/v1/projects/{project_id}/forms/{form_id}/access-control | User access control for a forms. Returns a detailed JSON report of the current user&#39;s permissions.
@@ -290,6 +292,7 @@ Class | Method | HTTP request | Description
  - [FormVersionSchema](doc/FormVersionSchema.md)
  - [LogicComponentSchema](doc/LogicComponentSchema.md)
  - [LoginRequest](doc/LoginRequest.md)
+ - [MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest](doc/MahasangrahaApiV1AdminAiOpsLoraImprovePostRequest.md)
  - [MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest](doc/MahasangrahaApiV1AdminFeatureFlagsFlagKeyPutRequest.md)
  - [MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest](doc/MahasangrahaApiV1AdminOrgsOrgIdAdminPutRequest.md)
  - [MahasangrahaApiV1AdminOrgsOrgIdStatusPutRequest](doc/MahasangrahaApiV1AdminOrgsOrgIdStatusPutRequest.md)

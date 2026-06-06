@@ -15,6 +15,9 @@ import 'package:frontend/modules/form_builder/responses/pages/response_detail_pa
 import 'package:frontend/modules/form_builder/responses/pages/response_list_page.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/core/widgets/error_state_widget.dart';
+import 'package:frontend/modules/platform/screens/organization_management_screen.dart';
+import 'package:frontend/modules/platform/screens/feature_flags_screen.dart';
+import 'package:frontend/modules/platform/screens/ai_ops_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -155,6 +158,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final projectId = state.pathParameters['projectId']!;
           return AnalyticsPage(projectId: projectId, formId: formId);
         },
+      ),
+      GoRoute(
+        path: '/admin/orgs',
+        builder: (context, state) => const OrganizationManagementScreen(),
+      ),
+      GoRoute(
+        path: '/admin/feature-flags',
+        builder: (context, state) => const FeatureFlagsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/ai-ops',
+        builder: (context, state) => const AIOpsScreen(),
       ),
     ],
   );
