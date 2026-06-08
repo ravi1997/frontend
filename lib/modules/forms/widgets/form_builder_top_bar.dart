@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
@@ -552,28 +553,20 @@ class _SaveButton extends ConsumerWidget {
         }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Form saved successfully (${type == 'patch'
-                ? 'Patch'
-                : type == 'minor'
-                ? 'Minor'
-                : 'Major'} Version)',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      ref.read(snackbarServiceProvider).showSuccess(
+        'Form saved successfully (${type == 'patch'
+            ? 'Patch'
+            : type == 'minor'
+            ? 'Minor'
+            : 'Major'} Version)',
       );
     } else {
       final error = ref
           .read(formBuilderControllerProvider(controllerKey))
           .value
           ?.error;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save form: ${error ?? "Unknown error"}'),
-          backgroundColor: Colors.red,
-        ),
+      ref.read(snackbarServiceProvider).showError(
+        'Failed to save form: ${error ?? "Unknown error"}',
       );
     }
   }
@@ -689,13 +682,8 @@ class _PublishButton extends ConsumerWidget {
               .read(formBuilderControllerProvider(controllerKey))
               .value
               ?.error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Failed to publish form: ${error ?? "Unknown error"}',
-              ),
-              backgroundColor: Colors.red,
-            ),
+          ref.read(snackbarServiceProvider).showError(
+            'Failed to publish form: ${error ?? "Unknown error"}',
           );
         }
       },
@@ -748,11 +736,8 @@ class _GitBranchSelector extends ConsumerWidget {
           onChanged: (String? newValue) {
             if (newValue != null) {
               gitNotifier.switchBranch(newValue);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Switched to branch: $newValue'),
-                  backgroundColor: AppColors.primary,
-                ),
+              ref.read(snackbarServiceProvider).showInfo(
+                'Switched to branch: $newValue',
               );
             }
           },

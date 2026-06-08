@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'token_service.dart';
 import 'auth_interceptor.dart';
 import 'unified_network_interceptor.dart';
+import 'package:frontend/modules/auth/auth_service.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 import 'api_endpoints.dart';
 import 'app_config.dart';
@@ -31,6 +32,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final tokenService = ref.read(tokenServiceProvider.notifier);
   final snackbarService = ref.read(snackbarServiceProvider);
+  final authService = AuthService(dio, tokenService);
 
   dio.interceptors.add(
     UnifiedNetworkInterceptor(snackbarService: snackbarService),
@@ -38,6 +40,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   dio.interceptors.add(
     AuthInterceptor(
+      dio: dio,
       getTokens: () {
         if (!ref.mounted) return null;
         return ref.read(tokenServiceProvider).value;
@@ -49,6 +52,7 @@ final dioProvider = Provider<Dio>((ref) {
       onNavigateToLogin: () {
         if (!ref.mounted) return;
       },
+      refreshAccessToken: (refreshToken) => authService.refreshToken(refreshToken),
       getCsrfToken: () => readCookieValue('X-CSRF-TOKEN-ACCESS'),
     ),
   );

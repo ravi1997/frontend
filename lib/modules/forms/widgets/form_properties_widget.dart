@@ -8,6 +8,8 @@ import 'package:frontend/modules/forms/widgets/form_layout_settings.dart';
 import 'package:frontend/modules/forms/widgets/form_style_settings.dart';
 import 'package:frontend/modules/forms/widgets/form_logic_settings.dart';
 import 'package:frontend/modules/forms/widgets/form_access_settings.dart';
+import 'package:frontend/modules/forms/widgets/properties_panel_shell.dart';
+import 'package:frontend/modules/forms/widgets/padded_scroll_tab.dart';
 import 'package:frontend/app/localization/locale_controller.dart';
 
 class FormPropertiesWidget extends ConsumerStatefulWidget {
@@ -59,20 +61,15 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
 
         return DefaultTabController(
           length: 5,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                left: BorderSide(color: AppColors.borderLight, width: 1),
-              ),
-            ),
-            child: Column(
+          child: PropertiesPanelShell(
+            header: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const FaIcon(FontAwesomeIcons.fileLines,
+                      const FaIcon(
+                        FontAwesomeIcons.fileLines,
                         size: 16,
                         color: AppColors.textGrey,
                       ),
@@ -92,13 +89,12 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                           color: AppColors.textGrey,
                           size: 20,
                         ),
-                        onPressed: () => controller.selectQuestion(null, null),
+                        onPressed: controller.selectForm,
                       ),
                     ],
                   ),
                 ),
                 const Divider(color: AppColors.borderLight, height: 1),
-                // Language Selector
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -132,22 +128,10 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                             fontWeight: FontWeight.bold,
                           ),
                           items: const [
-                            DropdownMenuItem(
-                              value: 'en',
-                              child: Text('English (EN)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'es',
-                              child: Text('Spanish (ES)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'fr',
-                              child: Text('French (FR)'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'hi',
-                              child: Text('Hindi (HI)'),
-                            ),
+                            DropdownMenuItem(value: 'en', child: Text('English (EN)')),
+                            DropdownMenuItem(value: 'es', child: Text('Spanish (ES)')),
+                            DropdownMenuItem(value: 'fr', child: Text('French (FR)')),
+                            DropdownMenuItem(value: 'hi', child: Text('Hindi (HI)')),
                           ],
                           onChanged: (val) {
                             if (val != null) {
@@ -180,66 +164,71 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                     ),
                   ),
                 ),
-                const Divider(color: AppColors.borderLight, height: 1),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: FormGeneralSettings(
-                          form: form.toJson(),
-                          onChanged: (updated) => controller.updateForm(
-                            form.copyWith(
-                              title: updated['title'] as String? ?? form.title,
-                              uiType: updated['ui_type'] as String? ?? form.uiType,
-                              isPublic: updated['isPublic'] as bool? ?? form.isPublic,
-                              style: Map<String, dynamic>.from(updated['style'] ?? form.style),
-                              accessPolicy: Map<String, dynamic>.from(updated['accessPolicy'] ?? form.accessPolicy),
-                            ),
-                          ),
+              ],
+            ),
+            body: TabBarView(
+              children: [
+                PaddedScrollTab(
+                  child: 
+                  FormGeneralSettings(
+                    form: form.toJson(),
+                    onChanged: (updated) => controller.updateForm(
+                      form.copyWith(
+                        title: updated['title'] as String? ?? form.title,
+                        uiType: updated['ui_type'] as String? ?? form.uiType,
+                        isPublic: updated['isPublic'] as bool? ?? form.isPublic,
+                        style: Map<String, dynamic>.from(
+                          updated['style'] ?? form.style,
+                        ),
+                        accessPolicy: Map<String, dynamic>.from(
+                          updated['accessPolicy'] ?? form.accessPolicy,
                         ),
                       ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: FormLayoutSettings(
-                          form: form.toJson(),
-                          onChanged: (updated) => controller.updateForm(
-                            form.copyWith(
-                              style: Map<String, dynamic>.from(updated['style'] ?? form.style),
-                            ),
-                          ),
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  FormLayoutSettings(
+                    form: form.toJson(),
+                    onChanged: (updated) => controller.updateForm(
+                      form.copyWith(
+                        style: Map<String, dynamic>.from(
+                          updated['style'] ?? form.style,
                         ),
                       ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: FormStyleSettings(
-                          form: form.toJson(),
-                          onChanged: (updated) => controller.updateForm(
-                            form.copyWith(
-                              style: Map<String, dynamic>.from(updated['style'] ?? form.style),
-                            ),
-                          ),
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  FormStyleSettings(
+                    form: form.toJson(),
+                    onChanged: (updated) => controller.updateForm(
+                      form.copyWith(
+                        style: Map<String, dynamic>.from(
+                          updated['style'] ?? form.style,
                         ),
                       ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: FormLogicSettings(
-                          form: form.toJson(),
-                          onChanged: (_) {},
-                        ),
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  FormLogicSettings(
+                    form: form.toJson(),
+                    onChanged: (_) {},
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  FormAccessSettings(
+                    form: form.toJson(),
+                    onChanged: (updated) => controller.updateForm(
+                      form.copyWith(
+                        isPublic: updated['isPublic'] as bool? ?? form.isPublic,
                       ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: FormAccessSettings(
-                          form: form.toJson(),
-                          onChanged: (updated) => controller.updateForm(
-                            form.copyWith(
-                              isPublic: updated['isPublic'] as bool? ?? form.isPublic,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],

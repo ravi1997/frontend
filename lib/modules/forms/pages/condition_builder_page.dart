@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import 'package:frontend/modules/forms/services/condition_controller.dart';
 import 'package:frontend/modules/forms/models/condition_rule.dart';
 import 'package:frontend/modules/forms/models/condition_enums.dart';
@@ -113,15 +114,11 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    ref.read(snackbarServiceProvider).showError(message);
   }
 
   void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
+    ref.read(snackbarServiceProvider).showSuccess(message);
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../design_system/tokens.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 /// Centralized UI state handlers for loading spinners and empty state placeholders.
 class AppStates {

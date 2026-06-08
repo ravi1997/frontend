@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../design_system/tokens.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 /// Screen size enum for the four supported breakpoints.
 enum ScreenSize { mobile, tablet, laptop, desktop }

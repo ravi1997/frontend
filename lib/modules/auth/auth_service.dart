@@ -27,12 +27,13 @@ class AuthService {
     final user = _userFromData(data['user']);
     if (user != null) return user;
 
-    final currentUser = await getCurrentUser();
-    if (currentUser == null) {
-      await _tokenService.clearTokens();
-      throw Exception('Failed to retrieve user info after login');
+    final currentUser = await _fetchCurrentUserOrNull();
+    if (currentUser != null) {
+      await _tokenService.setOrganizationId(currentUser.organizationId.toString());
+      return currentUser;
     }
-    return currentUser;
+
+    throw Exception('Failed to retrieve user info after login');
   }
 
   Future<UserModel> loginWithOtp(String mobile, String otp) async {
@@ -53,12 +54,13 @@ class AuthService {
     final user = _userFromData(data['user']);
     if (user != null) return user;
 
-    final currentUser = await getCurrentUser();
-    if (currentUser == null) {
-      await _tokenService.clearTokens();
-      throw Exception('Failed to retrieve user info after login');
+    final currentUser = await _fetchCurrentUserOrNull();
+    if (currentUser != null) {
+      await _tokenService.setOrganizationId(currentUser.organizationId.toString());
+      return currentUser;
     }
-    return currentUser;
+
+    throw Exception('Failed to retrieve user info after login');
   }
 
   Future<void> requestOtp(String mobile) async {
@@ -78,10 +80,21 @@ class AuthService {
 
   Future<UserModel?> getCurrentUser() async {
     try {
+      return await _fetchCurrentUserOrNull();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
+  Future<UserModel?> _fetchCurrentUserOrNull() async {
+    try {
       final response = await _apiClient.get(ApiEndpoints.userProfile);
       final data = _authData(response.data);
       return _userFromData(data?['user'] ?? data);
-    } catch (_) {
+    } on DioException {
       return null;
     }
   }
@@ -130,6 +143,10 @@ class AuthService {
       data?['refresh_token']?.toString() ?? data?['refreshToken']?.toString(),
       null,
     );
+    final organizationId = _tokenService.organizationId;
+    if (organizationId != null) {
+      await _tokenService.setOrganizationId(organizationId);
+    }
     return accessToken;
   }
 
@@ -177,11 +194,15 @@ class AuthService {
     if (raw is Map<String, dynamic> && raw.containsKey('user')) {
       return _userFromData(raw['user']);
     }
-    if (raw is Map<String, dynamic>) {
-      return UserModel.fromJson(raw);
-    }
-    if (raw is Map) {
-      return UserModel.fromJson(Map<String, dynamic>.from(raw));
+    try {
+      if (raw is Map<String, dynamic>) {
+        return UserModel.fromJson(raw);
+      }
+      if (raw is Map) {
+        return UserModel.fromJson(Map<String, dynamic>.from(raw));
+      }
+    } catch (_) {
+      return null;
     }
     return null;
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../ai_ops_repository.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 
 class AIOpsScreen extends ConsumerStatefulWidget {
   const AIOpsScreen({super.key});

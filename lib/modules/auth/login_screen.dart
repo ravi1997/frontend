@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'auth_controller.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import 'auth_widgets.dart';
 import 'package:frontend/core/networking/token_service.dart';
 
@@ -131,7 +131,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (mounted) {
         setState(() {
           _emailController.text = box.get('email', defaultValue: '');
-          _passwordController.text = box.get('password', defaultValue: '');
           _rememberMe = rememberMe;
         });
       }
@@ -257,11 +256,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final box = await Hive.openBox('credentials_box');
       if (_rememberMe) {
         await box.put('email', _emailController.text);
-        await box.put('password', _passwordController.text);
         await box.put('remember_me', true);
       } else {
         await box.delete('email');
-        await box.delete('password');
         await box.put('remember_me', false);
       }
 

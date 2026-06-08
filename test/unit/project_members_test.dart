@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/dashboard/domain/entities/project_summary.dart';
+import 'package:frontend/modules/dashboard/models/project_summary.dart';
 
 void main() {
   group('ProjectSummary.fromJson Member Parsing', () {

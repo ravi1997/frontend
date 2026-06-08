@@ -27,17 +27,39 @@ class FieldStyleSettings extends ConsumerStatefulWidget {
 
 class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
   final _formKey = GlobalKey<FormState>();
+  static const Map<String, IconData> _iconOptions = {
+    'email': Icons.email,
+    'person': Icons.person,
+    'phone': Icons.phone,
+    'lock': Icons.lock,
+    'calendar_today': Icons.calendar_today,
+    'access_time': Icons.access_time,
+    'visibility': Icons.visibility,
+    'attach_file': Icons.attach_file,
+    'search': Icons.search,
+    'home': Icons.home,
+    'work': Icons.work,
+    'info': Icons.info,
+    'check': Icons.check,
+    'close': Icons.close,
+  };
+
+  FormBuilderController _controller() {
+    return ref.read(formBuilderControllerProvider(widget.formId).notifier);
+  }
 
   void _updateStyle(WidgetRef ref, QuestionStyle newStyle) {
     if (_formKey.currentState!.validate()) {
-      ref
-          .read(formBuilderControllerProvider(widget.formId).notifier)
-          .updateQuestion(
+      _controller().updateQuestion(
             widget.question.copyWith(
               ui: {...widget.question.ui, 'style': newStyle.toJson()},
             ),
           );
     }
+  }
+
+  void _updateMetadata(WidgetRef ref, String key, dynamic value) {
+    _controller().updateQuestionMetadata(widget.question.id, {key: value});
   }
 
   @override
@@ -273,36 +295,24 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                           .toDouble(),
                       min: 0,
                       max: 10,
-                      onChanged: (val) {
-                        ref
-                            .read(
-                              formBuilderControllerProvider(
-                                widget.formId,
-                              ).notifier,
-                            )
-                            .updateQuestionMetadata(widget.question.id, {
-                              'elevation': val,
-                            });
-                      },
+                      onChanged: (val) => _updateMetadata(
+                        ref,
+                        'elevation',
+                        val,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     if ((widget.question.metadata['elevation'] ?? 0) > 0)
                       PropertyBuilderUtils.buildColorPicker(
                         label: 'Shadow Color',
                         value:
-                            widget.question.metadata['shadowColor'] ??
+                        widget.question.metadata['shadowColor'] ??
                             '#000000',
-                        onChanged: (val) {
-                          ref
-                              .read(
-                                formBuilderControllerProvider(
-                                  widget.formId,
-                                ).notifier,
-                              )
-                              .updateQuestionMetadata(widget.question.id, {
-                                'shadowColor': val,
-                              });
-                        },
+                        onChanged: (val) => _updateMetadata(
+                          ref,
+                          'shadowColor',
+                          val,
+                        ),
                       ),
 
                     const SizedBox(height: 12),
@@ -533,23 +543,6 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
   }
 
   void _showIconPickerDialog(Function(String) onSelected) {
-    final Map<String, IconData> icons = {
-      'email': Icons.email,
-      'person': Icons.person,
-      'phone': Icons.phone,
-      'lock': Icons.lock,
-      'calendar_today': Icons.calendar_today,
-      'access_time': Icons.access_time,
-      'visibility': Icons.visibility,
-      'attach_file': Icons.attach_file,
-      'search': Icons.search,
-      'home': Icons.home,
-      'work': Icons.work,
-      'info': Icons.info,
-      'check': Icons.check,
-      'close': Icons.close,
-    };
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -559,7 +552,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
           child: GridView.count(
             crossAxisCount: 5,
             shrinkWrap: true,
-            children: icons.entries
+            children: _iconOptions.entries
                 .map(
                   (e) => IconButton(
                     icon: Icon(e.value),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../design_system/tokens.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 /// Reusable Glassmorphic Shimmer Loader with multiple named presets
 /// (Card, Stats, Text, List) for platform-wide aesthetic consistency.

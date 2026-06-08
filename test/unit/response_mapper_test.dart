@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/responses/data/mappers/response_mapper.dart';
+import 'package:frontend/modules/forms/responses/data/mappers/response_mapper.dart';
 
 void main() {
   group('ResponseMapper', () {

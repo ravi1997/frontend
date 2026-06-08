@@ -45,6 +45,18 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   double _leftPanelWidth = 300;
   double _rightPanelWidth = 320;
 
+  double _readWidth(
+    Box<dynamic> box,
+    String key,
+    double fallback,
+    double min,
+    double max,
+  ) {
+    final value = box.get(key);
+    final width = value is num ? value.toDouble() : fallback;
+    return width.clamp(min, max).toDouble();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,19 +65,19 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 
   Future<void> _restoreLayoutPreferences() async {
     final box = await Hive.openBox(_layoutBoxName);
-    final leftWidth = _readStoredWidth(
+    final leftWidth = _readWidth(
       box,
       _leftPanelWidthKey,
-      fallback: _defaultLeftPanelWidth,
-      min: _minLeftPanelWidth,
-      max: _maxLeftPanelWidth,
+      _defaultLeftPanelWidth,
+      _minLeftPanelWidth,
+      _maxLeftPanelWidth,
     );
-    final rightWidth = _readStoredWidth(
+    final rightWidth = _readWidth(
       box,
       _rightPanelWidthKey,
-      fallback: _defaultRightPanelWidth,
-      min: _minRightPanelWidth,
-      max: _maxRightPanelWidth,
+      _defaultRightPanelWidth,
+      _minRightPanelWidth,
+      _maxRightPanelWidth,
     );
 
     if (!mounted) return;
@@ -73,18 +85,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       _leftPanelWidth = leftWidth;
       _rightPanelWidth = rightWidth;
     });
-  }
-
-  double _readStoredWidth(
-    Box<dynamic> box,
-    String key, {
-    required double fallback,
-    required double min,
-    required double max,
-  }) {
-    final value = box.get(key);
-    final width = value is num ? value.toDouble() : fallback;
-    return width.clamp(min, max).toDouble();
   }
 
   Future<void> _saveLayoutPreferences() async {

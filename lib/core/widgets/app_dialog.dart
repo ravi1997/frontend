@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../design_system/tokens.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 /// Reusable Glassmorphic Dialog container enforcing visual parity across the app.
 class AppDialog extends StatelessWidget {

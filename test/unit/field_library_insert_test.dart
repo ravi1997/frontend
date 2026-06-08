@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/form_builder/models/custom_field_template.dart';
-import 'package:frontend/features/form_builder/models/question_type.dart';
-import 'package:frontend/features/form_builder/services/form_builder_controller.dart';
+import 'package:frontend/modules/forms/models/custom_field_template.dart';
+import 'package:frontend/modules/forms/models/question_type.dart';
+import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers

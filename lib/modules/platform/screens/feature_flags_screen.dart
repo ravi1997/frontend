@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../feature_flag_repository.dart';
 import '../organization_repository.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 
 class FeatureFlagsScreen extends ConsumerStatefulWidget {
   const FeatureFlagsScreen({super.key});

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'auth_controller.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import 'auth_widgets.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {

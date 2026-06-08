@@ -67,6 +67,7 @@ void main() {
   group('AuthInterceptor', () {
     test('adds request id, bearer token, and organization header', () {
       final interceptor = AuthInterceptor(
+        dio: Dio(),
         getTokens: () => AuthTokens(
           accessToken: 'access',
           refreshToken: 'refresh',
@@ -74,6 +75,7 @@ void main() {
         ),
         clearTokens: () async {},
         onNavigateToLogin: () {},
+        refreshAccessToken: (_) async => 'access',
         getCsrfToken: () => 'csrf-token',
       );
       final options = RequestOptions(path: '/projects');
@@ -89,9 +91,11 @@ void main() {
 
     test('adds csrf token for unsafe cookie-mode requests', () {
       final interceptor = AuthInterceptor(
+        dio: Dio(),
         getTokens: () => AuthTokens(accessToken: 'access'),
         clearTokens: () async {},
         onNavigateToLogin: () {},
+        refreshAccessToken: (_) async => 'access',
         getCsrfToken: () => 'csrf-token',
       );
       final options = RequestOptions(path: '/forms', method: 'POST');

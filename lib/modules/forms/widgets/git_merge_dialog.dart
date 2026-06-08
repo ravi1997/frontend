@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
 
@@ -254,16 +255,15 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
 
                       if (context.mounted) {
                         Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Workspace merged and published successfully!'
-                                  : 'Failed to resolve all conflicts. Re-check options.',
-                            ),
-                            backgroundColor: success ? Colors.green : Colors.red,
-                          ),
-                        );
+                        if (success) {
+                          ref
+                              .read(snackbarServiceProvider)
+                              .showSuccess('Workspace merged and published successfully!');
+                        } else {
+                          ref
+                              .read(snackbarServiceProvider)
+                              .showError('Failed to resolve all conflicts. Re-check options.');
+                        }
                       }
                     },
                   ),

@@ -30,9 +30,9 @@ class TokenService extends AsyncNotifier<AuthTokens> {
 
     if (accessToken != null && isTokenExpired(accessToken)) {
       await box.delete(_accessTokenKey);
+      await box.delete(_organizationIdKey);
       return AuthTokens(
         refreshToken: refreshToken,
-        organizationId: organizationId,
       );
     }
 
@@ -66,10 +66,10 @@ class TokenService extends AsyncNotifier<AuthTokens> {
     if (tokens?.accessToken != null && isTokenExpired(tokens!.accessToken!)) {
       final box = await Hive.openBox(_boxName);
       await box.delete(_accessTokenKey);
+      await box.delete(_organizationIdKey);
       state = AsyncData(
         AuthTokens(
           refreshToken: tokens.refreshToken,
-          organizationId: tokens.organizationId,
         ),
       );
     }
@@ -94,12 +94,14 @@ class TokenService extends AsyncNotifier<AuthTokens> {
     }
     if (organizationId != null) {
       await box.put(_organizationIdKey, organizationId);
+    } else {
+      await box.delete(_organizationIdKey);
     }
     state = AsyncData(
       AuthTokens(
         accessToken: accessToken,
         refreshToken: refreshToken ?? state.value?.refreshToken,
-        organizationId: organizationId ?? state.value?.organizationId,
+        organizationId: organizationId,
       ),
     );
   }

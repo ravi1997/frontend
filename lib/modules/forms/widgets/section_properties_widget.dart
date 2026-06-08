@@ -8,6 +8,8 @@ import 'package:frontend/modules/forms/widgets/general_settings_panels.dart';
 import 'package:frontend/modules/forms/widgets/section_layout_settings.dart';
 import 'package:frontend/modules/forms/widgets/section_style_settings.dart';
 import 'package:frontend/modules/forms/widgets/section_logic_settings.dart';
+import 'package:frontend/modules/forms/widgets/properties_panel_shell.dart';
+import 'package:frontend/modules/forms/widgets/padded_scroll_tab.dart';
 import '../../../../app/localization/locale_controller.dart';
 
 class SectionPropertiesWidget extends ConsumerStatefulWidget {
@@ -76,20 +78,15 @@ class _SectionPropertiesWidgetState
 
         return DefaultTabController(
           length: 4,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                left: BorderSide(color: AppColors.borderLight, width: 1),
-              ),
-            ),
-            child: Column(
+          child: PropertiesPanelShell(
+            header: Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const FaIcon(FontAwesomeIcons.layerGroup,
+                      const FaIcon(
+                        FontAwesomeIcons.layerGroup,
                         size: 16,
                         color: AppColors.textGrey,
                       ),
@@ -112,7 +109,7 @@ class _SectionPropertiesWidgetState
                           color: AppColors.textGrey,
                           size: 20,
                         ),
-                        onPressed: () => controller.selectQuestion(null, null),
+                        onPressed: controller.selectForm,
                       ),
                     ],
                   ),
@@ -139,54 +136,55 @@ class _SectionPropertiesWidgetState
                     ),
                   ),
                 ),
-                const Divider(color: AppColors.borderLight, height: 1),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: SectionGeneralSettings(
-                          section: activeSection.toJson(),
-                          onChanged: (updated) => controller.updateSection(
-                            activeSection.copyWith(
-                              title: updated['title'] as String? ?? activeSection.title,
-                              description: updated['description'] as String? ?? activeSection.description,
-                            ),
-                          ),
+              ],
+            ),
+            body: TabBarView(
+              children: [
+                PaddedScrollTab(
+                  child: 
+                  SectionGeneralSettings(
+                    section: activeSection.toJson(),
+                    onChanged: (updated) => controller.updateSection(
+                      activeSection.copyWith(
+                        title:
+                            updated['title'] as String? ?? activeSection.title,
+                        description:
+                            updated['description'] as String? ??
+                                activeSection.description,
+                      ),
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  SectionLayoutSettings(
+                    section: activeSection.toJson(),
+                    onChanged: (updated) => controller.updateSection(
+                      activeSection.copyWith(
+                        title:
+                            updated['title'] as String? ?? activeSection.title,
+                      ),
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  SectionStyleSettings(
+                    section: activeSection.toJson(),
+                    onChanged: (updated) => controller.updateSection(
+                      activeSection.copyWith(
+                        metadata: Map<String, dynamic>.from(
+                          updated['metadata'] ?? activeSection.metadata,
                         ),
                       ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: SectionLayoutSettings(
-                          section: activeSection.toJson(),
-                          onChanged: (updated) => controller.updateSection(
-                            activeSection.copyWith(
-                              title: updated['title'] as String? ?? activeSection.title,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: SectionStyleSettings(
-                          section: activeSection.toJson(),
-                          onChanged: (updated) => controller.updateSection(
-                            activeSection.copyWith(
-                              metadata: Map<String, dynamic>.from(
-                                updated['metadata'] ?? activeSection.metadata,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
-                        child: SectionLogicSettings(
-                          section: activeSection.toJson(),
-                          onChanged: (_) {},
-                        ),
-                      ),
-                    ],
+                    ),
+                  ),
+                ),
+                PaddedScrollTab(
+                  child: 
+                  SectionLogicSettings(
+                    section: activeSection.toJson(),
+                    onChanged: (_) {},
                   ),
                 ),
               ],

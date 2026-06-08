@@ -30,16 +30,14 @@ class BuilderFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = _questionStyle(question);
-    Color bgColor;
-    Color borderColor;
-
-    try {
-      bgColor = Color(int.parse(style.backgroundColor.replaceAll('#', '0xFF')));
-      borderColor = Color(int.parse(style.borderColor.replaceAll('#', '0xFF')));
-    } catch (_) {
-      bgColor = Colors.white;
-      borderColor = AppColors.borderLight;
-    }
+    final bgColor = _parseHexColor(
+      style.backgroundColor,
+      Colors.white,
+    );
+    final borderColor = _parseHexColor(
+      style.borderColor,
+      AppColors.borderLight,
+    );
 
     final labelPosition = style.labelPosition;
     final isLeftAligned = labelPosition == 'left';
@@ -160,12 +158,7 @@ class BuilderFieldWidget extends StatelessWidget {
 
   Widget _buildLabelText(BuildContext context) {
     final style = _questionStyle(question);
-    Color labelColor;
-    try {
-      labelColor = Color(int.parse(style.labelColor.replaceAll('#', '0xFF')));
-    } catch (_) {
-      labelColor = AppColors.textDark;
-    }
+    final labelColor = _parseHexColor(style.labelColor, AppColors.textDark);
 
     return RichText(
       text: TextSpan(
@@ -191,12 +184,7 @@ class BuilderFieldWidget extends StatelessWidget {
 
   Widget _buildHelperText(BuildContext context) {
     final style = _questionStyle(question);
-    Color helperColor;
-    try {
-      helperColor = Color(int.parse(style.helperColor.replaceAll('#', '0xFF')));
-    } catch (_) {
-      helperColor = AppColors.textGrey;
-    }
+    final helperColor = _parseHexColor(style.helperColor, AppColors.textGrey);
 
     return Text(
       _helperText(question).translate(locale),
@@ -214,6 +202,14 @@ class BuilderFieldWidget extends StatelessWidget {
       return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
     }
     return const QuestionStyle();
+  }
+
+  Color _parseHexColor(String value, Color fallback) {
+    try {
+      return Color(int.parse(value.replaceAll('#', '0xFF')));
+    } catch (_) {
+      return fallback;
+    }
   }
 
   dynamic _helperText(FormQuestion q) {

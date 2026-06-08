@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../organization_repository.dart';
-import 'package:frontend/shared/widgets/snackbar.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 
 class OrganizationManagementScreen extends ConsumerStatefulWidget {
   const OrganizationManagementScreen({super.key});

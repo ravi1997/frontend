@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -22,6 +23,7 @@ import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'package:frontend/modules/forms/utility/form_logic_engine.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
+import 'package:frontend/modules/forms/utility/form_layout_utils.dart';
 import 'package:frontend/modules/forms/models/form_question_option.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/modules/forms/services/form_builder_repository.dart';
@@ -37,44 +39,6 @@ final submitFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
   (ref) => {},
 );
 
-String _sectionLayoutValue(SectionLayoutType layout) {
-  return switch (layout) {
-    SectionLayoutType.standard => 'flex',
-    SectionLayoutType.grid => 'grid-cols-2',
-    SectionLayoutType.threeColumns => 'grid-cols-3',
-    SectionLayoutType.fullWidth => 'full-width',
-    SectionLayoutType.list => 'list',
-    SectionLayoutType.sidebar => 'sidebar',
-    SectionLayoutType.accordion => 'accordion',
-    SectionLayoutType.tabbed => 'tabbed',
-    SectionLayoutType.custom => 'custom',
-    SectionLayoutType.overlay => 'overlay',
-    SectionLayoutType.dashboard => 'dashboard',
-    SectionLayoutType.centered => 'centered',
-    SectionLayoutType.wizard => 'wizard',
-    SectionLayoutType.masonry => 'masonry',
-    SectionLayoutType.fixed => 'fixed',
-    SectionLayoutType.card => 'card',
-  };
-}
-
-bool _isWideSectionLayout(String layout) {
-  return layout == _sectionLayoutValue(SectionLayoutType.fullWidth) ||
-      layout == _sectionLayoutValue(SectionLayoutType.dashboard) ||
-      layout == _sectionLayoutValue(SectionLayoutType.centered);
-}
-
-double _sectionMaxWidth(String layout, Map<String, dynamic> metadata) {
-  return (metadata['maxWidth'] as num?)?.toDouble() ??
-      (layout == _sectionLayoutValue(SectionLayoutType.centered) ? 760.0 : 1200.0);
-}
-
-double _fixedFieldWidth(double fixedWidth, {double fallback = 200.0}) {
-  if (fixedWidth <= 240) return 200.0;
-  if (fixedWidth <= 480) return 400.0;
-  if (fixedWidth > 480) return 600.0;
-  return fallback;
-}
 final Map<String, List<TextEditingController>> _submitOtpControllers = {};
 final Map<String, bool> _submitRichPreviewMode = {};
 
@@ -624,10 +588,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 : 1;
 
             final layout = section.layout;
-            final isFullWidth = _isWideSectionLayout(layout);
+            final isFullWidth = isWideSectionLayout(layout);
             final metadata = section.metaData;
-            final sectionMaxWidth = isFullWidth
-                ? _sectionMaxWidth(layout, metadata)
+            final maxSectionWidth = isFullWidth
+                ? sectionMaxWidth(layout, metadata)
                 : form.style.maxWidth;
 
             final alignStr = metadata['alignment']?.toString() ?? 'left';
@@ -642,7 +606,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 Align(
                   alignment: isFullWidth ? alignment : Alignment.center,
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                constraints: BoxConstraints(maxWidth: maxSectionWidth),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1104,12 +1068,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             ? null
             : () async {
                 if (!(_formKey.currentState?.validate() ?? true)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fix errors in the form'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  ref
+                      .read(snackbarServiceProvider)
+                      .showError('Please fix errors in the form');
                   return;
                 }
 
@@ -1340,10 +1301,10 @@ class _SubmitSectionWidget extends ConsumerWidget {
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         int crossAxisCount = 1;
-        if (section.layout == _sectionLayoutValue(SectionLayoutType.grid)) {
+        if (section.layout == sectionLayoutValue(SectionLayoutType.grid)) {
           crossAxisCount = section.gridColumns;
         } else if (section.layout ==
-            _sectionLayoutValue(SectionLayoutType.threeColumns)) {
+            sectionLayoutValue(SectionLayoutType.threeColumns)) {
           crossAxisCount = 3;
         }
 
@@ -1367,7 +1328,7 @@ class _SubmitSectionWidget extends ConsumerWidget {
           children: visibleQuestions.map((q) {
             double width = itemWidth;
             if (q.style.widthMode == 'fixed') {
-              width = _fixedFieldWidth(q.style.fixedWidth);
+              width = fixedFieldWidth(q.style.fixedWidth);
             } else {
               int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
               width = (itemWidth * span) + (questionSpacing * (span - 1));
@@ -2555,9 +2516,9 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     required String hint,
   }) {
     final locale = ref.read(localeControllerProvider).languageCode;
-    return TextFormField(
+    return buildSpecialTextField(
       controller: _controller,
-      style: textStyle,
+      textStyle: textStyle,
       decoration: inputDecoration.copyWith(
         hintText: q.placeholder.translate(locale).isEmpty
             ? hint
@@ -2580,9 +2541,9 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     required String hint,
   }) {
     final locale = ref.read(localeControllerProvider).languageCode;
-    return TextFormField(
+    return buildSpecialTextField(
       controller: _controller,
-      style: textStyle,
+      textStyle: textStyle,
       decoration: inputDecoration.copyWith(
         hintText: q.placeholder.translate(locale).isEmpty
             ? hint
@@ -2731,12 +2692,7 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         }
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not pick image: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ref.read(snackbarServiceProvider).showError('Could not pick image: $e');
       }
     }
 

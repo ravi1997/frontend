@@ -565,12 +565,16 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ),
               if (hasButton) ...[
                 const SizedBox(height: 16),
-                PropertyBuilderUtils.buildTextField(
-                  label: 'Button Label',
-                  controller: TextEditingController(text: buttonLabel),
-                  textStyle: const TextStyle(color: AppColors.textDark),
-                  labelStyle: const TextStyle(color: AppColors.textDark),
-                  hintStyle: const TextStyle(color: AppColors.textGrey),
+                TextFormField(
+                  initialValue: buttonLabel,
+                  decoration: const InputDecoration(
+                    labelText: 'Button Label',
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelStyle: TextStyle(color: AppColors.textDark),
+                  ),
+                  style: const TextStyle(color: AppColors.textDark),
                   onChanged: (val) {
                     final newConfig = Map<String, dynamic>.from(actionConfig);
                     newConfig['buttonLabel'] = val;

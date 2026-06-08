@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -20,6 +21,7 @@ import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'package:frontend/modules/forms/utility/form_logic_engine.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
+import 'package:frontend/modules/forms/utility/form_layout_utils.dart';
 import 'package:frontend/modules/forms/models/form_question_option.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/app_exception.dart';
@@ -485,10 +487,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             }
 
             final layout = section.layout;
-            final isFullWidth = _isWideSectionLayout(layout);
+            final isFullWidth = isWideSectionLayout(layout);
             final metadata = section.metaData;
-            final sectionMaxWidth = isFullWidth
-                ? _sectionMaxWidth(layout, metadata)
+            final maxSectionWidth = isFullWidth
+                ? sectionMaxWidth(layout, metadata)
                 : widget.form.style.maxWidth;
 
             final alignStr = metadata['alignment']?.toString() ?? 'left';
@@ -499,7 +501,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             return Align(
               alignment: isFullWidth ? alignment : Alignment.center,
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                constraints: BoxConstraints(maxWidth: maxSectionWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -644,7 +646,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
           runSpacing: spacing,
           children: visibleSections.map((section) {
             final metadata = section.metaData;
-            final sectionMaxWidth =
+            final maxSectionWidth =
                 (metadata['maxWidth'] as num?)?.toDouble() ??
                 widget.form.style.maxWidth;
 
@@ -658,7 +660,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
               child: Align(
                 alignment: alignment,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: sectionMaxWidth),
+                  constraints: BoxConstraints(maxWidth: maxSectionWidth),
                   child: _PreviewSectionWidget(
                     section: section,
                     questionSpacing: widget.form.style.questionSpacing,
@@ -826,12 +828,9 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             ? null
             : () async {
                 if (!(_formKey.currentState?.validate() ?? true)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fix errors in the form'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
+                  ref
+                      .read(snackbarServiceProvider)
+                      .showError('Please fix errors in the form');
                   return;
                 }
 
@@ -1488,10 +1487,10 @@ class _PreviewSectionWidgetState extends ConsumerState<_PreviewSectionWidget> {
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         int crossAxisCount = 1;
-        if (widget.section.layout == _sectionLayoutValue(SectionLayoutType.grid)) {
+        if (widget.section.layout == sectionLayoutValue(SectionLayoutType.grid)) {
           crossAxisCount = widget.section.gridColumns;
         } else if (widget.section.layout ==
-            _sectionLayoutValue(SectionLayoutType.threeColumns)) {
+            sectionLayoutValue(SectionLayoutType.threeColumns)) {
           crossAxisCount = 3;
         }
 
@@ -1512,7 +1511,7 @@ class _PreviewSectionWidgetState extends ConsumerState<_PreviewSectionWidget> {
           children: visibleQuestions.expand((q) {
             double width = itemWidth;
             if (q.style.widthMode == 'fixed') {
-              width = _fixedFieldWidth(q.style.fixedWidth);
+              width = fixedFieldWidth(q.style.fixedWidth);
             } else {
               int span = LayoutEngine.getFieldSpan(q, crossAxisCount);
               width = (itemWidth * span) + (questionSpacing * (span - 1));
@@ -2621,9 +2620,9 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     String locale, {
     required String hint,
   }) {
-    return TextFormField(
+    return buildSpecialTextField(
       controller: _controller,
-      style: textStyle,
+      textStyle: textStyle,
       decoration: inputDecoration.copyWith(
         hintText: q.placeholder.translate(locale).isEmpty
             ? hint
@@ -2646,9 +2645,9 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     String locale, {
     required String hint,
   }) {
-    return TextFormField(
+    return buildSpecialTextField(
       controller: _controller,
-      style: textStyle,
+      textStyle: textStyle,
       decoration: inputDecoration.copyWith(
         hintText: q.placeholder.translate(locale).isEmpty
             ? hint
@@ -2800,12 +2799,7 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         }
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not pick image: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ref.read(snackbarServiceProvider).showError('Could not pick image: $e');
       }
     }
 
@@ -3603,13 +3597,10 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
     required InputDecoration decoration,
     required VoidCallback onTap,
   }) {
+    final borderRadius = _pickerBorderRadius(decoration);
     return InkWell(
       onTap: onTap,
-      borderRadius: decoration.border is OutlineInputBorder
-          ? (decoration.border as OutlineInputBorder).borderRadius
-          : decoration.border is UnderlineInputBorder
-          ? (decoration.border as UnderlineInputBorder).borderRadius
-          : BorderRadius.circular(8),
+      borderRadius: borderRadius,
       child: InputDecorator(
         decoration: decoration,
         child: Row(
@@ -3621,6 +3612,14 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         ),
       ),
     );
+  }
+
+  BorderRadius _pickerBorderRadius(InputDecoration decoration) {
+    return switch (decoration.border) {
+      final OutlineInputBorder border => border.borderRadius,
+      final UnderlineInputBorder border => border.borderRadius,
+      _ => BorderRadius.circular(8),
+    };
   }
 
   Widget _buildSignatureField(
@@ -3736,42 +3735,4 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
       ),
     );
   }
-}
-String _sectionLayoutValue(SectionLayoutType layout) {
-  return switch (layout) {
-    SectionLayoutType.standard => 'flex',
-    SectionLayoutType.grid => 'grid-cols-2',
-    SectionLayoutType.threeColumns => 'grid-cols-3',
-    SectionLayoutType.fullWidth => 'full-width',
-    SectionLayoutType.list => 'list',
-    SectionLayoutType.sidebar => 'sidebar',
-    SectionLayoutType.accordion => 'accordion',
-    SectionLayoutType.tabbed => 'tabbed',
-    SectionLayoutType.custom => 'custom',
-    SectionLayoutType.overlay => 'overlay',
-    SectionLayoutType.dashboard => 'dashboard',
-    SectionLayoutType.centered => 'centered',
-    SectionLayoutType.wizard => 'wizard',
-    SectionLayoutType.masonry => 'masonry',
-    SectionLayoutType.fixed => 'fixed',
-    SectionLayoutType.card => 'card',
-  };
-}
-
-bool _isWideSectionLayout(String layout) {
-  return layout == _sectionLayoutValue(SectionLayoutType.fullWidth) ||
-      layout == _sectionLayoutValue(SectionLayoutType.dashboard) ||
-      layout == _sectionLayoutValue(SectionLayoutType.centered);
-}
-
-double _sectionMaxWidth(String layout, Map<String, dynamic> metadata) {
-  return (metadata['maxWidth'] as num?)?.toDouble() ??
-      (layout == _sectionLayoutValue(SectionLayoutType.centered) ? 760.0 : 1200.0);
-}
-
-double _fixedFieldWidth(double fixedWidth, {double fallback = 200.0}) {
-  if (fixedWidth <= 240) return 200.0;
-  if (fixedWidth <= 480) return 400.0;
-  if (fixedWidth > 480) return 600.0;
-  return fallback;
 }

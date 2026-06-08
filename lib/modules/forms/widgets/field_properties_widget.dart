@@ -11,7 +11,9 @@ import 'package:frontend/modules/forms/widgets/field_logic_settings.dart';
 import 'package:frontend/modules/forms/widgets/field_layout_settings.dart';
 import 'package:frontend/modules/forms/widgets/field_specific_settings.dart';
 import 'package:frontend/modules/forms/services/custom_fields_controller.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/localization/locale_controller.dart';
+import 'package:frontend/modules/forms/widgets/properties_panel_shell.dart';
 
 class FieldPropertiesWidget extends ConsumerStatefulWidget {
   final String controllerKey;
@@ -84,51 +86,33 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   }
 
   void _syncControllers(FormQuestion question, String locale) {
-    final translatedLabel = question.label.translate(locale);
-    if (_labelController.text != translatedLabel) {
-      _labelController.value = _labelController.value.copyWith(
-        text: translatedLabel,
-        selection: TextSelection.collapsed(offset: translatedLabel.length),
-      );
-    }
-    if (_variableNameController.text != (question.variableName ?? '')) {
-      _variableNameController.text = question.variableName ?? '';
-    }
-    final translatedHelperText = question.helperText.translate(locale);
-    if (_helperTextController.text != translatedHelperText) {
-      _helperTextController.text = translatedHelperText;
-    }
-    final translatedPlaceholder = question.placeholder.translate(locale);
-    if (_placeholderController.text != translatedPlaceholder) {
-      _placeholderController.text = translatedPlaceholder;
-    }
-    if (_regexController.text != (question.validationRegex ?? '')) {
-      _regexController.text = question.validationRegex ?? '';
-    }
-    if (_minLengthController.text != (question.minLength?.toString() ?? '')) {
-      _minLengthController.text = question.minLength?.toString() ?? '';
-    }
-    if (_maxLengthController.text != (question.maxLength?.toString() ?? '')) {
-      _maxLengthController.text = question.maxLength?.toString() ?? '';
-    }
-    if (_minValueController.text != (question.minValue?.toString() ?? '')) {
-      _minValueController.text = question.minValue?.toString() ?? '';
-    }
-    if (_maxValueController.text != (question.maxValue?.toString() ?? '')) {
-      _maxValueController.text = question.maxValue?.toString() ?? '';
-    }
-    if (_inputMaskController.text != (question.inputMask ?? '')) {
-      _inputMaskController.text = question.inputMask ?? '';
-    }
-    if (_customErrorController.text != (question.customErrorMessage ?? '')) {
-      _customErrorController.text = question.customErrorMessage ?? '';
-    }
-    if (_prefixIconController.text != question.style.prefixIcon) {
-      _prefixIconController.text = question.style.prefixIcon;
-    }
-    if (_suffixIconController.text != question.style.suffixIcon) {
-      _suffixIconController.text = question.style.suffixIcon;
-    }
+    _syncController(_labelController, question.label.translate(locale));
+    _syncController(_variableNameController, question.variableName ?? '');
+    _syncController(_helperTextController, question.helperText.translate(locale));
+    _syncController(
+      _placeholderController,
+      question.placeholder.translate(locale),
+    );
+    _syncController(_regexController, question.validationRegex ?? '');
+    _syncController(_minLengthController, question.minLength?.toString() ?? '');
+    _syncController(_maxLengthController, question.maxLength?.toString() ?? '');
+    _syncController(_minValueController, question.minValue?.toString() ?? '');
+    _syncController(_maxValueController, question.maxValue?.toString() ?? '');
+    _syncController(_inputMaskController, question.inputMask ?? '');
+    _syncController(
+      _customErrorController,
+      question.customErrorMessage ?? '',
+    );
+    _syncController(_prefixIconController, question.style.prefixIcon);
+    _syncController(_suffixIconController, question.style.suffixIcon);
+  }
+
+  void _syncController(TextEditingController controller, String value) {
+    if (controller.text == value) return;
+    controller.value = controller.value.copyWith(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
   }
 
   FormQuestion? _findQuestionById(List<FormSection> sections, String id) {
@@ -162,16 +146,9 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
         return DefaultTabController(
           length: 6,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                left: BorderSide(color: AppColors.borderLight, width: 1),
-              ),
-            ),
-            child: Column(
+          child: PropertiesPanelShell(
+            header: Column(
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Wrap(
@@ -183,7 +160,8 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const FaIcon(FontAwesomeIcons.sliders,
+                          const FaIcon(
+                            FontAwesomeIcons.sliders,
                             size: 16,
                             color: AppColors.textGrey,
                           ),
@@ -212,11 +190,9 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                                     'My Fields',
                                     question,
                                   );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Field saved as template!'),
-                                ),
-                              );
+                              ref
+                                  .read(snackbarServiceProvider)
+                                  .showSuccess('Field saved as template!');
                             },
                             icon: const Icon(Icons.star_border, size: 16),
                             label: const Text(
@@ -244,8 +220,10 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                     ],
                   ),
                 ),
-                const Divider(color: AppColors.borderLight, height: 1),
-
+              ],
+            ),
+            body: Column(
+              children: [
                 // Tab Bar
                 Material(
                   color: Colors.white,

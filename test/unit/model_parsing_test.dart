@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/features/auth/auth_models.dart';
-import 'package:frontend/features/responses/form_response.dart';
+import 'package:frontend/modules/auth/auth_models.dart';
+import 'package:frontend/modules/forms/responses/form_response.dart';
 
 void main() {
   group('UserModel entity parsing tests', () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart'; // Assuming this controller handles AI interactions
 
@@ -281,12 +282,8 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                       onPressed: () {
                         // Logic to add this field
                         // ref.read(formBuilderControllerProvider(widget.formId).notifier).addQuestion(...)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Adding field suggestions currently requires manual confirmation in this version.',
-                            ),
-                          ),
+                        ref.read(snackbarServiceProvider).showInfo(
+                          'Adding field suggestions currently requires manual confirmation in this version.',
                         );
                       },
                       child: const Text('Add to Form'),

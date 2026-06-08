@@ -69,7 +69,7 @@ class _DynamicPropertiesPanelState extends ConsumerState<DynamicPropertiesPanel>
       future: _metadataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -28,8 +28,19 @@ class FieldLayoutSettings extends ConsumerWidget {
               ...question.ui,
               'style': newStyle.toJson(),
             },
-          ),
+        ),
         );
+  }
+
+  void _updateLayoutMetadata(
+    WidgetRef ref,
+    void Function(Map<String, dynamic> layout) update,
+  ) {
+    final layout = Map<String, dynamic>.from(question.metadata['layout'] ?? {});
+    update(layout);
+    ref
+        .read(formBuilderControllerProvider('$projectId::$formId').notifier)
+        .updateQuestionMetadata(question.id, {'layout': layout});
   }
 
   @override
@@ -97,17 +108,9 @@ class FieldLayoutSettings extends ConsumerWidget {
           ],
           onChanged: (val) {
             if (val != null) {
-              final layout = Map<String, dynamic>.from(
-                question.metadata['layout'] ?? {},
-              );
-              layout['widthPreset'] = val;
-              ref
-                  .read(
-                    formBuilderControllerProvider(
-                      '$projectId::$formId',
-                    ).notifier,
-                  )
-                  .updateQuestionMetadata(question.id, {'layout': layout});
+              _updateLayoutMetadata(ref, (layout) {
+                layout['widthPreset'] = val;
+              });
             }
           },
         ),
@@ -125,17 +128,9 @@ class FieldLayoutSettings extends ConsumerWidget {
           ],
           onChanged: (val) {
             if (val != null) {
-              final layout = Map<String, dynamic>.from(
-                question.metadata['layout'] ?? {},
-              );
-              layout['span'] = val;
-              ref
-                  .read(
-                    formBuilderControllerProvider(
-                      '$projectId::$formId',
-                    ).notifier,
-                  )
-                  .updateQuestionMetadata(question.id, {'layout': layout});
+              _updateLayoutMetadata(ref, (layout) {
+                layout['span'] = val;
+              });
             }
           },
         ),

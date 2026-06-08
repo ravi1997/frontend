@@ -14,19 +14,25 @@ import 'token_service.dart';
 /// revokes the current session server-side.
 class AuthInterceptor extends QueuedInterceptor {
   static const _uuid = Uuid();
+  final Dio _dio;
   final AuthTokens? Function() _getTokens;
   final Future<void> Function() _clearTokens;
   final Function() _onNavigateToLogin;
   final String? Function() _getCsrfToken;
+  final Future<String?> Function(String refreshToken) _refreshAccessToken;
 
   AuthInterceptor({
+    required Dio dio,
     required AuthTokens? Function() getTokens,
     required Future<void> Function() clearTokens,
     required Function() onNavigateToLogin,
+    required Future<String?> Function(String refreshToken) refreshAccessToken,
     String? Function()? getCsrfToken,
-  }) : _getTokens = getTokens,
+  }) : _dio = dio,
+       _getTokens = getTokens,
        _clearTokens = clearTokens,
        _onNavigateToLogin = onNavigateToLogin,
+       _refreshAccessToken = refreshAccessToken,
        _getCsrfToken = getCsrfToken ?? (() => null);
 
   @override
@@ -69,6 +75,29 @@ class AuthInterceptor extends QueuedInterceptor {
     final isAuthPath = _isAuthEndpoint(err.requestOptions.path);
 
     if (err.response?.statusCode == 401 && !isAuthPath) {
+      final tokens = _getTokens();
+      final refreshToken = tokens?.refreshToken;
+      final alreadyRetried =
+          err.requestOptions.extra['auth_interceptor_retried'] == true;
+
+      if (refreshToken != null && !alreadyRetried) {
+        final accessToken = await _refreshAccessToken(refreshToken);
+        if (accessToken != null) {
+          final retryOptions = err.requestOptions.copyWith(
+            headers: Map<String, dynamic>.from(err.requestOptions.headers)
+              ..remove('Authorization'),
+            extra: Map<String, dynamic>.from(err.requestOptions.extra)
+              ..['auth_interceptor_retried'] = true,
+          );
+          try {
+            final response = await _dio.fetch(retryOptions);
+            return handler.resolve(response);
+          } on DioException {
+            // Fall through to the token-clear path below.
+          }
+        }
+      }
+
       await _clearTokens();
       _onNavigateToLogin();
       return handler.next(err);
@@ -78,19 +107,17 @@ class AuthInterceptor extends QueuedInterceptor {
   }
 
   bool _isAuthEndpoint(String path) {
-    // These credential-less paths must bypass token injection because they
-    // either don't have a token yet (login/register/OTP) or carry their own
-    // specific token (refresh).
-    //
-    // NOTE: /auth/logout is deliberately NOT in this list — it needs the
-    // session's access token so the backend can revoke it server-side.
-    return path.contains('/auth/login') ||
-        path.contains('/auth/register') ||
-        path.contains('/auth/otp') ||
-        path.contains('/auth/request-otp') ||
-        path.contains('/auth/refresh') ||
-        path.contains('/auth/request-password-reset') ||
-        path.contains('/generate-otp');
+    final normalized = Uri.parse(path).path;
+    const authPaths = <String>{
+      '/auth/login',
+      '/auth/register',
+      '/auth/otp',
+      '/auth/request-otp',
+      '/auth/refresh',
+      '/auth/request-password-reset',
+      '/generate-otp',
+    };
+    return authPaths.contains(normalized);
   }
 
   bool _requiresCsrf(String method) {
