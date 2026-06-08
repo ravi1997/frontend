@@ -1,19 +1,17 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
-import '../network/token_service.dart';
+import 'token_service.dart';
 
 /// Auth interceptor that handles JWT token management.
 ///
 /// Responsibilities:
-/// - Add access token to all requests (except credential-less auth endpoints)
+/// - Add access token to all requests except credential-less auth endpoints
 /// - Add organization ID header for multi-tenancy
-/// - Attach auth headers to outgoing requests
+/// - Attach CSRF headers when cookie auth is in use
 ///
-/// IMPORTANT: /auth/logout is intentionally NOT excluded here because the
-/// backend requires a valid Bearer token to revoke the session. Only the
-/// credential-less paths (login, register, OTP, refresh, password-reset)
-/// bypass token injection.
+/// NOTE: `/auth/logout` still receives the bearer token because the backend
+/// revokes the current session server-side.
 class AuthInterceptor extends QueuedInterceptor {
   static const _uuid = Uuid();
   final AuthTokens? Function() _getTokens;
@@ -92,7 +90,7 @@ class AuthInterceptor extends QueuedInterceptor {
         path.contains('/auth/request-otp') ||
         path.contains('/auth/refresh') ||
         path.contains('/auth/request-password-reset') ||
-        path.contains('/generate-otp'); // legacy alias
+        path.contains('/generate-otp');
   }
 
   bool _requiresCsrf(String method) {

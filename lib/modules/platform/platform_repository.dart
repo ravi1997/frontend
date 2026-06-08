@@ -1,12 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../core/networking/api_client_wrapper.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/networking/api_endpoints.dart';
 
 class PlatformRepository {
   PlatformRepository(this._apiClient);
 
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   Future<Map<String, dynamic>> getTaskStatus(String taskId) async {
     final response = await _apiClient.get(ApiEndpoints.taskStatus(taskId));
@@ -99,5 +99,5 @@ class PlatformRepository {
 }
 
 final platformRepositoryProvider = Provider<PlatformRepository>((ref) {
-  return PlatformRepository(ref.watch(apiClientProvider));
+  return PlatformRepository(ref.watch(dioProvider));
 });

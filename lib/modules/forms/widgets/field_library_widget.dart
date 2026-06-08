@@ -295,8 +295,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                 children: [
                   Row(
                     children: const [
-                      Icon(
-                        FontAwesomeIcons.cubes,
+                      FaIcon(FontAwesomeIcons.cubes,
                         size: 16,
                         color: AppColors.textGrey,
                       ),
@@ -440,8 +439,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(
-                                        FontAwesomeIcons.wandMagicSparkles,
+                                      const FaIcon(FontAwesomeIcons.wandMagicSparkles,
                                         color: AppColors.primary,
                                         size: 14,
                                       ),
@@ -645,7 +643,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
       }
     }
 
-    final iconOverride = template.template_type == 'workflow'
+    final IconData? iconOverride = template.template_type == 'workflow'
         ? Icons.account_tree_outlined
         : (template.template_type == 'section'
               ? Icons.dashboard_customize
@@ -740,11 +738,13 @@ class _FieldButtonCard extends StatelessWidget {
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              iconOverride ?? FieldRegistry.getIconForType(type),
-              color: color,
-              size: 18,
-            ),
+            child: iconOverride != null
+                ? Icon(iconOverride, color: color, size: 18)
+                : FaIcon(
+                    FieldRegistry.getIconForType(type),
+                    color: color,
+                    size: 18,
+                  ),
           ),
           const SizedBox(height: 8),
           Text(

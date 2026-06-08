@@ -38,7 +38,6 @@ class AgentOSApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Backwards-compatible wrapper: keep name but delegate to new app widget.
     return const RidpApp();
   }
 }

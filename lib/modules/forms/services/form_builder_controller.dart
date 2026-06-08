@@ -59,6 +59,7 @@ class FormBuilderController
           organizationId: _projectId,
           createdBy: 'system',
           activeVersion: initialVersion.version,
+          sections: [initialSection],
           versions: [initialVersion],
         );
         _savedFormSnapshot = initialForm;
@@ -183,6 +184,7 @@ class FormBuilderController
     }).toList();
     return form.copyWith(
       activeVersion: activeVersion,
+      sections: sections,
       versions: updatedVersions,
     );
   }

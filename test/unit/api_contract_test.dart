@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/core/network/auth_interceptor.dart';
-import 'package:frontend/core/network/api_endpoints.dart';
-import 'package:frontend/core/network/token_service.dart';
+import 'package:frontend/core/networking/auth_interceptor.dart';
+import 'package:frontend/core/networking/api_endpoints.dart';
+import 'package:frontend/core/networking/token_service.dart';
 
 void main() {
   group('API contract constants', () {

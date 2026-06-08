@@ -1,13 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:frontend/modules/forms/models/workflow.dart';
 import 'package:frontend/modules/forms/services/workflow_repository.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 
 /// Implementation of [WorkflowRepository] for workflow operations.
 ///
 /// Handles CRUD operations for workflow definitions via the backend API.
 class WorkflowRepositoryImpl implements WorkflowRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
 
   WorkflowRepositoryImpl(this._apiClient);

@@ -1,12 +1,11 @@
-import 'package:logger/logger.dart';
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/form_version_history.dart';
 import 'package:frontend/modules/forms/services/form_builder_repository.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
 import 'package:frontend/core/app_exception.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 import '../../../../core/networking/api_endpoints.dart';
 import '../dto/form_dto.dart';
 import '../mappers/form_mapper.dart';
@@ -19,7 +18,7 @@ import '../mappers/form_mapper.dart';
 /// EnvelopeInterceptor in the Dio pipeline already unwraps
 /// { "success": true, "data": ... } responses, so response.data is the unwrapped data.
 class FormBuilderRepositoryImpl implements FormBuilderRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
   static const _uuid = Uuid();
 

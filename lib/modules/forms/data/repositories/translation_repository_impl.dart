@@ -1,15 +1,15 @@
+import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:frontend/modules/forms/models/translation_job.dart';
 import 'package:frontend/modules/forms/models/translation_language.dart';
 import 'package:frontend/modules/forms/services/translation_repository.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 import '../../../../core/networking/api_endpoints.dart';
 
 /// Implementation of [TranslationRepository] for translation operations.
 ///
 /// Handles bulk translation and translation job management via the backend API.
 class TranslationRepositoryImpl implements TranslationRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
 
   TranslationRepositoryImpl(this._apiClient);

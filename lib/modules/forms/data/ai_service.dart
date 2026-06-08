@@ -1,10 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import '../../../../core/networking/api_endpoints.dart';
 
 /// AI Service for form analysis and AI-powered features
 class AIService {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   AIService(this._apiClient);
 
@@ -48,5 +49,5 @@ class AIService {
 }
 
 final aiServiceProvider = Provider<AIService>((ref) {
-  return AIService(ref.watch(apiClientProvider));
+  return AIService(ref.watch(dioProvider));
 });

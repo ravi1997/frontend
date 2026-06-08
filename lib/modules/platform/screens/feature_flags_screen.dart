@@ -89,7 +89,7 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: selectedOrgId,
+                    initialValue: selectedOrgId,
                     decoration: const InputDecoration(labelText: 'Select Organization'),
                     items: _orgs.map((org) {
                       return DropdownMenuItem<String>(
@@ -216,7 +216,7 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                 ),
                                 Switch(
                                   value: isEnabled,
-                                  activeColor: const Color(0xFF4338CA),
+                                  activeThumbColor: const Color(0xFF4338CA),
                                   onChanged: (val) => _toggleGlobalFlag(key, isEnabled),
                                 ),
                               ],

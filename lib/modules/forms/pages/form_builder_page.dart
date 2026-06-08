@@ -306,7 +306,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           body: ErrorStateWidget(
             title: 'Failed to load form builder',
             message:
-                'We couldn\'t load the form structure. This might be due to a network issue or an invalid form ID.',
+                'We couldn\'t load the form structure. This might be due to a connection issue or an invalid form ID.',
             error: error.toString(),
             onRetry: () =>
                 ref.refresh(formBuilderControllerProvider(controllerKey)),

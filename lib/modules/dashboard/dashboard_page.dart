@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/app/startup/responsive.dart';
@@ -99,7 +99,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     if (created == null) return;
 
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     await api.post(
       ApiEndpoints.createProject,
       data: {
@@ -122,7 +122,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Future<void> _archiveProject(ProjectSummary project) async {
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     await api.delete(ApiEndpoints.deleteProject(project.id));
     if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
@@ -160,7 +160,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     if (title == null || title.isEmpty) return;
 
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     await api.post(
       ApiEndpoints.createProjectForm(project.id),
       data: {

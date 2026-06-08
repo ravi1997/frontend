@@ -1,9 +1,9 @@
-import 'package:frontend/core/networking/api_client.dart';
+import 'package:dio/dio.dart';
 import '../../form_response.dart';
 import '../../response_repository.dart';
 
 class ResponseRepositoryImpl implements ResponseRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   ResponseRepositoryImpl(this._apiClient);
 

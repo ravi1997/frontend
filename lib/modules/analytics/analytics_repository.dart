@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'form_analytics.dart';
 import 'analytics_summary.dart';
 import 'analytics_timeline.dart';
@@ -32,6 +32,6 @@ abstract class AnalyticsRepository {
 }
 
 final analyticsRepositoryProvider = Provider<AnalyticsRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return AnalyticsRepositoryImpl(apiClient);
 });

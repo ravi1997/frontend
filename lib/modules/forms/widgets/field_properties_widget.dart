@@ -183,8 +183,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            FontAwesomeIcons.sliders,
+                          const FaIcon(FontAwesomeIcons.sliders,
                             size: 16,
                             color: AppColors.textGrey,
                           ),

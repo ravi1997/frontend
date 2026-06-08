@@ -4,14 +4,14 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/modules/auth/auth_models.dart';
 import 'package:frontend/modules/auth/auth_service.dart';
 
 // Auth Service Provider
 final authServiceProvider = Provider<AuthService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   final tokenStore = ref.watch(tokenServiceProvider.notifier);
   return AuthService(apiClient, tokenStore);
 });

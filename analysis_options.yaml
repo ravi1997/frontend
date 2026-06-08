@@ -13,7 +13,6 @@ analyzer:
   plugins:
     - custom_lint
   exclude:
-    - lib/generated/api/**
     - lib/features/**/domain/**
     - lib/features/**/presentation/**
   errors:

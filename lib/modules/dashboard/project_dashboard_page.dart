@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/core/widgets/error_state_widget.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
@@ -51,7 +51,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
     });
 
     try {
-      final api = ref.read(apiClientProvider);
+      final api = ref.read(dioProvider);
       final response = await api.get(ApiEndpoints.getProject(widget.projectId));
       final data = response.data;
       Map<String, dynamic> projectData;
@@ -86,7 +86,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
     });
 
     try {
-      final api = ref.read(apiClientProvider);
+      final api = ref.read(dioProvider);
       final response = await api.get(
         ApiEndpoints.listProjectForms(widget.projectId),
       );
@@ -221,7 +221,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
 
     if (shouldSave != true) return;
 
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     await api.put(
       ApiEndpoints.updateProject(widget.projectId),
       data: {
@@ -239,7 +239,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
   }
 
   Future<void> _archiveProject() async {
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     await api.delete(ApiEndpoints.deleteProject(widget.projectId));
     if (mounted) {
       context.pop();
@@ -432,7 +432,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
 
     if (payload == null) return;
 
-    final api = ref.read(apiClientProvider);
+    final api = ref.read(dioProvider);
     final response = await api.post(
       ApiEndpoints.createProjectForm(widget.projectId),
       data: payload,

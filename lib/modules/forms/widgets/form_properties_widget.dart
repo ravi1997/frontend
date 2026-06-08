@@ -72,8 +72,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(
-                        FontAwesomeIcons.fileLines,
+                      const FaIcon(FontAwesomeIcons.fileLines,
                         size: 16,
                         color: AppColors.textGrey,
                       ),

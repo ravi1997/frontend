@@ -1,7 +1,7 @@
 import 'package:frontend/modules/forms/models/condition_rule.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/modules/forms/data/repositories/condition_repository_impl.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 
 /// Repository interface for conditional rule operations.
 ///
@@ -37,6 +37,6 @@ abstract class ConditionRepository {
 
 final conditionRepositoryProvider = Provider<ConditionRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return ConditionRepositoryImpl(apiClient);
 });

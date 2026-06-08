@@ -2,7 +2,7 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/form_version_history.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/modules/forms/data/repositories/form_builder_repository_impl.dart';
 
 abstract class FormBuilderRepository {
@@ -76,6 +76,6 @@ abstract class FormBuilderRepository {
 
 final formBuilderRepositoryProvider = Provider<FormBuilderRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return FormBuilderRepositoryImpl(apiClient);
 });

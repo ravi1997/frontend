@@ -1,13 +1,14 @@
-import 'package:logger/logger.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
+import 'package:logger/logger.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 
 /// Service for custom field template operations.
 ///
 /// Handles CRUD operations for custom field templates via the backend API.
 class FieldLibraryService {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
 
   FieldLibraryService(this._apiClient);
@@ -86,5 +87,5 @@ class FieldLibraryService {
 }
 
 final fieldLibraryServiceProvider = Provider<FieldLibraryService>((ref) {
-  return FieldLibraryService(ref.watch(apiClientProvider));
+  return FieldLibraryService(ref.watch(dioProvider));
 });

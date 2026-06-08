@@ -185,14 +185,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
-  copy_with_extension:
-    dependency: transitive
-    description:
-      name: copy_with_extension
-      sha256: "28b8a99384df46f5287ed87e249869fddedd299752ea83603800448e0523f00b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.1.0"
   coverage:
     dependency: transitive
     description:
@@ -441,10 +433,10 @@ packages:
     dependency: "direct main"
     description:
       name: font_awesome_flutter
-      sha256: b9011df3a1fa02993630b8fb83526368cf2206a711259830325bab2f1d2a4eb0
+      sha256: "09dcde8ab90ffae1a7d65ff2ef96fc62a17ad9d0ce7c127b317ded676b0d5935"
       url: "https://pub.dev"
     source: hosted
-    version: "10.12.0"
+    version: "11.0.0"
   freezed_annotation:
     dependency: transitive
     description:
@@ -975,13 +967,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
-  ridp_api:
-    dependency: "direct main"
-    description:
-      path: "lib/generated/api"
-      relative: true
-    source: path
-    version: "1.0.0"
   riverpod:
     dependency: transitive
     description:

@@ -2,11 +2,7 @@ import 'package:dio/dio.dart';
 import '../exceptions/app_exception.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 
-/// Unified network interceptor that combines error handling and envelope parsing.
-///
-/// This interceptor provides:
-/// - User-friendly error messages via Snackbar
-/// - Envelope/response parsing for API responses
+/// Unified interceptor for envelope parsing and user-facing network errors.
 class UnifiedNetworkInterceptor extends Interceptor {
   final SnackbarService _snackbarService;
 
@@ -16,6 +12,11 @@ class UnifiedNetworkInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
+    if (_isAuthPath(response.requestOptions.path)) {
+      handler.next(response);
+      return;
+    }
+
     _parseEnvelope(response);
     handler.next(response);
   }
@@ -134,6 +135,10 @@ class UnifiedNetworkInterceptor extends Interceptor {
   /// Check if error is from envelope parsing.
   bool _isEnvelopeError(DioException err) {
     return err.error is ApiException;
+  }
+
+  bool _isAuthPath(String path) {
+    return path.contains('/auth/');
   }
 
   /// Handle envelope-specific errors.

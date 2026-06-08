@@ -78,7 +78,7 @@ class FieldRegistry {
     );
   }
 
-  static IconData getIconForType(QuestionType type) {
+  static FaIconData getIconForType(QuestionType type) {
     switch (type) {
       case QuestionType.shortText:
         return FontAwesomeIcons.textWidth;

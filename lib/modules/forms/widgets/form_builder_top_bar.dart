@@ -367,7 +367,7 @@ class _EditingLocaleSwitcher extends ConsumerWidget {
 }
 
 class _TopBarActionButton extends StatelessWidget {
-  final IconData icon;
+  final FaIconData icon;
   final String label;
   final VoidCallback onTap;
 
@@ -381,7 +381,7 @@ class _TopBarActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton.icon(
       onPressed: onTap,
-      icon: Icon(icon, size: 14, color: AppColors.textGrey),
+      icon: FaIcon(icon, size: 14, color: AppColors.textGrey),
       label: Text(
         label,
         style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
@@ -457,7 +457,7 @@ class _TopBarOverflowMenu extends ConsumerWidget {
           value: 'access',
           child: Row(
             children: [
-              Icon(FontAwesomeIcons.users, size: 16),
+              FaIcon(FontAwesomeIcons.users, size: 16),
               SizedBox(width: 10),
               Text('Access'),
             ],
@@ -467,7 +467,7 @@ class _TopBarOverflowMenu extends ConsumerWidget {
           value: 'analytics',
           child: Row(
             children: [
-              Icon(FontAwesomeIcons.chartLine, size: 16),
+              FaIcon(FontAwesomeIcons.chartLine, size: 16),
               SizedBox(width: 10),
               Text('Analytics'),
             ],
@@ -477,7 +477,7 @@ class _TopBarOverflowMenu extends ConsumerWidget {
           value: 'history',
           child: Row(
             children: [
-              Icon(FontAwesomeIcons.clockRotateLeft, size: 16),
+              FaIcon(FontAwesomeIcons.clockRotateLeft, size: 16),
               SizedBox(width: 10),
               Text('History'),
             ],
@@ -497,7 +497,7 @@ class _TopBarOverflowMenu extends ConsumerWidget {
           value: 'workflows',
           child: Row(
             children: [
-              Icon(FontAwesomeIcons.shareNodes, size: 16),
+              FaIcon(FontAwesomeIcons.shareNodes, size: 16),
               SizedBox(width: 10),
               Text('Workflows'),
             ],
@@ -739,7 +739,7 @@ class _GitBranchSelector extends ConsumerWidget {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: gitState.activeBranch,
-          icon: const Icon(FontAwesomeIcons.codeBranch, size: 14, color: AppColors.primary),
+          icon: const FaIcon(FontAwesomeIcons.codeBranch, size: 14, color: AppColors.primary),
           style: const TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,

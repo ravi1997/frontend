@@ -1,11 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/networking/api_client.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/networking/api_endpoints.dart';
 
 class FeatureFlagRepository {
   FeatureFlagRepository(this._apiClient);
 
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   /// Retrieves all feature flags and overrides.
   Future<List<Map<String, dynamic>>> listFeatureFlags() async {
@@ -55,5 +56,5 @@ class FeatureFlagRepository {
 }
 
 final featureFlagRepositoryProvider = Provider<FeatureFlagRepository>((ref) {
-  return FeatureFlagRepository(ref.watch(apiClientProvider));
+  return FeatureFlagRepository(ref.watch(dioProvider));
 });

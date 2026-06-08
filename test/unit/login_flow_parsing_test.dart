@@ -1,20 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/core/network/api_client.dart';
-import 'package:frontend/core/network/token_service.dart';
+import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/features/auth/auth_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockApiClient extends Mock implements ApiClient {}
+class MockDio extends Mock implements Dio {}
 class MockTokenService extends Mock implements TokenService {}
 
 void main() {
   late AuthService authService;
-  late MockApiClient mockApiClient;
+  late MockDio mockApiClient;
   late MockTokenService mockTokenService;
 
   setUp(() {
-    mockApiClient = MockApiClient();
+    mockApiClient = MockDio();
     mockTokenService = MockTokenService();
     authService = AuthService(mockApiClient, mockTokenService);
     

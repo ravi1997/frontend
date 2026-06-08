@@ -4,5 +4,3 @@ targets:
       include:
         - "lib/**"
         - "pubspec.yaml"
-      exclude:
-        - "lib/generated/api/**"

@@ -6,7 +6,7 @@ Status: Accepted
 
 Backend schemas and Flask route metadata are the source of truth for the public
 API contract. CI exports and validates `docs/openapi_spec.json`; frontend Dart
-clients are generated from that artifact into `lib/generated/api`.
+clients are generated from that artifact and consumed directly by the frontend.
 
 ## Consequences
 

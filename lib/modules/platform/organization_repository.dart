@@ -1,11 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/networking/api_client.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/networking/api_endpoints.dart';
 
 class OrganizationRepository {
   OrganizationRepository(this._apiClient);
 
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   /// Creates a new enterprise organization.
   Future<Map<String, dynamic>> createOrg(Map<String, dynamic> payload) async {
@@ -77,5 +78,5 @@ class OrganizationRepository {
 }
 
 final organizationRepositoryProvider = Provider<OrganizationRepository>((ref) {
-  return OrganizationRepository(ref.watch(apiClientProvider));
+  return OrganizationRepository(ref.watch(dioProvider));
 });

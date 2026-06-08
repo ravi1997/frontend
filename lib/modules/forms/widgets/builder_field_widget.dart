@@ -114,13 +114,17 @@ class BuilderFieldWidget extends StatelessWidget {
   Widget _buildHeader(BuildContext context, bool isLeftAligned, bool isHidden) {
     return Row(
       children: [
-        Icon(
-          isSelected ? Icons.check_circle : FontAwesomeIcons.gripVertical,
-          size: 14,
-          color: isSelected
-              ? AppColors.primary
-              : AppColors.textGrey.withValues(alpha: 0.5),
-        ),
+        isSelected
+            ? const Icon(
+                Icons.check_circle,
+                size: 14,
+                color: AppColors.primary,
+              )
+            : FaIcon(
+                FontAwesomeIcons.gripVertical,
+                size: 14,
+                color: AppColors.textGrey.withValues(alpha: 0.5),
+              ),
         const SizedBox(width: 8),
         if (!isLeftAligned)
           Expanded(

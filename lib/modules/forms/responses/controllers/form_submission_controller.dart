@@ -64,7 +64,7 @@ class FormSubmissionController extends Notifier<AsyncValue<void>> {
         return false;
       }
 
-      // Fallback to offline storage on network failure
+      // Queue submission for later retry when the backend is unreachable.
       await ref
           .read(syncServiceProvider.notifier)
           .addPendingSubmission(response, projectId: projectId);

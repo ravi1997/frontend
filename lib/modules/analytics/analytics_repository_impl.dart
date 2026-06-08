@@ -1,6 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
-import '../../../../core/networking/api_client_wrapper.dart';
 import 'analytics_distribution.dart';
 import 'analytics_repository.dart';
 import 'analytics_summary.dart';
@@ -8,7 +8,7 @@ import 'analytics_timeline.dart';
 import 'form_analytics.dart';
 
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
 
   AnalyticsRepositoryImpl(this._apiClient);

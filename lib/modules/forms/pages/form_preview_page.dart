@@ -21,7 +21,7 @@ import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'package:frontend/modules/forms/utility/form_logic_engine.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
 import 'package:frontend/modules/forms/models/form_question_option.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/app_exception.dart';
 
 final previewFormDataProvider = StateProvider.autoDispose<Map<String, dynamic>>(
@@ -253,7 +253,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     try {
       debugPrint('Triggering logic webhook: $resolvedUrl');
 
-      final apiClient = ref.read(apiClientProvider);
+      final apiClient = ref.read(dioProvider);
       final response = await apiClient.get(resolvedUrl);
       final responseData = response.data;
 
@@ -573,8 +573,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            FontAwesomeIcons.fileLines,
+          FaIcon(FontAwesomeIcons.fileLines,
             size: 48,
             color: AppColors.textGrey.withValues(alpha: 0.3),
           ),

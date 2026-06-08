@@ -1,12 +1,11 @@
-// lib/features/dashboard/dashboard_service.dart
-
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
 
 class DashboardService {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   DashboardService(this._apiClient);
 
@@ -109,6 +108,6 @@ class DashboardService {
 }
 
 final dashboardServiceProvider = Provider<DashboardService>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return DashboardService(apiClient);
 });

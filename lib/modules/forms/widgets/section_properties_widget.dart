@@ -89,8 +89,7 @@ class _SectionPropertiesWidgetState
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(
-                        FontAwesomeIcons.layerGroup,
+                      const FaIcon(FontAwesomeIcons.layerGroup,
                         size: 16,
                         color: AppColors.textGrey,
                       ),

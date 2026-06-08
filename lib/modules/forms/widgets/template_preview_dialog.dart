@@ -239,7 +239,7 @@ class TemplatePreviewDialog extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24, bottom: 8),
             child: Row(
               children: [
-                Icon(
+                FaIcon(
                   _getQuestionIcon(question.type),
                   size: 14,
                   color: Colors.grey[500],
@@ -344,7 +344,7 @@ class TemplatePreviewDialog extends StatelessWidget {
     }
   }
 
-  IconData _getQuestionIcon(dynamic type) {
+  FaIconData _getQuestionIcon(dynamic type) {
     switch (type.toString()) {
       case 'QuestionType.shortText':
         return FontAwesomeIcons.textWidth;

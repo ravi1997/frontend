@@ -443,7 +443,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 }
 
 class _SocialButton extends StatelessWidget {
-  final IconData icon;
+  final FaIconData icon;
   final String label;
   final VoidCallback onTap;
 

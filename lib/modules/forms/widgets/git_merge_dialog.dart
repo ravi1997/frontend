@@ -49,7 +49,7 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
               // Header
               Row(
                 children: [
-                  const Icon(FontAwesomeIcons.codeMerge, color: AppColors.primary, size: 24),
+                  const FaIcon(FontAwesomeIcons.codeMerge, color: AppColors.primary, size: 24),
                   const SizedBox(width: 12),
                   Text(
                     'Visual 3-Way Conflict Resolver',
@@ -236,7 +236,7 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    icon: const Icon(FontAwesomeIcons.circleCheck, size: 16),
+                    icon: const FaIcon(FontAwesomeIcons.circleCheck, size: 16),
                     label: const Text(
                       'Resolve & Complete Merge',
                       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),

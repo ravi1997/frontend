@@ -1,5 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 
 class GitBranchCommit {
   final String id;
@@ -95,7 +96,7 @@ class GitState {
 }
 
 class GitController extends StateNotifier<GitState> {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
 
   GitController(this._apiClient) : super(GitState());
 
@@ -189,6 +190,6 @@ final gitControllerProvider =
       ref,
       formKey,
     ) {
-      final apiClient = ref.watch(apiClientProvider);
+      final apiClient = ref.watch(dioProvider);
       return GitController(apiClient);
     });

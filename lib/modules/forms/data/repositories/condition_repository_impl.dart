@@ -1,13 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import 'package:frontend/modules/forms/models/condition_rule.dart';
 import 'package:frontend/modules/forms/services/condition_repository.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 
 /// Implementation of [ConditionRepository] for conditional rule operations.
 ///
 /// Handles CRUD operations for conditional logic rules via the backend API.
 class ConditionRepositoryImpl implements ConditionRepository {
-  final ApiClient _apiClient;
+  final Dio _apiClient;
   final Logger _logger = Logger();
 
   ConditionRepositoryImpl(this._apiClient);

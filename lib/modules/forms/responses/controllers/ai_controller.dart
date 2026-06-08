@@ -7,7 +7,6 @@ final aiControllerProvider = AsyncNotifierProvider<AIController, void>(
   AIController.new,
 );
 
-// Backwards-compatible alias for the previous codegen name.
 final aIControllerProvider = aiControllerProvider;
 
 final sentimentTrendsProvider =

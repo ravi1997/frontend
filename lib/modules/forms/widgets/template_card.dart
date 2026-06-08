@@ -84,7 +84,7 @@ class TemplateCard extends StatelessWidget {
             ),
           ),
           Center(
-            child: Icon(
+            child: FaIcon(
               _getCategoryIcon(),
               size: 48,
               color: Colors.white.withValues(alpha: 0.8),
@@ -215,7 +215,7 @@ class TemplateCard extends StatelessWidget {
     }
   }
 
-  IconData _getCategoryIcon() {
+  FaIconData _getCategoryIcon() {
     switch (template.category) {
       case FormTemplateCategory.contact:
         return FontAwesomeIcons.addressCard;

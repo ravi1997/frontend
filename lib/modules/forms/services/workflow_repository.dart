@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/modules/forms/data/repositories/workflow_repository_impl.dart';
 import 'package:frontend/modules/forms/models/workflow.dart';
 
@@ -33,6 +33,6 @@ abstract class WorkflowRepository {
 }
 
 final workflowRepositoryProvider = Provider<WorkflowRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return WorkflowRepositoryImpl(apiClient);
 });

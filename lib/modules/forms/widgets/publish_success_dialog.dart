@@ -29,8 +29,8 @@ class PublishSuccessDialog extends StatelessWidget {
                 color: Colors.green.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Center(
-                child: Icon(
+              child: Center(
+                child: FaIcon(
                   FontAwesomeIcons.check,
                   color: Colors.green,
                   size: 40,

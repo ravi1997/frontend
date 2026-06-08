@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/shared/models/form_models.dart';
-import 'package:frontend/core/networking/api_service.dart';
 import 'package:frontend/core/widgets/app_shimmer.dart';
+import 'package:frontend/modules/forms/services/form_builder_repository.dart';
 import 'property_builder_utils.dart';
 
 /// Dynamic, schema-driven properties panel rendering inputs on the fly
@@ -28,7 +28,7 @@ class _DynamicPropertiesPanelState extends ConsumerState<DynamicPropertiesPanel>
   @override
   void initState() {
     super.initState();
-    _metadataFuture = ref.read(apiServiceProvider).getBuilderMetadata();
+    _metadataFuture = ref.read(formBuilderRepositoryProvider).getBuilderMetadata();
   }
 
   void _updateQuestionValue(String target, String key, dynamic value) {
@@ -108,8 +108,8 @@ class _DynamicPropertiesPanelState extends ConsumerState<DynamicPropertiesPanel>
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        _metadataFuture = ref.read(apiServiceProvider).getBuilderMetadata();
+                    setState(() {
+                        _metadataFuture = ref.read(formBuilderRepositoryProvider).getBuilderMetadata();
                       });
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandBlue),

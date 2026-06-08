@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/features/form_builder/models/custom_field_template.dart';
 import 'package:frontend/features/form_builder/models/question_type.dart';
 import 'package:frontend/features/form_builder/services/form_builder_controller.dart';
-import 'package:frontend/core/form_models.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -13,14 +12,18 @@ import 'package:frontend/core/form_models.dart';
 /// initialized for an in-memory ("new") form so no repository/HTTP calls
 /// are needed.
 Future<ProviderContainer> _makeContainer() async {
-  // The controller key format is "projectId::formId".
-  // When formId is "new" the controller builds an empty form locally.
   const key = '::new';
   final container = ProviderContainer();
-  // Wait until initialization finishes (state transitions from loading).
+  final sub = container.listen(
+    formBuilderControllerProvider(key),
+    (_, _) {},
+    fireImmediately: true,
+  );
+
   while (container.read(formBuilderControllerProvider(key)).isLoading) {
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
+  addTearDown(sub.close);
   return container;
 }
 
@@ -42,7 +45,6 @@ void main() {
           formBuilderControllerProvider(_key).notifier,
         );
 
-        // No section selected by default.
         final stateBefore = container
             .read(formBuilderControllerProvider(_key))
             .value!;
@@ -60,7 +62,6 @@ void main() {
           stateAfter.form.sections[0].questions[0].type,
           QuestionType.mobile,
         );
-        // Insertion selects the new question for the properties panel.
         expect(stateAfter.selectedQuestionId, isNotNull);
         expect(stateAfter.selectedSectionId, stateAfter.form.sections[0].id);
       },
@@ -76,26 +77,20 @@ void main() {
           formBuilderControllerProvider(_key).notifier,
         );
 
-        // Add a second section and select it.
         await notifier.addSection();
         final stateWithTwo = container
             .read(formBuilderControllerProvider(_key))
             .value!;
         expect(stateWithTwo.form.sections, hasLength(2));
         final secondId = stateWithTwo.form.sections[1].id;
-        expect(
-          stateWithTwo.selectedSectionId,
-          secondId,
-        ); // addSection selects new section
+        expect(stateWithTwo.selectedSectionId, secondId);
 
         notifier.addQuestionToActiveSection(QuestionType.email);
 
         final stateAfter = container
             .read(formBuilderControllerProvider(_key))
             .value!;
-        // First section remains empty.
         expect(stateAfter.form.sections[0].questions, isEmpty);
-        // Second section received the question.
         expect(stateAfter.form.sections[1].questions, hasLength(1));
         expect(
           stateAfter.form.sections[1].questions[0].type,
@@ -105,7 +100,6 @@ void main() {
     );
 
     test('does not change state when form has no sections', () async {
-      // Bootstrap with a normal form key then manually remove the section.
       final container = await _makeContainer();
       addTearDown(container.dispose);
 
@@ -113,7 +107,6 @@ void main() {
         formBuilderControllerProvider(_key).notifier,
       );
 
-      // Remove the only section that was auto-created.
       final sectionId = container
           .read(formBuilderControllerProvider(_key))
           .value!
@@ -127,7 +120,6 @@ void main() {
           .value!;
       expect(stateBefore.form.sections, isEmpty);
 
-      // Should no-op gracefully.
       notifier.addQuestionToActiveSection(QuestionType.shortText);
 
       final stateAfter = container
@@ -153,7 +145,6 @@ void main() {
         template_type: 'question',
         data: {
           'id': 'q-template',
-          // FormQuestion.fromJson uses 'field_type' (not 'type') for the enum.
           'field_type': 'short_text',
           'label': 'Patient Name',
           'is_required': true,
@@ -185,7 +176,6 @@ void main() {
           category: 'System',
           template_type: 'section',
           data: {
-            // FormSection.fromJson requires 'id' and 'title'.
             'id': 'sec-from-template',
             'title': 'Patient Details',
             'questions': <dynamic>[],
@@ -197,7 +187,6 @@ void main() {
         final stateAfter = container
             .read(formBuilderControllerProvider(_key))
             .value!;
-        // Original section + new template section = 2.
         expect(stateAfter.form.sections, hasLength(2));
         expect(stateAfter.selectedSectionId, stateAfter.form.sections[1].id);
       },
@@ -226,14 +215,11 @@ void main() {
         final state = container
             .read(formBuilderControllerProvider(_key))
             .value!;
-        // Insertion produces exactly one question.
         expect(state.form.sections[0].questions, hasLength(1));
-        // And the right panel would open for this question (selectedQuestionId set).
         expect(
           state.selectedQuestionId,
           state.form.sections[0].questions[0].id,
         );
-        // isFormSelected must NOT be accidentally flipped to true.
         expect(state.isFormSelected, isFalse);
       },
     );

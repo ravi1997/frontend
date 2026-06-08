@@ -123,14 +123,6 @@ class TokenService extends AsyncNotifier<AuthTokens> {
   String? get organizationId => state.value?.organizationId;
 
   Future<void> clearTokens() async {
-    final current = state.value;
-    if (current == null ||
-        (current.accessToken == null &&
-            current.refreshToken == null &&
-            current.organizationId == null)) {
-      return;
-    }
-
     final box = await Hive.openBox(_boxName);
     await box.delete(_accessTokenKey);
     await box.delete(_refreshTokenKey);

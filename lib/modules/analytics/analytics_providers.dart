@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/networking/api_client.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'analysis_dashboard_repository.dart';
 import 'analytics_controller.dart';
 import 'analytics_summary.dart';

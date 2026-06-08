@@ -24,8 +24,8 @@ make openapi
 make generate-dart-client
 ```
 
-Generated transport clients must remain isolated under `lib/generated/api`.
-Existing Freezed/domain models may wrap generated transport DTOs for UI state.
+API contract artifacts are generated from the backend repo and are not checked in here.
+Existing Freezed/domain models may wrap transport DTOs for UI state.
 
 ## Quality Gates
 

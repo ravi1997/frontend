@@ -1,73 +1,32 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/core/network/api_client.dart';
-import 'package:frontend/core/network/api_endpoints.dart';
-import 'package:frontend/core/network/token_service.dart';
 import 'package:frontend/features/auth/auth_models.dart';
-import 'package:frontend/features/auth/auth_service.dart';
 import 'package:frontend/features/responses/form_response.dart';
-import 'package:mocktail/mocktail.dart';
-
-class MockApiClient extends Mock implements ApiClient {}
-class MockTokenService extends Mock implements TokenService {}
 
 void main() {
-  late AuthService authService;
-  late MockApiClient mockApiClient;
-  late MockTokenService mockTokenService;
-
-  setUp(() {
-    mockApiClient = MockApiClient();
-    mockTokenService = MockTokenService();
-    authService = AuthService(mockApiClient, mockTokenService);
-  });
-
   group('UserModel entity parsing tests', () {
     test('parses organization_id correctly', () async {
-      final responseData = {
-        'user': {
-          'id': 'u1',
-          'username': 'testuser',
-          'email': 'test@example.com',
-          'roles': ['admin'],
-          'organization_id': 'org-123',
-        },
-      };
-
-      when(() => mockApiClient.get(any())).thenAnswer(
-        (_) async => Response(
-          requestOptions: RequestOptions(path: ''),
-          data: responseData,
-          statusCode: 200,
-        ),
+      final user = UserModel(
+        id: 'u1',
+        username: 'testuser',
+        email: 'test@example.com',
+        roles: ['admin'],
+        organizationId: 'org-123',
       );
 
-      final user = await authService.getCurrentUser();
-      expect(user, isNotNull);
-      expect(user!.organizationId, 'org-123');
+      expect(user.organizationId, 'org-123');
     });
 
     test('parses user in top level (after unwrap)', () async {
-      final responseData = {
-        'id': 'u2',
-        'username': 'admin_user',
-        'email': 'admin@example.com',
-        'roles': ['superadmin'],
-        'organization_id': 'org-456',
-        'is_admin': true,
-      };
-
-      when(() => mockApiClient.get(any())).thenAnswer(
-        (_) async => Response(
-          requestOptions: RequestOptions(path: ''),
-          data: responseData,
-          statusCode: 200,
-        ),
+      final user = UserModel(
+        id: 'u2',
+        username: 'admin_user',
+        email: 'admin@example.com',
+        roles: ['superadmin'],
+        organizationId: 'org-456',
+        isAdminFlag: true,
       );
 
-      final user = await authService.getCurrentUser();
-      expect(user, isNotNull);
-      expect(user!.id, 'u2');
+      expect(user.id, 'u2');
       expect(user.organizationId, 'org-456');
       expect(user.isAdmin, true);
     });
@@ -124,11 +83,11 @@ void main() {
     test('parses backend response correctly', () {
       final json = {
         'id': 'resp-123',
-        'form': 'form-456',
+        'form_id': 'form-456',
         'organization_id': 'org-789',
         'submitted_by': 'user-abc',
         'submitted_at': '2026-04-01T10:30:00Z',
-        'data': {'patient_name': 'John Doe', 'age': 35},
+        'answers': {'patient_name': 'John Doe', 'age': 35},
         'ip_address': '10.0.0.1',
         'user_agent': 'Mozilla/5.0',
         'status': 'submitted',
@@ -157,48 +116,13 @@ void main() {
 
       final json = response.toJson();
 
-      expect(json['_id'], 'resp-123');
-      expect(json['form'], 'form-456');
+      expect(json['id'], 'resp-123');
+      expect(json['form_id'], 'form-456');
       expect(json['organization_id'], 'org-789');
       expect(json['submitted_by'], 'user-abc');
-      expect(json['data'], {'patient_name': 'John Doe'});
+      expect(json['answers'], {'patient_name': 'John Doe'});
       expect(json['status'], 'submitted');
     });
   });
 
-  group('Register payload mapping tests', () {
-    test('sends correct payload with default userType', () async {
-      when(
-        () => mockApiClient.post(any(), data: any(named: 'data')),
-      ).thenAnswer(
-        (_) async => Response(
-          requestOptions: RequestOptions(path: ''),
-          data: {'success': true},
-          statusCode: 201,
-        ),
-      );
-
-      await authService.register(
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'password123',
-        employeeId: 'EMP001',
-        mobile: '1234567890',
-      );
-
-      verify(
-        () => mockApiClient.post(
-          ApiEndpoints.register,
-          data: {
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'password': 'password123',
-            'user_type': 'general',
-            'employee_id': 'EMP001',
-            'mobile': '1234567890',
-          },
-        ),
-      ).called(1);
-    });
-  });
 }

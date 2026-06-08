@@ -102,8 +102,7 @@ class FormCanvasWidget extends ConsumerWidget {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    FontAwesomeIcons.layerGroup,
+                                  FaIcon(FontAwesomeIcons.layerGroup,
                                     size: 48,
                                     color: AppColors.textGrey.withValues(
                                       alpha: 0.2,

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/modules/forms/models/signature_request.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/modules/forms/data/repositories/signature_repository_impl.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
 
 /// Repository interface for signature operations.
 ///
@@ -58,6 +58,6 @@ abstract class SignatureRepository {
 
 final signatureRepositoryProvider = Provider<SignatureRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return SignatureRepositoryImpl(apiClient);
 });

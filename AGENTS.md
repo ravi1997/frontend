@@ -5,6 +5,15 @@ Flutter/Dart frontend for the RIDP Form Platform. Keep this file as the durable 
 ## Durable Subagent Orchestration
 Prefer the narrowest relevant skill for non-trivial work. Use the specialized `ridp-*` skills when the task clearly matches them, but do not force subagent orchestration for small, local edits.
 
+## Token Discipline
+- Keep parent prompts short: objective, constraints, exact files/symbols, and expected output only.
+- Use codebase-memory MCP first for code discovery: `search_graph`, `trace_path`, `get_code_snippet`, `query_graph`, `get_architecture`.
+- Send subagents one bounded task at a time. Do not bundle discovery, implementation, and verification unless the task is tiny.
+- Pass file paths, symbol names, and commands instead of pasting large context blocks.
+- Ask subagents to return only the decision, changed files, commands run, and residual risk.
+- If work spans frontend and backend, split by repo and keep each prompt repo-local.
+- Prefer targeted checks while iterating. Run broad gates only when contracts, auth, tenancy, generated code, or shared infrastructure changed.
+
 ## Codex & Antigravity (AGY) Integration
 
 Codex is installed locally at `/usr/bin/codex` and can be leveraged to delegate subtasks, generate/refactor code, or perform automated reviews.
@@ -49,7 +58,6 @@ For promptless report-only verification while another agent edits, run `.agents/
 
 ## Hard Invariants
 - Backend source: `/home/ravi/workspace/docker/apps/form-backend`; API prefix: `/mahasangraha/api/v1/`.
-- Generated client `lib/generated/api/` is read-only. Regenerate it from `/home/ravi/workspace/docker/apps/form-backend` with `make openapi && make generate-dart-client`, then copy the generated output back into this repo.
 - Auth supports Bearer and HttpOnly cookie modes; cookie writes require `X-CSRF-TOKEN-ACCESS`.
 - Role order: `superadmin > admin > manager > user`; enforce UI visibility from roles plus form ACLs, with backend as source of truth.
 - Async operations such as publish, clone, bulk export, and translation jobs return `202` with `task_id`.
@@ -64,7 +72,5 @@ flutter analyze
 flutter test
 flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8051
 ```
-
-If you touch `lib/generated/api/` or backend contract-dependent wrappers, also regenerate the client from the backend repo before handoff.
 
 Before handoff, report checks run, skipped checks, and residual risk.

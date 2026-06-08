@@ -1215,7 +1215,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
 
 // ─── Social Button ────────────────────────────────────────────────────────────
 class _SocialButton extends StatefulWidget {
-  final IconData icon;
+  final FaIconData icon;
   final String label;
   final VoidCallback onTap;
 

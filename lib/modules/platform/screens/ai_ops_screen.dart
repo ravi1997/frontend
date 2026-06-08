@@ -237,7 +237,7 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
                 style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
               ),
               value: _fastMode,
-              activeColor: const Color(0xFF4338CA),
+              activeThumbColor: const Color(0xFF4338CA),
               onChanged: (val) => setState(() => _fastMode = val),
             ),
             const SizedBox(height: 24),

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/api_endpoints.dart';
 
 class AIRepository {

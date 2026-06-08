@@ -6,7 +6,7 @@ import 'package:frontend/modules/forms/models/translation_job.dart';
 import 'package:frontend/modules/forms/models/translation_language.dart';
 import 'package:frontend/modules/forms/services/form_builder_repository.dart';
 import 'package:frontend/modules/forms/services/translation_repository.dart';
-import 'package:frontend/core/networking/api_client_wrapper.dart';
+import 'package:frontend/core/networking/dio_provider.dart';
 
 class TranslationController extends ChangeNotifier {
   TranslationController(this.ref);
@@ -116,7 +116,7 @@ class TranslationController extends ChangeNotifier {
 }
 
 final translationRepositoryProvider = Provider<TranslationRepository>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
+  final apiClient = ref.watch(dioProvider);
   return TranslationRepositoryImpl(apiClient);
 });
 
