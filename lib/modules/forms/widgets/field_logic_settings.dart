@@ -109,7 +109,31 @@ class FieldLogicSettings extends ConsumerWidget {
                 ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
-                onPressed: () => _showDialog(context, ref),
+                onPressed: () async {
+                  final state = ref
+                      .read(formBuilderControllerProvider('$projectId::$formId'))
+                      .value;
+                  final locale = state?.editingLocale ?? 'en';
+
+                  final result = await showDialog<Map<String, dynamic>>(
+                    context: context,
+                    builder: (context) => LogicRuleDialog(
+                      question: question,
+                      sections: sections,
+                      initialRule: null,
+                      locale: locale,
+                    ),
+                  );
+
+                  if (result != null) {
+                    final logicState = _getLogicState(question);
+                    final newRules = List<Map<String, dynamic>>.from(
+                      logicState['rules'],
+                    );
+                    newRules.add(result);
+                    _updateLogic(ref, {...logicState, 'rules': newRules});
+                  }
+                },
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Logical Action'),
                 style: ElevatedButton.styleFrom(
@@ -178,8 +202,31 @@ class FieldLogicSettings extends ConsumerWidget {
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.edit, size: 14),
-                onPressed: () =>
-                    _showDialog(context, ref, initialRule: rule, index: index),
+                onPressed: () async {
+                  final state = ref
+                      .read(formBuilderControllerProvider('$projectId::$formId'))
+                      .value;
+                  final locale = state?.editingLocale ?? 'en';
+
+                  final result = await showDialog<Map<String, dynamic>>(
+                    context: context,
+                    builder: (context) => LogicRuleDialog(
+                      question: question,
+                      sections: sections,
+                      initialRule: rule,
+                      locale: locale,
+                    ),
+                  );
+
+                  if (result != null) {
+                    final logicState = _getLogicState(question);
+                    final newRules = List<Map<String, dynamic>>.from(
+                      logicState['rules'],
+                    );
+                    newRules[index] = result;
+                    _updateLogic(ref, {...logicState, 'rules': newRules});
+                  }
+                },
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -236,36 +283,4 @@ class FieldLogicSettings extends ConsumerWidget {
     return id;
   }
 
-  void _showDialog(
-    BuildContext context,
-    WidgetRef ref, {
-    Map<String, dynamic>? initialRule,
-    int? index,
-  }) async {
-    final state = ref
-        .read(formBuilderControllerProvider('$projectId::$formId'))
-        .value;
-    final locale = state?.editingLocale ?? 'en';
-
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => LogicRuleDialog(
-        question: question,
-        sections: sections,
-        initialRule: initialRule,
-        locale: locale,
-      ),
-    );
-
-    if (result != null) {
-      final logicState = _getLogicState(question);
-      final newRules = List<Map<String, dynamic>>.from(logicState['rules']);
-      if (index != null) {
-        newRules[index] = result;
-      } else {
-        newRules.add(result);
-      }
-      _updateLogic(ref, {...logicState, 'rules': newRules});
-    }
-  }
 }

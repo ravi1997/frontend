@@ -44,7 +44,31 @@ class RecentFormsList extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           if (filteredForms.isEmpty)
-            _buildEmptyState(searchQuery)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.search_off,
+                      size: 48,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      searchQuery.isEmpty
+                          ? 'No forms yet. Create your first form!'
+                          : 'No forms found matching "$searchQuery"',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFF6B7280),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            )
           else
             ...filteredForms.map(
               (form) => Padding(
@@ -71,27 +95,6 @@ class RecentFormsList extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyState(String searchQuery) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off, size: 48, color: Color(0xFF9CA3AF)),
-            const SizedBox(height: 16),
-            Text(
-              searchQuery.isEmpty
-                  ? 'No forms yet. Create your first form!'
-                  : 'No forms found matching "$searchQuery"',
-              style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _RecentFormItem extends ConsumerWidget {

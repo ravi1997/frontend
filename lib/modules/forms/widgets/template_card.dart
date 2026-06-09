@@ -41,7 +41,63 @@ class TemplateCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _buildTags(),
                   const SizedBox(height: 12),
-                  _buildFooter(),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.description_outlined,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${template.form.sections.fold<int>(0, (count, section) => count + section.questions.length)} fields',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const Spacer(),
+                      Icon(
+                        Icons.trending_up,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${template.usageCount} uses',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: onUse,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(Icons.add, size: 12),
+                        label: Text(
+                          'Use',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -58,7 +114,41 @@ class TemplateCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: _getCategoryColors(),
+          colors: switch (template.category) {
+            FormTemplateCategory.contact => [
+              const Color(0xFF3B82F6),
+              const Color(0xFF2563EB),
+            ],
+            FormTemplateCategory.survey => [
+              const Color(0xFF10B981),
+              const Color(0xFF059669),
+            ],
+            FormTemplateCategory.registration => [
+              const Color(0xFFF59E0B),
+              const Color(0xFFD97706),
+            ],
+            FormTemplateCategory.event => [
+              const Color(0xFF8B5CF6),
+              const Color(0xFF7C3AED),
+            ],
+            FormTemplateCategory.assessment => [
+              const Color(0xFFEF4444),
+              const Color(0xFFDC2626),
+            ],
+            FormTemplateCategory.feedback => [
+              const Color(0xFFEC4899),
+              const Color(0xFFDB2777),
+            ],
+            FormTemplateCategory.order => [
+              const Color(0xFF6366F1),
+              const Color(0xFF4B5563),
+            ],
+            FormTemplateCategory.application => [
+              const Color(0xFF14B8A6),
+              const Color(0xFF0D9488),
+            ],
+            _ => [const Color(0xFF6B7280), const Color(0xFF4B5563)],
+          },
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
@@ -85,7 +175,19 @@ class TemplateCard extends StatelessWidget {
           ),
           Center(
             child: FaIcon(
-              _getCategoryIcon(),
+              switch (template.category) {
+                FormTemplateCategory.contact => FontAwesomeIcons.addressCard,
+                FormTemplateCategory.survey => FontAwesomeIcons.clipboardList,
+                FormTemplateCategory.registration => FontAwesomeIcons.userPlus,
+                FormTemplateCategory.event => FontAwesomeIcons.calendarDays,
+                FormTemplateCategory.assessment =>
+                  FontAwesomeIcons.graduationCap,
+                FormTemplateCategory.feedback => FontAwesomeIcons.commentDots,
+                FormTemplateCategory.order => FontAwesomeIcons.cartShopping,
+                FormTemplateCategory.application =>
+                  FontAwesomeIcons.fileSignature,
+                _ => FontAwesomeIcons.file,
+              },
               size: 48,
               color: Colors.white.withValues(alpha: 0.8),
             ),
@@ -144,97 +246,4 @@ class TemplateCard extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter() {
-    return Row(
-      children: [
-        Icon(Icons.description_outlined, size: 14, color: Colors.grey[600]),
-        const SizedBox(width: 4),
-        Text(
-          '${_getFieldCount()} fields',
-          style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[600]),
-        ),
-        const Spacer(),
-        Icon(Icons.trending_up, size: 14, color: Colors.grey[600]),
-        const SizedBox(width: 4),
-        Text(
-          '${template.usageCount} uses',
-          style: GoogleFonts.inter(fontSize: 11, color: Colors.grey[600]),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton.icon(
-          onPressed: onUse,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-            ),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          icon: const Icon(Icons.add, size: 12),
-          label: Text(
-            'Use',
-            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    );
-  }
-
-  int _getFieldCount() {
-    int count = 0;
-    for (final section in template.form.sections) {
-      count += section.questions.length;
-    }
-    return count;
-  }
-
-  List<Color> _getCategoryColors() {
-    switch (template.category) {
-      case FormTemplateCategory.contact:
-        return [const Color(0xFF3B82F6), const Color(0xFF2563EB)];
-      case FormTemplateCategory.survey:
-        return [const Color(0xFF10B981), const Color(0xFF059669)];
-      case FormTemplateCategory.registration:
-        return [const Color(0xFFF59E0B), const Color(0xFFD97706)];
-      case FormTemplateCategory.event:
-        return [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)];
-      case FormTemplateCategory.assessment:
-        return [const Color(0xFFEF4444), const Color(0xFFDC2626)];
-      case FormTemplateCategory.feedback:
-        return [const Color(0xFFEC4899), const Color(0xFFDB2777)];
-      case FormTemplateCategory.order:
-        return [const Color(0xFF6366F1), const Color(0xFF4B5563)];
-      case FormTemplateCategory.application:
-        return [const Color(0xFF14B8A6), const Color(0xFF0D9488)];
-      default:
-        return [const Color(0xFF6B7280), const Color(0xFF4B5563)];
-    }
-  }
-
-  FaIconData _getCategoryIcon() {
-    switch (template.category) {
-      case FormTemplateCategory.contact:
-        return FontAwesomeIcons.addressCard;
-      case FormTemplateCategory.survey:
-        return FontAwesomeIcons.clipboardList;
-      case FormTemplateCategory.registration:
-        return FontAwesomeIcons.userPlus;
-      case FormTemplateCategory.event:
-        return FontAwesomeIcons.calendarDays;
-      case FormTemplateCategory.assessment:
-        return FontAwesomeIcons.graduationCap;
-      case FormTemplateCategory.feedback:
-        return FontAwesomeIcons.commentDots;
-      case FormTemplateCategory.order:
-        return FontAwesomeIcons.cartShopping;
-      case FormTemplateCategory.application:
-        return FontAwesomeIcons.fileSignature;
-      default:
-        return FontAwesomeIcons.file;
-    }
-  }
 }

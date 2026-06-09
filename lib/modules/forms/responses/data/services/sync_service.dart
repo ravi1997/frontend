@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:frontend/core/services/connectivity_service.dart';
 import 'package:frontend/core/errors/app_exception.dart';
 import 'package:frontend/modules/forms/responses/form_response.dart';
@@ -5,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/modules/forms/responses/response_repository_provider.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
+import 'package:frontend/modules/auth/auth_models.dart';
 
 final syncServiceProvider = AsyncNotifierProvider<SyncService, void>(
   SyncService.new,
@@ -14,10 +16,21 @@ class SyncService extends AsyncNotifier<void> {
   Box? _box;
   String? _currentUserId;
 
+  void _log(String message) {
+    debugPrint(message);
+  }
+
+  String _boxNameForUser(String organizationId, String userId) {
+    return 'pending_submissions_${organizationId}_$userId';
+  }
+
+  UserModel? _currentUser() {
+    return ref.read(authControllerProvider).value;
+  }
+
   @override
   Future<void> build() async {
-    final authState = ref.watch(authControllerProvider);
-    final user = authState.value;
+    final user = ref.watch(authControllerProvider).value;
 
     if (user == null) {
       if (_box != null) {
@@ -37,9 +50,7 @@ class SyncService extends AsyncNotifier<void> {
       _currentUserId = user.id;
       // Scoping box by organizationId and userId to prevent data leakage between users/orgs
       final organizationId = user.organizationId ?? 'default';
-      _box = await Hive.openBox(
-        'pending_submissions_${organizationId}_${user.id}',
-      );
+      _box = await Hive.openBox(_boxNameForUser(organizationId, user.id));
     }
 
     // Try to sync on startup if online
@@ -101,11 +112,9 @@ class SyncService extends AsyncNotifier<void> {
           await repository.submitResponse(response);
         }
         await _box!.delete(key);
-        // ignore: avoid_print
-        print('Synced submission: $key for user $_currentUserId');
+        _log('Synced submission: $key for user $_currentUserId');
       } catch (e) {
-        // ignore: avoid_print
-        print('Failed to sync submission $key: $e');
+        _log('Failed to sync submission $key: $e');
         // Handle permanently invalid submissions (e.g. 400 Bad Request, 403 Forbidden)
         // by deleting them from the queue so they do not block subsequent submissions.
         if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
@@ -143,12 +152,11 @@ class SyncService extends AsyncNotifier<void> {
   Future<void> _ensureBox() async {
     if (_box != null) return;
 
-    final authState = ref.read(authControllerProvider);
-    final user = authState.value;
+    final user = _currentUser();
     if (user == null) return;
 
     _currentUserId = user.id;
     final organizationId = user.organizationId ?? 'default';
-    _box = await Hive.openBox('pending_submissions_${organizationId}_${user.id}');
+    _box = await Hive.openBox(_boxNameForUser(organizationId, user.id));
   }
 }

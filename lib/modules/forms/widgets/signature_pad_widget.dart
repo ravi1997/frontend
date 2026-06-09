@@ -110,7 +110,14 @@ class _SignaturePadWidgetState extends State<SignaturePadWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon(
-                onPressed: _clear,
+                onPressed: () {
+                  setState(() {
+                    _points.clear();
+                    _strokes.clear();
+                    _currentPoint = null;
+                  });
+                  widget.onSigned?.call('');
+                },
                 icon: const Icon(Icons.clear, color: Colors.red),
                 label: const Text('Clear'),
               ),
@@ -151,15 +158,6 @@ class _SignaturePadWidgetState extends State<SignaturePadWidget> {
       _currentPoint = null;
       _points.add(null);
     });
-  }
-
-  void _clear() {
-    setState(() {
-      _points.clear();
-      _strokes.clear();
-      _currentPoint = null;
-    });
-    widget.onSigned?.call('');
   }
 
   Future<void> _save() async {

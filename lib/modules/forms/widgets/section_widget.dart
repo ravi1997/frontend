@@ -59,30 +59,6 @@ class SectionWidget extends ConsumerWidget {
     this.mode,
   });
 
-  int _sectionCrossAxisCount(SectionLayoutType layout, int gridColumns) {
-    switch (layout) {
-      case SectionLayoutType.grid:
-        return gridColumns;
-      case SectionLayoutType.threeColumns:
-        return 3;
-      case SectionLayoutType.fullWidth:
-      case SectionLayoutType.list:
-      case SectionLayoutType.sidebar:
-      case SectionLayoutType.custom:
-      case SectionLayoutType.overlay:
-      case SectionLayoutType.dashboard:
-      case SectionLayoutType.centered:
-      case SectionLayoutType.wizard:
-      case SectionLayoutType.masonry:
-      case SectionLayoutType.fixed:
-      case SectionLayoutType.standard:
-      case SectionLayoutType.accordion:
-      case SectionLayoutType.tabbed:
-      case SectionLayoutType.card:
-        return 1;
-    }
-  }
-
   SectionStyle _sectionStyle(FormSection section) {
     final raw = section.ui['style'];
     if (raw is Map) {
@@ -130,26 +106,6 @@ class SectionWidget extends ConsumerWidget {
     } catch (_) {
       return fallback;
     }
-  }
-
-  BoxBorder _buildSectionBorder(Map<String, dynamic> metadata) {
-    final sectionStyle = _sectionStyle(section);
-    final borderColor = _parseColor(
-      metadata['borderColor']?.toString() ?? sectionStyle.borderColor,
-      AppColors.borderLight,
-    );
-    final borderWidth = (metadata['borderWidth'] as num?)?.toDouble() ??
-        sectionStyle.borderWidth;
-    final borderStyle = metadata['borderStyle']?.toString() ?? 'solid';
-    final style = switch (borderStyle) {
-      'dashed' || 'dotted' => BorderStyle.solid,
-      _ => BorderStyle.solid,
-    };
-    return Border.all(
-      color: borderColor,
-      width: borderWidth,
-      style: style,
-    );
   }
 
   @override
@@ -239,7 +195,20 @@ class SectionWidget extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
                 border: isHovered || isSectionSelected
                     ? Border.all(color: AppColors.primary, width: 2)
-                    : _buildSectionBorder(metadata),
+                    : Border.all(
+                        color: _parseColor(
+                          metadata['borderColor']?.toString() ??
+                              sectionStyle.borderColor,
+                          AppColors.borderLight,
+                        ),
+                        width: (metadata['borderWidth'] as num?)?.toDouble() ??
+                            sectionStyle.borderWidth,
+                        style: switch (metadata['borderStyle']?.toString() ??
+                            'solid') {
+                          'dashed' || 'dotted' => BorderStyle.solid,
+                          _ => BorderStyle.solid,
+                        },
+                      ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,10 +429,24 @@ class SectionWidget extends ConsumerWidget {
                       builder: (context, constraints) {
                         final availableWidth = constraints.maxWidth;
 
-                        int crossAxisCount = _sectionCrossAxisCount(
-                          layout,
-                          section.gridColumns,
-                        );
+                        int crossAxisCount = switch (layout) {
+                          SectionLayoutType.grid => section.gridColumns,
+                          SectionLayoutType.threeColumns => 3,
+                          SectionLayoutType.fullWidth ||
+                          SectionLayoutType.list ||
+                          SectionLayoutType.sidebar ||
+                          SectionLayoutType.custom ||
+                          SectionLayoutType.overlay ||
+                          SectionLayoutType.dashboard ||
+                          SectionLayoutType.centered ||
+                          SectionLayoutType.wizard ||
+                          SectionLayoutType.masonry ||
+                          SectionLayoutType.fixed ||
+                          SectionLayoutType.standard ||
+                          SectionLayoutType.accordion ||
+                          SectionLayoutType.tabbed ||
+                          SectionLayoutType.card => 1,
+                        };
 
                         if (availableWidth < 400 && crossAxisCount > 1) {
                           crossAxisCount = 1;
@@ -689,208 +672,192 @@ class SectionWidget extends ConsumerWidget {
           ),
         );
 
-                              final wrappedSection = _wrapSectionByLayout(
-          layout,
-          sectionShell,
-          sectionStyle,
-          sectionBg,
-        );
-
         return Align(
           alignment: sectionAlignment,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: sectionMaxWidth),
-            child: wrappedSection,
+            child: switch (layout) {
+              SectionLayoutType.card => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius + 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: sectionShell,
+                ),
+              SectionLayoutType.centered => Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: sectionShell,
+                  ),
+                ),
+              SectionLayoutType.sidebar => Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                        color: AppColors.primary.withValues(alpha: 0.55),
+                        width: 4,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LayoutModeBanner(
+                        icon: Icons.view_sidebar_outlined,
+                        label: 'Sidebar Layout',
+                        hint: section.sections.isEmpty
+                            ? 'Add sub-sections to activate sidebar navigation'
+                            : '${section.sections.length} sub-section(s) shown as nav items',
+                        color: AppColors.primary,
+                        isReady: section.sections.isNotEmpty,
+                      ),
+                      sectionShell,
+                    ],
+                  ),
+                ),
+              SectionLayoutType.dashboard => Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primary.withValues(alpha: 0.10),
+                        sectionBg,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                  ),
+                  child: sectionShell,
+                ),
+              SectionLayoutType.overlay => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.28),
+                      width: 2,
+                    ),
+                  ),
+                  child: sectionShell,
+                ),
+              SectionLayoutType.accordion => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.22),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LayoutModeBanner(
+                        icon: Icons.expand_more,
+                        label: 'Accordion Layout',
+                        hint: 'Section collapses/expands in the preview',
+                        color: const Color(0xFF8B5CF6),
+                        isReady: true,
+                      ),
+                      sectionShell,
+                    ],
+                  ),
+                ),
+              SectionLayoutType.wizard => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.14),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LayoutModeBanner(
+                        icon: Icons.linear_scale,
+                        label: 'Wizard / Multi-Step Layout',
+                        hint: section.sections.isEmpty
+                            ? 'Add sub-sections - each becomes a step'
+                            : '${section.sections.length} step(s) with Next/Back navigation',
+                        color: const Color(0xFF10B981),
+                        isReady: section.sections.isNotEmpty,
+                      ),
+                      sectionShell,
+                    ],
+                  ),
+                ),
+              SectionLayoutType.masonry => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LayoutModeBanner(
+                        icon: Icons.dashboard_outlined,
+                        label: 'Masonry Layout',
+                        hint: section.sections.length < 2
+                            ? 'Add at least 2 sub-sections for staggered columns'
+                            : '${section.sections.length} sub-sections in 2 staggered columns',
+                        color: const Color(0xFFF59E0B),
+                        isReady: section.sections.length >= 2,
+                      ),
+                      sectionShell,
+                    ],
+                  ),
+                ),
+              SectionLayoutType.tabbed => Container(
+                  decoration: BoxDecoration(
+                    color: sectionBg,
+                    borderRadius:
+                        BorderRadius.circular(sectionStyle.borderRadius),
+                    border: Border(
+                      top: BorderSide(
+                        color: AppColors.primary.withValues(alpha: 0.55),
+                        width: 4,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _LayoutModeBanner(
+                        icon: Icons.tab_outlined,
+                        label: 'Tabbed Layout',
+                        hint: 'Each sub-section is a tab',
+                        color: const Color(0xFF6366F1),
+                        isReady: section.sections.isNotEmpty,
+                      ),
+                      sectionShell,
+                    ],
+                  ),
+                ),
+              SectionLayoutType.standard => sectionShell,
+              _ => sectionShell,
+            },
           ),
         );
       },
     );
   }
 
-  Widget _wrapSectionByLayout(
-    SectionLayoutType layout,
-    Widget child,
-    dynamic sectionStyle,
-    Color sectionBg,
-  ) {
-    switch (layout) {
-      case SectionLayoutType.card:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius + 4),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: child,
-        );
-      case SectionLayoutType.centered:
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: child,
-          ),
-        );
-      case SectionLayoutType.sidebar:
-        return Container(
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.55),
-                width: 4,
-              ),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LayoutModeBanner(
-                icon: Icons.view_sidebar_outlined,
-                label: 'Sidebar Layout',
-                hint: section.sections.isEmpty
-                    ? 'Add sub-sections to activate sidebar navigation'
-                    : '${section.sections.length} sub-section(s) shown as nav items',
-                color: AppColors.primary,
-                isReady: section.sections.isNotEmpty,
-              ),
-              child,
-            ],
-          ),
-        );
-      case SectionLayoutType.dashboard:
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primary.withValues(alpha: 0.10), sectionBg],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-          ),
-          child: child,
-        );
-      case SectionLayoutType.overlay:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.28),
-              width: 2,
-            ),
-          ),
-          child: child,
-        );
-      case SectionLayoutType.accordion:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.22),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LayoutModeBanner(
-                icon: Icons.expand_more,
-                label: 'Accordion Layout',
-                hint: 'Section collapses/expands in the preview',
-                color: const Color(0xFF8B5CF6),
-                isReady: true,
-              ),
-              child,
-            ],
-          ),
-        );
-      case SectionLayoutType.wizard:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.14),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LayoutModeBanner(
-                icon: Icons.linear_scale,
-                label: 'Wizard / Multi-Step Layout',
-                hint: section.sections.isEmpty
-                    ? 'Add sub-sections — each becomes a step'
-                    : '${section.sections.length} step(s) with Next/Back navigation',
-                color: const Color(0xFF10B981),
-                isReady: section.sections.isNotEmpty,
-              ),
-              child,
-            ],
-          ),
-        );
-      case SectionLayoutType.masonry:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-            border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.10),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LayoutModeBanner(
-                icon: Icons.dashboard_outlined,
-                label: 'Masonry Layout',
-                hint: section.sections.length < 2
-                    ? 'Add at least 2 sub-sections for staggered columns'
-                    : '${section.sections.length} sub-sections in 2 staggered columns',
-                color: const Color(0xFFF59E0B),
-                isReady: section.sections.length >= 2,
-              ),
-              child,
-            ],
-          ),
-        );
-      case SectionLayoutType.tabbed:
-        return Container(
-          decoration: BoxDecoration(
-            color: sectionBg,
-            borderRadius: BorderRadius.circular(sectionStyle.borderRadius),
-            border: Border(
-              top: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.55),
-                width: 4,
-              ),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _LayoutModeBanner(
-                icon: Icons.tab_outlined,
-                label: 'Tabbed Layout',
-                hint: section.sections.isEmpty
-                    ? 'Add sub-sections — each becomes a tab'
-                    : '${section.sections.length} sub-section(s) shown as tabs',
-                color: AppColors.primary,
-                isReady: section.sections.isNotEmpty,
-              ),
-              child,
-            ],
-          ),
-        );
-      default:
-        return child;
-    }
-  }
 }
 
 class _SectionMetaChip extends StatelessWidget {

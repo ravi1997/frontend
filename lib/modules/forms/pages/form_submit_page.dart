@@ -8,6 +8,9 @@ import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 import 'package:frontend/modules/forms/widgets/signature_pad_widget.dart';
 import 'package:frontend/modules/forms/widgets/camera_capture_dialog.dart';
+import 'package:frontend/modules/forms/widgets/language_switcher.dart';
+import 'package:frontend/modules/forms/utility/form_action_button_utils.dart';
+import 'package:frontend/modules/forms/utility/submission_error_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -176,7 +179,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             ],
           ),
           actions: [
-            _buildLanguageSwitcher(),
+            const LanguageSwitcher(),
             const SizedBox(width: 8),
             TextButton.icon(
               onPressed: () {
@@ -432,7 +435,49 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     Map<String, bool> requiredMap,
   ) {
     if (_showSubmitted) {
-      return _buildSuccessScreen(locale);
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 80,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Form Submitted Successfully!',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Thank you for your response.',
+              style: TextStyle(color: AppColors.textGrey, fontSize: 16),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () => setState(() => _showSubmitted = false),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+              ),
+              child: const Text('Back to Preview'),
+            ),
+          ],
+        ),
+      );
     }
 
     if (_isReviewing) {
@@ -457,7 +502,29 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
-                child: _buildFormHeader(form, locale),
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderLight),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    form.title.translate(locale),
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: formStyle.sectionSpacing),
@@ -470,7 +537,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   children: [
                     _buildSubmitButton(form),
                     const SizedBox(height: 16),
-                    _buildPreviewFooter(),
+                    const SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -486,49 +553,6 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       transitionBuilder: (child, animation) =>
           FadeTransition(opacity: animation, child: child),
       child: content,
-    );
-  }
-
-  Widget _buildSuccessScreen(String locale) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 80,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Form Submitted Successfully!',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Thank you for your response.',
-            style: TextStyle(color: AppColors.textGrey, fontSize: 16),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () => setState(() => _showSubmitted = false),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            ),
-            child: const Text('Back to Preview'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -716,32 +740,6 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
             style: TextStyle(color: AppColors.textGrey),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFormHeader(BuilderForm form, String locale) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Text(
-        form.title.translate(locale),
-        style: const TextStyle(
-          color: AppColors.textDark,
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
@@ -1062,11 +1060,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     );
     final submissionState = ref.watch(formSubmissionControllerProvider);
 
-    return Center(
-      child: ElevatedButton(
-        onPressed: submissionState.isLoading
-            ? null
-            : () async {
+    return buildPrimaryFormActionButton(
+      onPressed: submissionState.isLoading
+          ? null
+          : () async {
                 if (!(_formKey.currentState?.validate() ?? true)) {
                   ref
                       .read(snackbarServiceProvider)
@@ -1106,20 +1103,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                       errorState.details != null &&
                       mounted) {
                     setState(() {
-                      if (errorState.details is Map) {
-                        (errorState.details as Map).forEach((key, value) {
-                          _fieldErrors[key.toString()] = value.toString();
-                        });
-                      } else if (errorState.details is List) {
-                        for (final err in (errorState.details as List)) {
-                          if (err is Map &&
-                              err.containsKey('field') &&
-                              err.containsKey('message')) {
-                            _fieldErrors[err['field'].toString()] =
-                                err['message'].toString();
-                          }
-                        }
-                      }
+                      applySubmissionFieldErrors(
+                        errorState.details,
+                        (field, message) => _fieldErrors[field] = message,
+                      );
                     });
 
                     ScaffoldMessenger.of(
@@ -1128,75 +1115,22 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   }
                 }
               },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(
-            horizontal: small ? 32 : 48,
-            vertical: small ? 12 : 16,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(form.style.globalBorderRadius),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        child: submissionState.isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Text('Submit'),
-      ),
+      primaryColor: primaryColor,
+      borderRadius: form.style.globalBorderRadius,
+      small: small,
+      child: submissionState.isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Text('Submit'),
     );
   }
 
-  Widget _buildPreviewFooter() {
-    return Center(
-      child: Text(
-        '',
-        style: TextStyle(
-          color: AppColors.textGrey.withValues(alpha: 0.8),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageSwitcher() {
-    final currentLocale = ref.watch(localeControllerProvider);
-
-    return PopupMenuButton<String>(
-      tooltip: 'Change Language',
-      icon: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.language, size: 20, color: AppColors.textGrey),
-          const SizedBox(width: 4),
-          Text(
-            currentLocale.languageCode.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textGrey,
-            ),
-          ),
-        ],
-      ),
-      onSelected: (code) =>
-          ref.read(localeControllerProvider.notifier).setLocale(code),
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'en', child: Text('English (EN)')),
-        const PopupMenuItem(value: 'es', child: Text('Spanish (ES)')),
-        const PopupMenuItem(value: 'fr', child: Text('French (FR)')),
-        const PopupMenuItem(value: 'hi', child: Text('Hindi (HI)')),
-      ],
-    );
-  }
 }
 
 class _SubmitSectionWidget extends ConsumerWidget {

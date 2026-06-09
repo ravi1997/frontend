@@ -39,28 +39,6 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
     super.dispose();
   }
 
-  Future<void> _fetchSuggestions() async {
-    setState(() => _isLoadingSuggestions = true);
-    final suggestions = await ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
-        .getAISuggestions();
-    setState(() {
-      _suggestions = suggestions;
-      _isLoadingSuggestions = false;
-    });
-  }
-
-  Future<void> _runValidation() async {
-    setState(() => _isValidating = true);
-    final results = await ref
-        .read(formBuilderControllerProvider(widget.formId).notifier)
-        .validateFormWithAI();
-    setState(() {
-      _validationResults = results;
-      _isValidating = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -204,7 +182,16 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _fetchSuggestions,
+              onPressed: () async {
+                setState(() => _isLoadingSuggestions = true);
+                final suggestions = await ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .getAISuggestions();
+                setState(() {
+                  _suggestions = suggestions;
+                  _isLoadingSuggestions = false;
+                });
+              },
               child: const Text('Get Suggestions'),
             ),
           ],
@@ -296,7 +283,16 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
         ),
         const SizedBox(height: 16),
         TextButton.icon(
-          onPressed: _fetchSuggestions,
+          onPressed: () async {
+            setState(() => _isLoadingSuggestions = true);
+            final suggestions = await ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .getAISuggestions();
+            setState(() {
+              _suggestions = suggestions;
+              _isLoadingSuggestions = false;
+            });
+          },
           icon: const Icon(Icons.refresh, size: 16),
           label: const Text('Refresh Suggestions'),
         ),
@@ -323,7 +319,16 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _runValidation,
+              onPressed: () async {
+                setState(() => _isValidating = true);
+                final results = await ref
+                    .read(formBuilderControllerProvider(widget.formId).notifier)
+                    .validateFormWithAI();
+                setState(() {
+                  _validationResults = results;
+                  _isValidating = false;
+                });
+              },
               child: const Text('Analyze Form Design'),
             ),
           ],
@@ -422,7 +427,16 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
         }),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: _runValidation,
+          onPressed: () async {
+            setState(() => _isValidating = true);
+            final results = await ref
+                .read(formBuilderControllerProvider(widget.formId).notifier)
+                .validateFormWithAI();
+            setState(() {
+              _validationResults = results;
+              _isValidating = false;
+            });
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.builderBackground,
             foregroundColor: AppColors.primary,

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthTokens {
   final String? accessToken;
@@ -16,23 +16,22 @@ final tokenServiceProvider = AsyncNotifierProvider<TokenService, AuthTokens>(
 );
 
 class TokenService extends AsyncNotifier<AuthTokens> {
-  static const String _boxName = 'auth_box';
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _organizationIdKey = 'organization_id';
 
   @override
   FutureOr<AuthTokens> build() async {
-    final box = await Hive.openBox(_boxName);
-    final accessToken = box.get(_accessTokenKey) as String?;
-    final refreshToken = box.get(_refreshTokenKey) as String?;
-    final organizationId = box.get(_organizationIdKey) as String?;
+    final accessToken = await _storage.read(key: _accessTokenKey);
+    final refreshToken = await _storage.read(key: _refreshTokenKey);
+    final organizationId = await _storage.read(key: _organizationIdKey);
 
     if (accessToken != null && isTokenExpired(accessToken)) {
-      await box.delete(_accessTokenKey);
-      await box.delete(_organizationIdKey);
+      await _storage.delete(key: _accessTokenKey);
       return AuthTokens(
         refreshToken: refreshToken,
+        organizationId: organizationId,
       );
     }
 
@@ -64,12 +63,11 @@ class TokenService extends AsyncNotifier<AuthTokens> {
   Future<void> checkAndClearIfExpired() async {
     final tokens = state.value;
     if (tokens?.accessToken != null && isTokenExpired(tokens!.accessToken!)) {
-      final box = await Hive.openBox(_boxName);
-      await box.delete(_accessTokenKey);
-      await box.delete(_organizationIdKey);
+      await _storage.delete(key: _accessTokenKey);
       state = AsyncData(
         AuthTokens(
           refreshToken: tokens.refreshToken,
+          organizationId: tokens.organizationId,
         ),
       );
     }
@@ -87,15 +85,14 @@ class TokenService extends AsyncNotifier<AuthTokens> {
       return;
     }
 
-    final box = await Hive.openBox(_boxName);
-    await box.put(_accessTokenKey, accessToken);
+    await _storage.write(key: _accessTokenKey, value: accessToken);
     if (refreshToken != null) {
-      await box.put(_refreshTokenKey, refreshToken);
+      await _storage.write(key: _refreshTokenKey, value: refreshToken);
     }
     if (organizationId != null) {
-      await box.put(_organizationIdKey, organizationId);
+      await _storage.write(key: _organizationIdKey, value: organizationId);
     } else {
-      await box.delete(_organizationIdKey);
+      await _storage.delete(key: _organizationIdKey);
     }
     state = AsyncData(
       AuthTokens(
@@ -111,8 +108,7 @@ class TokenService extends AsyncNotifier<AuthTokens> {
       return;
     }
 
-    final box = await Hive.openBox(_boxName);
-    await box.put(_organizationIdKey, organizationId);
+    await _storage.write(key: _organizationIdKey, value: organizationId);
     state = AsyncData(
       AuthTokens(
         accessToken: state.value?.accessToken,
@@ -125,10 +121,9 @@ class TokenService extends AsyncNotifier<AuthTokens> {
   String? get organizationId => state.value?.organizationId;
 
   Future<void> clearTokens() async {
-    final box = await Hive.openBox(_boxName);
-    await box.delete(_accessTokenKey);
-    await box.delete(_refreshTokenKey);
-    await box.delete(_organizationIdKey);
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+    await _storage.delete(key: _organizationIdKey);
     state = AsyncData(AuthTokens());
   }
 }

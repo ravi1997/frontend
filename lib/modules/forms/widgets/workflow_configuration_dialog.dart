@@ -168,39 +168,6 @@ class _WorkflowConfigurationDialogState
     return triggers;
   }
 
-  Map<String, String> _getOperators(QuestionType type) {
-    if (type == QuestionType.number) {
-      return {
-        'equals': 'Equals (=)',
-        'not_equals': 'Not Equals (!=)',
-        'greater_than': 'Greater Than (>)',
-        'less_than': 'Less Than (<)',
-        'greater_than_equals': 'Greater Than or Equal (>=)',
-        'less_than_equals': 'Less Than or Equal (<=)',
-        'is_empty': 'Is Empty',
-        'is_not_empty': 'Is Not Empty',
-      };
-    }
-    if (type == QuestionType.date || type == QuestionType.time) {
-      return {
-        'equals': 'Equals',
-        'not_equals': 'Not Equals',
-        'before': 'Before',
-        'after': 'After',
-        'is_empty': 'Is Empty',
-        'is_not_empty': 'Is Not Empty',
-      };
-    }
-    return {
-      'equals': 'Equals',
-      'not_equals': 'Not Equals',
-      'contains': 'Contains',
-      'not_contains': 'Does Not Contain',
-      'is_empty': 'Is Empty',
-      'is_not_empty': 'Is Not Empty',
-    };
-  }
-
   Widget _buildVariableHelper(TextEditingController controller) {
     return IconButton(
       icon: const Icon(Icons.data_object, size: 20, color: AppColors.primary),
@@ -919,7 +886,34 @@ class _WorkflowConfigurationDialogState
         .where((t) => t.id == selectedTriggerId)
         .firstOrNull;
     final operators = selectedTrigger != null
-        ? _getOperators(selectedTrigger.type)
+        ? switch (selectedTrigger.type) {
+            QuestionType.number => {
+                'equals': 'Equals (=)',
+                'not_equals': 'Not Equals (!=)',
+                'greater_than': 'Greater Than (>)',
+                'less_than': 'Less Than (<)',
+                'greater_than_equals': 'Greater Than or Equal (>=)',
+                'less_than_equals': 'Less Than or Equal (<=)',
+                'is_empty': 'Is Empty',
+                'is_not_empty': 'Is Not Empty',
+              },
+            QuestionType.date || QuestionType.time => {
+                'equals': 'Equals',
+                'not_equals': 'Not Equals',
+                'before': 'Before',
+                'after': 'After',
+                'is_empty': 'Is Empty',
+                'is_not_empty': 'Is Not Empty',
+              },
+            _ => {
+                'equals': 'Equals',
+                'not_equals': 'Not Equals',
+                'contains': 'Contains',
+                'not_contains': 'Does Not Contain',
+                'is_empty': 'Is Empty',
+                'is_not_empty': 'Is Not Empty',
+              },
+          }
         : {'equals': 'Equals'};
     final op = condition['operator'];
     final needsValue = op != 'is_empty' && op != 'is_not_empty';
@@ -1002,147 +996,143 @@ class _WorkflowConfigurationDialogState
           ),
           if (needsValue) ...[
             const SizedBox(height: 8),
-            _buildValueInput(condition, selectedTrigger),
+            if (selectedTrigger == null)
+              const SizedBox()
+            else if (selectedTrigger.options.isNotEmpty)
+              _buildDropdown(
+                label: 'Select Value',
+                value: selectedTrigger.options
+                        .any((o) => o.value == condition['value'])
+                    ? condition['value']
+                    : null,
+                items: selectedTrigger.options
+                    .map(
+                      (o) => DropdownMenuItem<String>(
+                        value: o.value,
+                        child: Text(
+                          o.label,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (val) =>
+                    setState(() => condition['value'] = val ?? ''),
+              )
+            else if (selectedTrigger.type == QuestionType.rating)
+              _buildDropdown(
+                label: 'Select Rating',
+                value: condition['value'],
+                items: List.generate(
+                  selectedTrigger.maxValue?.toInt() ?? 5,
+                  (i) => DropdownMenuItem<String>(
+                    value: (i + 1).toString(),
+                    child: Text(
+                      (i + 1).toString(),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+                onChanged: (val) =>
+                    setState(() => condition['value'] = val ?? ''),
+              )
+            else if (selectedTrigger.type == QuestionType.date)
+              _buildGenericPicker(
+                label: 'Pick Date',
+                value: condition['value'],
+                icon: Icons.calendar_today,
+                onTap: () async {
+                  final current =
+                      DateTime.tryParse(condition['value']) ?? DateTime.now();
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: current,
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime(2100),
+                    builder: (context, child) => Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          surface: Colors.white,
+                          onSurface: AppColors.textDark,
+                        ),
+                      ),
+                      child: child!,
+                    ),
+                  );
+                  if (date != null) {
+                    setState(() {
+                      condition['value'] = date.toIso8601String().split('T')[0];
+                    });
+                  }
+                },
+              )
+            else if (selectedTrigger.type == QuestionType.time)
+              _buildGenericPicker(
+                label: 'Pick Time',
+                value: condition['value'],
+                icon: Icons.access_time,
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                    builder: (context, child) => Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          surface: Colors.white,
+                          onSurface: AppColors.textDark,
+                        ),
+                      ),
+                      child: child!,
+                    ),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      condition['value'] =
+                          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                    });
+                  }
+                },
+              )
+            else
+              TextFormField(
+                key: ValueKey('${selectedTrigger.id}_${condition['operator']}'),
+                initialValue: condition['value'],
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 12,
+                ),
+                keyboardType: selectedTrigger.type == QuestionType.number
+                    ? const TextInputType.numberWithOptions(decimal: true)
+                    : TextInputType.text,
+                decoration: InputDecoration(
+                  labelText: 'Value',
+                  labelStyle:
+                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  hintText: selectedTrigger.type == QuestionType.number
+                      ? 'Enter number'
+                      : 'Enter value',
+                  hintStyle:
+                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  isDense: true,
+                ),
+                onChanged: (val) => condition['value'] = val,
+                validator: (v) => v?.isEmpty == true ? 'Required' : null,
+              ),
           ],
         ],
       ),
-    );
-  }
-
-  Widget _buildValueInput(
-    Map<String, dynamic> condition,
-    FormQuestion? trigger,
-  ) {
-    if (trigger == null) return const SizedBox();
-
-    if (trigger.options.isNotEmpty) {
-      return _buildDropdown(
-        label: 'Select Value',
-        value: trigger.options.any((o) => o.value == condition['value'])
-            ? condition['value']
-            : null,
-        items: trigger.options
-            .map(
-              (o) => DropdownMenuItem<String>(
-                value: o.value,
-                child: Text(o.label, style: const TextStyle(fontSize: 12)),
-              ),
-            )
-            .toList(),
-        onChanged: (val) => setState(() => condition['value'] = val ?? ''),
-      );
-    }
-
-    if (trigger.type == QuestionType.rating) {
-      final max = trigger.maxValue?.toInt() ?? 5;
-      return _buildDropdown(
-        label: 'Select Rating',
-        value: condition['value'],
-        items: List.generate(
-          max,
-          (i) => DropdownMenuItem<String>(
-            value: (i + 1).toString(),
-            child: Text(
-              (i + 1).toString(),
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-        ),
-        onChanged: (val) => setState(() => condition['value'] = val ?? ''),
-      );
-    }
-
-    if (trigger.type == QuestionType.date) {
-      return _buildGenericPicker(
-        label: 'Pick Date',
-        value: condition['value'],
-        icon: Icons.calendar_today,
-        onTap: () async {
-          final current =
-              DateTime.tryParse(condition['value']) ?? DateTime.now();
-          final date = await showDatePicker(
-            context: context,
-            initialDate: current,
-            firstDate: DateTime(1900),
-            lastDate: DateTime(2100),
-            builder: (context, child) => Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: const ColorScheme.light(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: AppColors.textDark,
-                ),
-              ),
-              child: child!,
-            ),
-          );
-          if (date != null) {
-            setState(() {
-              condition['value'] = date.toIso8601String().split('T')[0];
-            });
-          }
-        },
-      );
-    }
-
-    if (trigger.type == QuestionType.time) {
-      return _buildGenericPicker(
-        label: 'Pick Time',
-        value: condition['value'],
-        icon: Icons.access_time,
-        onTap: () async {
-          final time = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay.now(),
-            builder: (context, child) => Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: const ColorScheme.light(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                  onSurface: AppColors.textDark,
-                ),
-              ),
-              child: child!,
-            ),
-          );
-          if (time != null) {
-            setState(() {
-              condition['value'] =
-                  '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-            });
-          }
-        },
-      );
-    }
-
-    return TextFormField(
-      key: ValueKey('${trigger.id}_${condition['operator']}'),
-      initialValue: condition['value'],
-      style: const TextStyle(color: AppColors.textDark, fontSize: 12),
-      keyboardType: trigger.type == QuestionType.number
-          ? const TextInputType.numberWithOptions(decimal: true)
-          : TextInputType.text,
-      decoration: InputDecoration(
-        labelText: 'Value',
-        labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
-        hintText: trigger.type == QuestionType.number
-            ? 'Enter number'
-            : 'Enter value',
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        isDense: true,
-      ),
-      onChanged: (val) => condition['value'] = val,
-      validator: (v) => v?.isEmpty == true ? 'Required' : null,
     );
   }
 

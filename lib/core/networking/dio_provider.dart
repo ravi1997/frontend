@@ -19,6 +19,7 @@ final dioProvider = Provider<Dio>((ref) {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       sendTimeout: kIsWeb ? Duration.zero : const Duration(seconds: 15),
+      receiveDataWhenStatusError: true,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

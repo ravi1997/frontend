@@ -35,11 +35,18 @@ class FormBuilderController
   final List<BuilderForm> _redoStack = [];
   BuilderForm? _lastHistoryForm;
 
+  void _log(String message) {
+    debugPrint(message);
+  }
+
   Future<void> _init(String formKey) async {
     try {
       final parts = formKey.split('::');
       _projectId = parts.first;
       _formId = parts.sublist(1).join('::');
+      _log(
+        'FORM_BUILDER_CONTROLLER_INIT: formKey=$formKey, _projectId=$_projectId, _formId=$_formId',
+      );
 
       // For now, let's create an empty form if formId is 'new'
       if (_formId == 'new') {
@@ -174,9 +181,11 @@ class FormBuilderController
     BuilderForm form,
     List<FormSection> sections,
   ) {
-    if (form.versions.isEmpty) return form;
-    final activeVersion = form.activeVersion ?? form.versions.first.version;
-    final updatedVersions = form.versions.map((version) {
+    final activeVersion = form.activeVersion ?? '0.1.0';
+    final versions = form.versions.isEmpty
+        ? [FormVersion(version: activeVersion, sections: sections)]
+        : form.versions;
+    final updatedVersions = versions.map((version) {
       if (version.version == activeVersion) {
         return version.copyWith(sections: sections);
       }
@@ -190,7 +199,7 @@ class FormBuilderController
   }
 
   List<FormSection> _currentSections(BuilderForm form) {
-    if (form.versions.isEmpty) return const [];
+    if (form.versions.isEmpty) return form.sections;
     final activeVersion = form.activeVersion;
     if (activeVersion == null) return form.versions.first.sections;
     return form.versions
@@ -395,6 +404,9 @@ class FormBuilderController
   }
 
   Future<void> addSection({String? parentSectionId}) async {
+    _log(
+      'FORM_BUILDER_CONTROLLER_ADD_SECTION: state.value=${state.value != null}',
+    );
     if (state.value == null) return;
 
     FormSection newSection = FormSection(
@@ -574,9 +586,7 @@ class FormBuilderController
     if (state.value == null) return;
     final sections = state.value!.form.sections;
     if (sections.isEmpty) {
-      debugPrint(
-        'addQuestionToActiveSection: no sections exist — add a section first.',
-      );
+      _log('addQuestionToActiveSection: no sections exist — add a section first.');
       return;
     }
     final targetId = state.value!.selectedSectionId ?? sections.first.id;

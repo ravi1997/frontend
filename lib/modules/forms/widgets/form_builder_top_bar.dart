@@ -639,10 +639,13 @@ class _SaveButton extends ConsumerWidget {
               ],
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Icon(
-                  Icons.arrow_drop_down,
-                  color: isSaving ? AppColors.textGrey : AppColors.primary,
-                  size: 20,
+                child: Tooltip(
+                  message: 'Save options',
+                  child: Icon(
+                    Icons.arrow_drop_down,
+                    color: isSaving ? AppColors.textGrey : AppColors.primary,
+                    size: 20,
+                  ),
                 ),
               ),
             ),

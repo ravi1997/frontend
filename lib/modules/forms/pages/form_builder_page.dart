@@ -138,7 +138,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                   length: 3,
                   child: Column(
                     children: [
-                      _buildTopBar(context),
+                      _buildTopBar(context, controllerKey),
                       Container(
                         color: AppColors.builderSidebar,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -180,7 +180,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                 )
               : Column(
                   children: [
-                    _buildTopBar(context),
+                    _buildTopBar(context, controllerKey),
 
                     // Main Workspace
                     Expanded(
@@ -317,9 +317,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, String controllerKey) {
     return FormBuilderTopBar(
-      controllerKey: '${widget.projectId}::${widget.formId}',
+      controllerKey: controllerKey,
       projectId: widget.projectId,
       formId: widget.formId,
       mode: widget.mode,

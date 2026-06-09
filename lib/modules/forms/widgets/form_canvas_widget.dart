@@ -73,11 +73,60 @@ class FormCanvasWidget extends ConsumerWidget {
                     child: Column(
                       children: [
                         // Form Title Input
-                        _buildFormHeader(
-                          state.form.title,
-                          ref,
-                          state.editingLocale,
-                          mode,
+                        InkWell(
+                          onTap: () {
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    controllerKey,
+                                  ).notifier,
+                                )
+                                .selectQuestion(null, null);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 24,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              () {
+                                String titleText = state.form.title.translate(
+                                  state.editingLocale,
+                                );
+                                if (mode != null && mode != 'form') {
+                                  if (mode == 'question') {
+                                    titleText = 'Question Designer';
+                                  }
+                                  if (mode == 'section') {
+                                    titleText = 'Section Designer';
+                                  }
+                                  if (mode == 'workflow') {
+                                    titleText = 'Workflow Designer';
+                                  }
+                                }
+                                return titleText.isEmpty
+                                    ? 'Untitled Form'
+                                    : titleText;
+                              }(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 24),
 
@@ -257,13 +306,18 @@ class FormCanvasWidget extends ConsumerWidget {
                         if (mode == null || mode == 'form')
                           Center(
                             child: ElevatedButton.icon(
-                              onPressed: () => ref
-                                  .read(
-                                    formBuilderControllerProvider(
-                                      '$projectId::$formId',
-                                    ).notifier,
-                                  )
-                                  .addSection(),
+                              onPressed: () {
+                                debugPrint(
+                                  'ADD_SECTION_CLICKED: controllerKey=$controllerKey, projectId=$projectId, formId=$formId',
+                                );
+                                ref
+                                    .read(
+                                      formBuilderControllerProvider(
+                                        controllerKey,
+                                      ).notifier,
+                                    )
+                                    .addSection();
+                              },
                               icon: const Icon(Icons.add),
                               label: const Text('Add New Section'),
                               style: ElevatedButton.styleFrom(
@@ -295,51 +349,6 @@ class FormCanvasWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildFormHeader(
-    Object? title,
-    WidgetRef ref,
-    String locale,
-    String? mode,
-  ) {
-    String titleText = title.translate(locale);
-
-    if (mode != null && mode != 'form') {
-      if (mode == 'question') titleText = 'Question Designer';
-      if (mode == 'section') titleText = 'Section Designer';
-      if (mode == 'workflow') titleText = 'Workflow Designer';
-    }
-
-    return InkWell(
-      onTap: () {
-        ref
-            .read(formBuilderControllerProvider(controllerKey).notifier)
-            .selectQuestion(null, null);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Text(
-          titleText.isEmpty ? 'Untitled Form' : titleText,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
 }
 
 class _DashedBorderPainter extends CustomPainter {

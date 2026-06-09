@@ -20,11 +20,11 @@ class AuthService {
     }
 
     await _handleAuthResponse(
-      data['access_token']?.toString() ?? data['accessToken']?.toString(),
-      data['refresh_token']?.toString() ?? data['refreshToken']?.toString(),
-      _userFromData(data['user']),
+      _tokenFromData(data, 'access_token'),
+      _tokenFromData(data, 'refresh_token'),
+      _userFromData(data['user'] ?? data['user_data'] ?? data['profile']),
     );
-    final user = _userFromData(data['user']);
+    final user = _userFromData(data['user'] ?? data['user_data'] ?? data['profile']);
     if (user != null) return user;
 
     final currentUser = await _fetchCurrentUserOrNull();
@@ -47,11 +47,11 @@ class AuthService {
     }
 
     await _handleAuthResponse(
-      data['access_token']?.toString() ?? data['accessToken']?.toString(),
-      data['refresh_token']?.toString() ?? data['refreshToken']?.toString(),
-      _userFromData(data['user']),
+      _tokenFromData(data, 'access_token'),
+      _tokenFromData(data, 'refresh_token'),
+      _userFromData(data['user'] ?? data['user_data'] ?? data['profile']),
     );
-    final user = _userFromData(data['user']);
+    final user = _userFromData(data['user'] ?? data['user_data'] ?? data['profile']);
     if (user != null) return user;
 
     final currentUser = await _fetchCurrentUserOrNull();
@@ -132,15 +132,14 @@ class AuthService {
       options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
     );
     final data = _authData(response.data);
-    final accessToken = data?['access_token']?.toString() ??
-        data?['accessToken']?.toString();
+    final accessToken = _tokenFromData(data, 'access_token');
     if (accessToken == null) {
       throw Exception('Refresh response missing access token');
     }
 
     await _handleAuthResponse(
       accessToken,
-      data?['refresh_token']?.toString() ?? data?['refreshToken']?.toString(),
+      _tokenFromData(data, 'refresh_token'),
       null,
     );
     final organizationId = _tokenService.organizationId;
@@ -182,10 +181,25 @@ class AuthService {
       final data = raw['data'];
       if (data is Map<String, dynamic>) return data;
       if (data is Map) return Map<String, dynamic>.from(data);
+      if (raw['user'] is Map<String, dynamic>) return raw;
+      if (raw['user'] is Map) return Map<String, dynamic>.from(raw);
       return raw;
     }
     if (raw is Map) return Map<String, dynamic>.from(raw);
     return null;
+  }
+
+  String? _tokenFromData(Map<String, dynamic>? data, String key) {
+    switch (key) {
+      case 'access_token':
+        return data?['access_token']?.toString() ??
+            data?['accessToken']?.toString();
+      case 'refresh_token':
+        return data?['refresh_token']?.toString() ??
+            data?['refreshToken']?.toString();
+      default:
+        return data?[key]?.toString();
+    }
   }
 
   UserModel? _userFromData(dynamic raw) {

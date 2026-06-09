@@ -186,7 +186,39 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
               },
             ),
             const SizedBox(height: 16),
-            _buildOperatorDropdown(operators),
+            DropdownButtonFormField<ConditionOperator>(
+              initialValue: _selectedOperator,
+              decoration: const InputDecoration(
+                labelText: 'Operator',
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                ...operators.entries.map((entry) {
+                  return DropdownMenuItem<ConditionOperator>(
+                    value: entry.value.first,
+                    enabled: false,
+                    child: Text(
+                      entry.key,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  );
+                }),
+                ...operators.values.expand((e) => e).map((op) {
+                  return DropdownMenuItem(
+                    value: op,
+                    child: Text(_getOperatorLabel(op)),
+                  );
+                }),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedOperator = value);
+                }
+              },
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: _valueController,
@@ -248,46 +280,6 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildOperatorDropdown(
-    Map<String, List<ConditionOperator>> operators,
-  ) {
-    final allOperators = operators.values.expand((e) => e).toList();
-
-    return DropdownButtonFormField<ConditionOperator>(
-      initialValue: _selectedOperator,
-      decoration: const InputDecoration(
-        labelText: 'Operator',
-        border: OutlineInputBorder(),
-      ),
-      items: [
-        ...operators.entries.map((entry) {
-          return DropdownMenuItem<ConditionOperator>(
-            value: entry.value.first,
-            enabled: false,
-            child: Text(
-              entry.key,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
-              ),
-            ),
-          );
-        }),
-        ...allOperators.map((op) {
-          return DropdownMenuItem(
-            value: op,
-            child: Text(_getOperatorLabel(op)),
-          );
-        }),
-      ],
-      onChanged: (value) {
-        if (value != null) {
-          setState(() => _selectedOperator = value);
-        }
-      },
     );
   }
 
@@ -355,97 +347,74 @@ class _ConditionBuilderPageState extends ConsumerState<ConditionBuilderPage> {
                 itemCount: rules.length,
                 itemBuilder: (context, index) {
                   final rule = rules[index];
-                  return _buildRuleCard(rule);
+                  final condition = rule.conditions.firstOrNull;
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    color: rule.isEnabled ? null : Colors.grey[200],
+                    child: ListTile(
+                      leading: Switch(
+                        value: rule.isEnabled,
+                        onChanged: (_) => _toggleRule(rule.id),
+                      ),
+                      title: Row(
+                        children: [
+                          Text(rule.name),
+                          const Spacer(),
+                          Chip(
+                            label: Text(
+                              rule.action.name.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                              ),
+                            ),
+                            backgroundColor: switch (rule.action) {
+                              ConditionAction.show => Colors.green,
+                              ConditionAction.hide => Colors.orange,
+                              ConditionAction.require => Colors.blue,
+                              ConditionAction.optional => Colors.grey,
+                              ConditionAction.disable => Colors.purple,
+                              ConditionAction.enable => Colors.teal,
+                              ConditionAction.setValue => Colors.amber,
+                              ConditionAction.webhook => Colors.indigo,
+                              ConditionAction.updateOptions => Colors.cyan,
+                            },
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          if (condition != null) ...[
+                            Text(
+                              'IF "${condition.fieldName}" ${_getOperatorLabel(condition.operator)} "${condition.value}"',
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ],
+                          const SizedBox(height: 4),
+                          Text(
+                            'Target: ${rule.targetId}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _deleteRule(rule.id),
+                      ),
+                    ),
+                  );
                 },
               ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildRuleCard(ConditionalRule rule) {
-    final condition = rule.conditions.firstOrNull;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: rule.isEnabled ? null : Colors.grey[200],
-      child: ListTile(
-        leading: Switch(
-          value: rule.isEnabled,
-          onChanged: (_) => _toggleRule(rule.id),
-        ),
-        title: Row(
-          children: [
-            Text(rule.name),
-            const Spacer(),
-            _buildActionChip(rule.action),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            if (condition != null) ...[
-              Text(
-                'IF "${condition.fieldName}" ${_getOperatorLabel(condition.operator)} "${condition.value}"',
-                style: const TextStyle(fontSize: 13),
-              ),
-            ],
-            const SizedBox(height: 4),
-            Text(
-              'Target: ${rule.targetId}',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
-          onPressed: () => _deleteRule(rule.id),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionChip(ConditionAction action) {
-    Color color;
-    switch (action) {
-      case ConditionAction.show:
-        color = Colors.green;
-        break;
-      case ConditionAction.hide:
-        color = Colors.orange;
-        break;
-      case ConditionAction.require:
-        color = Colors.blue;
-        break;
-      case ConditionAction.optional:
-        color = Colors.grey;
-        break;
-      case ConditionAction.disable:
-        color = Colors.purple;
-        break;
-      case ConditionAction.enable:
-        color = Colors.teal;
-        break;
-      case ConditionAction.setValue:
-        color = Colors.amber;
-        break;
-      case ConditionAction.webhook:
-        color = Colors.indigo;
-        break;
-      case ConditionAction.updateOptions:
-        color = Colors.cyan;
-        break;
-    }
-
-    return Chip(
-      label: Text(
-        action.name.toUpperCase(),
-        style: const TextStyle(color: Colors.white, fontSize: 11),
-      ),
-      backgroundColor: color,
-      padding: EdgeInsets.zero,
     );
   }
 

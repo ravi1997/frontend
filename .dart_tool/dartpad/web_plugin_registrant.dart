@@ -9,6 +9,7 @@
 import 'package:connectivity_plus/src/connectivity_plus_web.dart';
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:file_saver/file_saver_web.dart';
+import 'package:flutter_secure_storage_web/flutter_secure_storage_web.dart';
 import 'package:image_picker_for_web/image_picker_for_web.dart';
 import 'package:mobile_scanner/src/web/mobile_scanner_web.dart';
 import 'package:share_plus/src/share_plus_web.dart';
@@ -20,6 +21,7 @@ void registerPlugins([final Registrar? pluginRegistrar]) {
   ConnectivityPlusWebPlugin.registerWith(registrar);
   FilePickerWeb.registerWith(registrar);
   FileSaverWeb.registerWith(registrar);
+  FlutterSecureStorageWeb.registerWith(registrar);
   ImagePickerPlugin.registerWith(registrar);
   MobileScannerWeb.registerWith(registrar);
   SharePlusWebPlugin.registerWith(registrar);

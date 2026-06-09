@@ -6,6 +6,7 @@ import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 import 'package:frontend/modules/forms/widgets/signature_pad_widget.dart';
 import 'package:frontend/modules/forms/widgets/camera_capture_dialog.dart';
+import 'package:frontend/modules/forms/widgets/language_switcher.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -21,7 +22,9 @@ import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'package:frontend/modules/forms/utility/form_logic_engine.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
+import 'package:frontend/modules/forms/utility/form_action_button_utils.dart';
 import 'package:frontend/modules/forms/utility/form_layout_utils.dart';
+import 'package:frontend/modules/forms/utility/submission_error_utils.dart';
 import 'package:frontend/modules/forms/models/form_question_option.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/app_exception.dart';
@@ -57,6 +60,16 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
   final Map<String, String> _lastWebhookHashes = {};
   final Map<String, List<FormQuestionOption>> _dynamicOptions = {};
   final Map<String, String?> _fieldErrors = {};
+  ProviderSubscription<Map<String, dynamic>>? _previewFormDataSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _previewFormDataSubscription = ref.listenManual<Map<String, dynamic>>(
+      previewFormDataProvider,
+      (previous, next) => _handleDataChange(next),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +86,6 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     final primaryColor = PreviewUtils.parseColor(
       formStyle.primaryColor,
       AppColors.primary,
-    );
-
-    ref.listen<Map<String, dynamic>>(
-      previewFormDataProvider,
-      (previous, next) => _handleDataChange(next),
     );
 
     return Theme(
@@ -113,7 +121,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             ],
           ),
           actions: [
-            _buildLanguageSwitcher(),
+            const LanguageSwitcher(),
             const SizedBox(width: 8),
             TextButton.icon(
               onPressed: () {
@@ -162,6 +170,12 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
         body: Form(key: _formKey, child: _buildBody(locale, visibilityMap)),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _previewFormDataSubscription?.close();
+    super.dispose();
   }
 
   String _interpolateUrl(String url, Map<String, dynamic> formData) {
@@ -342,7 +356,138 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     }
 
     if (_isReviewing) {
-      return _buildReviewScreen(locale, visibilityMap);
+      final formData = ref.watch(previewFormDataProvider);
+      final visibleSections = widget.form.sections
+          .where((s) => visibilityMap[s.id] ?? true)
+          .toList();
+
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxWidth: widget.form.style.maxWidth),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.rate_review,
+                      size: 48,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Review Your Answers',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Please double-check everything before submitting.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textGrey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            ...visibleSections.map((section) {
+              final visibleQuestions = section.questions
+                  .where((q) => visibilityMap[q.id] ?? true)
+                  .toList();
+              if (visibleQuestions.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              final layout = section.layout;
+              final isFullWidth = isWideSectionLayout(layout);
+              final metadata = section.metaData;
+              final maxSectionWidth = isFullWidth
+                  ? sectionMaxWidth(layout, metadata)
+                  : widget.form.style.maxWidth;
+
+              final alignStr = metadata['alignment']?.toString() ?? 'left';
+              AlignmentGeometry alignment = Alignment.centerLeft;
+              if (alignStr == 'center') alignment = Alignment.center;
+              if (alignStr == 'right') alignment = Alignment.centerRight;
+
+              return Align(
+                alignment: isFullWidth ? alignment : Alignment.center,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxSectionWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        section.title.translate(locale).toUpperCase(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: AppColors.textGrey,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const Divider(height: 24),
+                      ...visibleQuestions.map((q) {
+                        final val = formData[q.id];
+                        String displayVal = val?.toString() ?? '—';
+                        if (val is List) {
+                          displayVal = val.join(', ');
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                q.label.translate(locale),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                displayVal,
+                                style: const TextStyle(
+                                  color: AppColors.textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 32),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => setState(() => _isReviewing = false),
+                      child: const Text('Back to Edit'),
+                    ),
+                    _buildSubmitButton(small: true),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     final formStyle = widget.form.style;
@@ -363,7 +508,29 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
-                child: _buildFormHeader(locale),
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderLight),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    widget.form.title.translate(locale),
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: formStyle.sectionSpacing),
@@ -376,7 +543,16 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   children: [
                     _buildSubmitButton(),
                     const SizedBox(height: 16),
-                    _buildPreviewFooter(),
+                    Center(
+                      child: Text(
+                        'Preview Mode: Workflows (Email/Slack) will be simulated in logs.',
+                        style: TextStyle(
+                          color: AppColors.textGrey.withValues(alpha: 0.8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -438,138 +614,6 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
   }
 
-  Widget _buildReviewScreen(String locale, Map<String, bool> visibilityMap) {
-    final formData = ref.watch(previewFormDataProvider);
-    final visibleSections = widget.form.sections
-        .where((s) => visibilityMap[s.id] ?? true)
-        .toList();
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.rate_review,
-                    size: 48,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Review Your Answers',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Please double-check everything before submitting.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textGrey),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          ...visibleSections.map((section) {
-            final visibleQuestions = section.questions
-                .where((q) => visibilityMap[q.id] ?? true)
-                .toList();
-            if (visibleQuestions.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
-            final layout = section.layout;
-            final isFullWidth = isWideSectionLayout(layout);
-            final metadata = section.metaData;
-            final maxSectionWidth = isFullWidth
-                ? sectionMaxWidth(layout, metadata)
-                : widget.form.style.maxWidth;
-
-            final alignStr = metadata['alignment']?.toString() ?? 'left';
-            AlignmentGeometry alignment = Alignment.centerLeft;
-            if (alignStr == 'center') alignment = Alignment.center;
-            if (alignStr == 'right') alignment = Alignment.centerRight;
-
-            return Align(
-              alignment: isFullWidth ? alignment : Alignment.center,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxSectionWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      section.title.translate(locale).toUpperCase(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: AppColors.textGrey,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const Divider(height: 24),
-                    ...visibleQuestions.map((q) {
-                      final val = formData[q.id];
-                      String displayVal = val?.toString() ?? '—';
-                      if (val is List) {
-                        displayVal = val.join(', ');
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              q.label.translate(locale),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              displayVal,
-                              style: const TextStyle(color: AppColors.textGrey),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            );
-          }),
-          const SizedBox(height: 32),
-          Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: widget.form.style.maxWidth),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => setState(() => _isReviewing = false),
-                    child: const Text('Back to Edit'),
-                  ),
-                  _buildSubmitButton(small: true),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -585,32 +629,6 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
             style: TextStyle(color: AppColors.textGrey),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFormHeader(String locale) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Text(
-        widget.form.title.translate(locale),
-        style: const TextStyle(
-          color: AppColors.textDark,
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
@@ -822,11 +840,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     );
     final submissionState = ref.watch(formSubmissionControllerProvider);
 
-    return Center(
-      child: ElevatedButton(
-        onPressed: submissionState.isLoading
-            ? null
-            : () async {
+    return buildPrimaryFormActionButton(
+      onPressed: submissionState.isLoading
+          ? null
+          : () async {
                 if (!(_formKey.currentState?.validate() ?? true)) {
                   ref
                       .read(snackbarServiceProvider)
@@ -865,25 +882,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                       errorState.details != null &&
                       mounted) {
                     setState(() {
-                      if (errorState.details is Map) {
-                        (errorState.details as Map).forEach((key, value) {
-                          // Keep the preview aligned with the submit page by surfacing field-level errors.
-                          // The preview field widgets already read from the shared form data provider.
-                          //
-                          // field error handling is intentionally kept local to this page.
-                          //
-                          _fieldErrors[key.toString()] = value.toString();
-                        });
-                      } else if (errorState.details is List) {
-                        for (final err in (errorState.details as List)) {
-                          if (err is Map &&
-                              err.containsKey('field') &&
-                              err.containsKey('message')) {
-                            _fieldErrors[err['field'].toString()] =
-                                err['message'].toString();
-                          }
-                        }
-                      }
+                      applySubmissionFieldErrors(
+                        errorState.details,
+                        (field, message) => _fieldErrors[field] = message,
+                      );
                     });
 
                     ScaffoldMessenger.of(
@@ -892,77 +894,22 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                   }
                 }
               },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(
-            horizontal: small ? 32 : 48,
-            vertical: small ? 12 : 16,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              widget.form.style.globalBorderRadius,
-            ),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        child: submissionState.isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Text('Submit'),
-      ),
+      primaryColor: primaryColor,
+      borderRadius: widget.form.style.globalBorderRadius,
+      small: small,
+      child: submissionState.isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Text('Submit'),
     );
   }
 
-  Widget _buildPreviewFooter() {
-    return Center(
-      child: Text(
-        'Preview Mode: Workflows (Email/Slack) will be simulated in logs.',
-        style: TextStyle(
-          color: AppColors.textGrey.withValues(alpha: 0.8),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageSwitcher() {
-    final currentLocale = ref.watch(localeControllerProvider);
-
-    return PopupMenuButton<String>(
-      tooltip: 'Change Language',
-      icon: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.language, size: 20, color: AppColors.textGrey),
-          const SizedBox(width: 4),
-          Text(
-            currentLocale.languageCode.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textGrey,
-            ),
-          ),
-        ],
-      ),
-      onSelected: (code) =>
-          ref.read(localeControllerProvider.notifier).setLocale(code),
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'en', child: Text('English (EN)')),
-        const PopupMenuItem(value: 'es', child: Text('Spanish (ES)')),
-        const PopupMenuItem(value: 'fr', child: Text('French (FR)')),
-        const PopupMenuItem(value: 'hi', child: Text('Hindi (HI)')),
-      ],
-    );
-  }
 }
 
 class _PreviewSectionWidget extends ConsumerStatefulWidget {
@@ -2529,11 +2476,62 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            _editorChip('Bold', Icons.format_bold),
-            _editorChip('Italic', Icons.format_italic),
-            if (isMarkdown) _editorChip('Heading', Icons.title),
-            if (isMarkdown) _editorChip('List', Icons.format_list_bulleted),
-            if (isMarkdown) _editorChip('Link', Icons.link),
+            Chip(
+              avatar: const Icon(
+                Icons.format_bold,
+                size: 16,
+                color: AppColors.primary,
+              ),
+              label: const Text('Bold'),
+              backgroundColor: AppColors.builderElement.withValues(alpha: 0.35),
+              side: BorderSide(color: AppColors.borderLight),
+            ),
+            Chip(
+              avatar: const Icon(
+                Icons.format_italic,
+                size: 16,
+                color: AppColors.primary,
+              ),
+              label: const Text('Italic'),
+              backgroundColor: AppColors.builderElement.withValues(alpha: 0.35),
+              side: BorderSide(color: AppColors.borderLight),
+            ),
+            if (isMarkdown)
+              Chip(
+                avatar: const Icon(
+                  Icons.title,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: const Text('Heading'),
+                backgroundColor:
+                    AppColors.builderElement.withValues(alpha: 0.35),
+                side: BorderSide(color: AppColors.borderLight),
+              ),
+            if (isMarkdown)
+              Chip(
+                avatar: const Icon(
+                  Icons.format_list_bulleted,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: const Text('List'),
+                backgroundColor:
+                    AppColors.builderElement.withValues(alpha: 0.35),
+                side: BorderSide(color: AppColors.borderLight),
+              ),
+            if (isMarkdown)
+              Chip(
+                avatar: const Icon(
+                  Icons.link,
+                  size: 16,
+                  color: AppColors.primary,
+                ),
+                label: const Text('Link'),
+                backgroundColor:
+                    AppColors.builderElement.withValues(alpha: 0.35),
+                side: BorderSide(color: AppColors.borderLight),
+              ),
             if (isMarkdown)
               ActionChip(
                 avatar: Icon(
@@ -2600,15 +2598,6 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
             },
           ),
       ],
-    );
-  }
-
-  Widget _editorChip(String label, IconData icon) {
-    return Chip(
-      avatar: Icon(icon, size: 16, color: AppColors.primary),
-      label: Text(label),
-      backgroundColor: AppColors.builderElement.withValues(alpha: 0.35),
-      side: BorderSide(color: AppColors.borderLight),
     );
   }
 

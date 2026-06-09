@@ -21,93 +21,151 @@ class TemplatePreviewDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(context),
-            Expanded(child: SingleChildScrollView(child: _buildContent())),
-            _buildFooter(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  template.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border:
+                    Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          template.name,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF111827),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    _getCategoryColor().withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                template.category.displayName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: _getCategoryColor(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.trending_up,
+                              size: 14,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${template.usageCount} uses',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDescription(),
+                      const SizedBox(height: 24),
+                      _buildTags(),
+                      const SizedBox(height: 24),
+                      _buildFormPreview(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getCategoryColor().withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        template.category.displayName,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: _getCategoryColor(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(Icons.trending_up, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${template.usageCount} uses',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildDescription(),
-          const SizedBox(height: 24),
-          _buildTags(),
-          const SizedBox(height: 24),
-          _buildFormPreview(),
-        ],
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF374151),
+                      side: const BorderSide(color: Color(0xFFD1D5DB)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: onUse,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(
+                      'Use This Template',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +298,23 @@ class TemplatePreviewDialog extends StatelessWidget {
             child: Row(
               children: [
                 FaIcon(
-                  _getQuestionIcon(question.type),
+                  switch (question.type.toString()) {
+                    'QuestionType.shortText' => FontAwesomeIcons.textWidth,
+                    'QuestionType.paragraph' => FontAwesomeIcons.alignLeft,
+                    'QuestionType.number' => FontAwesomeIcons.hashtag,
+                    'QuestionType.email' => FontAwesomeIcons.envelope,
+                    'QuestionType.mobile' => FontAwesomeIcons.phone,
+                    'QuestionType.date' => FontAwesomeIcons.calendar,
+                    'QuestionType.time' => FontAwesomeIcons.clock,
+                    'QuestionType.dropdown' => FontAwesomeIcons.caretDown,
+                    'QuestionType.multipleChoice' => FontAwesomeIcons.circle,
+                    'QuestionType.checkboxes' => FontAwesomeIcons.squareCheck,
+                    'QuestionType.rating' => FontAwesomeIcons.star,
+                    'QuestionType.fileUpload' => FontAwesomeIcons.upload,
+                    'QuestionType.signature' => FontAwesomeIcons.signature,
+                    'QuestionType.url' => FontAwesomeIcons.link,
+                    _ => FontAwesomeIcons.circleQuestion,
+                  },
                   size: 14,
                   color: Colors.grey[500],
                 ),
@@ -267,60 +341,6 @@ class TemplatePreviewDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF374151),
-              side: const BorderSide(color: Color(0xFFD1D5DB)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          ElevatedButton.icon(
-            onPressed: onUse,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            icon: const Icon(Icons.add, size: 18),
-            label: Text(
-              'Use This Template',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Color _getCategoryColor() {
     switch (template.category) {
       case FormTemplateCategory.contact:
@@ -344,38 +364,4 @@ class TemplatePreviewDialog extends StatelessWidget {
     }
   }
 
-  FaIconData _getQuestionIcon(dynamic type) {
-    switch (type.toString()) {
-      case 'QuestionType.shortText':
-        return FontAwesomeIcons.textWidth;
-      case 'QuestionType.paragraph':
-        return FontAwesomeIcons.alignLeft;
-      case 'QuestionType.number':
-        return FontAwesomeIcons.hashtag;
-      case 'QuestionType.email':
-        return FontAwesomeIcons.envelope;
-      case 'QuestionType.mobile':
-        return FontAwesomeIcons.phone;
-      case 'QuestionType.date':
-        return FontAwesomeIcons.calendar;
-      case 'QuestionType.time':
-        return FontAwesomeIcons.clock;
-      case 'QuestionType.dropdown':
-        return FontAwesomeIcons.caretDown;
-      case 'QuestionType.multipleChoice':
-        return FontAwesomeIcons.circle;
-      case 'QuestionType.checkboxes':
-        return FontAwesomeIcons.squareCheck;
-      case 'QuestionType.rating':
-        return FontAwesomeIcons.star;
-      case 'QuestionType.fileUpload':
-        return FontAwesomeIcons.upload;
-      case 'QuestionType.signature':
-        return FontAwesomeIcons.signature;
-      case 'QuestionType.url':
-        return FontAwesomeIcons.link;
-      default:
-        return FontAwesomeIcons.circleQuestion;
-    }
-  }
 }

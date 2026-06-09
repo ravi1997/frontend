@@ -500,9 +500,40 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                                         children: filteredCategoryTypes.map((
                                           type,
                                         ) {
-                                          return _buildFieldButton(
-                                            context,
-                                            type,
+                                          final card = _FieldButtonCard(
+                                            type: type,
+                                            width: 105,
+                                          );
+                                          return Draggable<Object>(
+                                            data: type,
+                                            feedback: Material(
+                                              color: Colors.transparent,
+                                              child: Opacity(
+                                                opacity: 0.8,
+                                                child: _FieldButtonCard(
+                                                  type: type,
+                                                  width: 110,
+                                                ),
+                                              ),
+                                            ),
+                                            // InkWell on the child (non-dragging) triggers the insert action.
+                                            // Dragging still works — the drag starts before the tap gesture fires.
+                                            child: InkWell(
+                                              onTap: () {
+                                                ref
+                                                    .read(
+                                                      formBuilderControllerProvider(
+                                                        widget.controllerKey,
+                                                      ).notifier,
+                                                    )
+                                                    .addQuestionToActiveSection(
+                                                      type,
+                                                    );
+                                              },
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              child: card,
+                                            ),
                                           );
                                         }).toList(),
                                       ),
@@ -586,9 +617,67 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: filtered
-                      .map((t) => _buildCustomFieldButton(context, t))
-                      .toList(),
+                  children: filtered.map((template) {
+                    QuestionType type = QuestionType.shortText;
+                    if (template.template_type == 'question') {
+                      final typeStr = template.data['type'];
+                      if (typeStr != null) {
+                        final rawTypeStr = typeStr.toString();
+                        type = QuestionType.values.firstWhere(
+                          (e) =>
+                              e.toString() == rawTypeStr ||
+                              e.toString() == 'QuestionType.$rawTypeStr',
+                          orElse: () => QuestionType.shortText,
+                        );
+                      }
+                    }
+
+                    final IconData? iconOverride =
+                        template.template_type == 'workflow'
+                        ? Icons.account_tree_outlined
+                        : (template.template_type == 'section'
+                            ? Icons.dashboard_customize
+                            : null);
+
+                    final card = _FieldButtonCard(
+                      type: type,
+                      label: template.name,
+                      width: 105,
+                      isCustom: true,
+                      iconOverride: iconOverride,
+                    );
+
+                    return Draggable<Object>(
+                      data: template,
+                      feedback: Material(
+                        color: Colors.transparent,
+                        child: Opacity(
+                          opacity: 0.8,
+                          child: _FieldButtonCard(
+                            type: type,
+                            label: template.name,
+                            width: 110,
+                            isCustom: true,
+                            iconOverride: iconOverride,
+                          ),
+                        ),
+                      ),
+                      // InkWell on the child triggers the insert action on tap.
+                      child: InkWell(
+                        onTap: () {
+                          ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .addTemplateToActiveSection(template);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: card,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
@@ -598,94 +687,6 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
     );
   }
 
-  Widget _buildFieldButton(BuildContext context, QuestionType type) {
-    final card = _FieldButtonCard(type: type, width: 105);
-    return Draggable<Object>(
-      data: type,
-      feedback: Material(
-        color: Colors.transparent,
-        child: Opacity(
-          opacity: 0.8,
-          child: _FieldButtonCard(type: type, width: 110),
-        ),
-      ),
-      // InkWell on the child (non-dragging) triggers the insert action.
-      // Dragging still works — the drag starts before the tap gesture fires.
-      child: InkWell(
-        onTap: () {
-          ref
-              .read(
-                formBuilderControllerProvider(widget.controllerKey).notifier,
-              )
-              .addQuestionToActiveSection(type);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: card,
-      ),
-    );
-  }
-
-  Widget _buildCustomFieldButton(
-    BuildContext context,
-    CustomFieldTemplate template,
-  ) {
-    QuestionType type = QuestionType.shortText;
-    if (template.template_type == 'question') {
-      final typeStr = template.data['type'];
-      if (typeStr != null) {
-        final rawTypeStr = typeStr.toString();
-        type = QuestionType.values.firstWhere(
-          (e) =>
-              e.toString() == rawTypeStr ||
-              e.toString() == 'QuestionType.$rawTypeStr',
-          orElse: () => QuestionType.shortText,
-        );
-      }
-    }
-
-    final IconData? iconOverride = template.template_type == 'workflow'
-        ? Icons.account_tree_outlined
-        : (template.template_type == 'section'
-              ? Icons.dashboard_customize
-              : null);
-
-    final card = _FieldButtonCard(
-      type: type,
-      label: template.name,
-      width: 105,
-      isCustom: true,
-      iconOverride: iconOverride,
-    );
-
-    return Draggable<Object>(
-      data: template,
-      feedback: Material(
-        color: Colors.transparent,
-        child: Opacity(
-          opacity: 0.8,
-          child: _FieldButtonCard(
-            type: type,
-            label: template.name,
-            width: 110,
-            isCustom: true,
-            iconOverride: iconOverride,
-          ),
-        ),
-      ),
-      // InkWell on the child triggers the insert action on tap.
-      child: InkWell(
-        onTap: () {
-          ref
-              .read(
-                formBuilderControllerProvider(widget.controllerKey).notifier,
-              )
-              .addTemplateToActiveSection(template);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: card,
-      ),
-    );
-  }
 }
 
 class _FieldButtonCard extends StatelessWidget {

@@ -41,14 +41,13 @@ class WorkflowExecutorImpl implements WorkflowExecutor {
           await _executeEmail(
             config['recipient'],
             form.title.translate('en'),
-            responseData,
           );
           break;
         case 'webhook':
           await _executeWebhook(config['url'], responseData);
           break;
         case 'slack_notification':
-          await _executeSlack(form.title.translate('en'), responseData);
+          await _executeSlack(form.title.translate('en'));
           break;
       }
     }
@@ -92,13 +91,11 @@ class WorkflowExecutorImpl implements WorkflowExecutor {
   Future<void> _executeEmail(
     String? recipient,
     String formTitle,
-    Map<String, dynamic> data,
   ) async {
-    debugPrint(
+    await _simulateAction(
       'SIMULATING EMAIL to $recipient: New submission for "$formTitle"',
+      const Duration(milliseconds: 500),
     );
-    // In a real app, this would call an API or Email Provider SDK
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   Future<void> _executeWebhook(String? url, Map<String, dynamic> data) async {
@@ -118,9 +115,15 @@ class WorkflowExecutorImpl implements WorkflowExecutor {
 
   Future<void> _executeSlack(
     String formTitle,
-    Map<String, dynamic> data,
   ) async {
-    debugPrint('SIMULATING SLACK notification for "$formTitle"');
-    await Future.delayed(const Duration(milliseconds: 300));
+    await _simulateAction(
+      'SIMULATING SLACK notification for "$formTitle"',
+      const Duration(milliseconds: 300),
+    );
+  }
+
+  Future<void> _simulateAction(String message, Duration delay) async {
+    debugPrint(message);
+    await Future.delayed(delay);
   }
 }

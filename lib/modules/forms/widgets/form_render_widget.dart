@@ -18,7 +18,12 @@ TextStyle _sectionTypographyStyle({
   required double fallbackSize,
   required Map<String, dynamic> metadata,
 }) {
-  final color = _parseColor(baseColor, fallbackColor);
+  Color color;
+  try {
+    color = Color(int.parse(baseColor.replaceAll('#', '0xFF')));
+  } catch (_) {
+    color = fallbackColor;
+  }
   final size = (metadata[sizeKey] as num?)?.toDouble() ?? fallbackSize;
   final weight = switch (metadata[weightKey]?.toString()) {
     'medium' => FontWeight.w500,
@@ -28,43 +33,15 @@ TextStyle _sectionTypographyStyle({
   return TextStyle(color: color, fontSize: size, fontWeight: weight);
 }
 
-Color _parseColor(String value, Color fallback) {
-  try {
-    return Color(int.parse(value.replaceAll('#', '0xFF')));
-  } catch (_) {
-    return fallback;
-  }
-}
-
 class FormRenderWidget extends ConsumerWidget {
   final BuilderForm form;
 
   const FormRenderWidget({super.key, required this.form});
 
-  FormStyle _formStyle(BuilderForm form) {
-    return FormStyle.fromJson(form.style);
-  }
-
-  QuestionStyle _questionStyle(FormQuestion question) {
-    final raw = question.ui['style'];
-    if (raw is Map) {
-      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
-    }
-    return const QuestionStyle();
-  }
-
-  dynamic _helperText(FormQuestion question) {
-    return question.helpText ?? question.metadata['helper_text'] ?? '';
-  }
-
-  dynamic _placeholder(FormQuestion question) {
-    return question.metadata['placeholder'] ?? '';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider).languageCode;
-    final formStyle = _formStyle(form);
+    final formStyle = FormStyle.fromJson(form.style);
     Color canvasColor;
     try {
       canvasColor = Color(
@@ -148,30 +125,6 @@ class FormRenderWidget extends ConsumerWidget {
     );
   }
 
-  int _sectionCrossAxisCount(SectionLayoutType layout, int gridColumns) {
-    switch (layout) {
-      case SectionLayoutType.grid:
-        return gridColumns;
-      case SectionLayoutType.threeColumns:
-        return 3;
-      case SectionLayoutType.fullWidth:
-      case SectionLayoutType.list:
-      case SectionLayoutType.sidebar:
-      case SectionLayoutType.custom:
-      case SectionLayoutType.overlay:
-      case SectionLayoutType.dashboard:
-      case SectionLayoutType.centered:
-      case SectionLayoutType.wizard:
-      case SectionLayoutType.masonry:
-      case SectionLayoutType.fixed:
-      case SectionLayoutType.standard:
-      case SectionLayoutType.accordion:
-      case SectionLayoutType.tabbed:
-      case SectionLayoutType.card:
-        return 1;
-    }
-  }
-
   Widget _buildFormHeader(Object? title, String locale) {
     return Container(
       width: double.infinity,
@@ -230,10 +183,24 @@ class FormRenderWidget extends ConsumerWidget {
             (e) => e.name == section.layout,
             orElse: () => SectionLayoutType.standard,
           );
-          int crossAxisCount = _sectionCrossAxisCount(
-            layout,
-            section.gridColumns,
-          );
+          int crossAxisCount = switch (layout) {
+            SectionLayoutType.grid => section.gridColumns,
+            SectionLayoutType.threeColumns => 3,
+            SectionLayoutType.fullWidth ||
+            SectionLayoutType.list ||
+            SectionLayoutType.sidebar ||
+            SectionLayoutType.custom ||
+            SectionLayoutType.overlay ||
+            SectionLayoutType.dashboard ||
+            SectionLayoutType.centered ||
+            SectionLayoutType.wizard ||
+            SectionLayoutType.masonry ||
+            SectionLayoutType.fixed ||
+            SectionLayoutType.standard ||
+            SectionLayoutType.accordion ||
+            SectionLayoutType.tabbed ||
+            SectionLayoutType.card => 1,
+          };
           if (availableWidth < 400 && crossAxisCount > 1) crossAxisCount = 1;
           if (availableWidth < 700 && crossAxisCount > 2) crossAxisCount = 2;
 
@@ -245,7 +212,10 @@ class FormRenderWidget extends ConsumerWidget {
             spacing: questionSpacing,
             runSpacing: questionSpacing,
             children: section.questions.map((q) {
-              final qStyle = _questionStyle(q);
+              final rawStyle = q.ui['style'];
+              final qStyle = rawStyle is Map
+                  ? QuestionStyle.fromJson(Map<String, dynamic>.from(rawStyle))
+                  : const QuestionStyle();
               double width = itemWidth;
               if (qStyle.widthMode == 'fixed') {
                 if (qStyle.fixedWidth <= 240) {
@@ -266,8 +236,8 @@ class FormRenderWidget extends ConsumerWidget {
                   question: q,
                   locale: locale,
                   style: qStyle,
-                  helperText: _helperText(q),
-                  placeholder: _placeholder(q),
+                  helperText: q.helpText ?? q.metadata['helper_text'] ?? '',
+                  placeholder: q.metadata['placeholder'] ?? '',
                 ),
               );
             }).toList(),
@@ -589,16 +559,16 @@ class _RenderFieldWidget extends StatelessWidget {
     required this.placeholder,
   });
 
-  QuestionStyle _styleFor(FormQuestion question) {
-    final raw = question.ui['style'];
-    if (raw is Map) {
-      return QuestionStyle.fromJson(Map<String, dynamic>.from(raw));
+  String _localizedText(Object? value, String locale) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) {
+      final map = value;
+      if (map.containsKey(locale)) return map[locale].toString();
+      if (map.containsKey('en')) return map['en'].toString();
+      if (map.isNotEmpty) return map.values.first.toString();
     }
-    return const QuestionStyle();
-  }
-
-  dynamic _placeholderFor(FormQuestion question) {
-    return question.metadata['placeholder'] ?? '';
+    return value.toString();
   }
 
   FontWeight _parseFontWeight(String weight) {
@@ -634,9 +604,9 @@ class _RenderFieldWidget extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            question.label.translate(locale).isEmpty
+            _localizedText(question.label, locale).isEmpty
                 ? 'Untitled ${question.type.label}'
-                : question.label.translate(locale),
+                : _localizedText(question.label, locale),
             style: TextStyle(
               color: labelColor,
               fontSize: style.labelFontSize,
@@ -656,9 +626,10 @@ class _RenderFieldWidget extends StatelessWidget {
     );
 
     Widget? helperWidget;
-    if (helperText.translate(locale).isNotEmpty) {
+    final localizedHelperText = _localizedText(helperText, locale);
+    if (localizedHelperText.isNotEmpty) {
       helperWidget = Text(
-        helperText.translate(locale),
+        localizedHelperText,
         style: TextStyle(
           color: helperColor,
           fontSize: style.helperFontSize,
@@ -814,9 +785,18 @@ class _RenderFieldWidget extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  placeholder.translate(locale).isEmpty
-                      ? _getPlaceholderForType(q.type)
-                      : placeholder.translate(locale),
+                  _localizedText(placeholder, locale).isEmpty
+                      ? switch (q.type) {
+                          QuestionType.shortText => 'Short answer text',
+                          QuestionType.number => 'Number',
+                          QuestionType.date => 'YYYY-MM-DD',
+                          QuestionType.time => 'HH:MM',
+                          QuestionType.email => 'name@example.com',
+                          QuestionType.mobile => '+1 234 567 890',
+                          QuestionType.url => 'https://example.com',
+                          _ => '',
+                        }
+                      : _localizedText(placeholder, locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
@@ -838,9 +818,9 @@ class _RenderFieldWidget extends StatelessWidget {
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            placeholder.translate(locale).isEmpty
+            _localizedText(placeholder, locale).isEmpty
                 ? 'Long answer text...'
-                : placeholder.translate(locale),
+                : _localizedText(placeholder, locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -854,9 +834,9 @@ class _RenderFieldWidget extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                placeholder.translate(locale).isEmpty
+                _localizedText(placeholder, locale).isEmpty
                     ? 'Select an option'
-                    : placeholder.translate(locale),
+                    : _localizedText(placeholder, locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),
@@ -1161,34 +1141,16 @@ class _RenderFieldWidget extends StatelessWidget {
     }
   }
 
-  String _getPlaceholderForType(QuestionType type) {
-    switch (type) {
-      case QuestionType.shortText:
-        return 'Short answer text';
-      case QuestionType.number:
-        return 'Number';
-      case QuestionType.date:
-        return 'YYYY-MM-DD';
-      case QuestionType.time:
-        return 'HH:MM';
-      case QuestionType.email:
-        return 'name@example.com';
-      case QuestionType.mobile:
-        return '+1 234 567 890';
-      case QuestionType.url:
-        return 'https://example.com';
-      default:
-        return '';
-    }
-  }
-
   Widget _buildSpecialFieldCard(
     FormQuestion q,
     TextStyle textStyle,
     String locale,
   ) {
-    final style = _styleFor(q);
-    final placeholder = _placeholderFor(q);
+    final rawStyle = q.ui['style'];
+    final style = rawStyle is Map
+        ? QuestionStyle.fromJson(Map<String, dynamic>.from(rawStyle))
+        : const QuestionStyle();
+    final placeholder = q.metadata['placeholder'] ?? '';
     return Container(
       height: style.height,
       decoration: BoxDecoration(

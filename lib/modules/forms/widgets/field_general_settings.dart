@@ -78,6 +78,26 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     super.dispose();
   }
 
+  void _updateActionConfig(
+    Map<String, dynamic> actionConfig,
+    void Function(Map<String, dynamic> config) update,
+  ) {
+    final newConfig = Map<String, dynamic>.from(actionConfig);
+    update(newConfig);
+    _controller().updateQuestion(
+          widget.question.copyWith(
+            logic: {
+              ...widget.question.logic ?? {},
+              'actionConfig': newConfig,
+            },
+          ),
+        );
+  }
+
+  FormBuilderController _controller() {
+    return ref.read(formBuilderControllerProvider(widget.controllerKey).notifier);
+  }
+
   bool get _showLabel =>
       widget.question.type != QuestionType.divider &&
       widget.question.type != QuestionType.spacer;
@@ -318,7 +338,86 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
           // Content Format (Phone, Credit Card, Currency)
           if (_showContentFormat) ...[
-            _buildContentFormat(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Content Format',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String?>(
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                        color: AppColors.borderLight,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.builderElement,
+                  ),
+                  initialValue: null,
+                  items: const [
+                    DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('None'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'phone',
+                      child: Text('Phone Number'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'email',
+                      child: Text('Email'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'currency',
+                      child: Text('Currency'),
+                    ),
+                    DropdownMenuItem<String?>(
+                      value: 'credit_card',
+                      child: Text('Credit Card'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    String? mask;
+                    String? regex;
+
+                    if (value == 'phone') {
+                      mask = '(###) ###-####';
+                      regex = r'^\(\d{3}\) \d{3}-\d{4}$';
+                    } else if (value == 'email') {
+                      regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+                    } else if (value == 'currency') {
+                      mask = '\$###,###.##';
+                      regex = r'^\$?\d+(,\d{3})*(\.\d{1,2})?$';
+                    } else if (value == 'credit_card') {
+                      mask = '#### #### #### ####';
+                      regex = r'^\d{4} \d{4} \d{4} \d{4}$';
+                    }
+
+                    var q = widget.question;
+                    if (mask != null) {
+                      q = q.copyWith(metadata: {...q.metadata, 'inputMask': mask});
+                    }
+                    if (regex != null) {
+                      q = q.copyWith(validation: {...q.validation, 'regex': regex});
+                    }
+
+                    _controller().updateQuestion(q);
+                  },
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
           ],
 
@@ -545,22 +644,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 label: 'Show Action Button',
                 value: hasButton,
                 onChanged: (val) {
-                  final newConfig = Map<String, dynamic>.from(actionConfig);
-                  newConfig['hasButton'] = val;
-                  ref
-                      .read(
-                        formBuilderControllerProvider(
-                          widget.controllerKey,
-                        ).notifier,
-                      )
-                      .updateQuestion(
-                        widget.question.copyWith(
-                          logic: {
-                            ...widget.question.logic ?? {},
-                            'actionConfig': newConfig,
-                          },
-                        ),
-                      );
+                  _updateActionConfig(actionConfig, (config) {
+                    config['hasButton'] = val;
+                  });
                 },
               ),
               if (hasButton) ...[
@@ -576,22 +662,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   ),
                   style: const TextStyle(color: AppColors.textDark),
                   onChanged: (val) {
-                    final newConfig = Map<String, dynamic>.from(actionConfig);
-                    newConfig['buttonLabel'] = val;
-                    ref
-                        .read(
-                          formBuilderControllerProvider(
-                            widget.controllerKey,
-                          ).notifier,
-                        )
-                        .updateQuestion(
-                          widget.question.copyWith(
-                            logic: {
-                              ...widget.question.logic ?? {},
-                              'actionConfig': newConfig,
-                            },
-                          ),
-                        );
+                    _updateActionConfig(actionConfig, (config) {
+                      config['buttonLabel'] = val;
+                    });
                   },
                 ),
                 const SizedBox(height: 16),
@@ -630,24 +703,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           ),
                         ],
                         onChanged: (v) {
-                          final newConfig = Map<String, dynamic>.from(
-                            actionConfig,
-                          );
-                          newConfig['webhookMethod'] = v;
-                          ref
-                              .read(
-                                formBuilderControllerProvider(
-                                  widget.controllerKey,
-                                ).notifier,
-                              )
-                              .updateQuestion(
-                                widget.question.copyWith(
-                                  logic: {
-                                    ...widget.question.logic ?? {},
-                                    'actionConfig': newConfig,
-                                  },
-                                ),
-                              );
+                          _updateActionConfig(actionConfig, (config) {
+                            config['webhookMethod'] = v;
+                          });
                         },
                       ),
                     );
@@ -667,24 +725,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                         ),
                         style: const TextStyle(color: AppColors.textDark),
                         onChanged: (val) {
-                          final newConfig = Map<String, dynamic>.from(
-                            actionConfig,
-                          );
-                          newConfig['webhookUrl'] = val;
-                          ref
-                              .read(
-                                formBuilderControllerProvider(
-                                  widget.controllerKey,
-                                ).notifier,
-                              )
-                              .updateQuestion(
-                                widget.question.copyWith(
-                                  logic: {
-                                    ...widget.question.logic ?? {},
-                                    'actionConfig': newConfig,
-                                  },
-                                ),
-                              );
+                          _updateActionConfig(actionConfig, (config) {
+                            config['webhookUrl'] = val;
+                          });
                         },
                       ),
                     );
@@ -730,24 +773,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                             initialValue: m['responseKey'],
                             onChanged: (v) {
                               mappings[i]['responseKey'] = v;
-                              final newConfig = Map<String, dynamic>.from(
-                                actionConfig,
-                              );
-                              newConfig['mappings'] = mappings;
-                              ref
-                                  .read(
-                                    formBuilderControllerProvider(
-                                      widget.controllerKey,
-                                    ).notifier,
-                                  )
-                                  .updateQuestion(
-                                    widget.question.copyWith(
-                                      logic: {
-                                        ...widget.question.logic ?? {},
-                                        'actionConfig': newConfig,
-                                      },
-                                    ),
-                                  );
+                              _updateActionConfig(actionConfig, (config) {
+                                config['mappings'] = mappings;
+                              });
                             },
                             decoration: const InputDecoration(
                               hintText: 'JSON Key',
@@ -763,29 +791,65 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                         ),
                         const Icon(Icons.arrow_forward, size: 14),
                         Expanded(
-                          child: _buildFieldTargetDropdown(m['targetFieldId'], (
-                            v,
-                          ) {
-                            mappings[i]['targetFieldId'] = v;
-                            final newConfig = Map<String, dynamic>.from(
-                              actionConfig,
-                            );
-                            newConfig['mappings'] = mappings;
-                            ref
-                                .read(
-                                  formBuilderControllerProvider(
-                                    widget.controllerKey,
-                                  ).notifier,
-                                )
-                                .updateQuestion(
-                                  widget.question.copyWith(
-                                    logic: {
-                                      ...widget.question.logic ?? {},
-                                      'actionConfig': newConfig,
-                                    },
+                          child: Builder(
+                            builder: (context) {
+                              final state = ref
+                                  .read(
+                                    formBuilderControllerProvider(
+                                      widget.controllerKey,
+                                    ),
+                                  )
+                                  .value;
+                              if (state == null) return const SizedBox();
+
+                              final allQuestions = state.form.sections
+                                  .expand((s) => s.questions)
+                                  .where((q) => q.id != widget.question.id)
+                                  .toList();
+
+                              return DropdownButtonFormField<String?>(
+                                initialValue: m['targetFieldId'],
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  hintText: 'Target Field',
+                                  isDense: true,
+                                  border: OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                                style: const TextStyle(
+                                  color: AppColors.textDark,
+                                ),
+                                dropdownColor: Colors.white,
+                                iconEnabledColor: AppColors.textDark,
+                                hint: const Text(
+                                  'Target Field',
+                                  style: TextStyle(
+                                    color: AppColors.textGrey,
                                   ),
-                                );
-                          }),
+                                ),
+                                items: allQuestions.map((q) {
+                                  return DropdownMenuItem<String?>(
+                                    value: q.id,
+                                    child: Text(
+                                      '${q.label} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textDark,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (v) {
+                                  mappings[i]['targetFieldId'] = v;
+                                  _updateActionConfig(actionConfig, (config) {
+                                    config['mappings'] = mappings;
+                                  });
+                                },
+                              );
+                            },
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(
@@ -794,27 +858,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                             color: Colors.red,
                           ),
                           onPressed: () {
-                            final newConfig = Map<String, dynamic>.from(
-                              actionConfig,
-                            );
                             final newList = List<Map<String, dynamic>>.from(
                               mappings,
                             )..removeAt(i);
-                            newConfig['mappings'] = newList;
-                            ref
-                                .read(
-                                  formBuilderControllerProvider(
-                                    widget.controllerKey,
-                                  ).notifier,
-                                )
-                                .updateQuestion(
-                                  widget.question.copyWith(
-                                    logic: {
-                                      ...widget.question.logic ?? {},
-                                      'actionConfig': newConfig,
-                                    },
-                                  ),
-                                );
+                            _updateActionConfig(actionConfig, (config) {
+                              config['mappings'] = newList;
+                            });
                           },
                         ),
                       ],
@@ -823,24 +872,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 }),
                 TextButton.icon(
                   onPressed: () {
-                    final newConfig = Map<String, dynamic>.from(actionConfig);
                     final newList = List<Map<String, dynamic>>.from(mappings)
                       ..add({'responseKey': '', 'targetFieldId': null});
-                    newConfig['mappings'] = newList;
-                    ref
-                        .read(
-                          formBuilderControllerProvider(
-                            widget.controllerKey,
-                          ).notifier,
-                        )
-                        .updateQuestion(
-                          widget.question.copyWith(
-                            logic: {
-                              ...widget.question.logic ?? {},
-                              'actionConfig': newConfig,
-                            },
-                          ),
-                        );
+                    _updateActionConfig(actionConfig, (config) {
+                      config['mappings'] = newList;
+                    });
                   },
                   icon: const Icon(Icons.add, size: 14),
                   label: const Text(
@@ -851,118 +887,6 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ],
             ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFieldTargetDropdown(String? value, Function(String?) onChanged) {
-    final state = ref
-        .read(formBuilderControllerProvider(widget.controllerKey))
-        .value;
-    if (state == null) return const SizedBox();
-
-    final allQuestions = state.form.sections
-        .expand((s) => s.questions)
-        .where((q) => q.id != widget.question.id)
-        .toList();
-
-    return DropdownButtonFormField<String?>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: const InputDecoration(
-        hintText: 'Target Field',
-        isDense: true,
-        border: OutlineInputBorder(),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      style: const TextStyle(color: AppColors.textDark),
-      dropdownColor: Colors.white,
-      iconEnabledColor: AppColors.textDark,
-      hint: const Text(
-        'Target Field',
-        style: TextStyle(color: AppColors.textGrey),
-      ),
-      items: allQuestions.map((q) {
-        return DropdownMenuItem<String?>(
-          value: q.id,
-          child: Text(
-            '${q.label} (${q.variableName?.isNotEmpty == true ? q.variableName : q.id})',
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12, color: AppColors.textDark),
-          ),
-        );
-      }).toList(),
-      onChanged: onChanged,
-    );
-  }
-
-  Widget _buildContentFormat() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Content Format',
-          style: TextStyle(
-            color: AppColors.textDark,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String?>(
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.borderLight),
-            ),
-            filled: true,
-            fillColor: AppColors.builderElement,
-          ),
-          initialValue: null,
-          items: const [
-            DropdownMenuItem<String?>(value: null, child: Text('None')),
-            DropdownMenuItem<String?>(value: 'phone', child: Text('Phone Number')),
-            DropdownMenuItem<String?>(value: 'email', child: Text('Email')),
-            DropdownMenuItem<String?>(value: 'currency', child: Text('Currency')),
-            DropdownMenuItem<String?>(value: 'credit_card', child: Text('Credit Card')),
-          ],
-          onChanged: (value) {
-            String? mask;
-            String? regex;
-
-            if (value == 'phone') {
-              mask = '(###) ###-####';
-              regex = r'^\(\d{3}\) \d{3}-\d{4}$';
-            } else if (value == 'email') {
-              regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
-            } else if (value == 'currency') {
-              mask = '\$###,###.##';
-              regex = r'^\$?\d+(,\d{3})*(\.\d{1,2})?$';
-            } else if (value == 'credit_card') {
-              mask = '#### #### #### ####';
-              regex = r'^\d{4} \d{4} \d{4} \d{4}$';
-            }
-
-            final notifier = ref.read(
-              formBuilderControllerProvider(widget.controllerKey).notifier,
-            );
-
-            var q = widget.question;
-            if (mask != null) {
-              q = q.copyWith(metadata: {...q.metadata, 'inputMask': mask});
-            }
-            if (regex != null) {
-              q = q.copyWith(validation: {...q.validation, 'regex': regex});
-            }
-
-            notifier.updateQuestion(q);
-          },
         ),
       ],
     );
@@ -991,13 +915,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                 lastDate: DateTime(2100),
               );
               if (picked != null) {
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestionDefaultValue(
+                _controller().updateQuestionDefaultValue(
                       widget.question.id,
                       picked.toIso8601String().split('T').first,
                     );
@@ -1058,13 +976,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               if (picked != null) {
                 final formatted =
                     '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestionDefaultValue(widget.question.id, formatted);
+                _controller().updateQuestionDefaultValue(
+                  widget.question.id,
+                  formatted,
+                );
               }
             },
             child: Container(
@@ -1146,13 +1061,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ),
             ],
             onChanged: (val) {
-              ref
-                  .read(
-                    formBuilderControllerProvider(
-                      widget.controllerKey,
-                    ).notifier,
-                  )
-                  .updateQuestionDefaultValue(widget.question.id, val);
+              _controller().updateQuestionDefaultValue(widget.question.id, val);
             },
           ),
         ],
@@ -1164,9 +1073,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
       placeholder: 'Initial value',
       controller: _defaultValueController,
       onChanged: (val) {
-        ref
-            .read(formBuilderControllerProvider(widget.controllerKey).notifier)
-            .updateQuestionDefaultValue(widget.question.id, val);
+        _controller().updateQuestionDefaultValue(widget.question.id, val);
       },
     );
   }
@@ -1204,7 +1111,104 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ),
             ),
             TextButton(
-              onPressed: () => _showBulkAddDialog(options),
+              onPressed: () {
+                final controller = TextEditingController();
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Bulk Add Options'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Enter one option per line:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: controller,
+                          maxLines: 8,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Option 1\nOption 2\nOption 3',
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          final lines = controller.text
+                              .split('\n')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList();
+
+                          if (lines.isNotEmpty) {
+                            final liveState = ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.controllerKey,
+                                  ),
+                                )
+                                .value;
+                            final liveQuestion = liveState == null
+                                ? widget.question
+                                : liveState.form.sections
+                                        .expand((s) => s.questions)
+                                        .where(
+                                          (q) => q.id == widget.question.id,
+                                        )
+                                        .firstOrNull ??
+                                    widget.question;
+
+                            final newOptions = List<Map<String, dynamic>>.from(
+                              liveQuestion.options.isEmpty
+                                  ? options
+                                  : liveQuestion.options,
+                            );
+                            for (var line in lines) {
+                              final exists = newOptions.any(
+                                (opt) =>
+                                    (opt['option_value'] ?? opt['value'] ?? '')
+                                        .toString()
+                                        .trim()
+                                        .toLowerCase() ==
+                                    line.trim().toLowerCase(),
+                              );
+                              if (exists) continue;
+                              newOptions.add({
+                                'id': const Uuid().v4(),
+                                'option_label': line,
+                                'option_value': line,
+                                'order': newOptions.length,
+                              });
+                            }
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.controllerKey,
+                                  ).notifier,
+                                )
+                                .updateQuestion(
+                                  liveQuestion.copyWith(options: newOptions),
+                                );
+                          }
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Add Options'),
+                      ),
+                    ],
+                  ),
+                );
+              },
               child: const Text('Bulk Add', style: TextStyle(fontSize: 12)),
             ),
           ],
@@ -1225,11 +1229,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               return {...e.value, 'order': e.key};
             }).toList().cast<Map<String, dynamic>>();
 
-            ref
-                .read(
-                  formBuilderControllerProvider(widget.controllerKey).notifier,
-                )
-                .updateQuestion(question.copyWith(options: orderedOptions));
+            _controller().updateQuestion(question.copyWith(options: orderedOptions));
           },
           itemBuilder: (context, index) {
             final option = options[index];
@@ -1248,24 +1248,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   'option_label': newValue,
                   'option_value': newValue,
                 };
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestion(question.copyWith(options: newOptions));
+                _controller().updateQuestion(question.copyWith(options: newOptions));
               },
               onDelete: () {
                 final newOptions = List<Map<String, dynamic>>.from(options);
                 newOptions.removeAt(index);
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestion(question.copyWith(options: newOptions));
+                _controller().updateQuestion(question.copyWith(options: newOptions));
               },
             );
           },
@@ -1280,11 +1268,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               'option_value': 'Option ${newOptions.length + 1}',
               'order': newOptions.length,
             });
-            ref
-                .read(
-                  formBuilderControllerProvider(widget.controllerKey).notifier,
-                )
-                .updateQuestion(question.copyWith(options: newOptions));
+            _controller().updateQuestion(question.copyWith(options: newOptions));
           },
           icon: const Icon(Icons.add, size: 16),
           label: const Text('Add Option'),
@@ -1300,106 +1284,15 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           label: "Include 'Other' Option",
           value: hasOtherOption,
           onChanged: (val) {
-            ref
-                .read(
-                  formBuilderControllerProvider(widget.controllerKey).notifier,
-                )
-                .updateQuestionMetadata(widget.question.id, {
-                  'hasOtherOption': val,
-                });
+            _controller().updateQuestionMetadata(widget.question.id, {
+              'hasOtherOption': val,
+            });
           },
         ),
       ],
     );
   }
 
-  void _showBulkAddDialog(List<Map<String, dynamic>> currentOptions) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Bulk Add Options'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Enter one option per line:',
-              style: TextStyle(fontSize: 13, color: AppColors.textGrey),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Option 1\nOption 2\nOption 3',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final lines = controller.text
-                  .split('\n')
-                  .map((e) => e.trim())
-                  .where((e) => e.isNotEmpty)
-                  .toList();
-
-              if (lines.isNotEmpty) {
-                final liveState = ref
-                    .read(formBuilderControllerProvider(widget.controllerKey))
-                    .value;
-                final liveQuestion = liveState == null
-                    ? widget.question
-                    : liveState.form.sections
-                              .expand((s) => s.questions)
-                              .where((q) => q.id == widget.question.id)
-                              .firstOrNull ??
-                          widget.question;
-
-                final newOptions = List<Map<String, dynamic>>.from(
-                  liveQuestion.options.isEmpty
-                      ? currentOptions
-                      : liveQuestion.options,
-                );
-                for (var line in lines) {
-                  final exists = newOptions.any(
-                    (opt) =>
-                        (opt['option_value'] ?? opt['value'] ?? '')
-                            .toString()
-                            .trim()
-                            .toLowerCase() ==
-                        line.trim().toLowerCase(),
-                  );
-                  if (exists) continue;
-                  newOptions.add({
-                    'id': const Uuid().v4(),
-                    'option_label': line,
-                    'option_value': line,
-                    'order': newOptions.length,
-                  });
-                }
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestion(liveQuestion.copyWith(options: newOptions));
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Add Options'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _OptionRow extends StatefulWidget {

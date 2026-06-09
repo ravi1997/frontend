@@ -26,22 +26,6 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
         .toList();
   }
 
-  List<QuestionType> _compatibleIntersection(List<FormQuestion> questions) {
-    if (questions.isEmpty) return const [];
-    var allowed = FieldRegistry.getCompatibleTypes(
-      questions.first.type,
-    ).toSet();
-    for (final question in questions.skip(1)) {
-      allowed = allowed.intersection(
-        FieldRegistry.getCompatibleTypes(question.type).toSet(),
-      );
-    }
-    final ordered = QuestionType.values
-        .where((type) => allowed.contains(type))
-        .toList();
-    return ordered;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final builderState = ref.watch(
@@ -55,7 +39,21 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
           return const SizedBox();
         }
 
-        final compatibleTypes = _compatibleIntersection(questions);
+        final compatibleTypes = questions.isEmpty
+            ? const <QuestionType>[]
+            : (() {
+                var allowed = FieldRegistry.getCompatibleTypes(
+                  questions.first.type,
+                ).toSet();
+                for (final question in questions.skip(1)) {
+                  allowed = allowed.intersection(
+                    FieldRegistry.getCompatibleTypes(question.type).toSet(),
+                  );
+                }
+                return QuestionType.values
+                    .where((type) => allowed.contains(type))
+                    .toList();
+              })();
 
         return Container(
           decoration: const BoxDecoration(
