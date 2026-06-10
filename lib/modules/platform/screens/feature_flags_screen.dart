@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import '../feature_flag_repository.dart';
 import '../organization_repository.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
@@ -80,7 +81,9 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+              ),
               title: Text(
                 'Add Tenant Override',
                 style: GoogleFonts.inter(fontWeight: FontWeight.bold),
@@ -136,20 +139,20 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: Text(
           'Feature Rollout Gates Manager',
           style: GoogleFonts.inter(
-            color: const Color(0xFF0F172A),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF475569)),
+            icon: const Icon(Icons.refresh),
             onPressed: _loadData,
           ),
         ],
@@ -158,13 +161,16 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _flags.isEmpty
               ? Center(
-                  child: Text(
-                    'No feature flags defined.',
-                    style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 16),
+                child: Text(
+                  'No feature flags defined.',
+                  style: GoogleFonts.inter(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                    fontSize: DesignTokens.fontM,
                   ),
-                )
+                ),
+              )
               : ListView.builder(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(DesignTokens.spaceL),
                   itemCount: _flags.length,
                   itemBuilder: (context, index) {
                     final flag = _flags[index];
@@ -178,13 +184,13 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 24),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+                        side: BorderSide(color: Theme.of(context).colorScheme.outline),
                       ),
                       elevation: 0,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       child: Padding(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -199,16 +205,16 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                         name,
                                         style: GoogleFonts.inter(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: const Color(0xFF0F172A),
+                                          fontSize: DesignTokens.fontM,
+                                          color: Theme.of(context).colorScheme.onSurface,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'Key: $key',
                                         style: GoogleFonts.inter(
-                                          color: const Color(0xFF64748B),
-                                          fontSize: 12,
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                                          fontSize: DesignTokens.fontS,
                                         ),
                                       ),
                                     ],
@@ -216,7 +222,7 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                 ),
                                 Switch(
                                   value: isEnabled,
-                                  activeThumbColor: const Color(0xFF4338CA),
+                                  activeThumbColor: Theme.of(context).colorScheme.primary,
                                   onChanged: (val) => _toggleGlobalFlag(key, isEnabled),
                                 ),
                               ],
@@ -225,8 +231,8 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                             Text(
                               desc,
                               style: GoogleFonts.inter(
-                                color: const Color(0xFF475569),
-                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                                fontSize: DesignTokens.fontM,
                                 height: 1.5,
                               ),
                             ),
@@ -238,8 +244,8 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                   'Organization Overrides',
                                   style: GoogleFonts.inter(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: const Color(0xFF334155),
+                                    fontSize: DesignTokens.fontM,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 TextButton.icon(
@@ -247,7 +253,7 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                   icon: const Icon(Icons.add_circle_outline, size: 18),
                                   label: const Text('Add Override'),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: const Color(0xFF4338CA),
+                                    foregroundColor: Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -257,8 +263,8 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                               Text(
                                 'No tenant-specific overrides configured.',
                                 style: GoogleFonts.inter(
-                                  color: const Color(0xFF94A3B8),
-                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                  fontSize: DesignTokens.fontS,
                                   fontStyle: FontStyle.italic,
                                 ),
                               ),
@@ -276,31 +282,31 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                     orElse: () => {'name': orgId},
                                   )['name'];
 
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          orgName.toString(),
-                                          style: GoogleFonts.inter(
-                                            color: const Color(0xFF475569),
-                                            fontWeight: FontWeight.w500,
+                                    return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceXS),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            orgName.toString(),
+                                            style: GoogleFonts.inter(
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              orgVal ? 'Enabled' : 'Disabled',
-                                              style: GoogleFonts.inter(
-                                                color: orgVal ? const Color(0xFF166534) : const Color(0xFF991B1B),
-                                                fontSize: 13,
+                                          Row(
+                                            children: [
+                                              Text(
+                                                orgVal ? 'Enabled' : 'Disabled',
+                                                style: GoogleFonts.inter(
+                                                color: orgVal ? DesignTokens.success : DesignTokens.error,
+                                                fontSize: DesignTokens.fontS,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             const SizedBox(width: 8),
                                             IconButton(
-                                              icon: const Icon(Icons.delete_outline, size: 18, color: Color(0xFF94A3B8)),
+                                              icon: Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
                                               onPressed: () => _updateOverride(key, orgId, false), // Or delete handler if API supports it, updating to false acts as standard disable/override toggle
                                             ),
                                           ],

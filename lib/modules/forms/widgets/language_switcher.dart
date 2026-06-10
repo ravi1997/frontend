@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/localization/locale_controller.dart';
-import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class LanguageSwitcher extends ConsumerWidget {
   const LanguageSwitcher({super.key});
@@ -15,14 +15,14 @@ class LanguageSwitcher extends ConsumerWidget {
       icon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.language, size: 20, color: AppColors.textGrey),
+          Icon(Icons.language, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72)),
           const SizedBox(width: 4),
           Text(
             currentLocale.languageCode.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 12,
+            style: TextStyle(
+              fontSize: DesignTokens.fontS,
               fontWeight: FontWeight.bold,
-              color: AppColors.textGrey,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
             ),
           ),
         ],
