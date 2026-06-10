@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/theme/tokens.dart';
 
-/// Screen size enum for the four supported breakpoints.
-enum ScreenSize { mobile, tablet, laptop, desktop }
+/// Screen size enum for the five supported breakpoints.
+enum ScreenSize { mobile, tablet, laptop, desktop, wide }
 
 /// Responsive layout utilities.
 /// Always use these instead of raw [MediaQuery] size checks so breakpoints
@@ -22,7 +22,8 @@ abstract class Responsive {
     if (w < DesignTokens.kMobile) return ScreenSize.mobile;
     if (w < DesignTokens.kTablet) return ScreenSize.tablet;
     if (w < DesignTokens.kLaptop) return ScreenSize.laptop;
-    return ScreenSize.desktop;
+    if (w < DesignTokens.kDesktop) return ScreenSize.desktop;
+    return ScreenSize.wide;
   }
 
   static bool isMobile(BuildContext context) =>
@@ -52,6 +53,7 @@ abstract class Responsive {
       ScreenSize.tablet  => const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       ScreenSize.laptop  => const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       ScreenSize.desktop => const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      ScreenSize.wide    => const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
     };
   }
 
@@ -62,6 +64,7 @@ abstract class Responsive {
       ScreenSize.tablet  => 20,
       ScreenSize.laptop  => 24,
       ScreenSize.desktop => 32,
+      ScreenSize.wide    => 40,
     };
   }
 
@@ -76,6 +79,7 @@ abstract class Responsive {
       ScreenSize.tablet  => 2,
       ScreenSize.laptop  => 3,
       ScreenSize.desktop => 4,
+      ScreenSize.wide    => 4,
     };
   }
 
@@ -86,6 +90,7 @@ abstract class Responsive {
       ScreenSize.tablet  => 2,
       ScreenSize.laptop  => 4,
       ScreenSize.desktop => 4,
+      ScreenSize.wide    => 4,
     };
   }
 
@@ -93,6 +98,8 @@ abstract class Responsive {
   static double sidebarWidth(BuildContext context) {
     if (isMobile(context)) return 0;
     if (isTablet(context)) return DesignTokens.sidebarCollapsed;
+    if (isLaptop(context)) return DesignTokens.sidebarExpanded;
+    if (isDesktop(context)) return DesignTokens.sidebarExpanded;
     return DesignTokens.sidebarExpanded;
   }
 }

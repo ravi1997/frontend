@@ -108,6 +108,10 @@ class AppShell extends ConsumerWidget {
         currentLocation: currentLocation,
         child: child,
       ),
+      ScreenSize.wide => _DesktopShell(
+        currentLocation: currentLocation,
+        child: child,
+      ),
     };
   }
 }

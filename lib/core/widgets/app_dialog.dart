@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
 
 /// Reusable Glassmorphic Dialog container enforcing visual parity across the app.
@@ -20,6 +21,7 @@ class AppDialog extends StatelessWidget {
   @override
   Widget build(BuildContext buildContext) {
     final screenSize = MediaQuery.sizeOf(buildContext);
+    final theme = Theme.of(buildContext);
 
     return Center(
       child: ClipRRect(
@@ -32,9 +34,9 @@ class AppDialog extends StatelessWidget {
               maxHeight: screenSize.height * 0.85,
             ),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: theme.colorScheme.surface.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: theme.colorScheme.outline),
             ),
             child: Material(
               color: Colors.transparent,
@@ -51,21 +53,21 @@ class AppDialog extends StatelessWidget {
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: DesignTokens.fontL,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
                         IconButton(
                           tooltip: 'Close dialog',
-                          icon: const Icon(Icons.close, color: Colors.white60),
+                          icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.72)),
                           onPressed: () => Navigator.of(buildContext).pop(),
                         ),
                       ],
                     ),
-                    const Divider(color: Colors.white10),
+                    Divider(color: theme.colorScheme.outline),
                     const SizedBox(height: AppSpacing.md),
 
                     ConstrainedBox(

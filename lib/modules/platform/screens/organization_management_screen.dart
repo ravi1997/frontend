@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import '../organization_repository.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 
 class OrganizationManagementScreen extends ConsumerStatefulWidget {
   const OrganizationManagementScreen({super.key});
@@ -219,22 +221,25 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 900;
+    final size = Responsive.of(context);
+    final isDesktop = size == ScreenSize.laptop ||
+        size == ScreenSize.desktop ||
+        size == ScreenSize.wide;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: Text(
           'Enterprise Organizations Manager',
           style: GoogleFonts.inter(
-            color: const Color(0xFF0F172A),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF475569)),
+            icon: const Icon(Icons.refresh),
             onPressed: _fetchOrgs,
           ),
         ],
@@ -263,7 +268,7 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreateOrgDialog,
-        backgroundColor: const Color(0xFF4338CA),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -274,12 +279,15 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
       return Center(
         child: Text(
           'No organizations found.',
-          style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 16),
+          style: GoogleFonts.inter(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+            fontSize: DesignTokens.fontM,
+          ),
         ),
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       itemCount: _orgs.length,
       itemBuilder: (context, index) {
         final org = _orgs[index];
@@ -294,37 +302,44 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusM),
             side: BorderSide(
-              color: isSelected ? const Color(0xFF4338CA) : const Color(0xFFE2E8F0),
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
           elevation: 0,
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: DesignTokens.spaceL,
+              vertical: DesignTokens.spaceS + 4,
+            ),
             title: Row(
               children: [
                 Text(
                   name,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: const Color(0xFF0F172A),
+                    fontSize: DesignTokens.fontM,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: isSuspended ? const Color(0xFFFEE2E2) : const Color(0xFFDCFCE7),
+                    color: isSuspended
+                        ? DesignTokens.error.withValues(alpha: 0.12)
+                        : DesignTokens.success.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(99),
                   ),
                   child: Text(
                     status.toUpperCase(),
                     style: GoogleFonts.inter(
-                      color: isSuspended ? const Color(0xFF991B1B) : const Color(0xFF166534),
+                      color: isSuspended ? DesignTokens.error : DesignTokens.success,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -336,10 +351,21 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 6),
-                Text('Slug: $slug | Domain: $domain', style: GoogleFonts.inter(color: const Color(0xFF64748B))),
+                Text(
+                  'Slug: $slug | Domain: $domain',
+                  style: GoogleFonts.inter(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
+                ),
                 if (org['admin_email'] != null) ...[
                   const SizedBox(height: 4),
-                  Text('Admin: ${org['admin_email']}', style: GoogleFonts.inter(color: const Color(0xFF475569), fontWeight: FontWeight.w500)),
+                  Text(
+                    'Admin: ${org['admin_email']}',
+                    style: GoogleFonts.inter(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.82),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ]
               ],
             ),
@@ -348,14 +374,14 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
               children: [
                 IconButton(
                   tooltip: 'Assign Admin',
-                  icon: const Icon(Icons.admin_panel_settings_outlined, color: Color(0xFF475569)),
+                  icon: const Icon(Icons.admin_panel_settings_outlined),
                   onPressed: () => _showAssignAdminDialog(id),
                 ),
                 IconButton(
                   tooltip: isSuspended ? 'Activate' : 'Suspend',
                   icon: Icon(
                     isSuspended ? Icons.play_circle_outline : Icons.pause_circle_outline,
-                    color: isSuspended ? const Color(0xFF166534) : const Color(0xFF991B1B),
+                    color: isSuspended ? DesignTokens.success : DesignTokens.error,
                   ),
                   onPressed: () => _toggleOrgStatus(id, status),
                 ),
@@ -372,10 +398,12 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
     if (_selectedOrgIdForStats == null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
           child: Text(
             'Select an organization to view stats and quotas.',
-            style: GoogleFonts.inter(color: const Color(0xFF64748B)),
+            style: GoogleFonts.inter(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+            ),
           ),
         ),
       );
@@ -390,8 +418,8 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
     final storageUsed = stats['storage_used_bytes'] ?? 0;
     
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.all(24),
+      color: Theme.of(context).colorScheme.surface,
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -401,9 +429,9 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
               Text(
                 'Organization Stats',
                 style: GoogleFonts.inter(
-                  fontSize: 18,
+                  fontSize: DesignTokens.fontL,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               IconButton(
@@ -430,24 +458,24 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF4338CA), size: 24),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               label,
               style: GoogleFonts.inter(
-                color: const Color(0xFF475569),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w500,
-                fontSize: 14,
+                fontSize: DesignTokens.fontM,
               ),
             ),
           ),
           Text(
             value,
             style: GoogleFonts.inter(
-              color: const Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: DesignTokens.fontM,
             ),
           ),
         ],

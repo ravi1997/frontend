@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
 
 /// Centralized UI state handlers for loading spinners and empty state placeholders.
 class AppStates {
   /// Centered premium loading spinner
   static Widget loading() {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        color: Colors.white70,
+        color: AppColors.primary,
         strokeWidth: 3,
       ),
     );
@@ -27,14 +28,14 @@ class AppStates {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: Colors.white30),
+            Icon(icon, size: 64, color: AppColors.textGrey.withValues(alpha: 0.35)),
             const SizedBox(height: AppSpacing.md),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.white70,
+                color: AppColors.textDark,
               ),
               textAlign: TextAlign.center,
             ),
@@ -43,7 +44,7 @@ class AppStates {
               subtitle,
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.white38,
+                color: AppColors.textGrey,
               ),
               textAlign: TextAlign.center,
             ),
@@ -52,9 +53,9 @@ class AppStates {
               ElevatedButton(
                 onPressed: onAction,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.09),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                  side: BorderSide(color: AppColors.primaryDark),
                 ),
                 child: Text(actionLabel),
               ),

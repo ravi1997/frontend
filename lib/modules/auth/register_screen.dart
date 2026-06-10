@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'auth_controller.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 import 'auth_widgets.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -37,8 +38,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    final size = MediaQuery.of(context).size;
-    final isWide = size.width > 1000;
+    final screenSize = Responsive.of(context);
+    final isWide =
+        screenSize == ScreenSize.laptop ||
+        screenSize == ScreenSize.desktop ||
+        screenSize == ScreenSize.wide;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncData && next.value == null && previous is AsyncLoading) {
@@ -54,7 +60,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return AuthBackground(
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          padding: Responsive.pagePadding(context),
           child: IntrinsicHeight(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -63,36 +69,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 if (isWide) ...[
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 64),
+                      padding: const EdgeInsets.only(right: DesignTokens.spaceXXL),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildBrandSection(context),
-                          const SizedBox(height: 48),
+                          const SizedBox(height: DesignTokens.spaceXXL),
                           Text(
                             'Create your account with Aetheris AI.',
-                            style: GoogleFonts.inter(
+                            style: textTheme.displayLarge?.copyWith(
                               fontSize: 56,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF111827),
+                              color: theme.colorScheme.onSurface,
                               height: 1.1,
                             ),
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: DesignTokens.spaceXL),
                           _buildFeatureItem(
+                            context,
                             Icons.security_outlined,
                             'Secure Data',
                             'Enterprise-grade encryption for all submissions.',
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: DesignTokens.spaceL),
                           _buildFeatureItem(
+                            context,
                             Icons.auto_awesome_outlined,
                             'AI Powered',
                             'Automate form building and data analysis.',
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: DesignTokens.spaceL),
                           _buildFeatureItem(
+                            context,
                             Icons.speed,
                             'High Performance',
                             'Optimized for massive scale and reliability.',
@@ -112,23 +121,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Widget _buildBrandSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB),
-            borderRadius: BorderRadius.circular(8),
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
           child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 12),
         Text(
           'Aetheris AI',
-          style: GoogleFonts.inter(
+          style: textTheme.titleLarge?.copyWith(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF111827),
+            color: theme.colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
         ),
@@ -136,16 +148,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title, String description) {
+  Widget _buildFeatureItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String description,
+  ) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(8),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
+          child: Icon(icon, color: theme.colorScheme.primary, size: 24),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -154,17 +174,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: textTheme.titleMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF111827),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               Text(
                 description,
-                style: GoogleFonts.inter(
+                style: textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
-                  color: const Color(0xFF6B7280),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
                 ),
               ),
             ],
@@ -175,13 +195,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Widget _buildRegisterCard(AsyncValue authState, bool isWide) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final availableWidth =
+        MediaQuery.sizeOf(context).width - (Responsive.pageHPad(context) * 2);
+    final cardWidth = isWide
+        ? 500.0
+        : availableWidth.clamp(320.0, 560.0).toDouble();
+
     return Container(
-      width: 500,
-      padding: const EdgeInsets.all(40),
+      width: cardWidth,
+      padding: const EdgeInsets.all(DesignTokens.spaceXL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        border: Border.all(color: theme.colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -198,25 +226,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           children: [
             if (!isWide) ...[
               Center(child: _buildBrandSection(context)),
-              const SizedBox(height: 32),
+              const SizedBox(height: DesignTokens.spaceXL),
             ],
             Text(
               'Sign up',
-              style: GoogleFonts.inter(
+              style: textTheme.headlineSmall?.copyWith(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF111827),
+                color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spaceS),
             Text(
               'Join thousands of teams building better forms.',
-              style: GoogleFonts.inter(
+              style: textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
-                color: const Color(0xFF6B7280),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: DesignTokens.spaceXL),
 
             Row(
               children: [
@@ -227,7 +255,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onTap: () {},
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: DesignTokens.spaceS + 4),
                 Expanded(
                   child: _SocialButton(
                     icon: FontAwesomeIcons.apple,
@@ -237,25 +265,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
             Row(
               children: [
-                const Expanded(child: Divider(color: Color(0xFFE5E7EB))),
+                Expanded(child: Divider(color: theme.colorScheme.outline)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     'OR',
-                    style: GoogleFonts.inter(
+                    style: textTheme.labelSmall?.copyWith(
                       fontSize: 11,
-                      color: const Color(0xFF9CA3AF),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                const Expanded(child: Divider(color: Color(0xFFE5E7EB))),
+                Expanded(child: Divider(color: theme.colorScheme.outline)),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
 
             AuthTextFormField(
               controller: _usernameController,
@@ -269,7 +297,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             AuthTextFormField(
               controller: _emailController,
               label: 'Email',
@@ -286,7 +314,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             AuthTextFormField(
               controller: _mobileController,
               label: 'Mobile Number',
@@ -303,7 +331,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             AuthTextFormField(
               controller: _passwordController,
               label: 'Password',
@@ -322,14 +350,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  color: const Color(0xFF9CA3AF),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                   size: 20,
                 ),
                 onPressed: () =>
                     setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             AuthTextFormField(
               controller: _confirmPasswordController,
               label: 'Confirm Password',
@@ -350,7 +378,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   _obscureConfirmPassword
                       ? Icons.visibility_off
                       : Icons.visibility,
-                  color: const Color(0xFF9CA3AF),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                   size: 20,
                 ),
                 onPressed: () => setState(
@@ -359,28 +387,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: DesignTokens.spaceXL),
             _buildRegisterButton(authState),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: DesignTokens.spaceXL),
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Already have an account? ',
-                    style: GoogleFonts.inter(
+                    style: textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: const Color(0xFF6B7280),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
                     ),
                   ),
                   GestureDetector(
                     onTap: () => context.go('/login'),
                     child: Text(
                       'Sign in',
-                      style: GoogleFonts.inter(
+                      style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
-                        color: const Color(0xFF2563EB),
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -397,10 +425,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
 
   Widget _buildRegisterButton(AsyncValue authState) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return SizedBox(
       width: double.infinity,
       height: 48,
-      child: ElevatedButton(
+      child: FilledButton(
         onPressed: authState.isLoading
             ? null
             : () {
@@ -411,16 +442,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         username: _usernameController.text.trim(),
                         email: _emailController.text.trim(),
                         password: _passwordController.text,
-                        mobile: _mobileController.text.trim(),
+                      mobile: _mobileController.text.trim(),
                       );
                 }
               },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
         child: authState.isLoading
             ? const SizedBox(
                 height: 20,
@@ -432,9 +457,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               )
             : Text(
                 'Create Account',
-                style: GoogleFonts.inter(
+                style: textTheme.labelLarge?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
       ),
@@ -455,19 +481,28 @@ class _SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return OutlinedButton.icon(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF374151),
-        backgroundColor: Colors.white,
-        side: const BorderSide(color: Color(0xFFD1D5DB)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        foregroundColor: theme.colorScheme.onSurface,
+        backgroundColor: theme.colorScheme.surface,
+        side: BorderSide(color: theme.colorScheme.outline),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+        ),
         padding: const EdgeInsets.symmetric(vertical: 12),
       ),
-      icon: FaIcon(icon, size: 16, color: const Color(0xFF111827)),
+      icon: FaIcon(icon, size: 16, color: theme.colorScheme.onSurface),
       label: Text(
         label,
-        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
+        style: textTheme.bodyMedium?.copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: theme.colorScheme.onSurface,
+        ),
       ),
     );
   }

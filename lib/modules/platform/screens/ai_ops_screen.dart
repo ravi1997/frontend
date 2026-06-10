@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import '../ai_ops_repository.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 
 class AIOpsScreen extends ConsumerStatefulWidget {
   const AIOpsScreen({super.key});
@@ -74,21 +76,24 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = Responsive.of(context);
+    final pagePadding = Responsive.pagePadding(context);
+    final compactLayout = screenSize == ScreenSize.mobile || screenSize == ScreenSize.tablet;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: Text(
           'AI Operations Hub (LoRA)',
           style: GoogleFonts.inter(
-            color: const Color(0xFF0F172A),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w800,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF475569)),
+            icon: const Icon(Icons.refresh),
             onPressed: _fetchStatus,
           ),
         ],
@@ -96,12 +101,12 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: pagePadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildStatusOverview(),
-                  const SizedBox(height: 24),
+                  SizedBox(height: compactLayout ? 20 : 24),
                   _buildControlsCard(),
                 ],
               ),
@@ -118,13 +123,13 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
 
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(DesignTokens.spaceL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -132,8 +137,8 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               'Pipeline Status Overview',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: const Color(0xFF0F172A),
+                fontSize: DesignTokens.fontM,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const Divider(height: 24),
@@ -151,12 +156,12 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               color: exitCode == null
                   ? null
                   : exitCode == 0
-                      ? const Color(0xFF166534)
-                      : const Color(0xFF991B1B),
+                      ? DesignTokens.success
+                      : DesignTokens.error,
             ),
             if (_activeTaskId != null) ...[
               const Divider(height: 24),
-              _buildStatusItem('Active Task Identifier', _activeTaskId!, color: const Color(0xFF4338CA)),
+              _buildStatusItem('Active Task Identifier', _activeTaskId!, color: Theme.of(context).colorScheme.primary),
             ],
           ],
         ),
@@ -173,17 +178,17 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
           Text(
             label,
             style: GoogleFonts.inter(
-              color: const Color(0xFF475569),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
               fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontSize: DesignTokens.fontM,
             ),
           ),
           Text(
             value,
             style: GoogleFonts.inter(
-              color: color ?? const Color(0xFF0F172A),
+              color: color ?? Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
-              fontSize: 14,
+              fontSize: DesignTokens.fontM,
             ),
           ),
         ],
@@ -194,13 +199,13 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
   Widget _buildControlsCard() {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(DesignTokens.spaceL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -208,8 +213,8 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               'Trigger LoRA Fine-Tuning Cycle',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: const Color(0xFF0F172A),
+                fontSize: DesignTokens.fontM,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const Divider(height: 24),
@@ -234,10 +239,13 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
             SwitchListTile(
               title: Text(
                 'Fast Mode (Run fast scaffold)',
-                style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF475569)),
+                style: GoogleFonts.inter(
+                  fontSize: DesignTokens.fontM,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+                ),
               ),
               value: _fastMode,
-              activeThumbColor: const Color(0xFF4338CA),
+              activeThumbColor: Theme.of(context).colorScheme.primary,
               onChanged: (val) => setState(() => _fastMode = val),
             ),
             const SizedBox(height: 24),
@@ -247,8 +255,10 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               child: ElevatedButton(
                 onPressed: _triggerLoop,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4338CA),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                  ),
                 ),
                 child: Text(
                   'Launch Fine-Tuning Loop',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   final String title;
@@ -24,7 +26,7 @@ class ErrorStateWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Center(
@@ -34,16 +36,16 @@ class ErrorStateWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(DesignTokens.spaceM),
                       decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
+                        color: AppColors.fieldDate.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Semantics(
                         label: 'Error',
                         child: Icon(
                           Icons.error_outline,
-                          color: Colors.red,
+                          color: AppColors.fieldDate,
                           size: 48,
                         ),
                       ),
@@ -53,9 +55,9 @@ class ErrorStateWidget extends StatelessWidget {
                       title,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
-                        fontSize: 20,
+                        fontSize: DesignTokens.fontL,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -63,25 +65,25 @@ class ErrorStateWidget extends StatelessWidget {
                       message,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: const Color(0xFF64748B),
+                        fontSize: DesignTokens.fontM,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
                       ),
                     ),
                     if (trimmedError?.isNotEmpty == true) ...[
                       const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(DesignTokens.spaceM),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: AppColors.builderElement,
+                          borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                          border: Border.all(color: AppColors.borderLight),
                         ),
                         child: SelectableText(
                           trimmedError!,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.firaCode(
-                            fontSize: 12,
-                            color: const Color(0xFFef4444),
+                            fontSize: DesignTokens.fontS,
+                            color: AppColors.fieldDate,
                           ),
                         ),
                       ),

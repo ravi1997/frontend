@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class AppGlassCard extends StatelessWidget {
   final Widget child;
@@ -10,7 +11,7 @@ class AppGlassCard extends StatelessWidget {
   const AppGlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(20.0),
+    this.padding = const EdgeInsets.all(DesignTokens.spaceL),
     this.onTap,
     this.width,
     this.height,
@@ -18,7 +19,8 @@ class AppGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderRadius = BorderRadius.circular(16);
+    final borderRadius = BorderRadius.circular(DesignTokens.radiusL);
+    final scheme = Theme.of(context).colorScheme;
 
     return Material(
       color: Colors.transparent,
@@ -29,24 +31,13 @@ class AppGlassCard extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: scheme.surface.withValues(alpha: 0.72),
             borderRadius: borderRadius,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2),
-              width: 1,
-            ),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: 0.15),
-                Colors.white.withValues(alpha: 0.05),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            border: Border.all(color: scheme.outline.withValues(alpha: 0.7)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
+                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.06),
+                blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],

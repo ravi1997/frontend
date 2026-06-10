@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:go_router/go_router.dart';
-import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 import 'auth_controller.dart';
 import 'auth_widgets.dart';
@@ -36,6 +35,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     final authState = ref.watch(authControllerProvider);
     final resendTimer = ref.watch(otpControllerProvider);
     final otpNotifier = ref.read(otpControllerProvider.notifier);
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncError) {
@@ -46,35 +47,38 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     final defaultPinTheme = PinTheme(
       width: 56,
       height: 56,
-      textStyle: GoogleFonts.inter(
+      textStyle: textTheme.titleLarge?.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: AppColors.textDark,
+        color: theme.colorScheme.onSurface,
       ),
       decoration: BoxDecoration(
-        color: AppColors.fieldBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight, width: 1.5),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+        border: Border.all(color: theme.colorScheme.outline, width: 1.5),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: defaultPinTheme.decoration!.copyWith(
-        border: Border.all(color: AppColors.brandBlue, width: 2),
+        border: Border.all(color: theme.colorScheme.primary, width: 2),
       ),
     );
 
     final submittedPinTheme = defaultPinTheme.copyWith(
-      decoration: defaultPinTheme.decoration!.copyWith(color: Colors.white),
+      decoration: defaultPinTheme.decoration!.copyWith(
+        color: theme.colorScheme.surface,
+      ),
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.colorScheme.onSurface,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
@@ -98,16 +102,16 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
             ),
             const SizedBox(height: 48),
             if (authState.isLoading)
-              const CircularProgressIndicator()
+              CircularProgressIndicator(color: theme.colorScheme.primary)
             else ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Didn't receive code? ",
-                    style: GoogleFonts.inter(
+                    style: textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
-                      color: AppColors.textGrey,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
                     ),
                   ),
                   TextButton(
@@ -123,11 +127,13 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                       resendTimer == 0
                           ? 'Resend'
                           : 'Resend in ${resendTimer}s',
-                      style: GoogleFonts.inter(
+                      style: textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
                         color: resendTimer == 0
-                            ? AppColors.brandBlue
-                            : AppColors.textGrey.withValues(alpha: 0.5),
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.45,
+                              ),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

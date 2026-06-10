@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router.dart';
 import 'theme/design_system.dart';
+import 'theme/theme_controller.dart';
 import '../core/services/snackbar_service.dart';
 
 class RidpApp extends ConsumerWidget {
@@ -12,11 +13,14 @@ class RidpApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final snackbarService = ref.watch(snackbarServiceProvider);
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeControllerProvider);
 
     return MaterialApp.router(
       title: 'MahaSangrah Setu',
       debugShowCheckedModeBanner: false,
-      theme: AppDesignSystem.enterpriseDarkTheme,
+      theme: AppDesignSystem.enterpriseLightTheme,
+      darkTheme: AppDesignSystem.enterpriseDarkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       scaffoldMessengerKey: snackbarService.messengerKey,
     );

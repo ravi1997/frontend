@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
 
 /// Reusable Glassmorphic Shimmer Loader with multiple named presets
@@ -53,8 +54,8 @@ class AppShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext buildContext) {
     // Glassmorphic premium translucent sweep colors
-    final baseColor = Colors.white.withValues(alpha: 0.08);
-    final highlightColor = Colors.white.withValues(alpha: 0.18);
+    final baseColor = AppColors.primarySoft.withValues(alpha: 0.45);
+    final highlightColor = AppColors.primary.withValues(alpha: 0.18);
 
     if (child != null) {
       return Shimmer.fromColors(
@@ -68,11 +69,11 @@ class AppShimmer extends StatelessWidget {
       baseColor: baseColor,
       highlightColor: highlightColor,
       child: ExcludeSemantics(
-        child: Container(
-          width: width,
-          height: height,
-          decoration: ShapeDecoration(
-            color: Colors.white,
+          child: Container(
+            width: width,
+            height: height,
+            decoration: ShapeDecoration(
+            color: Theme.of(buildContext).colorScheme.surface,
             shape:
                 shape ??
                 RoundedRectangleBorder(
@@ -104,7 +105,7 @@ class SkeletonBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(borderRadius ?? AppRadius.sm),
       ),
     );
@@ -123,7 +124,7 @@ class SkeletonCircle extends StatelessWidget {
       width: size,
       height: size,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         shape: BoxShape.circle,
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 
 /// Auth-page background scaffold with soft decorative gradient orbs.
 class AuthBackground extends StatelessWidget {
@@ -10,8 +10,12 @@ class AuthBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final secondary = theme.colorScheme.secondary;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFF),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // ── Top-right large orb ──────────────────────────────────────────
@@ -20,7 +24,7 @@ class AuthBackground extends StatelessWidget {
             right: -180,
             child: _GradientOrb(
               size: 550,
-              colors: const [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+              colors: [primary, secondary],
               opacity: 0.055,
             ),
           ),
@@ -31,7 +35,7 @@ class AuthBackground extends StatelessWidget {
             left: -140,
             child: _GradientOrb(
               size: 440,
-              colors: const [Color(0xFF7C3AED), Color(0xFFEC4899)],
+              colors: [secondary, primary],
               opacity: 0.045,
             ),
           ),
@@ -42,7 +46,7 @@ class AuthBackground extends StatelessWidget {
             left: -80,
             child: _GradientOrb(
               size: 260,
-              colors: const [Color(0xFF6366F1), Color(0xFF4F46E5)],
+              colors: [primary, secondary],
               opacity: 0.03,
             ),
           ),
@@ -97,7 +101,7 @@ class _DotGridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const spacing = 28.0;
     final paint = Paint()
-      ..color = const Color(0xFF4F46E5).withValues(alpha: 0.06)
+      ..color = DesignTokens.primary.withValues(alpha: 0.06)
       ..style = PaintingStyle.fill;
 
     for (double x = 0; x < size.width; x += spacing) {
@@ -128,16 +132,34 @@ class AuthCardScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final screenSize = Responsive.of(context);
+    final horizontalPadding = switch (screenSize) {
+      ScreenSize.mobile => DesignTokens.spaceM,
+      ScreenSize.tablet => DesignTokens.spaceL,
+      ScreenSize.laptop => DesignTokens.spaceL,
+      ScreenSize.desktop => DesignTokens.spaceXL,
+      ScreenSize.wide => DesignTokens.spaceXL,
+    };
+    final verticalPadding = switch (screenSize) {
+      ScreenSize.mobile => DesignTokens.spaceL,
+      _ => DesignTokens.spaceXXL,
+    };
+
     return AuthBackground(
       child: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 440),
+            constraints: const BoxConstraints(maxWidth: 460),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.borderLight, width: 1.5),
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+              border: Border.all(color: theme.colorScheme.outline),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -147,44 +169,49 @@ class AuthCardScaffold extends StatelessWidget {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenSize == ScreenSize.mobile
+                    ? DesignTokens.spaceL
+                    : DesignTokens.spaceXL,
+                vertical: screenSize == ScreenSize.mobile
+                    ? DesignTokens.spaceXL
+                    : DesignTokens.spaceXXL,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Brand Header Icon Box
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.brandBlue.withValues(alpha: 0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       headerIcon,
                       size: 32,
-                      color: AppColors.brandBlue,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: DesignTokens.spaceL),
                   Text(
                     title,
-                    style: GoogleFonts.inter(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontSize: DesignTokens.fontXXL,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceS + 4),
                   Text(
                     subtitle,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppColors.textGrey,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: DesignTokens.spaceXL),
                   child,
                 ],
               ),
@@ -225,66 +252,59 @@ class AuthTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          style: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         TextFormField(
           controller: controller,
           validator: validator,
           keyboardType: keyboardType,
           obscureText: obscureText,
           textInputAction: textInputAction,
-          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textDark),
+          style: textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: GoogleFonts.inter(color: Colors.grey[400], fontSize: 14),
-            filled: true,
-            fillColor: AppColors.fieldBackground,
+            hintStyle: textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            ),
             prefixIcon: prefixIcon != null
                 ? Icon(
                     prefixIcon,
-                    color: AppColors.textGrey.withValues(alpha: 0.7),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.72),
                     size: 18,
                   )
                 : null,
             suffixIcon: suffixIcon,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
+              horizontal: DesignTokens.spaceM,
+              vertical: DesignTokens.spaceS + 4,
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.borderLight),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.borderLight),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: AppColors.brandBlue,
-                width: 1.5,
+          ).applyDefaults(theme.inputDecorationTheme).copyWith(
+                prefixIconColor: theme.colorScheme.primary.withValues(alpha: 0.72),
+                suffixIconColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.72,
+                ),
               ),
-            ),
-          ),
         ),
         if (helperText != null) ...[
           const SizedBox(height: 6),
           Text(
             helperText!,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: AppColors.textGrey,
+            style: textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],

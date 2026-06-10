@@ -1,80 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'auth_controller.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
+import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 import 'auth_widgets.dart';
 import 'package:frontend/core/networking/token_service.dart';
-
-// ─── Auth Design Tokens ───────────────────────────────────────────────────────
-abstract class _AuthTokens {
-  // Palette
-  static const Color primary = Color(
-    0xFF4338CA,
-  ); // Darkened from 4F46E5 for contrast (Indigo 700)
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color border = Color(0xFFE2E8F0);
-
-  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color textSecondary = Color(
-    0xFF334155,
-  ); // Darkened from 475569 for contrast (Slate 700)
-  static const Color textMuted = Color(
-    0xFF475569,
-  ); // Darkened from 94A3B8 for contrast (Slate 600)
-  static const Color textLink = Color(0xFF4338CA);
-
-  static const Color divider = Color(0xFFE2E8F0);
-
-  // Gradients
-  static const Gradient heroGradient = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF3730A3),
-      Color(0xFF5B21B6),
-    ], // Darkened for accessibility
-  );
-
-  // Spacing
-  static const double radiusSm = 8.0;
-  static const double radiusMd = 12.0;
-  static const double radiusLg = 16.0;
-  static const double radiusXl = 24.0;
-  static const double radiusFull = 999.0;
-
-  // Shadows
-  static List<BoxShadow> get cardShadow => [
-    BoxShadow(
-      color: const Color(0xFF4F46E5).withValues(alpha: 0.06),
-      blurRadius: 40,
-      spreadRadius: 0,
-      offset: const Offset(0, 16),
-    ),
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.04),
-      blurRadius: 8,
-      offset: const Offset(0, 4),
-    ),
-  ];
-
-  static List<BoxShadow> get buttonShadow => [
-    BoxShadow(
-      color: const Color(0xFF4F46E5).withValues(alpha: 0.35),
-      blurRadius: 16,
-      offset: const Offset(0, 6),
-    ),
-  ];
-}
-
-// ─── Breakpoints ─────────────────────────────────────────────────────────────
-abstract class _BP {
-  static const double mobile = 480;
-  static const double tablet = 1024;
-}
 
 // ─── Login Screen ─────────────────────────────────────────────────────────────
 class LoginScreen extends ConsumerStatefulWidget {
@@ -150,9 +84,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
-    final width = MediaQuery.of(context).size.width;
-    final isDesktop = width > _BP.tablet;
-    final isMobile = width <= _BP.mobile;
+    final screenSize = Responsive.of(context);
+    final isDesktop =
+        screenSize == ScreenSize.laptop ||
+        screenSize == ScreenSize.desktop ||
+        screenSize == ScreenSize.wide;
+    final isMobile = screenSize == ScreenSize.mobile;
 
     ref.listen(authControllerProvider, (previous, next) {
       if (next is AsyncError) {
@@ -169,10 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     return AuthBackground(
       child: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 16 : 24,
-            vertical: 32,
-          ),
+          padding: Responsive.pagePadding(context),
           child: isDesktop
               ? _buildDesktopLayout(authState)
               : _buildStackedLayout(authState, isMobile),
@@ -184,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   // ─── Desktop: Two-column ──────────────────────────────────────────────────
   Widget _buildDesktopLayout(AsyncValue authState) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 1140),
+      constraints: const BoxConstraints(maxWidth: 1280),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -192,7 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             Expanded(flex: 5, child: _HeroPanel()),
             const SizedBox(width: 56),
             SizedBox(
-              width: 460,
+              width: 480,
               child: _LoginCard(
                 formKey: _formKey,
                 emailController: _emailController,
@@ -280,23 +214,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 class _HeroPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final onPrimary = theme.colorScheme.onPrimary;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 56),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceXXL,
+        vertical: 56,
+      ),
       decoration: BoxDecoration(
-        gradient: _AuthTokens.heroGradient,
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusXl),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+        ),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Logo mark
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(_AuthTokens.radiusMd),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+              color: onPrimary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+              border: Border.all(color: onPrimary.withValues(alpha: 0.25)),
             ),
             child: const Center(
               child: Icon(
@@ -306,26 +250,23 @@ class _HeroPanel extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: DesignTokens.spaceS + 4),
           Text(
             'MahaSamgrah Setu',
-            style: GoogleFonts.inter(
+            style: textTheme.labelLarge?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: Colors.white, // Full white for contrast
+              color: onPrimary,
               letterSpacing: 0.2,
             ),
           ),
-
           const Spacer(),
-
-          // Main headline
           Text(
             'The most\nintelligent way\nto manage\nyour forms.',
-            style: GoogleFonts.inter(
+            style: textTheme.displayLarge?.copyWith(
               fontSize: 40,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: onPrimary,
               height: 1.15,
               letterSpacing: -0.5,
             ),
@@ -334,17 +275,13 @@ class _HeroPanel extends StatelessWidget {
           Text(
             'Streamline data collection, automate workflows, '
             'and gain real-time insights — all from one platform.',
-            style: GoogleFonts.inter(
+            style: textTheme.bodyMedium?.copyWith(
               fontSize: 15,
-              color: Colors.white.withValues(
-                alpha: 0.95,
-              ), // Darkened for contrast
+              color: onPrimary.withValues(alpha: 0.95),
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 40),
-
-          // Trust badges
+          const SizedBox(height: DesignTokens.spaceXXL),
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -354,10 +291,7 @@ class _HeroPanel extends StatelessWidget {
               _TrustBadge('99.9% Uptime'),
             ],
           ),
-
           const Spacer(),
-
-          // Decorative bottom element
           _HeroDecorativeStats(),
         ],
       ),
@@ -371,12 +305,14 @@ class _TrustBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusFull),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+        color: onPrimary.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+        border: Border.all(color: onPrimary.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -385,17 +321,16 @@ class _TrustBadge extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: const BoxDecoration(
-              color: Color(0xFF10B981),
+              color: DesignTokens.success,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 7),
           Text(
             label,
-            style: GoogleFonts.inter(
-              fontSize: 12,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: onPrimary,
             ),
           ),
         ],
@@ -407,12 +342,14 @@ class _TrustBadge extends StatelessWidget {
 class _HeroDecorativeStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusMd),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+        color: onPrimary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+        border: Border.all(color: onPrimary.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
@@ -430,10 +367,12 @@ class _HeroDecorativeStats extends StatelessWidget {
 class _VerticalDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return Container(
       width: 1,
       height: 32,
-      color: Colors.white.withValues(alpha: 0.15),
+      color: onPrimary.withValues(alpha: 0.15),
       margin: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
@@ -446,24 +385,27 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: textTheme.titleLarge?.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: onPrimary,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: textTheme.labelSmall?.copyWith(
               fontSize: 11,
-              color: Colors.white, // Pure white for contrast
+              color: onPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -480,15 +422,23 @@ class _CompactHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final onPrimary = theme.colorScheme.onPrimary;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 20 : 32,
+        horizontal: isMobile ? DesignTokens.spaceL : DesignTokens.spaceXL,
         vertical: isMobile ? 28 : 36,
       ),
       decoration: BoxDecoration(
-        gradient: _AuthTokens.heroGradient,
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusLg),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+        ),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,10 +449,10 @@ class _CompactHero extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+                  color: onPrimary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
+                    color: onPrimary.withValues(alpha: 0.25),
                   ),
                 ),
                 child: const Icon(
@@ -514,10 +464,10 @@ class _CompactHero extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 'MahaSamgrah Setu',
-                style: GoogleFonts.inter(
+                style: textTheme.labelLarge?.copyWith(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: onPrimary,
                   letterSpacing: 0.1,
                 ),
               ),
@@ -526,10 +476,10 @@ class _CompactHero extends StatelessWidget {
           SizedBox(height: isMobile ? 16 : 20),
           Text(
             'Intelligent form\nmanagement, simplified.',
-            style: GoogleFonts.inter(
+            style: textTheme.displaySmall?.copyWith(
               fontSize: isMobile ? 22 : 26,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: onPrimary,
               height: 1.2,
               letterSpacing: -0.3,
             ),
@@ -537,9 +487,9 @@ class _CompactHero extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Automate data collection and gain real-time insights.',
-            style: GoogleFonts.inter(
+            style: textTheme.bodySmall?.copyWith(
               fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: onPrimary.withValues(alpha: 0.75),
               height: 1.5,
             ),
           ),
@@ -589,19 +539,37 @@ class _LoginCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final screenSize = Responsive.of(context);
+    final cardPadding = screenSize == ScreenSize.mobile
+        ? DesignTokens.spaceL
+        : DesignTokens.spaceXXL;
+
     return Container(
       decoration: BoxDecoration(
-        color: _AuthTokens.surface,
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusXl),
-        border: Border.all(color: _AuthTokens.border),
-        boxShadow: _AuthTokens.cardShadow,
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+        border: Border.all(color: theme.colorScheme.outline),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withValues(alpha: 0.06),
+            blurRadius: 40,
+            offset: const Offset(0, 16),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusXl),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
         child: Form(
           key: formKey,
           child: Padding(
-            padding: const EdgeInsets.all(40),
+            padding: EdgeInsets.all(cardPadding),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,19 +583,19 @@ class _LoginCard extends StatelessWidget {
                 // Header
                 Text(
                   'Welcome back',
-                  style: GoogleFonts.inter(
+                  style: textTheme.headlineSmall?.copyWith(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
-                    color: _AuthTokens.textPrimary,
+                    color: theme.colorScheme.onSurface,
                     letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Sign in to continue to your workspace.',
-                  style: GoogleFonts.inter(
+                  style: textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
-                    color: _AuthTokens.textSecondary,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                     height: 1.4,
                   ),
                 ),
@@ -674,9 +642,7 @@ class _LoginCard extends StatelessWidget {
                       label: 'Remember me checkbox',
                       child: InkWell(
                         onTap: () => onRememberMe(!rememberMe),
-                        borderRadius: BorderRadius.circular(
-                          _AuthTokens.radiusSm,
-                        ),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                         child: Container(
                           color: Colors.transparent,
                           padding: const EdgeInsets.symmetric(
@@ -692,15 +658,17 @@ class _LoginCard extends StatelessWidget {
                                 height: 18,
                                 decoration: BoxDecoration(
                                   color: rememberMe
-                                      ? _AuthTokens.primary
+                                      ? theme.colorScheme.primary
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(
-                                    _AuthTokens.radiusSm - 2,
+                                    DesignTokens.radiusS - 2,
                                   ),
                                   border: Border.all(
                                     color: rememberMe
-                                        ? _AuthTokens.primary
-                                        : _AuthTokens.textMuted,
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.onSurface.withValues(
+                                            alpha: 0.45,
+                                          ),
                                     width: 1.5,
                                   ),
                                 ),
@@ -715,9 +683,11 @@ class _LoginCard extends StatelessWidget {
                               const SizedBox(width: 8),
                               Text(
                                 'Remember me',
-                                style: GoogleFonts.inter(
+                                style: textTheme.bodySmall?.copyWith(
                                   fontSize: 13,
-                                  color: _AuthTokens.textSecondary,
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.72,
+                                  ),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -738,9 +708,9 @@ class _LoginCard extends StatelessWidget {
                       ),
                       child: Text(
                         'Forgot password?',
-                        style: GoogleFonts.inter(
+                        style: textTheme.bodySmall?.copyWith(
                           fontSize: 13,
-                          color: _AuthTokens.textLink,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -762,23 +732,31 @@ class _LoginCard extends StatelessWidget {
                 // Divider
                 Row(
                   children: [
-                    const Expanded(
-                      child: Divider(color: _AuthTokens.divider, height: 1),
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outline,
+                        height: 1,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: Text(
                         'OR CONTINUE WITH',
-                        style: GoogleFonts.inter(
+                        style: textTheme.labelSmall?.copyWith(
                           fontSize: 10,
                           letterSpacing: 0.8,
-                          color: _AuthTokens.textMuted,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.55,
+                          ),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    const Expanded(
-                      child: Divider(color: _AuthTokens.divider, height: 1),
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outline,
+                        height: 1,
+                      ),
                     ),
                   ],
                 ),
@@ -808,9 +786,11 @@ class _LoginCard extends StatelessWidget {
                     children: [
                       Text(
                         "Don't have an account? ",
-                        style: GoogleFonts.inter(
+                        style: textTheme.bodySmall?.copyWith(
                           fontSize: 13.5,
-                          color: _AuthTokens.textSecondary,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.72,
+                          ),
                         ),
                       ),
                       GestureDetector(
@@ -820,9 +800,9 @@ class _LoginCard extends StatelessWidget {
                           button: true,
                           child: Text(
                             'Create account',
-                            style: GoogleFonts.inter(
+                            style: textTheme.bodySmall?.copyWith(
                               fontSize: 13.5,
-                              color: _AuthTokens.textLink,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -847,14 +827,21 @@ class _BrandRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
     return Row(
       children: [
         Container(
           width: small ? 36 : 44,
           height: small ? 36 : 44,
           decoration: BoxDecoration(
-            gradient: _AuthTokens.heroGradient,
-            borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
+            ),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
           child: Center(
             child: Icon(
@@ -870,19 +857,19 @@ class _BrandRow extends StatelessWidget {
           children: [
             Text(
               'MahaSamgrah Setu',
-              style: GoogleFonts.inter(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: small ? 15 : 18,
                 fontWeight: FontWeight.w800,
-                color: _AuthTokens.textPrimary,
+                color: theme.colorScheme.onSurface,
                 letterSpacing: -0.2,
               ),
             ),
             if (!small)
               Text(
                 'Enterprise Form Intelligence',
-                style: GoogleFonts.inter(
+                style: textTheme.bodySmall?.copyWith(
                   fontSize: 11,
-                  color: _AuthTokens.textMuted,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
               ),
           ],
@@ -910,13 +897,15 @@ class _AnimatedSegmentedToggle extends StatefulWidget {
 class _AnimatedSegmentedToggleState extends State<_AnimatedSegmentedToggle> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      height: 48, // Increased height for better tap target
+      height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(_AuthTokens.radiusMd),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+        border: Border.all(color: theme.colorScheme.outline),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -933,8 +922,8 @@ class _AnimatedSegmentedToggleState extends State<_AnimatedSegmentedToggle> {
                 width: tabWidth,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.06),
@@ -985,6 +974,8 @@ class _ToggleTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Expanded(
       child: Semantics(
         label: label,
@@ -1003,8 +994,8 @@ class _ToggleTab extends StatelessWidget {
                   icon,
                   size: 14,
                   color: isSelected
-                      ? _AuthTokens.primary
-                      : _AuthTokens.textMuted,
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
                 const SizedBox(width: 6),
                 Flexible(
@@ -1012,14 +1003,15 @@ class _ToggleTab extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontSize: 12.5,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected
-                          ? _AuthTokens.textPrimary
-                          : _AuthTokens.textMuted,
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withValues(
+                              alpha: 0.55,
+                            ),
                     ),
                   ),
                 ),
@@ -1049,6 +1041,8 @@ class _EmailFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         AuthTextFormField(
@@ -1084,7 +1078,7 @@ class _EmailFields extends StatelessWidget {
               obscurePassword
                   ? Icons.visibility_off_outlined
                   : Icons.visibility_outlined,
-              color: _AuthTokens.textMuted,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
               size: 18,
             ),
             onPressed: onTogglePassword,
@@ -1146,6 +1140,8 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Semantics(
       label: widget.label,
       button: true,
@@ -1158,19 +1154,27 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _isHovered && !widget.isLoading
-                  ? [const Color(0xFF4338CA), const Color(0xFF6D28D9)]
-                  : [_AuthTokens.primary, const Color(0xFF7C3AED)],
+                  ? [theme.colorScheme.primary, theme.colorScheme.secondary]
+                  : [theme.colorScheme.primary, theme.colorScheme.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
-            boxShadow: widget.isLoading ? [] : _AuthTokens.buttonShadow,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+            boxShadow: widget.isLoading
+                ? []
+                : [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: widget.isLoading ? null : widget.onPressed,
-              borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               child: Center(
                 child: widget.isLoading
                     ? const SizedBox(
@@ -1186,7 +1190,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
                         children: [
                           Text(
                             widget.label,
-                            style: GoogleFonts.inter(
+                            style: theme.textTheme.labelLarge?.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -1231,6 +1235,8 @@ class _SocialButtonState extends State<_SocialButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Semantics(
       label: 'Sign in with ${widget.label}',
       button: true,
@@ -1241,10 +1247,14 @@ class _SocialButtonState extends State<_SocialButton> {
           duration: const Duration(milliseconds: 150),
           height: 46,
           decoration: BoxDecoration(
-            color: _isHovered ? const Color(0xFFF8FAFC) : Colors.white,
-            borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+            color: _isHovered
+                ? theme.colorScheme.surfaceContainerHighest
+                : theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
             border: Border.all(
-              color: _isHovered ? const Color(0xFFCBD5E1) : _AuthTokens.border,
+              color: _isHovered
+                  ? theme.colorScheme.outline
+                  : theme.colorScheme.outline,
             ),
             boxShadow: _isHovered
                 ? [
@@ -1260,18 +1270,22 @@ class _SocialButtonState extends State<_SocialButton> {
             color: Colors.transparent,
             child: InkWell(
               onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(_AuthTokens.radiusSm),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  FaIcon(widget.icon, size: 15, color: _AuthTokens.textPrimary),
+                  FaIcon(
+                    widget.icon,
+                    size: 15,
+                    color: theme.colorScheme.onSurface,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     widget.label,
-                    style: GoogleFonts.inter(
+                    style: theme.textTheme.labelMedium?.copyWith(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
-                      color: _AuthTokens.textPrimary,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ],

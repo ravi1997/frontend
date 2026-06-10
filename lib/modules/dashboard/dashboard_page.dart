@@ -185,8 +185,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: cs.surface,
       body: authState.when(
         data: (user) {
           if (user == null) {
@@ -328,65 +330,79 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(DesignTokens.spaceXL),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF111827), Color(0xFF1D4ED8)],
+        gradient: LinearGradient(
+          colors: [
+            DesignTokens.darkBackground,
+            DesignTokens.primaryDark.withValues(alpha: 0.96),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Projects dashboard',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFFBFDBFE),
-              letterSpacing: 1.1,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'See every project the API knows about, then create or extend them from one place.',
-            style: GoogleFonts.inter(
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'The dashboard now reads project data from /projects and uses the project form endpoint when you add a form.',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: const Color(0xFFE2E8F0),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 720;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FilledButton.icon(
-                onPressed: onCreateProject,
-                icon: const Icon(Icons.add),
-                label: const Text('Create project'),
+              Text(
+                'Projects dashboard',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.78),
+                  letterSpacing: 1.1,
+                ),
               ),
-              OutlinedButton.icon(
-                onPressed: onRefresh,
-                icon: const Icon(Icons.sync),
-                label: const Text('Sync'),
+              const SizedBox(height: 10),
+              Text(
+                'See every project the API knows about, then create or extend them from one place.',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      height: 1.15,
+                    ),
               ),
+              const SizedBox(height: 12),
+              Text(
+                'The dashboard now reads project data from /projects and uses the project form endpoint when you add a form.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.84),
+                    ),
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  FilledButton.icon(
+                    onPressed: onCreateProject,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Create project'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: onRefresh,
+                    icon: const Icon(Icons.sync),
+                    label: const Text('Sync'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: cs.onPrimary,
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.28),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (compact) const SizedBox(height: 4),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }

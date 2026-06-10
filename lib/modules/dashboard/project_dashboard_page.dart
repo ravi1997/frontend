@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/networking/api_endpoints.dart';
+import 'package:frontend/app/startup/responsive.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
 
@@ -580,9 +582,10 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
     final description =
         _project?['description']?.toString() ?? 'No project details available.';
     final status = _project?['status']?.toString() ?? 'draft';
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
@@ -597,93 +600,131 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                 ),
               )
             : SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: Responsive.pagePadding(context),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1100),
+                    constraints: BoxConstraints(
+                      maxWidth: Responsive.maxContentWidth(context),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => context.pop(),
-                              icon: const Icon(Icons.arrow_back),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isCompact = constraints.maxWidth < 860;
+                            final titleText = Text(
                               'Project dashboard',
-                              style: GoogleFonts.inter(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF0F172A),
-                              ),
-                            ),
-                            const Spacer(),
-                            FilledButton.icon(
-                              onPressed: _refreshAll,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Refresh'),
-                            ),
-                            const SizedBox(width: 12),
-                            FilledButton.icon(
-                              onPressed: _createFormFromProject,
-                              icon: const Icon(Icons.add),
-                              label: const Text('New form'),
-                            ),
-                            const SizedBox(width: 12),
-                            PopupMenuButton<String>(
-                              onSelected: _handleManagementAction,
-                              itemBuilder: (context) => const [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text('Edit project'),
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: cs.onSurface,
+                                  ),
+                            );
+                            final actions = Wrap(
+                              spacing: DesignTokens.spaceS,
+                              runSpacing: DesignTokens.spaceS,
+                              alignment: WrapAlignment.end,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: _refreshAll,
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Refresh'),
                                 ),
-                                PopupMenuItem(
-                                  value: 'form',
-                                  child: Text('Add form'),
+                                FilledButton.icon(
+                                  onPressed: _createFormFromProject,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('New form'),
                                 ),
-                                PopupMenuItem(
-                                  value: 'refresh',
-                                  child: Text('Refresh'),
-                                ),
-                                PopupMenuDivider(),
-                                PopupMenuItem(
-                                  value: 'archive',
-                                  child: Text('Archive project'),
-                                ),
-                              ],
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF111827),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.settings_outlined,
-                                      color: Colors.white,
-                                      size: 18,
+                                PopupMenuButton<String>(
+                                  onSelected: _handleManagementAction,
+                                  itemBuilder: (context) => const [
+                                    PopupMenuItem(
+                                      value: 'edit',
+                                      child: Text('Edit project'),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Manage',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
+                                    PopupMenuItem(
+                                      value: 'form',
+                                      child: Text('Add form'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'refresh',
+                                      child: Text('Refresh'),
+                                    ),
+                                    PopupMenuDivider(),
+                                    PopupMenuItem(
+                                      value: 'archive',
+                                      child: Text('Archive project'),
                                     ),
                                   ],
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: DesignTokens.darkBackground,
+                                      borderRadius: BorderRadius.circular(
+                                        DesignTokens.radiusM,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.settings_outlined,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Manage',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.white,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+
+                            if (isCompact) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () => context.pop(),
+                                        icon: const Icon(Icons.arrow_back),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      titleText,
+                                    ],
+                                  ),
+                                  const SizedBox(height: DesignTokens.spaceS),
+                                  actions,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => context.pop(),
+                                  icon: const Icon(Icons.arrow_back),
+                                ),
+                                const SizedBox(width: 8),
+                                titleText,
+                                const Spacer(),
+                                actions,
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 20),
                         Container(
@@ -762,10 +803,11 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _InsightCard(
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final compact = constraints.maxWidth < 920;
+                            final cards = [
+                              _InsightCard(
                                 title: 'Forms',
                                 value: _formsLoading
                                     ? '--'
@@ -773,44 +815,58 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                                 subtitle: 'Forms inside this project',
                                 icon: Icons.description_outlined,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _InsightCard(
+                              _InsightCard(
                                 title: 'State',
                                 value: status,
                                 subtitle: 'Current project status',
                                 icon: Icons.flag_outlined,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _InsightCard(
+                              _InsightCard(
                                 title: 'Actions',
                                 value: '5',
                                 subtitle: 'Quick actions available',
                                 icon: Icons.tune_outlined,
                               ),
-                            ),
-                          ],
+                            ];
+                            if (compact) {
+                              return Column(
+                                children: cards
+                                    .map(
+                                      (card) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: DesignTokens.spaceS,
+                                        ),
+                                        child: card,
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: cards[0]),
+                                const SizedBox(width: 12),
+                                Expanded(child: cards[1]),
+                                const SizedBox(width: 12),
+                                Expanded(child: cards[2]),
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _InsightCard(
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final compact = constraints.maxWidth < 920;
+                            final cards = [
+                              _InsightCard(
                                 title: 'Members',
                                 value: _extractProjectMembers().isEmpty
                                     ? '0'
-                                    : _extractProjectMembers().length
-                                          .toString(),
+                                    : _extractProjectMembers().length.toString(),
                                 subtitle: 'Visible collaborators',
                                 icon: Icons.group_outlined,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _InsightCard(
+                              _InsightCard(
                                 title: 'Updated',
                                 value:
                                     _project?['updated_at']?.toString() ??
@@ -818,41 +874,75 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                                 subtitle: 'Last project activity',
                                 icon: Icons.schedule_outlined,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _InsightCard(
+                              _InsightCard(
                                 title: 'Access',
                                 value: 'Open',
                                 subtitle: 'Project permissions',
                                 icon: Icons.verified_user_outlined,
                               ),
-                            ),
-                          ],
+                            ];
+                            if (compact) {
+                              return Column(
+                                children: cards
+                                    .map(
+                                      (card) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: DesignTokens.spaceS,
+                                        ),
+                                        child: card,
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                            }
+                            return Row(
+                              children: [
+                                Expanded(child: cards[0]),
+                                const SizedBox(width: 12),
+                                Expanded(child: cards[1]),
+                                const SizedBox(width: 12),
+                                Expanded(child: cards[2]),
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 20),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _SectionCard(
-                                title: 'Forms by status',
-                                bodyWidget: _FormsBreakdown(
-                                  counts: _formStatusCounts(),
-                                  loading: _formsLoading,
-                                ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final compact = constraints.maxWidth < 980;
+                            final formsCard = _SectionCard(
+                              title: 'Forms by status',
+                              bodyWidget: _FormsBreakdown(
+                                counts: _formStatusCounts(),
+                                loading: _formsLoading,
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _SectionCard(
-                                title: 'Activity timeline',
-                                bodyWidget: _ActivityTimeline(
-                                  items: _buildActivityItems(title),
-                                ),
+                            );
+                            final timelineCard = _SectionCard(
+                              title: 'Activity timeline',
+                              bodyWidget: _ActivityTimeline(
+                                items: _buildActivityItems(title),
                               ),
-                            ),
-                          ],
+                            );
+
+                            if (compact) {
+                              return Column(
+                                children: [
+                                  formsCard,
+                                  const SizedBox(height: DesignTokens.spaceM),
+                                  timelineCard,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: formsCard),
+                                const SizedBox(width: DesignTokens.spaceM),
+                                Expanded(child: timelineCard),
+                              ],
+                            );
+                          },
                         ),
                         const SizedBox(height: 20),
                         _SectionCard(
@@ -867,19 +957,19 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFE5E7EB)),
+                            color: cs.surface,
+                            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+                            border: Border.all(color: cs.outline),
                           ),
                           child: TabBar(
                             controller: _tabController,
                             isScrollable: true,
-                            labelColor: const Color(0xFF0F172A),
-                            unselectedLabelColor: const Color(0xFF64748B),
+                            labelColor: cs.onSurface,
+                            unselectedLabelColor: cs.onSurface.withValues(alpha: 0.65),
                             indicatorSize: TabBarIndicatorSize.tab,
                             indicator: BoxDecoration(
-                              color: const Color(0xFFE0F2FE),
-                              borderRadius: BorderRadius.circular(12),
+                              color: DesignTokens.primarySoft,
+                              borderRadius: BorderRadius.circular(DesignTokens.radiusM),
                             ),
                             tabs: const [
                               Tab(text: 'Overview'),
@@ -1209,38 +1299,38 @@ class _TabMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(DesignTokens.spaceL),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+          border: Border.all(color: cs.outline),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               title,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF0F172A),
-              ),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spaceS),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: const Color(0xFF64748B),
-                height: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 14,
+                    color: cs.onSurface.withValues(alpha: 0.65),
+                    height: 1.5,
+                  ),
             ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: DesignTokens.spaceM),
               FilledButton(onPressed: onAction, child: Text(actionLabel!)),
             ],
           ],
@@ -1265,17 +1355,18 @@ class _ListTileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+            border: Border.all(color: cs.outline),
           ),
           child: Row(
             children: [
@@ -1283,34 +1374,32 @@ class _ListTileCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE),
-                  borderRadius: BorderRadius.circular(12),
+                  color: DesignTokens.primarySoft,
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusM),
                 ),
                 child: const Icon(
                   Icons.description_outlined,
-                  color: Color(0xFF0369A1),
+                  color: DesignTokens.primary,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: DesignTokens.spaceM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: const Color(0xFF64748B),
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.65),
+                          ),
                     ),
                   ],
                 ),
@@ -1360,12 +1449,13 @@ class _InsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+        border: Border.all(color: cs.outline),
       ),
       child: Row(
         children: [
@@ -1373,39 +1463,36 @@ class _InsightCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFFE0F2FE),
-              borderRadius: BorderRadius.circular(12),
+              color: DesignTokens.primarySoft,
+              borderRadius: BorderRadius.circular(DesignTokens.radiusM),
             ),
-            child: Icon(icon, color: const Color(0xFF0369A1)),
+            child: Icon(icon, color: DesignTokens.primary),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: DesignTokens.spaceM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF64748B),
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF0F172A),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurface,
+                      ),
                 ),
                 Text(
                   subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: const Color(0xFF64748B),
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withValues(alpha: 0.65),
+                      ),
                 ),
               ],
             ),
@@ -1424,20 +1511,20 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        color: cs.onSurface.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+        border: Border.all(color: cs.onSurface.withValues(alpha: 0.12)),
       ),
       child: Text(
         '$label: $value',
-        style: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface.withValues(alpha: 0.75),
+            ),
       ),
     );
   }
@@ -1452,36 +1539,35 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+        border: Border.all(color: cs.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: DesignTokens.spaceS),
           if (bodyWidget != null)
             bodyWidget!
           else
             Text(
               body,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                height: 1.5,
-                color: const Color(0xFF64748B),
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.5,
+                    color: cs.onSurface.withValues(alpha: 0.65),
+                  ),
             ),
         ],
       ),
@@ -1507,7 +1593,9 @@ class _FormsBreakdown extends StatelessWidget {
     if (counts.isEmpty) {
       return Text(
         'No forms have been created for this project yet.',
-        style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF64748B)),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+            ),
       );
     }
 
@@ -1567,10 +1655,13 @@ class _MembersAccessPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        Wrap(
+          spacing: DesignTokens.spaceS,
+          runSpacing: DesignTokens.spaceS,
           children: [
             FilledButton.icon(
               onPressed: () {
@@ -1585,7 +1676,6 @@ class _MembersAccessPanel extends StatelessWidget {
               icon: const Icon(Icons.person_add_alt_1),
               label: const Text('Invite member'),
             ),
-            const SizedBox(width: 12),
             OutlinedButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -1599,7 +1689,6 @@ class _MembersAccessPanel extends StatelessWidget {
               icon: const Icon(Icons.security_outlined),
               label: const Text('Manage access'),
             ),
-            const SizedBox(width: 12),
             OutlinedButton.icon(
               onPressed: () async {
                 await Clipboard.setData(
@@ -1619,21 +1708,19 @@ class _MembersAccessPanel extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'Project status: $projectStatus',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
         ),
         const SizedBox(height: 10),
         if (members.isEmpty)
           Text(
             'No member list was returned by the API. You can still manage access once the backend exposes collaborators.',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: const Color(0xFF64748B),
-              height: 1.5,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  height: 1.5,
+                  color: cs.onSurface.withValues(alpha: 0.65),
+                ),
           )
         else
           Wrap(
@@ -1666,6 +1753,7 @@ class _TimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1674,7 +1762,7 @@ class _TimelineItem extends StatelessWidget {
           height: 12,
           margin: const EdgeInsets.only(top: 6),
           decoration: const BoxDecoration(
-            color: Color(0xFF1D4ED8),
+            color: DesignTokens.primary,
             shape: BoxShape.circle,
           ),
         ),
@@ -1685,28 +1773,25 @@ class _TimelineItem extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A),
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: const Color(0xFF64748B),
-                  height: 1.4,
-                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.65),
+                      height: 1.4,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 time,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: const Color(0xFF94A3B8),
-                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.45),
+                    ),
               ),
             ],
           ),
@@ -1724,31 +1809,30 @@ class _MiniStatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
+        color: cs.onSurface.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF334155),
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface.withValues(alpha: 0.72),
+                  ),
             ),
           ),
           Text(
             value,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
           ),
         ],
       ),
@@ -1775,16 +1859,16 @@ class _ChipInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF334155),
-          ),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface.withValues(alpha: 0.72),
+              ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -1812,10 +1896,9 @@ class _ChipInputField extends StatelessWidget {
         if (chips.isEmpty)
           Text(
             'No $label added yet.',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: const Color(0xFF64748B),
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.65),
+                ),
           )
         else
           Wrap(
@@ -1848,10 +1931,9 @@ class _FormsTrendChart extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text(
           'No chart data yet.',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: const Color(0xFF64748B),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+              ),
         ),
       );
     }
@@ -1864,11 +1946,10 @@ class _FormsTrendChart extends StatelessWidget {
       children: [
         Text(
           'Total forms: $total',
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF0F172A),
-          ),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
         const SizedBox(height: 12),
         ...ordered.map((entry) {
@@ -1883,10 +1964,10 @@ class _FormsTrendChart extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entry.key,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                       ),
                     ),
                     Text(entry.value.toString()),
@@ -1898,7 +1979,8 @@ class _FormsTrendChart extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: fraction,
                     minHeight: 10,
-                    backgroundColor: const Color(0xFFE5E7EB),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                   ),
                 ),
               ],
@@ -1918,6 +2000,7 @@ class _RecentFormTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final formId = form['id']?.toString() ?? form['_id']?.toString() ?? '';
     final title = form['title']?.toString() ?? 'Untitled form';
     final status = form['status']?.toString() ?? 'draft';
@@ -1930,15 +2013,15 @@ class _RecentFormTile extends StatelessWidget {
             ? null
             : () => context.push('/projects/$projectId/forms/$formId'),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(DesignTokens.spaceM),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+            border: Border.all(color: cs.outline),
           ),
           child: Row(
             children: [
-              const Icon(Icons.description_outlined, color: Color(0xFF0369A1)),
+              const Icon(Icons.description_outlined, color: DesignTokens.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -1946,19 +2029,17 @@ class _RecentFormTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Status: $status',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: const Color(0xFF64748B),
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: cs.onSurface.withValues(alpha: 0.65),
+                          ),
                     ),
                   ],
                 ),

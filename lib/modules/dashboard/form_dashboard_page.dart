@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:frontend/app/startup/responsive.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class FormDashboardPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -35,61 +37,116 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: Responsive.pagePadding(context),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
+              constraints: BoxConstraints(maxWidth: Responsive.maxContentWidth(context)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () => context.pop(),
-                        icon: const Icon(Icons.arrow_back),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Form dashboard',
-                        style: GoogleFonts.inter(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const Spacer(),
-                      FilledButton.icon(
-                        onPressed: () => context.push(
-                          '/projects/${widget.projectId}/forms/${widget.formId}/edit',
-                        ),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit form'),
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isCompact = constraints.maxWidth < 760;
+                      final header = Wrap(
+                        spacing: DesignTokens.spaceS,
+                        runSpacing: DesignTokens.spaceS,
+                        alignment: WrapAlignment.end,
+                        children: [
+                          FilledButton.tonalIcon(
+                            onPressed: () => context.push(
+                              '/projects/${widget.projectId}/forms/${widget.formId}/responses',
+                            ),
+                            icon: const Icon(Icons.list_alt_outlined),
+                            label: const Text('Responses'),
+                          ),
+                          FilledButton.icon(
+                            onPressed: () => context.push(
+                              '/projects/${widget.projectId}/forms/${widget.formId}/edit',
+                            ),
+                            icon: const Icon(Icons.edit_outlined),
+                            label: const Text('Edit form'),
+                          ),
+                        ],
+                      );
+
+                      return isCompact
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () => context.pop(),
+                                      icon: const Icon(Icons.arrow_back),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Form dashboard',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: cs.onSurface,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: DesignTokens.spaceM),
+                                header,
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => context.pop(),
+                                  icon: const Icon(Icons.arrow_back),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Form dashboard',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        color: cs.onSurface,
+                                      ),
+                                ),
+                                const Spacer(),
+                                header,
+                              ],
+                            );
+                    },
                   ),
-                  const SizedBox(height: 20),
-                  _HeroCard(projectId: widget.projectId, formId: widget.formId),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: DesignTokens.spaceL),
+                  _HeroCard(
+                    projectId: widget.projectId,
+                    formId: widget.formId,
+                  ),
+                  const SizedBox(height: DesignTokens.spaceL),
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                      color: cs.surface,
+                      borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+                      border: Border.all(color: cs.outline),
                     ),
                     child: TabBar(
                       controller: _tabController,
                       isScrollable: true,
-                      labelColor: const Color(0xFF0F172A),
-                      unselectedLabelColor: const Color(0xFF64748B),
+                      labelColor: cs.onSurface,
+                      unselectedLabelColor: cs.onSurface.withValues(alpha: 0.55),
                       indicatorSize: TabBarIndicatorSize.tab,
                       indicator: BoxDecoration(
-                        color: const Color(0xFFE0F2FE),
-                        borderRadius: BorderRadius.circular(12),
+                        color: DesignTokens.primarySoft,
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
                       ),
                       tabs: const [
                         Tab(text: 'Overview'),
@@ -99,9 +156,9 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: DesignTokens.spaceL),
                   SizedBox(
-                    height: 560,
+                    height: Responsive.isMobile(context) ? 640 : 560,
                     child: TabBarView(
                       controller: _tabController,
                       children: [
@@ -121,7 +178,7 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                               label: 'View analytics',
                               icon: Icons.show_chart_outlined,
                               onPressed: () => context.push(
-                                '/forms/${widget.formId}/analytics',
+                                '/projects/${widget.projectId}/forms/${widget.formId}/analytics',
                               ),
                             ),
                           ],
@@ -149,7 +206,7 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                               label: 'Open analytics',
                               icon: Icons.analytics_outlined,
                               onPressed: () => context.push(
-                                '/forms/${widget.formId}/analytics',
+                                '/projects/${widget.projectId}/forms/${widget.formId}/analytics',
                               ),
                             ),
                           ],
@@ -191,36 +248,82 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(DesignTokens.spaceXL),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF111827), Color(0xFF1D4ED8)],
+        gradient: LinearGradient(
+          colors: [
+            DesignTokens.darkBackground,
+            DesignTokens.primaryDark.withValues(alpha: 0.96),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Form dashboard',
-            style: GoogleFonts.inter(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < 720;
+          final titleStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ) ??
+              const TextStyle(fontSize: DesignTokens.fontXXL, fontWeight: FontWeight.w800, color: Colors.white);
+          final bodyStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.82),
+                height: 1.5,
+              ) ??
+              const TextStyle(fontSize: DesignTokens.fontM, color: Colors.white70, height: 1.5);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Form dashboard', style: titleStyle),
+              const SizedBox(height: DesignTokens.spaceS),
+              Text(
+                'Project ID: $projectId${isCompact ? '\n' : '  '}Form ID: $formId',
+                style: bodyStyle,
+              ),
+              const SizedBox(height: DesignTokens.spaceL),
+              Wrap(
+                spacing: DesignTokens.spaceS,
+                runSpacing: DesignTokens.spaceS,
+                children: const [
+                  _HeroTag(label: 'Stub', value: 'Analytics and response panels are in progress'),
+                  _HeroTag(label: 'Scope', value: 'Project-scoped route'),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _HeroTag extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _HeroTag({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceM,
+        vertical: DesignTokens.spaceS,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Colors.white,
+              fontWeight: FontWeight.w600,
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Project ID: $projectId\nForm ID: $formId',
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              color: const Color(0xFFE2E8F0),
-              height: 1.5,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -242,10 +345,10 @@ class _FormDashboardTab extends StatelessWidget {
     return ListView(
       children: [
         _SectionCard(title: title, body: message),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: DesignTokens.spaceS,
+          runSpacing: DesignTokens.spaceS,
           children: actions
               .map(
                 (action) => FilledButton.icon(
@@ -281,33 +384,32 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+        border: Border.all(color: cs.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF0F172A),
-            ),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: DesignTokens.spaceS),
           Text(
             body,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              height: 1.5,
-              color: const Color(0xFF64748B),
-            ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  height: 1.5,
+                  color: cs.onSurface.withValues(alpha: 0.7),
+                ),
           ),
         ],
       ),
