@@ -107,9 +107,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       child: Center(
         child: SingleChildScrollView(
           padding: Responsive.pagePadding(context),
-          child: isDesktop
-              ? _buildDesktopLayout(authState)
-              : _buildStackedLayout(authState, isMobile),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: isDesktop ? 1280 : 560),
+            child: isDesktop
+                ? _buildDesktopLayout(authState)
+                : _buildStackedLayout(authState, isMobile),
+          ),
         ),
       ),
     );
@@ -451,9 +454,7 @@ class _CompactHero extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: onPrimary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(DesignTokens.radiusS),
-                  border: Border.all(
-                    color: onPrimary.withValues(alpha: 0.25),
-                  ),
+                  border: Border.all(color: onPrimary.withValues(alpha: 0.25)),
                 ),
                 child: const Icon(
                   Icons.auto_awesome_rounded,
@@ -642,7 +643,9 @@ class _LoginCard extends StatelessWidget {
                       label: 'Remember me checkbox',
                       child: InkWell(
                         onTap: () => onRememberMe(!rememberMe),
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusS,
+                        ),
                         child: Container(
                           color: Colors.transparent,
                           padding: const EdgeInsets.symmetric(
@@ -666,9 +669,8 @@ class _LoginCard extends StatelessWidget {
                                   border: Border.all(
                                     color: rememberMe
                                         ? theme.colorScheme.primary
-                                        : theme.colorScheme.onSurface.withValues(
-                                            alpha: 0.45,
-                                          ),
+                                        : theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.45),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1005,13 +1007,12 @@ class _ToggleTab extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontSize: 12.5,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                       color: isSelected
                           ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withValues(
-                              alpha: 0.55,
-                            ),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                 ),
@@ -1117,8 +1118,6 @@ class _PhoneField extends StatelessWidget {
   }
 }
 
-
-
 // ─── Primary Button ───────────────────────────────────────────────────────────
 class _PrimaryButton extends StatefulWidget {
   final bool isLoading;
@@ -1138,6 +1137,15 @@ class _PrimaryButton extends StatefulWidget {
 class _PrimaryButtonState extends State<_PrimaryButton> {
   bool _isHovered = false;
 
+  void _setHovered(bool hovered) {
+    if (!mounted || _isHovered == hovered) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _isHovered != hovered) {
+        setState(() => _isHovered = hovered);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1146,8 +1154,8 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
       label: widget.label,
       button: true,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
+        onEnter: (_) => _setHovered(true),
+        onExit: (_) => _setHovered(false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           height: 50,
@@ -1233,6 +1241,15 @@ class _SocialButton extends StatefulWidget {
 class _SocialButtonState extends State<_SocialButton> {
   bool _isHovered = false;
 
+  void _setHovered(bool hovered) {
+    if (!mounted || _isHovered == hovered) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _isHovered != hovered) {
+        setState(() => _isHovered = hovered);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1241,8 +1258,8 @@ class _SocialButtonState extends State<_SocialButton> {
       label: 'Sign in with ${widget.label}',
       button: true,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
+        onEnter: (_) => _setHovered(true),
+        onExit: (_) => _setHovered(false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           height: 46,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/widgets/general_settings_panels.dart';
 import 'package:frontend/modules/forms/widgets/form_layout_settings.dart';
@@ -65,7 +66,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
             header: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(DesignTokens.spaceL),
                   child: Row(
                     children: [
                       const FaIcon(
@@ -73,13 +74,13 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                         size: 16,
                         color: AppColors.textGrey,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: DesignTokens.spaceS),
                       const Text(
                         'Form Properties',
                         style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: DesignTokens.fontM,
                         ),
                       ),
                       const Spacer(),
@@ -97,8 +98,8 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                 const Divider(color: AppColors.borderLight, height: 1),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: DesignTokens.spaceL,
+                    vertical: DesignTokens.spaceS,
                   ),
                   color: AppColors.builderBackground.withValues(alpha: 0.5),
                   child: Row(
@@ -108,11 +109,11 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                         size: 14,
                         color: AppColors.textGrey,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: DesignTokens.spaceS),
                       const Text(
                         'Editing Language:',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: DesignTokens.fontS,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w500,
                         ),
@@ -123,7 +124,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                           value: currentLocale,
                           isDense: true,
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: DesignTokens.fontS,
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
                           ),
@@ -145,7 +146,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                 ),
                 const Divider(color: AppColors.borderLight, height: 1),
                 Material(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   child: TabBar(
                     tabs: const [
                       Tab(text: 'General'),
@@ -160,7 +161,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> {
                     indicatorWeight: 3,
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: DesignTokens.fontS,
                     ),
                   ),
                 ),

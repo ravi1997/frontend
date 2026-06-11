@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/localization/locale_controller.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -141,7 +142,7 @@ class SectionWidget extends ConsumerWidget {
         int.parse(sectionStyle.headerBackgroundColor.replaceAll('#', '0xFF')),
       );
     } catch (_) {
-      sectionBg = Colors.white;
+      sectionBg = Theme.of(context).colorScheme.surface;
       headerBg = AppColors.builderElement.withValues(alpha: 0.5);
     }
 
@@ -245,7 +246,7 @@ class SectionWidget extends ConsumerWidget {
                                   Icons.drag_indicator,
                                   color: AppColors.textGrey,
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: DesignTokens.spaceS),
                                 Expanded(
                                   child: Text(
                                     section.title.translate(locale),
@@ -329,7 +330,7 @@ class SectionWidget extends ConsumerWidget {
                                       child: Row(
                                         children: [
                                           Icon(Icons.copy, size: 18),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: DesignTokens.spaceS),
                                           Text('Duplicate'),
                                         ],
                                       ),
@@ -342,7 +343,7 @@ class SectionWidget extends ConsumerWidget {
                                             Icons.subdirectory_arrow_right,
                                             size: 18,
                                           ),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: DesignTokens.spaceS),
                                           Text('Add Sub-section'),
                                         ],
                                       ),
@@ -352,7 +353,7 @@ class SectionWidget extends ConsumerWidget {
                                       child: Row(
                                         children: [
                                           Icon(Icons.arrow_upward, size: 18),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: DesignTokens.spaceS),
                                           Text('Move Up'),
                                         ],
                                       ),
@@ -362,7 +363,7 @@ class SectionWidget extends ConsumerWidget {
                                       child: Row(
                                         children: [
                                           Icon(Icons.arrow_downward, size: 18),
-                                          SizedBox(width: 8),
+                                          SizedBox(width: DesignTokens.spaceS),
                                           Text('Move Down'),
                                         ],
                                       ),
@@ -466,7 +467,7 @@ class SectionWidget extends ConsumerWidget {
                             if (section.questions.isEmpty)
                               const Center(
                                 child: Padding(
-                                  padding: EdgeInsets.all(32.0),
+                                  padding: EdgeInsets.all(DesignTokens.spaceXXL),
                                   child: Text(
                                     'Drag and drop fields here',
                                     style: TextStyle(color: AppColors.textGrey),
@@ -898,7 +899,7 @@ class _SectionMetaChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: fg,
-              fontSize: 12,
+              fontSize: DesignTokens.fontS,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -949,7 +950,7 @@ class _LayoutModeBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(isReady ? icon : Icons.info_outline, size: 15, color: iconColor),
-          const SizedBox(width: 8),
+          const SizedBox(width: DesignTokens.spaceS),
           Expanded(
             child: RichText(
               text: TextSpan(
@@ -957,7 +958,7 @@ class _LayoutModeBanner extends StatelessWidget {
                   TextSpan(
                     text: '$label  ',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: DesignTokens.fontS,
                       fontWeight: FontWeight.w700,
                       color: labelColor,
                     ),
@@ -965,7 +966,7 @@ class _LayoutModeBanner extends StatelessWidget {
                   TextSpan(
                     text: hint,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: DesignTokens.fontS,
                       fontWeight: FontWeight.normal,
                       color: labelColor.withValues(alpha: 0.75),
                     ),

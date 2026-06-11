@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class FormLayoutSettings extends StatelessWidget {
   final Map<String, dynamic> form;
@@ -19,7 +20,7 @@ class FormLayoutSettings extends StatelessWidget {
           'Layout Settings',
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         DropdownButtonFormField<String>(
           initialValue: form['layout'] ?? 'singleColumn',
           decoration: const InputDecoration(

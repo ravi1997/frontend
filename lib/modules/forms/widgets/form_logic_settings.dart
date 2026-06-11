@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class FormLogicSettings extends StatelessWidget {
   final Map<String, dynamic> form;
@@ -19,7 +20,7 @@ class FormLogicSettings extends StatelessWidget {
           'Logic Settings',
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         const Text('Form logic rules will be configured here.'),
       ],
     );

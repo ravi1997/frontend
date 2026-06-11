@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 
 import 'package:frontend/modules/forms/models/question_type.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
@@ -269,11 +270,11 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
           children: [
             // Sticky Header Section
             Container(
-              padding: const EdgeInsets.only(
-                top: 16,
-                left: 16,
-                right: 16,
-                bottom: 12,
+              padding: const EdgeInsets.fromLTRB(
+                DesignTokens.spaceL,
+                DesignTokens.spaceL,
+                DesignTokens.spaceL,
+                DesignTokens.spaceM,
               ),
               decoration: BoxDecoration(
                 color: AppColors.builderSidebar.withValues(alpha: 0.9),
@@ -305,12 +306,12 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                         style: TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: DesignTokens.fontM,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: DesignTokens.spaceM),
                   // Search Bar with glass/subtle effect
                   TextField(
                     controller: _searchController,
@@ -319,7 +320,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                       hintText: 'Search fields (e.g., "Phone")',
                       hintStyle: TextStyle(
                         color: AppColors.textGrey.withValues(alpha: 0.7),
-                        fontSize: 13,
+                        fontSize: DesignTokens.fontS,
                       ),
                       prefixIcon: const Icon(
                         Icons.search,
@@ -328,24 +329,24 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                       ),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 12,
+                        vertical: DesignTokens.spaceS + 2,
+                        horizontal: DesignTokens.spaceM,
                       ),
                       filled: true,
                       fillColor: AppColors.builderBackground,
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                         borderSide: const BorderSide(color: Colors.transparent),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                         borderSide: BorderSide(
                           color: AppColors.primary.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
                     ),
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: DesignTokens.fontM),
                   ),
                 ],
               ),
@@ -365,7 +366,7 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                 indicatorWeight: 3,
                 labelStyle: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 13,
+                  fontSize: DesignTokens.fontS,
                 ),
               ),
             ),
@@ -389,10 +390,10 @@ class _FieldLibraryWidgetState extends ConsumerState<FieldLibraryWidget> {
                               const SizedBox(height: 12),
                               const Text(
                                 'No fields found',
-                                style: TextStyle(
-                                  color: AppColors.textGrey,
-                                  fontSize: 13,
-                                ),
+                              style: TextStyle(
+                                color: AppColors.textGrey,
+                                fontSize: DesignTokens.fontS,
+                              ),
                               ),
                             ],
                           ),

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 /// Signature pad widget for capturing signatures.
 ///
@@ -32,8 +33,8 @@ class SignaturePadWidget extends StatefulWidget {
     super.key,
     this.onSigned,
     this.readOnly = false,
-    this.backgroundColor = Colors.white,
-    this.strokeColor = Colors.black,
+    this.backgroundColor = const Color(0xFFFFFDF9),
+    this.strokeColor = const Color(0xFF111827),
     this.strokeWidth = 2.5,
     this.initialData,
   });
@@ -82,8 +83,8 @@ class _SignaturePadWidgetState extends State<SignaturePadWidget> {
         Container(
           decoration: BoxDecoration(
             color: widget.backgroundColor,
-            border: Border.all(color: Colors.grey[400]!),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFD6D0C5)),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
           child: RepaintBoundary(
             key: _repaintKey,
@@ -105,7 +106,7 @@ class _SignaturePadWidgetState extends State<SignaturePadWidget> {
           ),
         ),
         if (!widget.readOnly) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: DesignTokens.spaceS),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -288,7 +289,7 @@ class SignaturePadDialog extends StatelessWidget {
                       'Sign Here',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: DesignTokens.fontBase,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -303,7 +304,7 @@ class SignaturePadDialog extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(DesignTokens.spaceL),
               child: SignaturePadWidget(
                 onSigned: (base64String) {
                   if (base64String.isNotEmpty) {

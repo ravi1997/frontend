@@ -93,8 +93,12 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
         ApiEndpoints.listProjectForms(widget.projectId),
       );
       final data = response.data;
-      if (data is List) {
-        _forms = data;
+      final payload = data is Map ? data['data'] : data;
+
+      if (payload is List) {
+        _forms = payload;
+      } else if (payload is Map && payload['items'] is List) {
+        _forms = List<dynamic>.from(payload['items'] as List);
       } else if (data is Map && data['items'] is List) {
         _forms = List<dynamic>.from(data['items'] as List);
       } else {
@@ -193,7 +197,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                 controller: titleController,
                 decoration: const InputDecoration(labelText: 'Project title'),
               ),
-              const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
               TextField(
                 controller: descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
@@ -283,11 +287,27 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setModalState) => AlertDialog(
-          title: Text('Add form to ${_project?['title'] ?? 'project'}'),
-          content: SizedBox(
-            width: 560,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+          ),
+          title: Text(
+            'Add form to ${_project?['title'] ?? 'project'}',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+          ),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: 640,
+              maxWidth: 760,
+              maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+            ),
             child: SingleChildScrollView(
-              child: Column(
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
@@ -303,24 +323,24 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   TextField(
                     controller: slugController,
                     decoration: const InputDecoration(labelText: 'Slug'),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   TextField(
                     controller: descriptionController,
                     decoration: const InputDecoration(labelText: 'Description'),
                     maxLines: 2,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   TextField(
                     controller: helpTextController,
                     decoration: const InputDecoration(labelText: 'Help text'),
                     maxLines: 2,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   _ChipInputField(
                     label: 'Supported languages',
                     chips: languages,
@@ -337,7 +357,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                       setModalState(() => languages.remove(value));
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   TextField(
                     controller: defaultLanguageController,
                     decoration: const InputDecoration(
@@ -345,21 +365,52 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                       hintText: 'en',
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   DropdownButtonFormField<String>(
                     initialValue: uiType,
-                    decoration: const InputDecoration(labelText: 'UI type'),
+                    decoration: const InputDecoration(
+                      labelText: 'Layout',
+                    ),
                     items: const [
-                      DropdownMenuItem(value: 'flex', child: Text('Flex')),
-                      DropdownMenuItem(value: 'grid', child: Text('Grid')),
-                      DropdownMenuItem(value: 'wizard', child: Text('Wizard')),
+                      DropdownMenuItem(
+                        value: 'flex',
+                        child: Text('Flex layout'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'grid-cols-2',
+                        child: Text('Two-column grid'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'grid-cols-3',
+                        child: Text('Three-column grid'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'tabbed',
+                        child: Text('Tabbed layout'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'full-width',
+                        child: Text('Full-width layout'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'card',
+                        child: Text('Card layout'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'cards',
+                        child: Text('Cards layout'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'custom',
+                        child: Text('Custom layout'),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value == null) return;
                       setModalState(() => uiType = value);
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   _ChipInputField(
                     label: 'Tags',
                     chips: tags,
@@ -376,7 +427,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                       setModalState(() => tags.remove(value));
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: DesignTokens.spaceM),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: isPublic,
@@ -391,6 +442,7 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                         setModalState(() => isTemplate = value),
                   ),
                 ],
+                ),
               ),
             ),
           ),

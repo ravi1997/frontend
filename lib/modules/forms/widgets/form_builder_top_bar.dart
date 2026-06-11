@@ -11,6 +11,8 @@ import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
 import 'git_merge_dialog.dart';
+import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 
 import 'workflow_configuration_dialog.dart';
 import 'publish_success_dialog.dart';
@@ -31,6 +33,8 @@ class FormBuilderTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final screenSize = Responsive.of(context);
+    final isCompact = screenSize == ScreenSize.mobile || screenSize == ScreenSize.tablet;
     // Select specific parts of the state to minimize rebuilds
     final formTitle = ref.watch(
       formBuilderControllerProvider(
@@ -80,14 +84,17 @@ class FormBuilderTopBar extends ConsumerWidget {
     );
 
     return Container(
-      height: 64,
+      constraints: BoxConstraints(minHeight: isCompact ? 72 : 64),
       decoration: const BoxDecoration(
         color: AppColors.builderSidebar,
         border: Border(
           bottom: BorderSide(color: AppColors.builderBorder, width: 1),
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: isCompact ? DesignTokens.spaceM : DesignTokens.spaceL,
+        vertical: DesignTokens.spaceS,
+      ),
       child: Row(
         children: [
           IconButton(
@@ -100,7 +107,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: DesignTokens.spaceS),
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -121,11 +128,11 @@ class FormBuilderTopBar extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: DesignTokens.spaceM),
                   _VersionBadge(version: formVersion),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: DesignTokens.spaceS),
                   const _EditingBadge(),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: DesignTokens.spaceS),
                   _EditingLocaleSwitcher(
                     controllerKey: controllerKey,
                     formId: formId,
@@ -167,7 +174,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: DesignTokens.spaceS),
           _TopBarActionButton(
             icon: FontAwesomeIcons.wandMagicSparkles,
             label: 'AI Assistant',
@@ -178,7 +185,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: DesignTokens.spaceS),
           _TopBarActionButton(
             icon: FontAwesomeIcons.eye,
             label: 'Preview',
@@ -194,7 +201,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               }
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: DesignTokens.spaceS),
           _TopBarOverflowMenu(
             projectId: projectId,
             formId: formId,
@@ -204,13 +211,13 @@ class FormBuilderTopBar extends ConsumerWidget {
             sections: sections,
             editingLocale: editingLocale,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: DesignTokens.spaceM),
           if (isDirty) ...[
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.orange.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 border: Border.all(
                   color: Colors.orange.withValues(alpha: 0.35),
                 ),
@@ -219,12 +226,12 @@ class FormBuilderTopBar extends ConsumerWidget {
                 'Unsaved changes',
                 style: TextStyle(
                   color: Colors.orange,
-                  fontSize: 12,
+                  fontSize: DesignTokens.fontS,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: DesignTokens.spaceS),
             TextButton.icon(
               onPressed: canUndo
                   ? () => ref
@@ -236,7 +243,7 @@ class FormBuilderTopBar extends ConsumerWidget {
               icon: const Icon(Icons.undo, size: 18),
               label: const Text('Undo'),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: DesignTokens.spaceXS),
             TextButton.icon(
               onPressed: canRedo
                   ? () => ref
@@ -248,14 +255,14 @@ class FormBuilderTopBar extends ConsumerWidget {
               icon: const Icon(Icons.redo, size: 18),
               label: const Text('Redo'),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: DesignTokens.spaceS),
           ],
           _SaveButton(
             controllerKey: controllerKey,
             formId: formId,
             isSaving: isSaving,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: DesignTokens.spaceM),
           _PublishButton(
             controllerKey: controllerKey,
             formId: formId,
@@ -274,16 +281,19 @@ class _VersionBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceS,
+        vertical: DesignTokens.spaceXS,
+      ),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXS),
       ),
       child: Text(
         'v$version',
         style: const TextStyle(
           color: AppColors.primary,
-          fontSize: 12,
+          fontSize: DesignTokens.fontS,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -297,16 +307,19 @@ class _EditingBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceS,
+        vertical: DesignTokens.spaceXS,
+      ),
       decoration: BoxDecoration(
         color: Colors.green.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXS),
       ),
       child: const Text(
         'Editing',
         style: TextStyle(
           color: Colors.green,
-          fontSize: 12,
+          fontSize: DesignTokens.fontS,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -340,7 +353,7 @@ class _EditingLocaleSwitcher extends ConsumerWidget {
           isDense: true,
           style: const TextStyle(
             color: AppColors.primary,
-            fontSize: 12,
+            fontSize: DesignTokens.fontS,
             fontWeight: FontWeight.bold,
           ),
           icon: const Icon(
@@ -385,7 +398,10 @@ class _TopBarActionButton extends StatelessWidget {
       icon: FaIcon(icon, size: 14, color: AppColors.textGrey),
       label: Text(
         label,
-        style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
+        style: const TextStyle(
+          color: AppColors.textGrey,
+          fontSize: DesignTokens.fontS,
+        ),
       ),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -692,9 +708,14 @@ class _PublishButton extends ConsumerWidget {
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: DesignTokens.spaceL - 4,
+          vertical: DesignTokens.spaceM,
+        ),
       ),
       child: Text(
         mode != null && mode != 'form' ? 'Publish Template' : 'Publish',
@@ -720,21 +741,28 @@ class _GitBranchSelector extends ConsumerWidget {
     final gitNotifier = ref.read(gitControllerProvider(controllerKey).notifier);
 
     return Container(
-      margin: const EdgeInsets.only(left: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.only(left: DesignTokens.spaceS + 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: DesignTokens.spaceS,
+        vertical: DesignTokens.spaceXS,
+      ),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: gitState.activeBranch,
-          icon: const FaIcon(FontAwesomeIcons.codeBranch, size: 14, color: AppColors.primary),
+          icon: const FaIcon(
+            FontAwesomeIcons.codeBranch,
+            size: 14,
+            color: AppColors.primary,
+          ),
           style: const TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: DesignTokens.fontS,
           ),
           onChanged: (String? newValue) {
             if (newValue != null) {

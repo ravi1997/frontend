@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/widgets/field_general_settings.dart';
@@ -150,10 +151,10 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
             header: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(DesignTokens.spaceL),
                   child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: DesignTokens.spaceS,
+                    runSpacing: DesignTokens.spaceS,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     alignment: WrapAlignment.spaceBetween,
                     children: [
@@ -165,13 +166,13 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                             size: 16,
                             color: AppColors.textGrey,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: DesignTokens.spaceS),
                           const Text(
                             'Field Properties',
                             style: TextStyle(
                               color: AppColors.textDark,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: DesignTokens.fontM,
                             ),
                           ),
                         ],
@@ -197,10 +198,10 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                             icon: const Icon(Icons.star_border, size: 16),
                             label: const Text(
                               'Save Template',
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(fontSize: DesignTokens.fontS),
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: DesignTokens.spaceXS),
                           IconButton(
                             icon: const Icon(
                               Icons.close,
@@ -226,7 +227,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
               children: [
                 // Tab Bar
                 Material(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   child: TabBar(
                     isScrollable: true,
                     tabs: const [
@@ -243,7 +244,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                     indicatorWeight: 3,
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: DesignTokens.fontS,
                     ),
                   ),
                 ),
@@ -255,7 +256,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
                     children: [
                       // General Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: FieldGeneralSettings(
                           controllerKey: widget.controllerKey,
                           projectId: widget.projectId,
@@ -270,7 +271,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
                       // Layout Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: FieldLayoutSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,
@@ -280,7 +281,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
                       // Validation Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: DynamicPropertiesPanel(
                           question: question,
                           onQuestionChanged: (updatedQuestion) {
@@ -297,7 +298,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
                       // Specific Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: FieldSpecificSettings(
                           formId: widget.formId,
                           question: question,
@@ -306,7 +307,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
                       // Style Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: FieldStyleSettings(
                           formId: widget.formId,
                           question: question,
@@ -317,7 +318,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
                       // Logic Tab
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(DesignTokens.spaceL),
                         child: FieldLogicSettings(
                           projectId: widget.projectId,
                           formId: widget.formId,

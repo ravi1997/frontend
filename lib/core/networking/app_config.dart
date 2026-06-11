@@ -10,20 +10,25 @@
 /// `flutter run` still works without extra flags.
 class AppConfig {
   // ── Backend origin ──────────────────────────────────────────────────────────
-  /// Full base URL of the Flask backend (no trailing slash).
-  /// Defaults to the standard Docker Compose dev port.
-  static const String apiServerUrl = String.fromEnvironment(
+  static const String _apiServerOverride = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8051',
+    defaultValue: '',
   );
 
+  /// Full base URL of the Flask backend (no trailing slash).
+  /// Defaults to the standard local backend port for development.  The
+  /// explicit `API_BASE_URL` dart-define still wins for deployed builds.
+  static String get apiServerUrl =>
+      _apiServerOverride.isNotEmpty
+          ? _apiServerOverride
+          : 'http://localhost:8000';
+
   /// Versioned API prefix — combined with [apiServerUrl] by [ApiEndpoints].
-  /// Note the trailing slash: backend routes are rooted at
-  /// `/mahasangraha/api/v1/`.
-  static const String apiPath = '/mahasangraha/api/v1/';
+  /// Note the trailing slash: backend routes are rooted at `/api/v1/`.
+  static const String apiPath = '/api/v1/';
 
   /// Full base URL used as the Dio `baseUrl`.
-  static const String apiBaseUrl = '$apiServerUrl$apiPath';
+  static String get apiBaseUrl => '$apiServerUrl$apiPath';
 
   // ── Frontend origin ─────────────────────────────────────────────────────────
   /// Origin the web app is served from.  Only used for diagnostics / logging;

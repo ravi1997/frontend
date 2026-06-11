@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart'; // Assuming this controller handles AI interactions
 
 class AiAssistantDialog extends ConsumerStatefulWidget {
@@ -41,25 +42,31 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        width: 500,
-        height: 600,
-        padding: const EdgeInsets.all(24),
-        child: Column(
+      backgroundColor: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
+          child: Column(
           children: [
             Row(
               children: [
                 const Icon(Icons.auto_awesome, color: AppColors.primary),
-                const SizedBox(width: 12),
+                const SizedBox(width: DesignTokens.spaceM),
                 Text(
                   'Form AI Assistant',
                   style: GoogleFonts.outfit(
-                    fontSize: 24,
+                    fontSize: DesignTokens.fontL,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const Spacer(),
@@ -69,7 +76,7 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             TabBar(
               controller: _tabController,
               labelColor: AppColors.primary,
@@ -82,7 +89,7 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                 Tab(text: 'Validator'),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -94,6 +101,7 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
               ),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -105,9 +113,12 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
       children: [
         Text(
           'Describe what you want to build and let AI handle the structure.',
-          style: GoogleFonts.inter(color: AppColors.textGrey, fontSize: 13),
+          style: GoogleFonts.inter(
+            color: AppColors.textGrey,
+            fontSize: DesignTokens.fontS,
+          ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         TextField(
           controller: _promptController,
           maxLines: 5,
@@ -117,11 +128,11 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
             filled: true,
             fillColor: AppColors.builderBackground,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
           ),
@@ -142,19 +153,19 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                 },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceS + 8),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
             ),
           ),
           child: _isGenerating
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
+              ? SizedBox(
+                  height: DesignTokens.spaceL - 4,
+                  width: DesignTokens.spaceL - 4,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 )
               : const Text('Generate Fields'),
@@ -174,13 +185,13 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
               size: 48,
               color: AppColors.primary.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             const Text(
               'Need ideas? Let AI scan your form\nand suggest missing pieces.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textGrey),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
             ElevatedButton(
               onPressed: () async {
                 setState(() => _isLoadingSuggestions = true);
@@ -208,14 +219,15 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
         Expanded(
           child: ListView.separated(
             itemCount: _suggestions.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: DesignTokens.spaceM),
             itemBuilder: (context, index) {
               final s = _suggestions[index];
               return Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(DesignTokens.spaceM),
                 decoration: BoxDecoration(
                   color: AppColors.builderBackground,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                   border: Border.all(
                     color: AppColors.primary.withValues(alpha: 0.1),
                   ),
@@ -230,7 +242,7 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                           size: 16,
                           color: AppColors.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: DesignTokens.spaceS),
                         Text(
                           s['label'] ?? '',
                           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -256,15 +268,15 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: DesignTokens.spaceXS),
                     Text(
                       s['reason'] ?? '',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: DesignTokens.fontS,
                         color: AppColors.textGrey,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceM),
                     TextButton(
                       onPressed: () {
                         // Logic to add this field
@@ -281,7 +293,7 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
             },
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         TextButton.icon(
           onPressed: () async {
             setState(() => _isLoadingSuggestions = true);
@@ -311,13 +323,13 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
               size: 48,
               color: AppColors.primary.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             const Text(
               'Run an AI scan to check for UX issues,\ngaps, or logical inconsistencies.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textGrey),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
             ElevatedButton(
               onPressed: () async {
                 setState(() => _isValidating = true);
@@ -353,33 +365,36 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
               Text(
                 'Design Score',
                 style: GoogleFonts.outfit(
-                  fontSize: 14,
+                  fontSize: DesignTokens.fontM,
                   color: AppColors.textGrey,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: DesignTokens.spaceXS),
               Text(
                 '$score',
                 style: GoogleFonts.outfit(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
-                  color: score >= 80 ? Colors.green : Colors.orange,
+              color: score >= 80 ? Colors.green : Colors.orange,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: DesignTokens.spaceL),
         if (issues.isNotEmpty) ...[
           const Text(
             'Potential Issues',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: DesignTokens.fontBase,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: DesignTokens.spaceM),
           ...issues.map((issue) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: DesignTokens.spaceS),
+              padding: const EdgeInsets.all(DesignTokens.spaceM),
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
@@ -389,11 +404,11 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.warning_amber, size: 16, color: Colors.red),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: DesignTokens.spaceS),
                   Expanded(
                     child: Text(
                       issue['message'] ?? '',
-                      style: const TextStyle(fontSize: 13),
+                      style: const TextStyle(fontSize: DesignTokens.fontM),
                     ),
                   ),
                 ],
@@ -401,31 +416,34 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
             );
           }),
         ],
-        const SizedBox(height: 24),
+        const SizedBox(height: DesignTokens.spaceL),
         const Text(
           'Improvement Tips',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: DesignTokens.fontBase,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: DesignTokens.spaceM),
         ...suggestions.map((s) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.only(bottom: DesignTokens.spaceS),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.check_circle, size: 16, color: Colors.green),
-                const SizedBox(width: 8),
+                const SizedBox(width: DesignTokens.spaceS),
                 Expanded(
                   child: Text(
                     s.toString(),
-                    style: const TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: DesignTokens.fontM),
                   ),
                 ),
               ],
             ),
           );
         }),
-        const SizedBox(height: 24),
+        const SizedBox(height: DesignTokens.spaceL),
         ElevatedButton(
           onPressed: () async {
             setState(() => _isValidating = true);

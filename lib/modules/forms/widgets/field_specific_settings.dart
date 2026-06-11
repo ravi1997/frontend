@@ -4,6 +4,7 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'property_builder_utils.dart';
 
 class FieldSpecificSettings extends ConsumerStatefulWidget {
@@ -40,10 +41,10 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textGrey,
-            fontSize: 12,
+            fontSize: DesignTokens.fontS,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceL),
         if (widget.question.type == QuestionType.image)
           _buildImageSettings(metadata),
         if (widget.question.type == QuestionType.rating)
@@ -103,10 +104,13 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
         ].contains(widget.question.type))
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(DesignTokens.spaceL),
               child: Text(
                 'No specific settings for this field type.',
-                style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                style: TextStyle(
+                  color: AppColors.textGrey,
+                  fontSize: DesignTokens.fontS,
+                ),
               ),
             ),
           ),

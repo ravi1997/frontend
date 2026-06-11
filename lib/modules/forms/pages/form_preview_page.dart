@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:js_interop';
-import 'package:web/web.dart' as web;
+import 'package:file_picker/file_picker.dart';
 import 'package:frontend/modules/forms/widgets/signature_pad_widget.dart';
 import 'package:frontend/modules/forms/widgets/camera_capture_dialog.dart';
 import 'package:frontend/modules/forms/widgets/language_switcher.dart';
@@ -2966,58 +2965,28 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         ? _extensionsForTypes(allowedTypes)
         : null;
 
-    void pickFile() {
-      // Build the MIME/extension accept string, e.g. '.pdf,.jpg'
-      final accept = extensions != null
-          ? extensions.map((e) => '.$e').join(',')
-          : '';
-
-      // Create a hidden <input type="file"> using package:web
-      final input = web.HTMLInputElement()
-        ..type = 'file'
-        ..accept = accept;
-
-      // Listen for the change event, then read the file bytes
-      input.addEventListener(
-        'change',
-        (web.Event _) {
-          final files = input.files;
-          if (files == null || files.length == 0) return;
-          final file = files.item(0)!;
-
-          final reader = web.FileReader();
-          reader.addEventListener(
-            'load',
-            (web.Event _) {
-              // result is a JS ArrayBuffer; convert to Uint8List
-              final jsBuffer = reader.result;
-              Uint8List? bytes;
-              try {
-                bytes = (jsBuffer as JSArrayBuffer).toDart.asUint8List();
-              } catch (_) {
-                bytes = null;
-              }
-              if (mounted) {
-                ref
-                    .read(previewFormDataProvider.notifier)
-                    .update(
-                      (s) => {
-                        ...s,
-                        q.id: {
-                          'name': file.name,
-                          'size': file.size,
-                          'bytes': bytes,
-                        },
-                      },
-                    );
-              }
-            }.toJS,
-          );
-          reader.readAsArrayBuffer(file);
-        }.toJS,
+    Future<void> pickFile() async {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: extensions != null ? FileType.custom : FileType.any,
+        allowedExtensions: extensions,
+        withData: true,
       );
+      if (!mounted || result == null || result.files.isEmpty) {
+        return;
+      }
 
-      input.click();
+      final file = result.files.first;
+      ref.read(previewFormDataProvider.notifier).update(
+            (s) => {
+              ...s,
+              q.id: {
+                'name': file.name,
+                'size': file.size,
+                'bytes': file.bytes,
+              },
+            },
+          );
     }
 
     String formatBytes(int bytes) {
@@ -3120,6 +3089,15 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
                         .read(previewFormDataProvider.notifier)
                         .update((s) => {...s, q.id: null}),
                   ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.swap_horiz,
+                      color: Theme.of(context).primaryColor,
+                      size: 20,
+                    ),
+                    tooltip: 'Change file',
+                    onPressed: pickFile,
+                  ),
                 ],
               ),
       ),
@@ -3144,63 +3122,33 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
         : null;
 
     Future<void> pickFiles() async {
-      final input = web.HTMLInputElement()
-        ..type = 'file'
-        ..multiple = isMulti
-        ..accept = isGallery
-            ? 'image/*'
-            : (extensions != null
-                  ? extensions.map((e) => '.$e').join(',')
-                  : '');
-
-      input.addEventListener(
-        'change',
-        (web.Event _) {
-          final files = input.files;
-          if (files == null || files.length == 0) return;
-          final picked = <Map<String, dynamic>>[];
-          int remaining = files.length;
-
-          void writeValue() {
-            if (!mounted) return;
-            ref.read(previewFormDataProvider.notifier).update((state) {
-              final next = Map<String, dynamic>.from(state);
-              next[q.id] = isMulti
-                  ? picked
-                  : (picked.isNotEmpty ? picked.first : null);
-              return next;
-            });
-          }
-
-          for (var i = 0; i < files.length; i++) {
-            final file = files.item(i);
-            if (file == null) continue;
-            final reader = web.FileReader();
-            reader.addEventListener(
-              'load',
-              (web.Event _) {
-                Uint8List? bytes;
-                try {
-                  bytes = (reader.result as JSArrayBuffer).toDart.asUint8List();
-                } catch (_) {
-                  bytes = null;
-                }
-                picked.add({
-                  'name': file.name,
-                  'size': file.size,
-                  'bytes': bytes,
-                });
-                remaining -= 1;
-                if (remaining == 0) {
-                  writeValue();
-                }
-              }.toJS,
-            );
-            reader.readAsArrayBuffer(file);
-          }
-        }.toJS,
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: isMulti,
+        type: isGallery
+            ? FileType.image
+            : (extensions != null ? FileType.custom : FileType.any),
+        allowedExtensions: extensions,
+        withData: true,
       );
-      input.click();
+      if (!mounted || result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final picked = result.files
+          .map(
+            (file) => <String, dynamic>{
+              'name': file.name,
+              'size': file.size,
+              'bytes': file.bytes,
+            },
+          )
+          .toList();
+
+      ref.read(previewFormDataProvider.notifier).update((state) {
+        final next = Map<String, dynamic>.from(state);
+        next[q.id] = isMulti ? picked : picked.first;
+        return next;
+      });
     }
 
     final files = isMulti && value is List

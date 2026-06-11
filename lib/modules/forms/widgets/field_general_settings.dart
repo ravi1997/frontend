@@ -40,6 +40,14 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _defaultValueController;
   late TextEditingController _dividerTextController;
+  bool _isSlugLocked = true;
+
+  String _generateSlug(String text) {
+    return text.toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9\s_]'), '')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), '_');
+  }
 
   @override
   void initState() {
@@ -50,6 +58,11 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     _dividerTextController = TextEditingController(
       text: widget.question.metadata['dividerText']?.toString() ?? '',
     );
+
+    final labelSlug = _generateSlug(widget.labelController.text);
+    if (widget.variableNameController.text.isNotEmpty && widget.variableNameController.text != labelSlug) {
+      _isSlugLocked = false;
+    }
   }
 
   @override
@@ -259,25 +272,95 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                         ).notifier,
                       )
                       .updateQuestionLabel(widget.question.id, val);
+                  if (_isSlugLocked) {
+                    final slug = _generateSlug(val);
+                    widget.variableNameController.text = slug;
+                    ref
+                        .read(
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
+                        )
+                        .updateQuestion(
+                          widget.question.copyWith(variableName: slug),
+                        );
+                  }
                 }
               },
             ),
             const SizedBox(height: 20),
-            PropertyBuilderUtils.buildTextField(
-              label: 'Field Variable Name (API Key/ID)',
-              controller: widget.variableNameController,
-              placeholder: 'my_custom_field',
-              onChanged: (val) {
-                ref
-                    .read(
-                      formBuilderControllerProvider(
-                        widget.controllerKey,
-                      ).notifier,
-                    )
-                    .updateQuestion(
-                      widget.question.copyWith(variableName: val),
-                    );
-              },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Field Variable Name (API Key/ID)',
+                      style: TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isSlugLocked ? Icons.lock : Icons.lock_open,
+                        size: 16,
+                        color: AppColors.brandBlue,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isSlugLocked = !_isSlugLocked;
+                          if (_isSlugLocked) {
+                            final slug = _generateSlug(widget.labelController.text);
+                            widget.variableNameController.text = slug;
+                            ref
+                                .read(
+                                  formBuilderControllerProvider(
+                                    widget.controllerKey,
+                                  ).notifier,
+                                )
+                                .updateQuestion(
+                                  widget.question.copyWith(variableName: slug),
+                                );
+                          }
+                        });
+                      },
+                      tooltip: _isSlugLocked ? 'Unlock to edit manually' : 'Lock to auto-generate from label',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: widget.variableNameController,
+                  readOnly: _isSlugLocked,
+                  decoration: InputDecoration(
+                    hintText: 'my_custom_field',
+                    hintStyle: const TextStyle(color: Colors.black26),
+                    filled: true,
+                    fillColor: _isSlugLocked
+                        ? AppColors.builderElement.withValues(alpha: 0.5)
+                        : AppColors.builderElement,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                  onChanged: (val) {
+                    ref
+                        .read(
+                          formBuilderControllerProvider(
+                            widget.controllerKey,
+                          ).notifier,
+                        )
+                        .updateQuestion(
+                          widget.question.copyWith(variableName: val),
+                        );
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 20),
           ],
@@ -1233,6 +1316,16 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           },
           itemBuilder: (context, index) {
             final option = options[index];
+            final optionValue = (option['option_value'] ?? '').toString();
+            final isMultiple = question.type == QuestionType.checkboxes;
+            
+            // Handle lists or comma-separated default values
+            final isDefault = isMultiple
+                ? (question.defaultValue is List
+                    ? (question.defaultValue as List).contains(optionValue)
+                    : (question.defaultValue?.toString().split(',').contains(optionValue) ?? false))
+                : question.defaultValue?.toString() == optionValue;
+
             final isDuplicate = duplicateValues.contains(
               (option['option_value'] ?? '').toString().trim().toLowerCase(),
             );
@@ -1241,6 +1334,29 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               key: ValueKey(option['id']?.toString() ?? index),
               initialValue: option['option_label']?.toString() ?? '',
               errorText: isDuplicate ? 'Duplicate option value' : null,
+              isMultiple: isMultiple,
+              isDefault: isDefault,
+              onSetDefault: () {
+                if (isMultiple) {
+                  final currentDefaults = question.defaultValue is List
+                      ? List<String>.from(question.defaultValue as List)
+                      : (question.defaultValue?.toString().isNotEmpty == true
+                          ? question.defaultValue!.toString().split(',')
+                          : <String>[]);
+                  if (currentDefaults.contains(optionValue)) {
+                    currentDefaults.remove(optionValue);
+                  } else {
+                    currentDefaults.add(optionValue);
+                  }
+                  _controller().updateQuestionDefaultValue(question.id, currentDefaults);
+                } else {
+                  if (isDefault) {
+                    _controller().updateQuestionDefaultValue(question.id, null);
+                  } else {
+                    _controller().updateQuestionDefaultValue(question.id, optionValue);
+                  }
+                }
+              },
               onChanged: (newValue) {
                 final newOptions = List<Map<String, dynamic>>.from(options);
                 newOptions[index] = {
@@ -1272,16 +1388,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
           },
           icon: const Icon(Icons.add, size: 16),
           label: const Text('Add Option'),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 44),
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary),
-          ),
         ),
-        const SizedBox(height: 12),
-
+        const SizedBox(height: 16),
         PropertyBuilderUtils.buildSwitch(
-          label: "Include 'Other' Option",
+          label: 'Allow "Other" Option',
           value: hasOtherOption,
           onChanged: (val) {
             _controller().updateQuestionMetadata(widget.question.id, {
@@ -1300,12 +1410,18 @@ class _OptionRow extends StatefulWidget {
   final Function(String) onChanged;
   final VoidCallback onDelete;
   final String? errorText;
+  final bool isMultiple;
+  final bool isDefault;
+  final VoidCallback onSetDefault;
 
   const _OptionRow({
     super.key,
     required this.initialValue,
     required this.onChanged,
     required this.onDelete,
+    required this.isMultiple,
+    required this.isDefault,
+    required this.onSetDefault,
     this.errorText,
   });
 
@@ -1354,6 +1470,27 @@ class _OptionRowState extends State<_OptionRow> {
                 size: 20,
               ),
               const SizedBox(width: 8),
+              if (widget.isMultiple)
+                Checkbox(
+                  value: widget.isDefault,
+                  onChanged: (val) => widget.onSetDefault(),
+                  activeColor: AppColors.brandBlue,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                )
+              else
+                GestureDetector(
+                  onTap: widget.onSetDefault,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Icon(
+                      widget.isDefault ? Icons.radio_button_checked : Icons.radio_button_off,
+                      color: widget.isDefault ? AppColors.brandBlue : AppColors.textGrey,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 4),
               Expanded(
                 child: TextField(
                   controller: _controller,
@@ -1398,7 +1535,7 @@ class _OptionRowState extends State<_OptionRow> {
           ),
           if (widget.errorText != null)
             Padding(
-              padding: const EdgeInsets.only(left: 28, top: 4),
+              padding: const EdgeInsets.only(left: 56, top: 4),
               child: Text(
                 widget.errorText!,
                 style: const TextStyle(color: Colors.red, fontSize: 11),

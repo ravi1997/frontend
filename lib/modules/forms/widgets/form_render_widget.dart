@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/form_style.dart';
@@ -38,6 +39,25 @@ class FormRenderWidget extends ConsumerWidget {
 
   const FormRenderWidget({super.key, required this.form});
 
+  bool _isSectionVisible(FormSection section, double width) {
+    final metadata = section.metadata;
+    if (section.isHidden) return false;
+    final showOnMobile = metadata['showOnMobile'] as bool? ?? true;
+    final showOnTablet = metadata['showOnTablet'] as bool? ?? true;
+    final showOnDesktop = metadata['showOnDesktop'] as bool? ?? true;
+    final showOnlyInPreview = metadata['showOnlyInPreview'] as bool? ?? false;
+    if (showOnlyInPreview) return false;
+
+    final isMobile = width < 600;
+    final isTablet = width >= 600 && width < 1024;
+    final isDesktop = width >= 1024;
+
+    if (isMobile && !showOnMobile) return false;
+    if (isTablet && !showOnTablet) return false;
+    if (isDesktop && !showOnDesktop) return false;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeControllerProvider).languageCode;
@@ -54,21 +74,21 @@ class FormRenderWidget extends ConsumerWidget {
     return Container(
       color: canvasColor,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(DesignTokens.spaceXXL),
         child: Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
             child: Column(
               children: [
                 // Form Header
-                _buildFormHeader(form.title, locale),
-                const SizedBox(height: 24),
+                _buildFormHeader(context, form.title, locale),
+                const SizedBox(height: DesignTokens.spaceL),
 
                 // Sections
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final availableWidth = constraints.maxWidth;
-                    final spacing = 24.0;
+                    final spacing = DesignTokens.spaceL;
 
                     int crossAxisCount = 1;
                     if (form.layout == FormLayoutType.twoColumns.name) {
@@ -90,7 +110,9 @@ class FormRenderWidget extends ConsumerWidget {
                     return Wrap(
                       spacing: spacing,
                       runSpacing: spacing,
-                      children: form.sections.map((section) {
+                      children: form.sections.where((section) {
+                        return _isSectionVisible(section, availableWidth);
+                      }).map((section) {
                         return SizedBox(
                           width: itemWidth,
                           child: _buildSection(context, section, locale),
@@ -101,20 +123,25 @@ class FormRenderWidget extends ConsumerWidget {
                 ),
 
                 // Submit Button
-                const SizedBox(height: 32),
+                const SizedBox(height: DesignTokens.spaceXXL),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: DesignTokens.spaceM,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                       ),
                     ),
-                    child: const Text('Submit', style: TextStyle(fontSize: 16)),
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(fontSize: DesignTokens.fontBase),
+                    ),
                   ),
                 ),
               ],
@@ -125,17 +152,17 @@ class FormRenderWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildFormHeader(Object? title, String locale) {
+  Widget _buildFormHeader(BuildContext context, Object? title, String locale) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            blurRadius: DesignTokens.spaceS + 2,
             offset: const Offset(0, 4),
           ),
         ],
@@ -147,7 +174,7 @@ class FormRenderWidget extends ConsumerWidget {
             title.translate(locale),
             style: const TextStyle(
               color: AppColors.textDark,
-              fontSize: 24,
+              fontSize: DesignTokens.fontXL,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -261,7 +288,11 @@ class FormRenderWidget extends ConsumerWidget {
     final sectionStyle = SectionStyle.fromJson(
       Map<String, dynamic>.from(section.ui['style'] as Map? ?? const {}),
     );
-    return Column(
+    final metadata = section.metadata;
+    final collapsible = metadata['collapsible'] as bool? ?? false;
+    final startCollapsed = metadata['startCollapsed'] as bool? ?? false;
+
+    final body = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (sectionStyle.showHeader)
@@ -295,7 +326,7 @@ class FormRenderWidget extends ConsumerWidget {
                 ),
                 if ((section.description?.translate(locale) ?? '')
                     .isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: DesignTokens.spaceXS),
                   Text(
                     section.description.translate(locale),
                     style: _sectionTypographyStyle(
@@ -329,6 +360,23 @@ class FormRenderWidget extends ConsumerWidget {
           ),
       ],
     );
+
+    if (!collapsible) return body;
+
+    return Material(
+      color: Colors.transparent,
+      child: ExpansionTile(
+        key: PageStorageKey<String>('section_${section.id}'),
+        initiallyExpanded: !startCollapsed,
+        title: Text(section.title.translate(locale)),
+        subtitle: (section.description?.translate(locale) ?? '').isEmpty
+            ? null
+            : Text(section.description.translate(locale)),
+        childrenPadding: EdgeInsets.zero,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [body],
+      ),
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -350,7 +398,7 @@ class FormRenderWidget extends ConsumerWidget {
         int.parse(sectionStyle.headerBackgroundColor.replaceAll('#', '0xFF')),
       );
     } catch (_) {
-      sectionBg = Colors.white;
+      sectionBg = Theme.of(context).colorScheme.surface;
       headerBg = AppColors.builderElement.withValues(alpha: 0.5);
     }
 
@@ -619,7 +667,10 @@ class _RenderFieldWidget extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8.0),
             child: Text(
               '*',
-              style: TextStyle(color: Colors.red[400], fontSize: 16),
+              style: TextStyle(
+                color: Colors.red[400],
+                fontSize: DesignTokens.fontBase,
+              ),
             ),
           ),
       ],
@@ -660,13 +711,13 @@ class _RenderFieldWidget extends StatelessWidget {
                 children: [
                   labelWidget,
                   if (helperWidget != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: DesignTokens.spaceXS),
                     helperWidget,
                   ],
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: DesignTokens.spaceM),
             Expanded(child: _buildFieldInput(question, locale)),
           ],
         ),
@@ -682,10 +733,10 @@ class _RenderFieldWidget extends StatelessWidget {
         children: [
           labelWidget,
           if (helperWidget != null) ...[
-            const SizedBox(height: 4),
+                const SizedBox(height: DesignTokens.spaceXS),
             helperWidget,
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: DesignTokens.spaceS),
           _buildFieldInput(question, locale),
         ],
       ),
@@ -701,14 +752,14 @@ class _RenderFieldWidget extends StatelessWidget {
 
     switch (inputStyle) {
       case 'filled':
-        fillColor = Colors.grey.shade200;
+        fillColor = AppColors.builderElement;
         border = const Border(
           bottom: BorderSide(color: AppColors.textGrey, width: 1.5),
         );
         break;
       case 'glass':
-        fillColor = Colors.white.withValues(alpha: 0.3);
-        border = Border.all(color: Colors.white.withValues(alpha: 0.5));
+        fillColor = AppColors.fieldBackground.withValues(alpha: 0.3);
+        border = Border.all(color: AppColors.borderLight.withValues(alpha: 0.5));
         break;
       case 'minimalist':
         fillColor = Colors.transparent;
@@ -886,7 +937,7 @@ class _RenderFieldWidget extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: DesignTokens.spaceS),
                           Text(label, style: textStyle),
                         ],
                       ),
@@ -923,7 +974,7 @@ class _RenderFieldWidget extends StatelessWidget {
                             size: 22,
                             color: textStyle.color ?? AppColors.textGrey,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: DesignTokens.spaceS),
                           Text(label, style: textStyle),
                         ],
                       ),
@@ -947,11 +998,11 @@ class _RenderFieldWidget extends StatelessWidget {
                   color: AppColors.textGrey,
                   size: 32,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: DesignTokens.spaceS),
                 Text(
                   'Click to upload file',
                   style: textStyle.copyWith(
-                    fontSize: 14,
+                    fontSize: DesignTokens.fontM,
                     color: AppColors.textGrey,
                   ),
                 ),
@@ -976,7 +1027,7 @@ class _RenderFieldWidget extends StatelessWidget {
       case QuestionType.signature:
         return Container(
           height: style.height,
-          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          decoration: containerDecor.copyWith(color: AppColors.builderElement),
           child: Center(
             child: Icon(
               Icons.draw,
@@ -999,8 +1050,8 @@ class _RenderFieldWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('0', style: textStyle.copyWith(fontSize: 14)),
-                  Text('100', style: textStyle.copyWith(fontSize: 14)),
+                  Text('0', style: textStyle.copyWith(fontSize: DesignTokens.fontM)),
+                  Text('100', style: textStyle.copyWith(fontSize: DesignTokens.fontM)),
                 ],
               ),
             ),
@@ -1009,7 +1060,7 @@ class _RenderFieldWidget extends StatelessWidget {
       case QuestionType.image:
         return Container(
           height: style.height,
-          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          decoration: containerDecor.copyWith(color: AppColors.builderElement),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1021,11 +1072,11 @@ class _RenderFieldWidget extends StatelessWidget {
                       AppColors.textGrey,
                   size: 64,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: DesignTokens.spaceS + 4),
                 Text(
                   'Upload Image',
                   style: textStyle.copyWith(
-                    fontSize: 16,
+                    fontSize: DesignTokens.fontBase,
                     color: AppColors.textGrey,
                   ),
                 ),
@@ -1094,7 +1145,7 @@ class _RenderFieldWidget extends StatelessWidget {
                         child: Text(
                           'Column ${i + 1}',
                           style: textStyle.copyWith(
-                            fontSize: 12,
+                            fontSize: DesignTokens.fontS,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1114,7 +1165,7 @@ class _RenderFieldWidget extends StatelessWidget {
                         width: 120,
                         child: Text(
                           'Row ${i + 1}',
-                          style: textStyle.copyWith(fontSize: 14),
+                          style: textStyle.copyWith(fontSize: DesignTokens.fontM),
                         ),
                       ),
                       ...List.generate(
@@ -1170,14 +1221,14 @@ class _RenderFieldWidget extends StatelessWidget {
                 size: 18,
                 color: AppColors.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: DesignTokens.spaceS),
               Text(
                 q.type.label,
                 style: textStyle.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: DesignTokens.spaceS),
           Text(
             placeholder.translate(locale).isEmpty
                 ? 'Specialized input preview'

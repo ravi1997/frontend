@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -183,35 +184,38 @@ class _WorkflowConfigurationDialogState
     showDialog(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
         return AlertDialog(
-          title: const Text(
+          title: Text(
             'Insert Variable',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: AppColors.textDark,
+              fontSize: DesignTokens.fontL,
+              color: theme.colorScheme.onSurface,
             ),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusL),
           ),
-          content: Container(
-            width: double.maxFinite,
-            constraints: const BoxConstraints(maxWidth: 400, maxHeight: 400),
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 420,
+              maxHeight: MediaQuery.sizeOf(context).height * 0.5,
+            ),
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: triggers.length,
               separatorBuilder: (context, index) =>
-                  Divider(height: 1, color: Colors.grey.shade200),
+                  Divider(height: 1, color: theme.colorScheme.outline),
               itemBuilder: (context, index) {
                 final q = triggers[index];
                 return ListTile(
                   leading: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(DesignTokens.spaceS),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                     ),
                     child: const Icon(
                       Icons.tag,
@@ -221,15 +225,20 @@ class _WorkflowConfigurationDialogState
                   ),
                   title: Text(
                     q.label.translate(widget.locale),
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontS,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   subtitle: Text(
                     '{${q.variableName?.isNotEmpty == true ? q.variableName : q.id}}',
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: DesignTokens.fontXS,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.66,
+                      ),
+                    ),
                   ),
                   dense: true,
                   onTap: () {
@@ -292,7 +301,7 @@ class _WorkflowConfigurationDialogState
               size: 24,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: DesignTokens.spaceS + 4),
           const Text(
             'Form Workflows',
             style: TextStyle(
@@ -303,7 +312,7 @@ class _WorkflowConfigurationDialogState
           ),
         ],
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       scrollable: true,
       content: ConstrainedBox(
@@ -316,9 +325,12 @@ class _WorkflowConfigurationDialogState
             children: [
               const Text(
                 'Configure automated actions when a form is submitted.',
-                style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                style: TextStyle(
+                  color: AppColors.textGrey,
+                  fontSize: DesignTokens.fontS,
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: DesignTokens.spaceL),
               _buildIntegrationItem(
                 icon: Icons.email_outlined,
                 title: 'Email Notification',
@@ -345,11 +357,13 @@ class _WorkflowConfigurationDialogState
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                                  color: AppColors.borderLight,
                                 ),
                               ),
                               hintText: 'user@example.com OR {question_id}',
-                              hintStyle: const TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(
+                                color: AppColors.textGrey,
+                              ),
                               isDense: true,
                             ),
                             validator: (value) {
@@ -364,7 +378,7 @@ class _WorkflowConfigurationDialogState
                         _buildVariableHelper(_emailController),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     Row(
                       children: [
                         Expanded(
@@ -382,11 +396,13 @@ class _WorkflowConfigurationDialogState
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                                  color: AppColors.borderLight,
                                 ),
                               ),
                               hintText: 'New Form Submission',
-                              hintStyle: const TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(
+                                color: AppColors.textGrey,
+                              ),
                               isDense: true,
                             ),
                             validator: (value) {
@@ -401,7 +417,7 @@ class _WorkflowConfigurationDialogState
                         _buildVariableHelper(_emailSubjectController),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -422,11 +438,13 @@ class _WorkflowConfigurationDialogState
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                                  color: AppColors.borderLight,
                                 ),
                               ),
                               hintText: 'Thank you for your submission {name}!',
-                              hintStyle: const TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(
+                                color: AppColors.textGrey,
+                              ),
                               isDense: true,
                             ),
                           ),
@@ -434,31 +452,37 @@ class _WorkflowConfigurationDialogState
                         _buildVariableHelper(_emailBodyController),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: AppColors.builderElement,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: AppColors.borderLight),
                       ),
-                      child: SwitchListTile(
-                        title: const Text(
-                          'Include form responses summary',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textDark,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          title: const Text(
+                            'Include form responses summary',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textDark,
+                            ),
                           ),
-                        ),
-                        subtitle: const Text(
-                          'Attaches a table of all submitted answers to the email',
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                        value: _includeSummaryEnabled,
-                        onChanged: (v) =>
-                            setState(() => _includeSummaryEnabled = v),
-                        activeTrackColor: AppColors.primary,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          subtitle: const Text(
+                            'Attaches a table of all submitted answers to the email',
+                            style: TextStyle(
+                              fontSize: DesignTokens.fontXS,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                          value: _includeSummaryEnabled,
+                          onChanged: (v) =>
+                              setState(() => _includeSummaryEnabled = v),
+                          activeTrackColor: AppColors.primary,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -495,12 +519,14 @@ class _WorkflowConfigurationDialogState
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                                  color: AppColors.borderLight,
                                 ),
                               ),
                               hintText:
                                   'https://api.example.com/hooks/{user_id}',
-                              hintStyle: const TextStyle(color: Colors.grey),
+                              hintStyle: const TextStyle(
+                                color: AppColors.textGrey,
+                              ),
                               isDense: true,
                             ),
                             validator: (value) {
@@ -515,35 +541,41 @@ class _WorkflowConfigurationDialogState
                         _buildVariableHelper(_webhookController),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: AppColors.builderElement,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: AppColors.borderLight),
                       ),
-                      child: SwitchListTile(
-                        title: const Text(
-                          'Halt Submission on Failure',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textDark,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          title: const Text(
+                            'Halt Submission on Failure',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textDark,
+                            ),
                           ),
-                        ),
-                        subtitle: const Text(
-                          'If the webhook fails (e.g. 500 error), the user sees a "Submission Failed" screen.',
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
-                        ),
-                        value: _haltOnWebhookFailure,
-                        onChanged: (v) =>
-                            setState(() => _haltOnWebhookFailure = v),
-                        activeTrackColor: Colors.redAccent,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
+                          subtitle: const Text(
+                            'If the webhook fails (e.g. 500 error), the user sees a "Submission Failed" screen.',
+                            style: TextStyle(
+                              fontSize: DesignTokens.fontXS,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                          value: _haltOnWebhookFailure,
+                          onChanged: (v) =>
+                              setState(() => _haltOnWebhookFailure = v),
+                          activeTrackColor: Colors.redAccent,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: DesignTokens.spaceM),
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -572,7 +604,7 @@ class _WorkflowConfigurationDialogState
                                   hintText: 'Key (e.g. Authorization)',
                                   hintStyle: const TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey,
+                                    color: AppColors.textGrey,
                                   ),
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -591,7 +623,7 @@ class _WorkflowConfigurationDialogState
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: DesignTokens.spaceS),
                             Expanded(
                               child: TextFormField(
                                 initialValue: e.value['value'],
@@ -604,7 +636,7 @@ class _WorkflowConfigurationDialogState
                                   hintText: 'Value (e.g. Bearer token)',
                                   hintStyle: const TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey,
+                                    color: AppColors.textGrey,
                                   ),
                                   isDense: true,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -617,7 +649,7 @@ class _WorkflowConfigurationDialogState
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                      color: Colors.grey.shade300,
+                                      color: AppColors.borderLight,
                                     ),
                                   ),
                                 ),
@@ -669,7 +701,7 @@ class _WorkflowConfigurationDialogState
           onPressed: _saveLogic,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -700,16 +732,16 @@ class _WorkflowConfigurationDialogState
               decoration: BoxDecoration(
                 color: isEnabled
                     ? AppColors.primary.withValues(alpha: 0.1)
-                    : Colors.grey.shade100,
+                    : AppColors.builderElement,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 icon,
-                color: isEnabled ? AppColors.primary : Colors.grey,
+                color: isEnabled ? AppColors.primary : AppColors.textGrey,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: DesignTokens.spaceM),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,7 +750,7 @@ class _WorkflowConfigurationDialogState
                     title,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: DesignTokens.fontBase,
                       color: AppColors.textDark,
                     ),
                   ),
@@ -726,7 +758,7 @@ class _WorkflowConfigurationDialogState
                     description,
                     style: const TextStyle(
                       color: AppColors.textGrey,
-                      fontSize: 12,
+                      fontSize: DesignTokens.fontS,
                     ),
                   ),
                 ],
@@ -740,11 +772,11 @@ class _WorkflowConfigurationDialogState
           ],
         ),
         if (isEnabled && child != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: DesignTokens.spaceM),
           Padding(padding: const EdgeInsets.only(left: 44), child: child),
         ],
         if (isEnabled) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: DesignTokens.spaceM),
           Padding(
             padding: const EdgeInsets.only(left: 44),
             child: _buildConditionBuilder(id),
@@ -767,20 +799,23 @@ class _WorkflowConfigurationDialogState
       children: [
         Row(
           children: [
-            const Icon(Icons.filter_list, size: 14, color: Colors.grey),
-            const SizedBox(width: 8),
+            const Icon(Icons.filter_list, size: 14, color: AppColors.textGrey),
+            const SizedBox(width: DesignTokens.spaceS),
             Text(
               'Workflow Logic',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: isConditional ? AppColors.primary : Colors.grey,
+                color: isConditional ? AppColors.primary : AppColors.textGrey,
               ),
             ),
             const Spacer(),
             Text(
               isConditional ? 'Conditional' : 'Run Always',
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: DesignTokens.fontXS,
+                color: AppColors.textGrey,
+              ),
             ),
             Switch(
               value: isConditional,
@@ -798,9 +833,9 @@ class _WorkflowConfigurationDialogState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.builderElement,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: AppColors.borderLight),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -814,7 +849,7 @@ class _WorkflowConfigurationDialogState
                     DropdownButton<String>(
                       value: conditionGroup['matchType'] ?? 'and',
                       underline: const SizedBox(),
-                      dropdownColor: Colors.white,
+                      dropdownColor: Theme.of(context).colorScheme.surface,
                       style: const TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
@@ -825,7 +860,10 @@ class _WorkflowConfigurationDialogState
                           value: 'and',
                           child: Text('ALL (AND)'),
                         ),
-                        DropdownMenuItem<String>(value: 'or', child: Text('ANY (OR)')),
+                        DropdownMenuItem<String>(
+                          value: 'or',
+                          child: Text('ANY (OR)'),
+                        ),
                       ],
                       onChanged: (val) {
                         if (val != null) {
@@ -842,7 +880,7 @@ class _WorkflowConfigurationDialogState
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: DesignTokens.spaceS),
                 ...rules.asMap().entries.map((entry) {
                   return _buildConditionRow(
                     entry.key,
@@ -888,31 +926,31 @@ class _WorkflowConfigurationDialogState
     final operators = selectedTrigger != null
         ? switch (selectedTrigger.type) {
             QuestionType.number => {
-                'equals': 'Equals (=)',
-                'not_equals': 'Not Equals (!=)',
-                'greater_than': 'Greater Than (>)',
-                'less_than': 'Less Than (<)',
-                'greater_than_equals': 'Greater Than or Equal (>=)',
-                'less_than_equals': 'Less Than or Equal (<=)',
-                'is_empty': 'Is Empty',
-                'is_not_empty': 'Is Not Empty',
-              },
+              'equals': 'Equals (=)',
+              'not_equals': 'Not Equals (!=)',
+              'greater_than': 'Greater Than (>)',
+              'less_than': 'Less Than (<)',
+              'greater_than_equals': 'Greater Than or Equal (>=)',
+              'less_than_equals': 'Less Than or Equal (<=)',
+              'is_empty': 'Is Empty',
+              'is_not_empty': 'Is Not Empty',
+            },
             QuestionType.date || QuestionType.time => {
-                'equals': 'Equals',
-                'not_equals': 'Not Equals',
-                'before': 'Before',
-                'after': 'After',
-                'is_empty': 'Is Empty',
-                'is_not_empty': 'Is Not Empty',
-              },
+              'equals': 'Equals',
+              'not_equals': 'Not Equals',
+              'before': 'Before',
+              'after': 'After',
+              'is_empty': 'Is Empty',
+              'is_not_empty': 'Is Not Empty',
+            },
             _ => {
-                'equals': 'Equals',
-                'not_equals': 'Not Equals',
-                'contains': 'Contains',
-                'not_contains': 'Does Not Contain',
-                'is_empty': 'Is Empty',
-                'is_not_empty': 'Is Not Empty',
-              },
+              'equals': 'Equals',
+              'not_equals': 'Not Equals',
+              'contains': 'Contains',
+              'not_contains': 'Does Not Contain',
+              'is_empty': 'Is Empty',
+              'is_not_empty': 'Is Not Empty',
+            },
           }
         : {'equals': 'Equals'};
     final op = condition['operator'];
@@ -922,9 +960,9 @@ class _WorkflowConfigurationDialogState
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         children: [
@@ -956,7 +994,7 @@ class _WorkflowConfigurationDialogState
                   },
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: DesignTokens.spaceS),
               Expanded(
                 flex: 3,
                 child: _buildDropdown(
@@ -995,14 +1033,16 @@ class _WorkflowConfigurationDialogState
             ],
           ),
           if (needsValue) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: DesignTokens.spaceS),
             if (selectedTrigger == null)
               const SizedBox()
             else if (selectedTrigger.options.isNotEmpty)
               _buildDropdown(
                 label: 'Select Value',
-                value: selectedTrigger.options
-                        .any((o) => o.value == condition['value'])
+                value:
+                    selectedTrigger.options.any(
+                      (o) => o.value == condition['value'],
+                    )
                     ? condition['value']
                     : null,
                 items: selectedTrigger.options
@@ -1051,10 +1091,10 @@ class _WorkflowConfigurationDialogState
                     lastDate: DateTime(2100),
                     builder: (context, child) => Theme(
                       data: Theme.of(context).copyWith(
-                        colorScheme: const ColorScheme.light(
+                        colorScheme: ColorScheme.light(
                           primary: AppColors.primary,
-                          onPrimary: Colors.white,
-                          surface: Colors.white,
+                          onPrimary: Theme.of(context).colorScheme.onPrimary,
+                          surface: Theme.of(context).colorScheme.surface,
                           onSurface: AppColors.textDark,
                         ),
                       ),
@@ -1079,10 +1119,10 @@ class _WorkflowConfigurationDialogState
                     initialTime: TimeOfDay.now(),
                     builder: (context, child) => Theme(
                       data: Theme.of(context).copyWith(
-                        colorScheme: const ColorScheme.light(
+                        colorScheme: ColorScheme.light(
                           primary: AppColors.primary,
-                          onPrimary: Colors.white,
-                          surface: Colors.white,
+                          onPrimary: Theme.of(context).colorScheme.onPrimary,
+                          surface: Theme.of(context).colorScheme.surface,
                           onSurface: AppColors.textDark,
                         ),
                       ),
@@ -1103,27 +1143,31 @@ class _WorkflowConfigurationDialogState
                 initialValue: condition['value'],
                 style: const TextStyle(
                   color: AppColors.textDark,
-                  fontSize: 12,
+                  fontSize: DesignTokens.fontS,
                 ),
                 keyboardType: selectedTrigger.type == QuestionType.number
                     ? const TextInputType.numberWithOptions(decimal: true)
                     : TextInputType.text,
                 decoration: InputDecoration(
                   labelText: 'Value',
-                  labelStyle:
-                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  labelStyle: const TextStyle(
+                    color: AppColors.textGrey,
+                    fontSize: DesignTokens.fontS,
+                  ),
                   hintText: selectedTrigger.type == QuestionType.number
                       ? 'Enter number'
                       : 'Enter value',
-                  hintStyle:
-                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  hintStyle: const TextStyle(
+                    color: AppColors.textGrey,
+                    fontSize: DesignTokens.fontS,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: AppColors.borderLight),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: BorderSide(color: AppColors.borderLight),
                   ),
                   isDense: true,
                 ),
@@ -1148,32 +1192,35 @@ class _WorkflowConfigurationDialogState
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
-          color: Colors.white,
+          border: Border.all(color: AppColors.borderLight),
+          color: Theme.of(context).colorScheme.surface,
         ),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: Colors.grey),
-            const SizedBox(width: 12),
+            Icon(icon, size: 16, color: AppColors.textGrey),
+            const SizedBox(width: DesignTokens.spaceS + 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(color: Colors.grey, fontSize: 10),
+                    style: const TextStyle(
+                      color: AppColors.textGrey,
+                      fontSize: DesignTokens.fontXS,
+                    ),
                   ),
                   Text(
                     value.isEmpty ? 'Select...' : value,
                     style: const TextStyle(
                       color: AppColors.textDark,
-                      fontSize: 12,
+                      fontSize: DesignTokens.fontS,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_drop_down, color: Colors.grey),
+            const Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
           ],
         ),
       ),
@@ -1189,14 +1236,17 @@ class _WorkflowConfigurationDialogState
     return InputDecorator(
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+        labelStyle: const TextStyle(
+          color: AppColors.textGrey,
+          fontSize: DesignTokens.fontS,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1207,9 +1257,16 @@ class _WorkflowConfigurationDialogState
           items: items,
           onChanged: onChanged,
           isExpanded: true,
-          dropdownColor: Colors.white,
-          style: const TextStyle(color: AppColors.textDark, fontSize: 12),
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.grey, size: 20),
+          dropdownColor: Theme.of(context).colorScheme.surface,
+          style: const TextStyle(
+            color: AppColors.textDark,
+            fontSize: DesignTokens.fontS,
+          ),
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            color: AppColors.textGrey,
+            size: 20,
+          ),
         ),
       ),
     );

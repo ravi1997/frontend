@@ -154,66 +154,73 @@ class AuthCardScaffold extends StatelessWidget {
             horizontal: horizontalPadding,
             vertical: verticalPadding,
           ),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 460),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-              border: Border.all(color: theme.colorScheme.outline),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: screenSize == ScreenSize.desktop || screenSize == ScreenSize.wide
+                  ? 520
+                  : 460,
             ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize == ScreenSize.mobile
-                    ? DesignTokens.spaceL
-                    : DesignTokens.spaceXL,
-                vertical: screenSize == ScreenSize.mobile
-                    ? DesignTokens.spaceXL
-                    : DesignTokens.spaceXXL,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      headerIcon,
-                      size: 32,
-                      color: theme.colorScheme.primary,
-                    ),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+                border: Border.all(color: theme.colorScheme.outline),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
-                  const SizedBox(height: DesignTokens.spaceL),
-                  Text(
-                    title,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontSize: DesignTokens.fontXXL,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: DesignTokens.spaceS + 4),
-                  Text(
-                    subtitle,
-                    textAlign: TextAlign.center,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spaceXL),
-                  child,
                 ],
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenSize == ScreenSize.mobile
+                      ? DesignTokens.spaceL
+                      : DesignTokens.spaceXL,
+                  vertical: screenSize == ScreenSize.mobile
+                      ? DesignTokens.spaceXL
+                      : DesignTokens.spaceXXL,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        headerIcon,
+                        size: 32,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: DesignTokens.spaceL),
+                    Text(
+                      title,
+                      style: textTheme.titleLarge?.copyWith(
+                        fontSize: DesignTokens.fontXXL,
+                        fontWeight: FontWeight.w700,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
+                    Text(
+                      subtitle,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                      ),
+                    ),
+                    const SizedBox(height: DesignTokens.spaceXL),
+                    child,
+                  ],
+                ),
               ),
             ),
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/modules/forms/models/custom_field_template.dart';
 import 'package:frontend/modules/forms/models/form_layout_type.dart';
@@ -66,7 +67,7 @@ class FormCanvasWidget extends ConsumerWidget {
             child: Container(
               color: canvasColor,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(DesignTokens.spaceXXL),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
@@ -85,16 +86,18 @@ class FormCanvasWidget extends ConsumerWidget {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 24,
+                              vertical: DesignTokens.spaceM,
+                              horizontal: DesignTokens.spaceL,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.circular(
+                                DesignTokens.radiusS,
+                              ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 10,
+                                  blurRadius: DesignTokens.spaceS + 2,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
@@ -120,7 +123,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                     : titleText;
                               }(),
                               style: const TextStyle(
-                                fontSize: 24,
+                                fontSize: DesignTokens.fontXL,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textDark,
                               ),
@@ -128,13 +131,15 @@ class FormCanvasWidget extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: DesignTokens.spaceL),
 
                         // Empty State
                         if (state.form.sections.isEmpty)
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 80),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: DesignTokens.spaceXXL + 32,
+                            ),
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: AppColors.borderLight,
@@ -146,7 +151,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                 color: AppColors.textGrey.withValues(
                                   alpha: 0.3,
                                 ),
-                                borderRadius: 16,
+                                borderRadius: DesignTokens.radiusL,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -157,21 +162,21 @@ class FormCanvasWidget extends ConsumerWidget {
                                       alpha: 0.2,
                                     ),
                                   ),
-                                  const SizedBox(height: 24),
+                                  const SizedBox(height: DesignTokens.spaceL),
                                   const Text(
                                     'Your form is empty',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: DesignTokens.fontL,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.textDark,
                                     ),
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: DesignTokens.spaceM),
                                   const Text(
                                     'Start by adding a section or dragging a field',
                                     style: TextStyle(
                                       color: AppColors.textGrey,
-                                      fontSize: 15,
+                                      fontSize: DesignTokens.fontM,
                                     ),
                                   ),
                                 ],
@@ -184,7 +189,7 @@ class FormCanvasWidget extends ConsumerWidget {
                           LayoutBuilder(
                             builder: (context, constraints) {
                               final availableWidth = constraints.maxWidth;
-                              final spacing = 24.0;
+                              final spacing = DesignTokens.spaceL;
 
                               int crossAxisCount = 1;
                               if (state.form.layout ==
@@ -300,7 +305,7 @@ class FormCanvasWidget extends ConsumerWidget {
                             },
                           ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: DesignTokens.spaceL),
 
                         // Add Section Button (only if not in question/section/workflow mode)
                         if (mode == null || mode == 'form')
@@ -322,19 +327,21 @@ class FormCanvasWidget extends ConsumerWidget {
                               label: const Text('Add New Section'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.builderElement,
-                                foregroundColor: Colors.black,
+                                foregroundColor: AppColors.textDark,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
+                                  horizontal: DesignTokens.spaceL,
+                                  vertical: DesignTokens.spaceS + 4,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(
+                                    DesignTokens.radiusM,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
 
-                        const SizedBox(height: 60), // Bottom padding
+                        const SizedBox(height: DesignTokens.spaceXXL + 12),
                       ],
                     ),
                   ),
@@ -358,7 +365,10 @@ class _DashedBorderPainter extends CustomPainter {
   final double dashWidth = 5;
   final double dashSpace = 3;
 
-  _DashedBorderPainter({this.color = Colors.grey, this.borderRadius = 6});
+  _DashedBorderPainter({
+    this.color = AppColors.borderLight,
+    this.borderRadius = 6,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {

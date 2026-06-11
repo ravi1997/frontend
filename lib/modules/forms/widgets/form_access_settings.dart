@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class FormAccessSettings extends StatelessWidget {
   final Map<String, dynamic> form;
@@ -19,7 +20,7 @@ class FormAccessSettings extends StatelessWidget {
           'Access Settings',
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         SwitchListTile(
           title: const Text('Public Form'),
           value: form['isPublic'] ?? false,

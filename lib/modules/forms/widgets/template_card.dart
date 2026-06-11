@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/modules/forms/models/form_template.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class TemplateCard extends StatelessWidget {
   final FormTemplate template;
@@ -20,69 +21,69 @@ class TemplateCard extends StatelessWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildThumbnail(),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(DesignTokens.spaceM),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTitle(),
-                  const SizedBox(height: 4),
-                  _buildDescription(),
-                  const SizedBox(height: 8),
-                  _buildTags(),
-                  const SizedBox(height: 12),
+                  _buildTitle(context),
+                  const SizedBox(height: DesignTokens.spaceXS),
+                  _buildDescription(context),
+                  const SizedBox(height: DesignTokens.spaceS),
+                  _buildTags(context),
+                  const SizedBox(height: DesignTokens.spaceM),
                   Row(
                     children: [
                       Icon(
                         Icons.description_outlined,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: DesignTokens.spaceXS),
                       Text(
                         '${template.form.sections.fold<int>(0, (count, section) => count + section.questions.length)} fields',
                         style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: Colors.grey[600],
+                          fontSize: DesignTokens.fontXS,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
                         ),
                       ),
                       const Spacer(),
                       Icon(
                         Icons.trending_up,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: DesignTokens.spaceXS),
                       Text(
                         '${template.usageCount} uses',
                         style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: Colors.grey[600],
+                          fontSize: DesignTokens.fontXS,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: DesignTokens.spaceS),
                       ElevatedButton.icon(
                         onPressed: onUse,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                            horizontal: DesignTokens.spaceM,
+                            vertical: DesignTokens.spaceXS + 2,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                           ),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -91,7 +92,7 @@ class TemplateCard extends StatelessWidget {
                         label: Text(
                           'Use',
                           style: GoogleFonts.inter(
-                            fontSize: 11,
+                            fontSize: DesignTokens.fontS,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -150,7 +151,7 @@ class TemplateCard extends StatelessWidget {
             _ => [const Color(0xFF6B7280), const Color(0xFF4B5563)],
           },
         ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(DesignTokens.radiusM)),
       ),
       child: Stack(
         children: [
@@ -158,15 +159,18 @@ class TemplateCard extends StatelessWidget {
             top: 8,
             right: 8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceS,
+                vertical: DesignTokens.spaceXS + 2,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusM),
               ),
               child: Text(
                 template.category.displayName,
                 style: GoogleFonts.inter(
-                  fontSize: 10,
+                  fontSize: DesignTokens.fontXS,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
@@ -197,29 +201,32 @@ class TemplateCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     return Text(
       template.name,
       style: GoogleFonts.inter(
-        fontSize: 14,
+        fontSize: DesignTokens.fontM,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF111827),
+        color: Theme.of(context).colorScheme.onSurface,
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
     return Text(
       template.description,
-      style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF6B7280)),
+      style: GoogleFonts.inter(
+        fontSize: DesignTokens.fontS,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
+      ),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildTags() {
+  Widget _buildTags(BuildContext context) {
     if (template.tags.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -229,16 +236,19 @@ class TemplateCard extends StatelessWidget {
       runSpacing: 4,
       children: template.tags.take(3).map((tag) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spaceS,
+            vertical: DesignTokens.spaceXS,
+          ),
           decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(4),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
           child: Text(
             tag,
             style: GoogleFonts.inter(
-              fontSize: 10,
-              color: const Color(0xFF6B7280),
+              fontSize: DesignTokens.fontXS,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
             ),
           ),
         );

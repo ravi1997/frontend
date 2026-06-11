@@ -4,8 +4,7 @@ import 'package:frontend/core/app_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:js_interop';
-import 'package:web/web.dart' as web;
+import 'package:file_picker/file_picker.dart';
 import 'package:frontend/modules/forms/widgets/signature_pad_widget.dart';
 import 'package:frontend/modules/forms/widgets/camera_capture_dialog.dart';
 import 'package:frontend/modules/forms/widgets/language_switcher.dart';
@@ -105,6 +104,37 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     bool inRepeatedSection = false,
   }) {
     return inRepeatedSection ? '${section.id}.${question.id}' : question.id;
+  }
+
+  bool _isSectionVisibleForPublished(FormSection section) {
+    final metadata = section.metadata;
+    if (section.isHidden) return false;
+    if (metadata['showOnlyInPreview'] as bool? ?? false) return false;
+    return true;
+  }
+
+  bool _isSectionComplete(
+    FormSection section,
+    Map<String, dynamic> formData,
+    Map<String, bool> requiredMap,
+    Map<String, bool> visibilityMap,
+  ) {
+    final visibleQuestions = section.questions
+        .where((q) => visibilityMap[q.id] ?? true)
+        .toList();
+    for (final question in visibleQuestions) {
+      if (requiredMap[question.id] != true) continue;
+      final value = formData[question.id];
+      if (value == null) return false;
+      if (value is String && value.trim().isEmpty) return false;
+      if (value is List && value.isEmpty) return false;
+    }
+    for (final child in section.sections) {
+      if (!_isSectionComplete(child, formData, requiredMap, visibilityMap)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override
@@ -563,7 +593,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final formData = ref.watch(submitFormDataProvider);
     final visibleSections = form.sections
-        .where((s) => visibilityMap[s.id] ?? true)
+        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
         .toList();
 
     return SingleChildScrollView(
@@ -752,7 +782,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final spacing = form.style.sectionSpacing;
     final visibleSections = form.sections
-        .where((s) => visibilityMap[s.id] ?? true)
+        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
         .toList();
 
     return LayoutBuilder(
@@ -869,7 +899,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final sections = form.sections;
     final visibleSections = sections
-        .where((s) => visibilityMap[s.id] ?? true)
+        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
         .toList();
 
     if (_currentStep >= visibleSections.length) {
@@ -880,6 +910,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     final currentSection = visibleSections.isEmpty
         ? null
         : visibleSections[_currentStep];
+    final currentData = ref.read(submitFormDataProvider);
+    final currentRequiresGate =
+        currentSection?.metadata['requiredToContinue'] as bool? ?? false;
     final primaryColor = PreviewUtils.parseColor(
       form.style.primaryColor,
       AppColors.primary,
@@ -1010,7 +1043,16 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         if (_currentStep < visibleSections.length - 1)
                           ElevatedButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? true) {
+                              final valid = _formKey.currentState?.validate() ?? true;
+                              final complete = !currentRequiresGate
+                                  ? true
+                                  : _isSectionComplete(
+                                      currentSection,
+                                      currentData,
+                                      requiredMap,
+                                      visibilityMap,
+                                    );
+                              if (valid && complete) {
                                 setState(() => _currentStep++);
                               }
                             },
@@ -1027,7 +1069,16 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         else
                           ElevatedButton(
                             onPressed: () {
-                              if (_formKey.currentState?.validate() ?? true) {
+                              final valid = _formKey.currentState?.validate() ?? true;
+                              final complete = !currentRequiresGate
+                                  ? true
+                                  : _isSectionComplete(
+                                      currentSection,
+                                      currentData,
+                                      requiredMap,
+                                      visibilityMap,
+                                    );
+                              if (valid && complete) {
                                 setState(() => _isReviewing = true);
                               }
                             },
@@ -2804,58 +2855,28 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         ? _extensionsForTypes(allowedTypes)
         : null;
 
-    void pickFile() {
-      // Build the MIME/extension accept string, e.g. '.pdf,.jpg'
-      final accept = extensions != null
-          ? extensions.map((e) => '.$e').join(',')
-          : '';
-
-      // Create a hidden <input type="file"> using package:web
-      final input = web.HTMLInputElement()
-        ..type = 'file'
-        ..accept = accept;
-
-      // Listen for the change event, then read the file bytes
-      input.addEventListener(
-        'change',
-        (web.Event _) {
-          final files = input.files;
-          if (files == null || files.length == 0) return;
-          final file = files.item(0)!;
-
-          final reader = web.FileReader();
-          reader.addEventListener(
-            'load',
-            (web.Event _) {
-              // result is a JS ArrayBuffer; convert to Uint8List
-              final jsBuffer = reader.result;
-              Uint8List? bytes;
-              try {
-                bytes = (jsBuffer as JSArrayBuffer).toDart.asUint8List();
-              } catch (_) {
-                bytes = null;
-              }
-              if (mounted) {
-                ref
-                    .read(submitFormDataProvider.notifier)
-                    .update(
-                      (s) => {
-                        ...s,
-                        q.id: {
-                          'name': file.name,
-                          'size': file.size,
-                          'bytes': bytes,
-                        },
-                      },
-                    );
-              }
-            }.toJS,
-          );
-          reader.readAsArrayBuffer(file);
-        }.toJS,
+    Future<void> pickFile() async {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: extensions != null ? FileType.custom : FileType.any,
+        allowedExtensions: extensions,
+        withData: true,
       );
+      if (!mounted || result == null || result.files.isEmpty) {
+        return;
+      }
 
-      input.click();
+      final file = result.files.first;
+      ref.read(submitFormDataProvider.notifier).update(
+            (s) => {
+              ...s,
+              q.id: {
+                'name': file.name,
+                'size': file.size,
+                'bytes': file.bytes,
+              },
+            },
+          );
     }
 
     String formatBytes(int bytes) {
@@ -2992,60 +3013,33 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         : null;
 
     Future<void> pickFiles() async {
-      final accept = isGallery
-          ? 'image/*'
-          : (extensions != null ? extensions.map((e) => '.$e').join(',') : '');
-      final input = web.HTMLInputElement()
-        ..type = 'file'
-        ..multiple = isMulti
-        ..accept = accept;
-
-      input.addEventListener(
-        'change',
-        (web.Event _) {
-          final files = input.files;
-          if (files == null || files.length == 0) return;
-          final picked = <Map<String, dynamic>>[];
-          int remaining = files.length;
-
-          void commit() {
-            if (!mounted) return;
-            ref.read(submitFormDataProvider.notifier).update((state) {
-              final next = Map<String, dynamic>.from(state);
-              next[_fieldId] = isMulti
-                  ? picked
-                  : (picked.isNotEmpty ? picked.first : null);
-              return next;
-            });
-          }
-
-          for (var i = 0; i < files.length; i++) {
-            final file = files.item(i);
-            if (file == null) continue;
-            final reader = web.FileReader();
-            reader.addEventListener(
-              'load',
-              (web.Event _) {
-                Uint8List? bytes;
-                try {
-                  bytes = (reader.result as JSArrayBuffer).toDart.asUint8List();
-                } catch (_) {
-                  bytes = null;
-                }
-                picked.add({
-                  'name': file.name,
-                  'size': file.size,
-                  'bytes': bytes,
-                });
-                remaining -= 1;
-                if (remaining == 0) commit();
-              }.toJS,
-            );
-            reader.readAsArrayBuffer(file);
-          }
-        }.toJS,
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: isMulti,
+        type: isGallery
+            ? FileType.image
+            : (extensions != null ? FileType.custom : FileType.any),
+        allowedExtensions: extensions,
+        withData: true,
       );
-      input.click();
+      if (!mounted || result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final picked = result.files
+          .map(
+            (file) => <String, dynamic>{
+              'name': file.name,
+              'size': file.size,
+              'bytes': file.bytes,
+            },
+          )
+          .toList();
+
+      ref.read(submitFormDataProvider.notifier).update((state) {
+        final next = Map<String, dynamic>.from(state);
+        next[_fieldId] = isMulti ? picked : picked.first;
+        return next;
+      });
     }
 
     final files = isMulti && value is List

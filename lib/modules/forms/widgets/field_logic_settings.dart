@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/app/localization/locale_controller.dart';
@@ -74,27 +75,30 @@ class FieldLogicSettings extends ConsumerWidget {
           'FIELD LOGIC CONTROLS',
           style: TextStyle(
             color: AppColors.textGrey,
-            fontSize: 12,
+            fontSize: DesignTokens.fontS,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: DesignTokens.spaceM),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.borderLight),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
             color: AppColors.builderElement,
           ),
           child: Column(
             children: [
               if (rules.isEmpty)
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: EdgeInsets.symmetric(vertical: DesignTokens.spaceL),
                   child: Text(
                     'No logic rules applied to this field.',
-                    style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+                    style: TextStyle(
+                      color: AppColors.textGrey,
+                      fontSize: DesignTokens.fontS,
+                    ),
                   ),
                 )
               else
@@ -107,7 +111,7 @@ class FieldLogicSettings extends ConsumerWidget {
                     locale,
                   ),
                 ),
-              const SizedBox(height: 12),
+              const SizedBox(height: DesignTokens.spaceM),
               ElevatedButton.icon(
                 onPressed: () async {
                   final state = ref
@@ -190,7 +194,7 @@ class FieldLogicSettings extends ConsumerWidget {
           Row(
             children: [
               Icon(icon, size: 16, color: actionColor),
-              const SizedBox(width: 8),
+              const SizedBox(width: DesignTokens.spaceS),
               Text(
                 action.toString().toUpperCase().replaceAll('_', ' '),
                 style: TextStyle(
@@ -249,21 +253,27 @@ class FieldLogicSettings extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: DesignTokens.spaceS),
           Text(
             'If ${conditions.length} condition(s) are met:',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: DesignTokens.fontS,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           ...conditions.take(2).map((c) {
             return Text(
               '• ${c['triggerId'] != null ? _getFieldLabel(c['triggerId'], locale) : 'Unknown'} ${c['operator']} "${c['value']}"',
-              style: const TextStyle(fontSize: 11, color: AppColors.textGrey),
+              style: const TextStyle(
+                fontSize: DesignTokens.fontXS,
+                color: AppColors.textGrey,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             );
           }),
           if (conditions.length > 2)
-            const Text('...', style: TextStyle(fontSize: 10)),
+            const Text('...', style: TextStyle(fontSize: DesignTokens.fontXS)),
         ],
       ),
     );

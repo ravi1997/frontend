@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "commit": "e1c84613892292527565fc32c5c7f37b924e092a",
-    "indexed_at": "2026-06-08T10:00:14Z",
+    "commit": "f020dee47e463995f5b906f2733dbf015becf3c3",
+    "indexed_at": "2026-06-11T04:14:29Z",
     "project": "home-ravi-workspace-frontend",
-    "nodes": 0,
-    "edges": 0,
-    "original_size": 102400,
-    "compressed_size": 1396,
+    "nodes": 3044,
+    "edges": 5897,
+    "original_size": 6291456,
+    "compressed_size": 588568,
     "compression_level": 3
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class PropertyBuilderUtils {
   static Widget buildTextField({
@@ -25,11 +26,11 @@ class PropertyBuilderUtils {
           style: labelStyle ??
               const TextStyle(
                 color: AppColors.textDark,
-                fontSize: 13,
+                fontSize: DesignTokens.fontS,
                 fontWeight: FontWeight.w600,
               ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -40,17 +41,17 @@ class PropertyBuilderUtils {
             hintText: placeholder,
             hintStyle: hintStyle ?? const TextStyle(color: Colors.black26),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 14,
+              horizontal: DesignTokens.spaceM,
+              vertical: DesignTokens.spaceS + 6,
             ),
             filled: true,
             fillColor: fillColor ?? AppColors.builderElement,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
               borderSide: const BorderSide(color: AppColors.primary),
             ),
           ),
@@ -72,15 +73,15 @@ class PropertyBuilderUtils {
         label,
         style: const TextStyle(
           color: AppColors.textDark,
-          fontSize: 14,
+          fontSize: DesignTokens.fontM,
           fontWeight: FontWeight.w500,
         ),
       ),
       if (description != null) ...[
-        const SizedBox(height: 4),
+        const SizedBox(height: DesignTokens.spaceXS),
         Text(
           description,
-          style: const TextStyle(color: AppColors.textGrey, fontSize: 12),
+          style: const TextStyle(color: AppColors.textGrey, fontSize: DesignTokens.fontS),
         ),
       ],
     ];
@@ -94,7 +95,7 @@ class PropertyBuilderUtils {
             children: children,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: DesignTokens.spaceS),
         Switch(
           value: value,
           onChanged: onChanged,
@@ -121,7 +122,7 @@ class PropertyBuilderUtils {
               label,
               style: const TextStyle(
                 color: AppColors.textDark,
-                fontSize: 13,
+                fontSize: DesignTokens.fontS,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -129,7 +130,7 @@ class PropertyBuilderUtils {
               value.toStringAsFixed(0),
               style: const TextStyle(
                 color: AppColors.brandBlue,
-                fontSize: 13,
+                fontSize: DesignTokens.fontS,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -176,16 +177,16 @@ class PropertyBuilderUtils {
           label,
           style: const TextStyle(
             color: AppColors.textDark,
-            fontSize: 13,
+            fontSize: DesignTokens.fontS,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceM),
           decoration: BoxDecoration(
             color: AppColors.builderElement,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
@@ -203,7 +204,7 @@ class PropertyBuilderUtils {
 
   static Widget buildSectionHeader({required String title, Widget? trailing}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceM),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -211,7 +212,7 @@ class PropertyBuilderUtils {
             title,
             style: const TextStyle(
               color: AppColors.textGrey,
-              fontSize: 12,
+              fontSize: DesignTokens.fontS,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
             ),

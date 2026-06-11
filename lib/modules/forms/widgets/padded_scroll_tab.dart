@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/theme/tokens.dart';
 
 class PaddedScrollTab extends StatelessWidget {
   final Widget child;
@@ -11,7 +12,7 @@ class PaddedScrollTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(DesignTokens.spaceL),
       child: child,
     );
   }

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 
 // ---------------------------------------------------------------------------
 // ACCORDION — collapsible section; works standalone (no sub-sections needed)
@@ -61,10 +62,10 @@ class _AccordionSectionState extends State<AccordionSection>
     final title =
         (widget.section.title?.translate(widget.locale) as String?) ?? '';
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceL),
       decoration: BoxDecoration(
         color: widget.sectionBg,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusS + 2),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
@@ -77,10 +78,13 @@ class _AccordionSectionState extends State<AccordionSection>
       child: Column(
         children: [
           InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS + 2),
             onTap: _toggle,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceL,
+                vertical: DesignTokens.spaceM,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -88,7 +92,7 @@ class _AccordionSectionState extends State<AccordionSection>
                       title.isEmpty ? 'Section' : title,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: DesignTokens.fontM,
                         color: AppColors.textDark,
                       ),
                     ),
@@ -202,7 +206,7 @@ class _TabbedSectionState extends State<TabbedSection>
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: DesignTokens.spaceL),
       decoration: BoxDecoration(
         color: widget.sectionBg,
         borderRadius: BorderRadius.circular(radius),
@@ -220,12 +224,17 @@ class _TabbedSectionState extends State<TabbedSection>
         children: [
           if (showHeader && sectionTitle.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              padding: const EdgeInsets.fromLTRB(
+                DesignTokens.spaceL,
+                DesignTokens.spaceM,
+                DesignTokens.spaceL,
+                0,
+              ),
               child: Text(
                 sectionTitle,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: DesignTokens.fontL,
                   color: AppColors.textDark,
                 ),
               ),

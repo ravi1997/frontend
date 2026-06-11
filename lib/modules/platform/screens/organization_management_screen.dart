@@ -299,7 +299,9 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
         final isSuspended = status == 'suspended';
         final isSelected = _selectedOrgIdForStats == id;
 
-        return Card(
+        return SizedBox(
+          width: double.infinity,
+          child: Card(
           margin: const EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusM),
@@ -388,6 +390,7 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
               ],
             ),
             onTap: () => _fetchOrgStats(id),
+          ),
           ),
         );
       },

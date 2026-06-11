@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/forms/models/form_builder_state.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -57,7 +58,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
 
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.builderBackground,
             border: Border(
               left: BorderSide(color: AppColors.borderLight, width: 1),
             ),
@@ -65,21 +66,21 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(DesignTokens.spaceL),
                 child: Row(
                   children: [
                     const Icon(
                       Icons.layers_outlined,
                       color: AppColors.textGrey,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: DesignTokens.spaceS),
                     Expanded(
                       child: Text(
                         'Bulk Edit (${questions.length} Questions)',
                         style: const TextStyle(
                           color: AppColors.textDark,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: DesignTokens.fontM,
                         ),
                       ),
                     ),
@@ -99,7 +100,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
               const Divider(height: 1),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(DesignTokens.spaceL),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -107,12 +108,12 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                         'COMMON CHANGES',
                         style: TextStyle(
                           color: AppColors.textGrey,
-                          fontSize: 12,
+                          fontSize: DesignTokens.fontS,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: DesignTokens.spaceM),
                       if (compatibleTypes.length > 1) ...[
                         DropdownButtonFormField<QuestionType>(
                           decoration: const InputDecoration(
@@ -131,7 +132,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                             ),
                           ),
                           style: const TextStyle(color: AppColors.textDark),
-                          dropdownColor: Colors.white,
+                          dropdownColor: Theme.of(context).colorScheme.surface,
                           items: compatibleTypes
                               .map(
                                 (type) => DropdownMenuItem(
@@ -159,7 +160,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                                 );
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: DesignTokens.spaceM),
                       ],
                       PropertyBuilderUtils.buildSwitch(
                         label: 'Required',
@@ -182,7 +183,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                               ),
                             ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DesignTokens.spaceM),
                       PropertyBuilderUtils.buildSwitch(
                         label: 'Hidden',
                         value: questions.every((q) => q.isHidden),
@@ -197,7 +198,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                               (q) => q.copyWith(isHidden: val),
                             ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DesignTokens.spaceM),
                       PropertyBuilderUtils.buildSwitch(
                         label: 'Read Only',
                         value: questions.every((q) => q.isReadOnly),
@@ -212,7 +213,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                               (q) => q.copyWith(isReadOnly: val),
                             ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DesignTokens.spaceM),
                       PropertyBuilderUtils.buildSwitch(
                         label: 'Repeatable',
                         value: questions.every((q) => q.isRepeatable),
@@ -232,7 +233,7 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                             ),
                       ),
                       if (questions.every((q) => q.isRepeatable)) ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: DesignTokens.spaceM),
                         TextFormField(
                           initialValue: '1',
                           keyboardType: TextInputType.number,
@@ -258,12 +259,12 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
                           },
                         ),
                       ],
-                      const SizedBox(height: 20),
+                      const SizedBox(height: DesignTokens.spaceL - 4),
                       const Text(
                         'Tip: click a field to edit one item, or long-press fields to build a bulk selection.',
                         style: TextStyle(
                           color: AppColors.textGrey,
-                          fontSize: 12,
+                          fontSize: DesignTokens.fontS,
                         ),
                       ),
                     ],

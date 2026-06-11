@@ -102,13 +102,20 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: pagePadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildStatusOverview(),
-                  SizedBox(height: compactLayout ? 20 : 24),
-                  _buildControlsCard(),
-                ],
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: Responsive.maxContentWidth(context),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildStatusOverview(),
+                      SizedBox(height: compactLayout ? 20 : 24),
+                      _buildControlsCard(),
+                    ],
+                  ),
+                ),
               ),
             ),
     );
@@ -121,16 +128,18 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
     final exitCode = _status['last_training_exit_code'];
     final targetSize = _status['target_dataset_size'] ?? 'N/A';
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(DesignTokens.spaceL),
-        child: Column(
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
+        elevation: 0,
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -164,6 +173,7 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               _buildStatusItem('Active Task Identifier', _activeTaskId!, color: Theme.of(context).colorScheme.primary),
             ],
           ],
+          ),
         ),
       ),
     );
@@ -197,16 +207,18 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
   }
 
   Widget _buildControlsCard() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-        side: BorderSide(color: Theme.of(context).colorScheme.outline),
-      ),
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(DesignTokens.spaceL),
-        child: Column(
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
+        elevation: 0,
+        color: Theme.of(context).colorScheme.surface,
+        child: Padding(
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -270,6 +282,7 @@ class _AIOpsScreenState extends ConsumerState<AIOpsScreen> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

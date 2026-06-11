@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/responsive.dart';
 import '../feature_flag_repository.dart';
 import '../organization_repository.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
@@ -169,10 +170,18 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                   ),
                 ),
               )
-              : ListView.builder(
+              : SingleChildScrollView(
                   padding: const EdgeInsets.all(DesignTokens.spaceL),
-                  itemCount: _flags.length,
-                  itemBuilder: (context, index) {
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: Responsive.maxContentWidth(context),
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _flags.length,
+                        itemBuilder: (context, index) {
                     final flag = _flags[index];
                     final key = flag['key']?.toString() ?? '';
                     final name = flag['name']?.toString() ?? key;
@@ -181,7 +190,9 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                     final rawOverrides = flag['per_org_overrides'];
                     final overrides = rawOverrides is Map ? Map<String, dynamic>.from(rawOverrides) : <String, dynamic>{};
 
-                    return Card(
+                    return SizedBox(
+                      width: double.infinity,
+                      child: Card(
                       margin: const EdgeInsets.only(bottom: 24),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(DesignTokens.radiusL),
@@ -320,8 +331,12 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                           ],
                         ),
                       ),
+                      ),
                     );
-                  },
+                        },
+                      ),
+                    ),
+                  ),
                 ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 
 class PublishSuccessDialog extends StatelessWidget {
   final String formId;
@@ -12,68 +13,82 @@ class PublishSuccessDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formUrl = 'https://app.squintcam.com/forms/$formId';
+    final theme = Theme.of(context);
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(DesignTokens.spaceL),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Success Icon
             Container(
-              width: 80,
-              height: 80,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: DesignTokens.success.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: FaIcon(
                   FontAwesomeIcons.check,
-                  color: Colors.green,
-                  size: 40,
+                  color: DesignTokens.success,
+                  size: 34,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
 
             // Title
-            const Text(
+            Text(
               'Your form is Live!',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: DesignTokens.fontL,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
 
             // Content
-            const Text(
+            Text(
               'Share this link to start collecting responses.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textGrey, fontSize: 16),
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+                fontSize: DesignTokens.fontM,
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
 
             // Link Box
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceM,
+                vertical: DesignTokens.spaceS + 4,
+              ),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                border: Border.all(color: theme.colorScheme.outline),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       formUrl,
-                      style: const TextStyle(
-                        color: AppColors.textDark,
-                        fontSize: 14,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontSize: DesignTokens.fontM,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -106,36 +121,36 @@ class PublishSuccessDialog extends StatelessWidget {
 
             // QR Code Section
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(DesignTokens.spaceM),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[200]!),
-                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.outline),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusM),
               ),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Scan for Quick Access',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: DesignTokens.fontM,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textGrey,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: DesignTokens.spaceM),
                   QrImageView(
                     data: formUrl,
                     version: QrVersions.auto,
                     size: 160.0,
                     gapless: false,
-                    eyeStyle: QrEyeStyle(color: AppColors.textDark),
+                    eyeStyle: QrEyeStyle(color: theme.colorScheme.onSurface),
                     dataModuleStyle: QrDataModuleStyle(
-                      color: AppColors.textDark,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: DesignTokens.spaceL),
 
             // Done Button
             SizedBox(
@@ -143,11 +158,11 @@ class PublishSuccessDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceS + 8),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                   ),
                 ),
                 child: const Text(
@@ -157,6 +172,7 @@ class PublishSuccessDialog extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

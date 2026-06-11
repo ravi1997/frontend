@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/tokens.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 
@@ -32,7 +33,7 @@ class BuilderFieldWidget extends StatelessWidget {
     final style = _questionStyle(question);
     final bgColor = _parseHexColor(
       style.backgroundColor,
-      Colors.white,
+      Theme.of(context).colorScheme.surface,
     );
     final borderColor = _parseHexColor(
       style.borderColor,
@@ -49,8 +50,8 @@ class BuilderFieldWidget extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: style.verticalMargin),
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(style.borderRadius),
+      color: bgColor,
+      borderRadius: BorderRadius.circular(style.borderRadius),
           border: Border.all(
             color: isSelected ? AppColors.brandBlue : borderColor,
             width: isSelected ? 2 : style.borderWidth,
@@ -58,7 +59,7 @@ class BuilderFieldWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
+              blurRadius: DesignTokens.spaceS / 2,
               offset: const Offset(0, 2),
             ),
           ],
@@ -71,7 +72,7 @@ class BuilderFieldWidget extends StatelessWidget {
             _buildHeader(context, isLeftAligned, isHidden),
 
             if (isLeftAligned) ...[
-              const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -83,13 +84,13 @@ class BuilderFieldWidget extends StatelessWidget {
                         _buildLabelText(context),
                         if (_helperText(question).translate(locale).isNotEmpty)
                           ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: DesignTokens.spaceXS),
                           _buildHelperText(context),
                         ],
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: DesignTokens.spaceM),
                   Expanded(child: _buildFieldPreview(question, locale)),
                 ],
               ),
@@ -97,10 +98,10 @@ class BuilderFieldWidget extends StatelessWidget {
               // Top or Hidden
               if (!isHidden &&
                   _helperText(question).translate(locale).isNotEmpty) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: DesignTokens.spaceXS),
                 _buildHelperText(context),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: DesignTokens.spaceM),
               _buildFieldPreview(question, locale),
             ],
           ],
@@ -123,7 +124,7 @@ class BuilderFieldWidget extends StatelessWidget {
                 size: 14,
                 color: AppColors.textGrey.withValues(alpha: 0.5),
               ),
-        const SizedBox(width: 8),
+        const SizedBox(width: DesignTokens.spaceS),
         if (!isLeftAligned)
           Expanded(
             child: isHidden
@@ -175,7 +176,10 @@ class BuilderFieldWidget extends StatelessWidget {
           if (question.isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(color: Colors.red[400], fontSize: 16),
+              style: TextStyle(
+                color: Colors.red[400],
+                fontSize: DesignTokens.fontBase,
+              ),
             ),
         ],
       ),
@@ -242,18 +246,18 @@ class BuilderFieldWidget extends StatelessWidget {
     Color fillColor = AppColors.fieldBackground;
     BoxBorder? border = Border.all(color: AppColors.borderLight);
     List<BoxShadow>? shadows;
-    double radius = 6.0;
+    double radius = DesignTokens.radiusS;
 
     switch (inputStyle) {
       case 'filled':
-        fillColor = Colors.grey.shade200;
+        fillColor = AppColors.builderElement;
         border = const Border(
           bottom: BorderSide(color: AppColors.textGrey, width: 1.5),
         );
         break;
       case 'glass':
-        fillColor = Colors.white.withValues(alpha: 0.3);
-        border = Border.all(color: Colors.white.withValues(alpha: 0.5));
+        fillColor = AppColors.fieldBackground.withValues(alpha: 0.3);
+        border = Border.all(color: AppColors.borderLight.withValues(alpha: 0.5));
         break;
       case 'minimalist':
         fillColor = Colors.transparent;
@@ -424,7 +428,7 @@ class BuilderFieldWidget extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+        const SizedBox(width: DesignTokens.spaceS),
                           Text(label, style: textStyle),
                         ],
                       ),
@@ -461,7 +465,7 @@ class BuilderFieldWidget extends StatelessWidget {
                             size: 20,
                             color: textStyle.color ?? AppColors.textGrey,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: DesignTokens.spaceS),
                           Text(label, style: textStyle),
                         ],
                       ),
@@ -491,11 +495,11 @@ class BuilderFieldWidget extends StatelessWidget {
                     color: AppColors.textGrey,
                     size: 24,
                   ),
-                  const SizedBox(height: 8),
+                      const SizedBox(height: DesignTokens.spaceS),
                   Text(
                     'Click to upload file',
                     style: textStyle.copyWith(
-                      fontSize: 13,
+                      fontSize: DesignTokens.fontS,
                       color: AppColors.textGrey,
                     ),
                   ),
@@ -507,7 +511,9 @@ class BuilderFieldWidget extends StatelessWidget {
               case QuestionType.signature:
                 return Container(
           height: style.height,
-          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          decoration: containerDecor.copyWith(
+            color: AppColors.fieldBackground,
+          ),
           child: Center(
             child: Icon(
               Icons.draw,
@@ -520,7 +526,9 @@ class BuilderFieldWidget extends StatelessWidget {
               case QuestionType.image:
                 return Container(
           height: style.height,
-          decoration: containerDecor.copyWith(color: Colors.grey.shade50),
+          decoration: containerDecor.copyWith(
+            color: AppColors.fieldBackground,
+          ),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -532,11 +540,11 @@ class BuilderFieldWidget extends StatelessWidget {
                       AppColors.textGrey,
                   size: 32,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: DesignTokens.spaceS),
                 Text(
                   'Upload Image',
                   style: textStyle.copyWith(
-                    fontSize: 12,
+                    fontSize: DesignTokens.fontS,
                     color: AppColors.textGrey,
                   ),
                 ),
@@ -571,8 +579,8 @@ class BuilderFieldWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('0', style: textStyle.copyWith(fontSize: 12)),
-                  Text('100', style: textStyle.copyWith(fontSize: 12)),
+                  Text('0', style: textStyle.copyWith(fontSize: DesignTokens.fontS)),
+                  Text('100', style: textStyle.copyWith(fontSize: DesignTokens.fontS)),
                 ],
               ),
             ),
@@ -675,7 +683,7 @@ class _DashedBorderPainter extends CustomPainter {
   final double dashWidth = 5;
   final double dashSpace = 3;
 
-  _DashedBorderPainter({this.color = Colors.grey});
+  _DashedBorderPainter({this.color = const Color(0xFFD6D0C5)});
 
   @override
   void paint(Canvas canvas, Size size) {

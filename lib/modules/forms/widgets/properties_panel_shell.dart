@@ -15,7 +15,7 @@ class PropertiesPanelShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
           left: BorderSide(color: AppColors.borderLight, width: 1),
         ),

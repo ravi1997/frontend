@@ -61,59 +61,63 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Center(
         child: SingleChildScrollView(
           padding: Responsive.pagePadding(context),
-          child: IntrinsicHeight(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (isWide) ...[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: DesignTokens.spaceXXL),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildBrandSection(context),
-                          const SizedBox(height: DesignTokens.spaceXXL),
-                          Text(
-                            'Create your account with Aetheris AI.',
-                            style: textTheme.displayLarge?.copyWith(
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                              color: theme.colorScheme.onSurface,
-                              height: 1.1,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isWide ? 1280 : 560,
+            ),
+            child: isWide
+                ? IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: DesignTokens.spaceXXL),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildBrandSection(context),
+                                const SizedBox(height: DesignTokens.spaceXXL),
+                                Text(
+                                  'Create your account with Aetheris AI.',
+                                  style: textTheme.displayLarge?.copyWith(
+                                    fontSize: 56,
+                                    fontWeight: FontWeight.w800,
+                                    color: theme.colorScheme.onSurface,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                const SizedBox(height: DesignTokens.spaceXL),
+                                _buildFeatureItem(
+                                  context,
+                                  Icons.security_outlined,
+                                  'Secure Data',
+                                  'Enterprise-grade encryption for all submissions.',
+                                ),
+                                const SizedBox(height: DesignTokens.spaceL),
+                                _buildFeatureItem(
+                                  context,
+                                  Icons.auto_awesome_outlined,
+                                  'AI Powered',
+                                  'Automate form building and data analysis.',
+                                ),
+                                const SizedBox(height: DesignTokens.spaceL),
+                                _buildFeatureItem(
+                                  context,
+                                  Icons.speed,
+                                  'High Performance',
+                                  'Optimized for massive scale and reliability.',
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: DesignTokens.spaceXL),
-                          _buildFeatureItem(
-                            context,
-                            Icons.security_outlined,
-                            'Secure Data',
-                            'Enterprise-grade encryption for all submissions.',
-                          ),
-                          const SizedBox(height: DesignTokens.spaceL),
-                          _buildFeatureItem(
-                            context,
-                            Icons.auto_awesome_outlined,
-                            'AI Powered',
-                            'Automate form building and data analysis.',
-                          ),
-                          const SizedBox(height: DesignTokens.spaceL),
-                          _buildFeatureItem(
-                            context,
-                            Icons.speed,
-                            'High Performance',
-                            'Optimized for massive scale and reliability.',
-                          ),
-                        ],
-                      ),
+                        ),
+                        Expanded(child: _buildRegisterCard(authState, isWide)),
+                      ],
                     ),
-                  ),
-                ],
-                _buildRegisterCard(authState, isWide),
-              ],
-            ),
+                  )
+                : _buildRegisterCard(authState, isWide),
           ),
         ),
       ),
@@ -197,14 +201,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget _buildRegisterCard(AsyncValue authState, bool isWide) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final availableWidth =
-        MediaQuery.sizeOf(context).width - (Responsive.pageHPad(context) * 2);
-    final cardWidth = isWide
-        ? 500.0
-        : availableWidth.clamp(320.0, 560.0).toDouble();
 
     return Container(
-      width: cardWidth,
+      width: double.infinity,
       padding: const EdgeInsets.all(DesignTokens.spaceXL),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,

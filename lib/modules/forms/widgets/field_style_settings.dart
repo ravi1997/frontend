@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
 import 'package:frontend/modules/forms/models/form_style.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -67,10 +68,13 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
     if (widget.question.type == QuestionType.spacer) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(DesignTokens.spaceL),
           child: Text(
             'No style settings for Spacer.',
-            style: TextStyle(color: AppColors.textGrey, fontSize: 13),
+            style: TextStyle(
+              color: AppColors.textGrey,
+              fontSize: DesignTokens.fontS,
+            ),
           ),
         ),
       );
@@ -83,17 +87,27 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildResetButton(),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
             const Text(
               'DIVIDER STYLE',
               style: TextStyle(
                 color: AppColors.textGrey,
-                fontSize: 12,
+                fontSize: DesignTokens.fontS,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: DesignTokens.spaceM),
+            const Text('Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+            const SizedBox(height: 4),
+            _buildColorSwatches(
+              value: widget.question.styleObject.borderColor,
+              onChanged: (val) => _updateStyle(
+                ref,
+                widget.question.styleObject.copyWith(borderColor: val),
+              ),
+            ),
+            const SizedBox(height: 4),
             PropertyBuilderUtils.buildColorPicker(
               label: 'Line Color',
               value: widget.question.styleObject.borderColor,
@@ -102,7 +116,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                 widget.question.styleObject.copyWith(borderColor: val),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DesignTokens.spaceS + 4),
             PropertyBuilderUtils.buildNumberSlider(
               label: 'Thickness',
               value: widget.question.styleObject.borderWidth,
@@ -113,7 +127,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                 widget.question.styleObject.copyWith(borderWidth: val),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DesignTokens.spaceS + 4),
             PropertyBuilderUtils.buildDropdown<String>(
               label: 'Style',
               value: widget.question.metadata['dividerStyle'] ?? 'solid',
@@ -156,21 +170,21 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildResetButton(),
-          const SizedBox(height: 16),
+          const SizedBox(height: DesignTokens.spaceM),
 
           ExpansionTile(
             title: const Text(
               'Typography',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: DesignTokens.fontM,
                 color: AppColors.textDark,
               ),
             ),
             initiallyExpanded: true,
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(DesignTokens.spaceS),
                 child: Column(
                   children: [
                     _buildTypographyGroup(
@@ -187,7 +201,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: DesignTokens.spaceM),
                     _buildTypographyGroup(
                       'Helper Text',
                       widget.question.styleObject.helperFontSize,
@@ -202,7 +216,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: DesignTokens.spaceM),
                     _buildTypographyGroup(
                       'Input Text',
                       widget.question.styleObject.inputFontSize,
@@ -228,13 +242,13 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
               'Input Decoration',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: DesignTokens.fontM,
                 color: AppColors.textDark,
               ),
             ),
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(DesignTokens.spaceS),
                 child: Column(
                   children: [
                     PropertyBuilderUtils.buildDropdown<String>(
@@ -275,7 +289,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         }
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     PropertyBuilderUtils.buildNumberSlider(
                       label: 'Border Radius',
                       value: widget.question.styleObject.borderRadius,
@@ -286,7 +300,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         widget.question.styleObject.copyWith(borderRadius: val),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
 
                     // Shadow Settings
                     PropertyBuilderUtils.buildNumberSlider(
@@ -301,8 +315,15 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         val,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    if ((widget.question.metadata['elevation'] ?? 0) > 0)
+                    const SizedBox(height: DesignTokens.spaceS + 4),
+                    if ((widget.question.metadata['elevation'] ?? 0) > 0) ...[
+                      const Text('Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      const SizedBox(height: 4),
+                      _buildColorSwatches(
+                        value: widget.question.metadata['shadowColor'] ?? '#000000',
+                        onChanged: (val) => _updateMetadata(ref, 'shadowColor', val),
+                      ),
+                      const SizedBox(height: 4),
                       PropertyBuilderUtils.buildColorPicker(
                         label: 'Shadow Color',
                         value:
@@ -314,8 +335,19 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                           val,
                         ),
                       ),
+                    ],
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
+                    const Text('Background Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 4),
+                    _buildColorSwatches(
+                      value: widget.question.styleObject.backgroundColor,
+                      onChanged: (val) => _updateStyle(
+                        ref,
+                        widget.question.styleObject.copyWith(backgroundColor: val),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     PropertyBuilderUtils.buildColorPicker(
                       label: 'Background Color',
                       value: widget.question.styleObject.backgroundColor,
@@ -324,7 +356,17 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         widget.question.styleObject.copyWith(backgroundColor: val),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
+                    const Text('Border Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 4),
+                    _buildColorSwatches(
+                      value: widget.question.styleObject.borderColor,
+                      onChanged: (val) => _updateStyle(
+                        ref,
+                        widget.question.styleObject.copyWith(borderColor: val),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     PropertyBuilderUtils.buildColorPicker(
                       label: 'Border Color',
                       value: widget.question.styleObject.borderColor,
@@ -333,7 +375,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                         widget.question.styleObject.copyWith(borderColor: val),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: DesignTokens.spaceS + 4),
                     PropertyBuilderUtils.buildNumberSlider(
                       label: 'Border Width',
                       value: widget.question.styleObject.borderWidth,
@@ -355,34 +397,65 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
               'State Colors',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: DesignTokens.fontM,
                 color: AppColors.textDark,
               ),
             ),
             children: [
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(DesignTokens.spaceS),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: PropertyBuilderUtils.buildColorPicker(
-                        label: 'Focus',
-                        value: widget.question.styleObject.focusColor,
-                        onChanged: (val) => _updateStyle(
-                          ref,
-                          widget.question.styleObject.copyWith(focusColor: val),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          const SizedBox(height: 4),
+                          _buildColorSwatches(
+                            value: widget.question.styleObject.focusColor,
+                            onChanged: (val) => _updateStyle(
+                              ref,
+                              widget.question.styleObject.copyWith(focusColor: val),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          PropertyBuilderUtils.buildColorPicker(
+                            label: 'Focus',
+                            value: widget.question.styleObject.focusColor,
+                            onChanged: (val) => _updateStyle(
+                              ref,
+                              widget.question.styleObject.copyWith(focusColor: val),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: DesignTokens.spaceS),
                     Expanded(
-                      child: PropertyBuilderUtils.buildColorPicker(
-                        label: 'Error',
-                        value: widget.question.styleObject.errorColor,
-                        onChanged: (val) => _updateStyle(
-                          ref,
-                          widget.question.styleObject.copyWith(errorColor: val),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          const SizedBox(height: 4),
+                          _buildColorSwatches(
+                            value: widget.question.styleObject.errorColor,
+                            onChanged: (val) => _updateStyle(
+                              ref,
+                              widget.question.styleObject.copyWith(errorColor: val),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          PropertyBuilderUtils.buildColorPicker(
+                            label: 'Error',
+                            value: widget.question.styleObject.errorColor,
+                            onChanged: (val) => _updateStyle(
+                              ref,
+                              widget.question.styleObject.copyWith(errorColor: val),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -397,13 +470,13 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                 'Icons',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                fontSize: DesignTokens.fontM,
                   color: AppColors.textDark,
                 ),
               ),
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(DesignTokens.spaceS),
                   child: Row(
                     children: [
                       Expanded(
@@ -416,7 +489,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: DesignTokens.spaceS + 4),
                       Expanded(
                         child: _buildIconPicker(
                           label: 'Suffix Icon',
@@ -461,12 +534,12 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
         Text(
           title,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: DesignTokens.fontS,
             fontWeight: FontWeight.w600,
             color: AppColors.textDark,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -477,7 +550,14 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
               max: 32,
               onChanged: (val) => onChanged(val, color, fontWeight),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: DesignTokens.spaceS + 4),
+            const Text('Quick Palette', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+            const SizedBox(height: 4),
+            _buildColorSwatches(
+              value: color,
+              onChanged: (val) => onChanged(fontSize, val, fontWeight),
+            ),
+            const SizedBox(height: 4),
             PropertyBuilderUtils.buildColorPicker(
               label: 'Color',
               value: color,
@@ -485,7 +565,7 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         PropertyBuilderUtils.buildDropdown<String>(
           label: 'Weight',
           value: fontWeight,
@@ -512,9 +592,9 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+          style: const TextStyle(fontSize: DesignTokens.fontS, color: AppColors.textDark),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         GestureDetector(
           onTap: () => _showIconPickerDialog(onChanged),
           child: Container(
@@ -528,7 +608,10 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (currentIcon != null && currentIcon.isNotEmpty)
-                  Text(currentIcon, style: const TextStyle(fontSize: 24))
+                  Text(
+                    currentIcon,
+                    style: const TextStyle(fontSize: DesignTokens.fontL),
+                  )
                 else
                   const Text(
                     'Select',
@@ -571,6 +654,51 @@ class _FieldStyleSettingsState extends ConsumerState<FieldStyleSettings> {
             child: const Text('Cancel'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildColorSwatches({
+    required String value,
+    required ValueChanged<String> onChanged,
+  }) {
+    final colors = ['#FFFFFF', '#F5F5F5', '#E0E0E0', '#2196F3', '#4CAF50', '#FFC107', '#F44336', '#9C27B0'];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: colors.map((col) {
+          final isSelected = col.toLowerCase() == value.toLowerCase();
+          Color displayColor;
+          try {
+            displayColor = Color(int.parse(col.replaceAll('#', '0xFF')));
+          } catch (_) {
+            displayColor = Colors.transparent;
+          }
+          return GestureDetector(
+            onTap: () => onChanged(col),
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: displayColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? Colors.black : Colors.grey.shade300,
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check,
+                      size: 14,
+                      color: col.toLowerCase() == '#ffffff' ? Colors.black : Colors.white,
+                    )
+                  : null,
+            ),
+          );
+        }).toList(),
       ),
     );
   }

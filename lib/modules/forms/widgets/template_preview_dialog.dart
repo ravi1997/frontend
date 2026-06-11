@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:frontend/app/theme/app_colors.dart';
+import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/forms/models/form_template.dart';
 
 class TemplatePreviewDialog extends StatelessWidget {
@@ -15,18 +17,21 @@ class TemplatePreviewDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Dialog(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 800, maxHeight: 600),
+        constraints: BoxConstraints(
+          maxWidth: 800,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(DesignTokens.spaceL),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border:
-                    Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+                color: theme.colorScheme.surface,
+                border: Border(bottom: BorderSide(color: theme.colorScheme.outline)),
               ),
               child: Row(
                 children: [
@@ -37,12 +42,12 @@ class TemplatePreviewDialog extends StatelessWidget {
                         Text(
                           template.name,
                           style: GoogleFonts.inter(
-                            fontSize: 20,
+                            fontSize: DesignTokens.fontL,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: DesignTokens.spaceXS),
                         Row(
                           children: [
                             Container(
@@ -53,29 +58,29 @@ class TemplatePreviewDialog extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color:
                                     _getCategoryColor().withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                               ),
                               child: Text(
                                 template.category.displayName,
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
+                                  fontSize: DesignTokens.fontS,
                                   fontWeight: FontWeight.w500,
                                   color: _getCategoryColor(),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: DesignTokens.spaceS),
                             Icon(
                               Icons.trending_up,
                               size: 14,
-                              color: Colors.grey[600],
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: DesignTokens.spaceXS),
                             Text(
                               '${template.usageCount} uses',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                                fontSize: DesignTokens.fontS,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.66),
                               ),
                             ),
                           ],
@@ -93,14 +98,14 @@ class TemplatePreviewDialog extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(DesignTokens.spaceL),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildDescription(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: DesignTokens.spaceL),
                       _buildTags(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: DesignTokens.spaceL),
                       _buildFormPreview(),
                     ],
                   ),
@@ -108,10 +113,10 @@ class TemplatePreviewDialog extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(DesignTokens.spaceL),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+                color: theme.colorScheme.surface,
+                border: Border(top: BorderSide(color: theme.colorScheme.outline)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -119,44 +124,44 @@ class TemplatePreviewDialog extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF374151),
-                      side: const BorderSide(color: Color(0xFFD1D5DB)),
+                      foregroundColor: theme.colorScheme.onSurface,
+                      side: BorderSide(color: theme.colorScheme.outline),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                        horizontal: DesignTokens.spaceL,
+                        vertical: DesignTokens.spaceS + 4,
                       ),
                     ),
                     child: Text(
                       'Cancel',
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: DesignTokens.fontM,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: DesignTokens.spaceS + 4),
                   ElevatedButton.icon(
                     onPressed: onUse,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                        horizontal: DesignTokens.spaceL,
+                        vertical: DesignTokens.spaceS + 4,
                       ),
                     ),
                     icon: const Icon(Icons.add, size: 18),
                     label: Text(
                       'Use This Template',
                       style: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: DesignTokens.fontM,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -177,16 +182,16 @@ class TemplatePreviewDialog extends StatelessWidget {
         Text(
           'Description',
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: DesignTokens.fontM,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF111827),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         Text(
           template.description,
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: DesignTokens.fontM,
             color: const Color(0xFF6B7280),
             height: 1.5,
           ),
@@ -206,12 +211,12 @@ class TemplatePreviewDialog extends StatelessWidget {
         Text(
           'Tags',
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: DesignTokens.fontM,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF111827),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: DesignTokens.spaceS),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -225,7 +230,7 @@ class TemplatePreviewDialog extends StatelessWidget {
               child: Text(
                 tag,
                 style: GoogleFonts.inter(
-                  fontSize: 12,
+                  fontSize: DesignTokens.fontS,
                   color: const Color(0xFF6B7280),
                 ),
               ),
@@ -243,12 +248,12 @@ class TemplatePreviewDialog extends StatelessWidget {
         Text(
           'Form Structure',
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: DesignTokens.fontM,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF111827),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -275,15 +280,19 @@ class TemplatePreviewDialog extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              Icon(Icons.folder_outlined, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 8),
+              Icon(
+                Icons.folder_outlined,
+                size: DesignTokens.fontM,
+                color: AppColors.textGrey,
+              ),
+              const SizedBox(width: DesignTokens.spaceS),
               Expanded(
                 child: Text(
                   section.title is Map
                       ? section.title['en'] ?? 'Untitled Section'
                       : section.title?.toString() ?? 'Untitled Section',
                   style: GoogleFonts.inter(
-                    fontSize: 13,
+                    fontSize: DesignTokens.fontS,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF374151),
                   ),
@@ -316,16 +325,16 @@ class TemplatePreviewDialog extends StatelessWidget {
                     _ => FontAwesomeIcons.circleQuestion,
                   },
                   size: 14,
-                  color: Colors.grey[500],
+                  color: AppColors.textGrey,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: DesignTokens.spaceS),
                 Expanded(
                   child: Text(
                     question.label is Map
                         ? question.label['en'] ?? 'Untitled Question'
                         : question.label?.toString() ?? 'Untitled Question',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: DesignTokens.fontS,
                       color: const Color(0xFF6B7280),
                     ),
                   ),
@@ -336,7 +345,7 @@ class TemplatePreviewDialog extends StatelessWidget {
             ),
           );
         }).toList(),
-        const SizedBox(height: 16),
+        const SizedBox(height: DesignTokens.spaceM),
       ],
     );
   }
