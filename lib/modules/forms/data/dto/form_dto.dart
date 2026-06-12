@@ -142,12 +142,19 @@ class FormDto {
             normalizedJson['submission_settings'] ??
             const {},
       ),
-      quickResponses: (normalizedJson['quickResponses'] ??
-              normalizedJson['quick_responses'] ??
-              const [])
-          .whereType<Map>()
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList(),
+      quickResponses: () {
+        final raw =
+            normalizedJson['quickResponses'] ??
+            normalizedJson['quick_responses'] ??
+            const [];
+        if (raw is! List) {
+          return <Map<String, dynamic>>[];
+        }
+        return raw
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      }(),
       advancedSettings: Map<String, dynamic>.from(
         normalizedJson['advancedSettings'] ??
             normalizedJson['advanced_settings'] ??

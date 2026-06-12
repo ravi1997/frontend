@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/localization/locale_controller.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/tokens.dart';
+import 'package:frontend/core/widgets/app_states.dart';
+import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/widgets/general_settings_panels.dart';
 import 'package:frontend/modules/forms/widgets/padded_scroll_tab.dart';
@@ -68,7 +70,16 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
           state.form.sections,
           widget.selectedSectionId,
         );
-        if (section == null) return const SizedBox();
+        if (section == null) {
+          return AppStates.empty(
+            title: 'Section no longer available',
+            subtitle:
+                'The selected section could not be found. Clear the selection and choose another section.',
+            icon: Icons.view_day_outlined,
+            actionLabel: 'Clear selection',
+            onAction: () => controller.selectForm(),
+          );
+        }
 
         final activeSection = section;
         final locale = state.editingLocale;
@@ -322,7 +333,15 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => const SizedBox(),
+      error: (e, s) => ErrorStateWidget(
+        title: 'Failed to load section properties',
+        message:
+            'We could not load the selected section settings. Try reopening the section or reloading the form builder.',
+        error: e.toString(),
+        onRetry: () => ref.refresh(
+          formBuilderControllerProvider(widget.controllerKey),
+        ),
+      ),
     );
   }
 

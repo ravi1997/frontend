@@ -659,78 +659,90 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    key: ValueKey('${widget.question.id}-repeat-min'),
-                    initialValue: (widget.question.repeatMin ?? 1).toString(),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Minimum repeats',
-                      labelStyle: TextStyle(color: AppColors.textDark),
-                      filled: true,
-                      fillColor: AppColors.builderElement,
-                      border: OutlineInputBorder(),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.borderLight),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    style: const TextStyle(color: AppColors.textDark),
-                    onChanged: (val) {
-                      ref
-                          .read(
-                            formBuilderControllerProvider(
-                              widget.controllerKey,
-                            ).notifier,
-                          )
-                          .updateQuestion(
-                            widget.question.copyWith(
-                              repeatMin: int.tryParse(val) ?? 1,
-                            ),
-                          );
+                  child: Focus(
+                    onFocusChange: (hasFocus) {
+                      if (hasFocus) _selectAll(_repeatMinController);
                     },
+                    child: TextFormField(
+                      controller: _repeatMinController,
+                      key: ValueKey('${widget.question.id}-repeat-min'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: const InputDecoration(
+                        labelText: 'Minimum repeats',
+                        labelStyle: TextStyle(color: AppColors.textDark),
+                        filled: true,
+                        fillColor: AppColors.builderElement,
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.borderLight),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                      style: const TextStyle(color: AppColors.textDark),
+                      onTap: () => _selectAll(_repeatMinController),
+                      onChanged: (val) {
+                        ref
+                            .read(
+                              formBuilderControllerProvider(
+                                widget.controllerKey,
+                              ).notifier,
+                            )
+                            .updateQuestion(
+                              widget.question.copyWith(
+                                repeatMin: int.tryParse(val) ?? 1,
+                              ),
+                            );
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextFormField(
-                    key: ValueKey('${widget.question.id}-repeat-max'),
-                    initialValue: widget.question.repeatMax?.toString() ?? '',
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    decoration: const InputDecoration(
-                      labelText: 'Maximum repeats',
-                      hintText: 'Unlimited',
-                      labelStyle: TextStyle(color: AppColors.textDark),
-                      hintStyle: TextStyle(color: AppColors.textGrey),
-                      filled: true,
-                      fillColor: AppColors.builderElement,
-                      border: OutlineInputBorder(),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.borderLight),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                    ),
-                    style: const TextStyle(color: AppColors.textDark),
-                    onChanged: (val) {
-                      ref
-                          .read(
-                            formBuilderControllerProvider(
-                              widget.controllerKey,
-                            ).notifier,
-                          )
-                          .updateQuestion(
-                            widget.question.copyWith(
-                              repeatMax: val.trim().isEmpty
-                                  ? null
-                                  : int.tryParse(val),
-                            ),
-                          );
+                  child: Focus(
+                    onFocusChange: (hasFocus) {
+                      if (hasFocus) _selectAll(_repeatMaxController);
                     },
+                    child: TextFormField(
+                      controller: _repeatMaxController,
+                      key: ValueKey('${widget.question.id}-repeat-max'),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: const InputDecoration(
+                        labelText: 'Maximum repeats',
+                        hintText: 'Unlimited',
+                        labelStyle: TextStyle(color: AppColors.textDark),
+                        hintStyle: TextStyle(color: AppColors.textGrey),
+                        filled: true,
+                        fillColor: AppColors.builderElement,
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.borderLight),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                      style: const TextStyle(color: AppColors.textDark),
+                      onTap: () => _selectAll(_repeatMaxController),
+                      onChanged: (val) {
+                        ref
+                            .read(
+                              formBuilderControllerProvider(
+                                widget.controllerKey,
+                              ).notifier,
+                            )
+                            .updateQuestion(
+                              widget.question.copyWith(
+                                repeatMax: val.trim().isEmpty
+                                    ? null
+                                    : int.tryParse(val),
+                              ),
+                            );
+                      },
+                    ),
                   ),
                 ),
               ],

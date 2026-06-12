@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/app_states.dart';
+import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/widgets/field_general_settings.dart';
@@ -144,7 +146,20 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> w
           widget.selectedQuestionId,
         );
 
-        if (question == null) return const SizedBox();
+        if (question == null) {
+          return AppStates.empty(
+            title: 'Field no longer available',
+            subtitle:
+                'The selected question could not be found. Clear the selection and choose another field.',
+            icon: Icons.settings_outlined,
+            actionLabel: 'Clear selection',
+            onAction: () => ref
+                .read(
+                  formBuilderControllerProvider(widget.controllerKey).notifier,
+                )
+                .selectQuestion(null, null),
+          );
+        }
 
         _syncControllers(question, state.editingLocale);
 
@@ -338,7 +353,15 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> w
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => const SizedBox(),
+      error: (e, s) => ErrorStateWidget(
+        title: 'Failed to load field properties',
+        message:
+            'We could not load the selected field settings. Try reopening the selection or reloading the builder.',
+        error: e.toString(),
+        onRetry: () => ref.refresh(
+          formBuilderControllerProvider(widget.controllerKey),
+        ),
+      ),
     );
   }
 }

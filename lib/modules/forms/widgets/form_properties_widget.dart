@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/tokens.dart';
+import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/widgets/general_settings_panels.dart';
 import 'package:frontend/modules/forms/widgets/form_layout_settings.dart';
@@ -334,7 +335,11 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => const SizedBox(),
+      error: (e, s) => ErrorStateWidget(
+        title: 'Unable to load form properties',
+        message: e.toString(),
+        onRetry: controller.loadForm,
+      ),
     );
   }
 }

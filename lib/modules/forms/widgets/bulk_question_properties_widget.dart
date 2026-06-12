@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/core/widgets/app_states.dart';
+import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/modules/forms/models/form_builder_state.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
@@ -37,7 +39,18 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
       data: (state) {
         final questions = _selectedQuestions(state);
         if (questions.isEmpty) {
-          return const SizedBox();
+          return AppStates.empty(
+            title: 'Bulk edit selection changed',
+            subtitle:
+                'The selected questions are no longer available. Clear the selection and choose another set of questions.',
+            icon: Icons.layers_outlined,
+            actionLabel: 'Clear selection',
+            onAction: () => ref
+                .read(
+                  formBuilderControllerProvider(controllerKey).notifier,
+                )
+                .clearQuestionSelections(),
+          );
         }
 
         final compatibleTypes = questions.isEmpty
@@ -276,7 +289,15 @@ class BulkQuestionPropertiesWidget extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const SizedBox(),
+      error: (error, stack) => ErrorStateWidget(
+        title: 'Failed to load bulk edit',
+        message:
+            'We could not load the bulk edit panel. Try selecting the questions again or reloading the builder.',
+        error: error.toString(),
+        onRetry: () => ref.refresh(
+          formBuilderControllerProvider(controllerKey),
+        ),
+      ),
     );
   }
 }

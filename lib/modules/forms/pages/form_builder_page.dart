@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
+import 'package:frontend/core/widgets/app_states.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
@@ -290,7 +291,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                           builderState.selectedSectionId!,
                                     );
                                   }
-                                  return const SizedBox();
+                                  return AppStates.empty(
+                                    title: 'Nothing selected',
+                                    subtitle:
+                                        'Choose a form, section, or question on the canvas to edit its properties.',
+                                    icon: Icons.touch_app_outlined,
+                                  );
                                 },
                               ),
                             ),

@@ -18,6 +18,8 @@ import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/modules/platform/screens/organization_management_screen.dart';
 import 'package:frontend/modules/platform/screens/feature_flags_screen.dart';
 import 'package:frontend/modules/platform/screens/ai_ops_screen.dart';
+import 'package:frontend/modules/dashboard_builder/pages/dashboard_builder_page.dart';
+import 'package:frontend/modules/dashboard_builder/pages/public_dashboard_page.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -43,7 +45,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isOidcCallback = state.matchedLocation == '/oidc/callback';
       final isAuthPath =
           isLoggingIn || isRegistering || isForgotPassword || isVerifyingOtp || isOidcCallback;
-      final isPublicPath = state.matchedLocation.contains('/f/');
+      final isPublicPath = state.matchedLocation.contains('/f/') ||
+          state.matchedLocation.startsWith('/d/');
 
       if (!isAuth && !isAuthPath && !isPublicPath) return '/login';
       if (isAuth && isAuthPath) return '/';
@@ -166,6 +169,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final formId = state.pathParameters['formId']!;
           final projectId = state.pathParameters['projectId']!;
           return AnalyticsPage(projectId: projectId, formId: formId);
+        },
+      ),
+      // ── Dashboard Builder ──────────────────────────────────────────
+      GoRoute(
+        path: '/projects/:projectId/dashboards/:dashboardId',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          final dashboardId = state.pathParameters['dashboardId']!;
+          return DashboardBuilderPage(
+            projectId: projectId,
+            dashboardId: dashboardId,
+          );
+        },
+      ),
+      // ── Public Dashboard (unauthenticated) ─────────────────────────
+      GoRoute(
+        path: '/d/:shareToken',
+        builder: (context, state) {
+          final token = state.pathParameters['shareToken']!;
+          return PublicDashboardPage(shareToken: token);
         },
       ),
       GoRoute(

@@ -10,6 +10,7 @@ import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
+import 'package:frontend/modules/dashboard_builder/pages/project_dashboards_section.dart';
 
 class ProjectDashboardPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -1025,6 +1026,13 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                                 ),
                               ),
                               _RouteTabChip(
+                                label: 'Dashboards',
+                                selected: currentTab == 'dashboards',
+                                onTap: () => context.go(
+                                  '/projects/${widget.projectId}?tab=dashboards',
+                                ),
+                              ),
+                              _RouteTabChip(
                                 label: 'Members',
                                 selected: currentTab == 'members',
                                 onTap: () => context.go(
@@ -1407,6 +1415,7 @@ class _ProjectTabContent extends StatelessWidget {
           error: error,
           onRetry: onRetry,
         ),
+      'dashboards' => ProjectDashboardsSection(projectId: projectId),
       'members' => _MembersTab(
           members: members,
           hasMismatch: memberDataMismatch,

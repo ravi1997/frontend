@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/forms/services/form_builder_repository.dart';
+import 'package:frontend/shared/models/form_models.dart';
 
 class FormDashboardPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -20,6 +22,19 @@ class FormDashboardPage extends ConsumerStatefulWidget {
 }
 
 class _FormDashboardPageState extends ConsumerState<FormDashboardPage> {
+  late Future<BuilderForm> _formFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _formFuture = _loadForm();
+  }
+
+  Future<BuilderForm> _loadForm() {
+    return ref
+        .read(formBuilderRepositoryProvider)
+        .getForm(widget.projectId, widget.formId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,40 +49,70 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage> {
           padding: Responsive.pagePadding(context),
           child: Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: Responsive.maxContentWidth(context)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isCompact = constraints.maxWidth < 760;
-                      final header = Wrap(
-                        spacing: DesignTokens.spaceS,
-                        runSpacing: DesignTokens.spaceS,
-                        alignment: WrapAlignment.end,
-                        children: [
-                          FilledButton.tonalIcon(
-                            onPressed: () => context.push(
-                              '/projects/${widget.projectId}/forms/${widget.formId}/responses',
-                            ),
-                            icon: const Icon(Icons.list_alt_outlined),
-                            label: const Text('Responses'),
-                          ),
-                          FilledButton.icon(
-                            onPressed: () => context.push(
-                              '/projects/${widget.projectId}/forms/${widget.formId}/edit',
-                            ),
-                            icon: const Icon(Icons.edit_outlined),
-                            label: const Text('Edit form'),
-                          ),
-                        ],
-                      );
+              constraints: BoxConstraints(
+                maxWidth: Responsive.maxContentWidth(context),
+              ),
+              child: FutureBuilder<BuilderForm>(
+                future: _formFuture,
+                builder: (context, snapshot) {
+                  final form = snapshot.data;
+                  final loadError = snapshot.error;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isCompact = constraints.maxWidth < 760;
+                          final header = Wrap(
+                            spacing: DesignTokens.spaceS,
+                            runSpacing: DesignTokens.spaceS,
+                            alignment: WrapAlignment.end,
+                            children: [
+                              FilledButton.tonalIcon(
+                                onPressed: () => context.push(
+                                  '/projects/${widget.projectId}/forms/${widget.formId}/responses',
+                                ),
+                                icon: const Icon(Icons.list_alt_outlined),
+                                label: const Text('Responses'),
+                              ),
+                              FilledButton.icon(
+                                onPressed: () => context.push(
+                                  '/projects/${widget.projectId}/forms/${widget.formId}/edit',
+                                ),
+                                icon: const Icon(Icons.edit_outlined),
+                                label: const Text('Edit form'),
+                              ),
+                            ],
+                          );
 
-                      return isCompact
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          return isCompact
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () => context.pop(),
+                                          icon: const Icon(Icons.arrow_back),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Form dashboard',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w800,
+                                                color: cs.onSurface,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: DesignTokens.spaceM),
+                                    header,
+                                  ],
+                                )
+                              : Row(
                                   children: [
                                     IconButton(
                                       onPressed: () => context.pop(),
@@ -84,90 +129,75 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage> {
                                             color: cs.onSurface,
                                           ),
                                     ),
+                                    const Spacer(),
+                                    header,
                                   ],
-                                ),
-                                const SizedBox(height: DesignTokens.spaceM),
-                                header,
-                              ],
-                            )
-                          : Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () => context.pop(),
-                                  icon: const Icon(Icons.arrow_back),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Form dashboard',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: cs.onSurface,
-                                      ),
-                                ),
-                                const Spacer(),
-                                header,
-                              ],
-                            );
-                    },
-                  ),
-                  const SizedBox(height: DesignTokens.spaceL),
-                  _HeroCard(
-                    projectId: widget.projectId,
-                    formId: widget.formId,
-                  ),
-                  const SizedBox(height: DesignTokens.spaceL),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: cs.surface,
-                      borderRadius: BorderRadius.circular(DesignTokens.radiusL),
-                      border: Border.all(color: cs.outline),
-                    ),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _RouteTabChip(
-                          label: 'Overview',
-                          selected: currentTab == 'overview',
-                          onTap: () => context.go(
-                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=overview',
+                                );
+                        },
+                      ),
+                      const SizedBox(height: DesignTokens.spaceL),
+                      _HeroCard(
+                        projectId: widget.projectId,
+                        formId: widget.formId,
+                        form: form,
+                        isLoading:
+                            snapshot.connectionState == ConnectionState.waiting,
+                        error: loadError,
+                      ),
+                      const SizedBox(height: DesignTokens.spaceL),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: cs.surface,
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusL,
                           ),
+                          border: Border.all(color: cs.outline),
                         ),
-                        _RouteTabChip(
-                          label: 'Responses',
-                          selected: currentTab == 'responses',
-                          onTap: () => context.go(
-                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=responses',
-                          ),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _RouteTabChip(
+                              label: 'Overview',
+                              selected: currentTab == 'overview',
+                              onTap: () => context.go(
+                                '/projects/${widget.projectId}/forms/${widget.formId}?tab=overview',
+                              ),
+                            ),
+                            _RouteTabChip(
+                              label: 'Responses',
+                              selected: currentTab == 'responses',
+                              onTap: () => context.go(
+                                '/projects/${widget.projectId}/forms/${widget.formId}?tab=responses',
+                              ),
+                            ),
+                            _RouteTabChip(
+                              label: 'Analytics',
+                              selected: currentTab == 'analytics',
+                              onTap: () => context.go(
+                                '/projects/${widget.projectId}/forms/${widget.formId}?tab=analytics',
+                              ),
+                            ),
+                            _RouteTabChip(
+                              label: 'Builder',
+                              selected: currentTab == 'builder',
+                              onTap: () => context.go(
+                                '/projects/${widget.projectId}/forms/${widget.formId}?tab=builder',
+                              ),
+                            ),
+                          ],
                         ),
-                        _RouteTabChip(
-                          label: 'Analytics',
-                          selected: currentTab == 'analytics',
-                          onTap: () => context.go(
-                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=analytics',
-                          ),
-                        ),
-                        _RouteTabChip(
-                          label: 'Builder',
-                          selected: currentTab == 'builder',
-                          onTap: () => context.go(
-                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=builder',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spaceL),
-                  _FormDashboardTabContent(
-                    currentTab: currentTab,
-                    projectId: widget.projectId,
-                    formId: widget.formId,
-                  ),
-                ],
+                      ),
+                      const SizedBox(height: DesignTokens.spaceL),
+                      _FormDashboardTabContent(
+                        currentTab: currentTab,
+                        projectId: widget.projectId,
+                        formId: widget.formId,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -221,78 +251,85 @@ class _FormDashboardTabContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final child = switch (currentTab) {
       'responses' => _FormDashboardTab(
-          title: 'Responses',
-          message:
-              'This tab is a shortcut to the submissions dashboard for the selected form.',
-          actions: [
-            _DashboardAction(
-              label: 'Open responses',
-              icon: Icons.list_alt_outlined,
-              onPressed: () => context.push(
-                '/projects/$projectId/forms/$formId/responses',
-              ),
-            ),
-          ],
-        ),
+        title: 'Responses',
+        message:
+            'This tab is a shortcut to the submissions dashboard for the selected form.',
+        actions: [
+          _DashboardAction(
+            label: 'Open responses',
+            icon: Icons.list_alt_outlined,
+            onPressed: () =>
+                context.push('/projects/$projectId/forms/$formId/responses'),
+          ),
+        ],
+      ),
       'analytics' => _FormDashboardTab(
-          title: 'Analytics',
-          message:
-              'Use this area to inspect response trends, completion rates, and submission activity.',
-          actions: [
-            _DashboardAction(
-              label: 'Open analytics',
-              icon: Icons.analytics_outlined,
-              onPressed: () => context.push(
-                '/projects/$projectId/forms/$formId/analytics',
-              ),
-            ),
-          ],
-        ),
+        title: 'Analytics',
+        message:
+            'Use this area to inspect response trends, completion rates, and submission activity.',
+        actions: [
+          _DashboardAction(
+            label: 'Open analytics',
+            icon: Icons.analytics_outlined,
+            onPressed: () =>
+                context.push('/projects/$projectId/forms/$formId/analytics'),
+          ),
+        ],
+      ),
       'builder' => _FormDashboardTab(
-          title: 'Builder',
-          message:
-              'Jump into the builder when you are ready to edit sections, questions, and styling.',
-          actions: [
-            _DashboardAction(
-              label: 'Edit form',
-              icon: Icons.edit_outlined,
-              onPressed: () => context.push(
-                '/projects/$projectId/forms/$formId/edit',
-              ),
-            ),
-          ],
-        ),
+        title: 'Builder',
+        message:
+            'Jump into the builder when you are ready to edit sections, questions, and styling.',
+        actions: [
+          _DashboardAction(
+            label: 'Edit form',
+            icon: Icons.edit_outlined,
+            onPressed: () =>
+                context.push('/projects/$projectId/forms/$formId/edit'),
+          ),
+        ],
+      ),
       _ => _FormDashboardTab(
-          title: 'Overview',
-          message:
-              'Project-scoped form details will appear here, along with status, publishing state, and quick actions.',
-          actions: [
-            _DashboardAction(
-              label: 'Open responses',
-              icon: Icons.list_alt_outlined,
-              onPressed: () => context.push(
-                '/projects/$projectId/forms/$formId/responses',
-              ),
-            ),
-            _DashboardAction(
-              label: 'View analytics',
-              icon: Icons.show_chart_outlined,
-              onPressed: () => context.push(
-                '/projects/$projectId/forms/$formId/analytics',
-              ),
-            ),
-          ],
-        ),
+        title: 'Overview',
+        message:
+            'Project-scoped form details will appear here, along with status, publishing state, and quick actions.',
+        actions: [
+          _DashboardAction(
+            label: 'Open responses',
+            icon: Icons.list_alt_outlined,
+            onPressed: () =>
+                context.push('/projects/$projectId/forms/$formId/responses'),
+          ),
+          _DashboardAction(
+            label: 'View analytics',
+            icon: Icons.show_chart_outlined,
+            onPressed: () =>
+                context.push('/projects/$projectId/forms/$formId/analytics'),
+          ),
+        ],
+      ),
     };
-    return SizedBox(height: Responsive.isMobile(context) ? 640 : 560, child: child);
+    return SizedBox(
+      height: Responsive.isMobile(context) ? 640 : 560,
+      child: child,
+    );
   }
 }
 
 class _HeroCard extends StatelessWidget {
   final String projectId;
   final String formId;
+  final BuilderForm? form;
+  final bool isLoading;
+  final Object? error;
 
-  const _HeroCard({required this.projectId, required this.formId});
+  const _HeroCard({
+    required this.projectId,
+    required this.formId,
+    required this.form,
+    required this.isLoading,
+    required this.error,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -313,16 +350,26 @@ class _HeroCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isCompact = constraints.maxWidth < 720;
-          final titleStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
+          final titleStyle =
+              Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
               ) ??
-              const TextStyle(fontSize: DesignTokens.fontXXL, fontWeight: FontWeight.w800, color: Colors.white);
-          final bodyStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+              const TextStyle(
+                fontSize: DesignTokens.fontXXL,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              );
+          final bodyStyle =
+              Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white.withValues(alpha: 0.82),
                 height: 1.5,
               ) ??
-              const TextStyle(fontSize: DesignTokens.fontM, color: Colors.white70, height: 1.5);
+              const TextStyle(
+                fontSize: DesignTokens.fontM,
+                color: Colors.white70,
+                height: 1.5,
+              );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,17 +377,51 @@ class _HeroCard extends StatelessWidget {
               Text('Form dashboard', style: titleStyle),
               const SizedBox(height: DesignTokens.spaceS),
               Text(
+                error != null
+                    ? 'Unable to load form details'
+                    : form?.title ?? 'Loading form details...',
+                style: bodyStyle,
+              ),
+              if (error != null) ...[
+                const SizedBox(height: DesignTokens.spaceS),
+                Text(
+                  'The dashboard can still open responses, analytics, and the builder while the form metadata request is unavailable.',
+                  style: bodyStyle,
+                ),
+              ],
+              const SizedBox(height: DesignTokens.spaceS),
+              Text(
                 'Project ID: $projectId${isCompact ? '\n' : '  '}Form ID: $formId',
                 style: bodyStyle,
               ),
               const SizedBox(height: DesignTokens.spaceL),
-              Wrap(
-                spacing: DesignTokens.spaceS,
-                runSpacing: DesignTokens.spaceS,
-                children: const [
-                  _HeroTag(label: 'Stub', value: 'Analytics and response panels are in progress'),
-                  _HeroTag(label: 'Scope', value: 'Project-scoped route'),
-                ],
+              Builder(
+                builder: (_) {
+                  final sectionCount = form?.sections.length;
+                  final quickPresetCount = form?.quickResponses.length;
+                  return Wrap(
+                    spacing: DesignTokens.spaceS,
+                    runSpacing: DesignTokens.spaceS,
+                    children: [
+                      _HeroTag(
+                        label: 'Status',
+                        value: error != null
+                            ? 'Failed to load'
+                            : isLoading
+                            ? 'Loading'
+                            : form?.status ?? 'Unknown',
+                      ),
+                      _HeroTag(
+                        label: 'Sections',
+                        value: sectionCount?.toString() ?? '—',
+                      ),
+                      _HeroTag(
+                        label: 'Quick presets',
+                        value: quickPresetCount?.toString() ?? '—',
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           );
@@ -371,9 +452,9 @@ class _HeroTag extends StatelessWidget {
       child: Text(
         '$label: $value',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -449,17 +530,17 @@ class _SectionCard extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                ),
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
           ),
           const SizedBox(height: DesignTokens.spaceS),
           Text(
             body,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  height: 1.5,
-                  color: cs.onSurface.withValues(alpha: 0.7),
-                ),
+              height: 1.5,
+              color: cs.onSurface.withValues(alpha: 0.7),
+            ),
           ),
         ],
       ),

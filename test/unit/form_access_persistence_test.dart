@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/modules/forms/models/access_policy.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/services/form_builder_repository.dart';
+import 'package:frontend/modules/forms/widgets/form_access_settings.dart';
 import 'package:frontend/shared/models/form_models.dart';
 
 class _FakeFormBuilderRepository implements FormBuilderRepository {
@@ -84,4 +86,73 @@ void main() {
     expect(repo.savedForm!.accessPolicy['accessMode'], 'private');
     expect(repo.savedForm!.accessPolicy['collectEmail'], true);
   });
+
+  testWidgets(
+    'form access controls keep password confirmation and invites distinct',
+    (tester) async {
+      AccessPolicy? latestPolicy;
+      Map<String, dynamic> form = {
+        'accessPolicy': AccessPolicy(
+          passwordProtected: true,
+          inviteOnly: true,
+        ).toJson(),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return FormAccessSettings(
+                    form: form,
+                    onChanged: (policy) {
+                      latestPolicy = policy;
+                      setState(() {
+                        form = {'accessPolicy': policy.toJson()};
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final fields = find.byType(TextFormField);
+      expect(fields, findsNWidgets(5));
+
+      await tester.enterText(fields.at(0), 'secret-123');
+      await tester.pump();
+      await tester.enterText(fields.at(1), 'secret-xyz');
+      await tester.pump();
+
+      expect(find.text('Passwords do not match.'), findsOneWidget);
+      expect(
+        tester.widget<TextFormField>(fields.at(0)).controller!.text,
+        'secret-123',
+      );
+      expect(
+        tester.widget<TextFormField>(fields.at(1)).controller!.text,
+        'secret-xyz',
+      );
+      expect(latestPolicy!.passwordHash, 'secret-123');
+
+      await tester.enterText(fields.at(1), 'secret-123');
+      await tester.pump();
+      expect(find.text('Passwords do not match.'), findsNothing);
+
+      await tester.enterText(fields.at(3), 'invitee@example.com');
+      await tester.pump();
+      await tester.enterText(fields.at(4), '2026-12-31');
+      await tester.pump();
+
+      expect(latestPolicy!.invites, hasLength(1));
+      expect(latestPolicy!.invites.first['invitee'], 'invitee@example.com');
+      expect(latestPolicy!.invites.first['expiresAt'], '2026-12-31');
+    },
+  );
 }

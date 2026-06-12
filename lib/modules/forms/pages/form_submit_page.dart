@@ -223,10 +223,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               IconButton(
                 tooltip: 'Quick Responses',
                 onPressed: () => _showQuickResponsesPicker(context, form),
-                icon: Icon(
-                  Icons.auto_awesome,
-                  color: primaryColor,
-                ),
+                icon: Icon(Icons.auto_awesome, color: primaryColor),
               ),
             const LanguageSwitcher(),
             const SizedBox(width: 8),
@@ -551,7 +548,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     return null;
   }
 
-  Future<void> _showQuickResponsesPicker(BuildContext context, BuilderForm form) async {
+  Future<void> _showQuickResponsesPicker(
+    BuildContext context,
+    BuilderForm form,
+  ) async {
     final quickResponses = form.quickResponses;
     if (quickResponses.isEmpty) return;
 
@@ -564,24 +564,26 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         var query = '';
 
         List<int> visibleIndexes() {
-          return List<int>.generate(quickResponses.length, (index) => index)
-              .where((index) {
-                final response = quickResponses[index];
-                final archived = response['is_archived'] as bool? ??
-                    response['isArchived'] as bool? ??
-                    false;
-                if (!includeArchived && archived) return false;
-                if (query.trim().isEmpty) return true;
-                final haystack = <String>[
-                  response['name']?.toString() ?? '',
-                  response['description']?.toString() ?? '',
-                  ...(response['tags'] as List? ?? const []).map(
-                    (value) => value.toString(),
-                  ),
-                ].join(' ').toLowerCase();
-                return haystack.contains(query.trim().toLowerCase());
-              })
-              .toList();
+          return List<int>.generate(
+            quickResponses.length,
+            (index) => index,
+          ).where((index) {
+            final response = quickResponses[index];
+            final archived =
+                response['is_archived'] as bool? ??
+                response['isArchived'] as bool? ??
+                false;
+            if (!includeArchived && archived) return false;
+            if (query.trim().isEmpty) return true;
+            final haystack = <String>[
+              response['name']?.toString() ?? '',
+              response['description']?.toString() ?? '',
+              ...(response['tags'] as List? ?? const []).map(
+                (value) => value.toString(),
+              ),
+            ].join(' ').toLowerCase();
+            return haystack.contains(query.trim().toLowerCase());
+          }).toList();
         }
 
         return StatefulBuilder(
@@ -639,7 +641,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         itemBuilder: (context, visibleIndex) {
                           final index = indexes[visibleIndex];
                           final response = quickResponses[index];
-                          final archived = response['is_archived'] as bool? ??
+                          final archived =
+                              response['is_archived'] as bool? ??
                               response['isArchived'] as bool? ??
                               false;
                           final isSelected = selected.contains(index);
@@ -681,7 +684,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           if (selected.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Select at least one quick response.'),
+                                content: Text(
+                                  'Select at least one quick response.',
+                                ),
                               ),
                             );
                             return;
@@ -704,10 +709,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           }
                           ref
                               .read(submitFormDataProvider.notifier)
-                              .update((state) => {
-                                    ...state,
-                                    ...result.mergedValues,
-                                  });
+                              .update(
+                                (state) => {...state, ...result.mergedValues},
+                              );
                           Navigator.of(sheetContext).pop();
                         },
                         child: const Text('Apply to draft'),
@@ -734,15 +738,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = results[index];
-        final submittedAt =
-            item['submitted_at']?.toString() ??
-            item['submittedAt']?.toString() ??
-            '';
-        final submittedBy =
-            item['submitted_by']?.toString() ??
-            item['submittedBy']?.toString() ??
-            '';
-        final data = item['data'] ?? item['answers'] ?? item;
+        final metadata = _historyLookupMetadata(item);
+        final matches = _historyLookupMatches(item);
+        final submittedAt = metadata['submitted_at']?.toString() ?? '';
+        final submittedBy = metadata['submitted_by']?.toString() ?? '';
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(12),
@@ -763,7 +762,21 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   ),
                 ],
                 const SizedBox(height: 8),
-                Text(data.toString(), style: const TextStyle(fontSize: 12)),
+                Text(
+                  matches.isNotEmpty
+                      ? matches
+                            .map((match) {
+                              final fieldKey =
+                                  match['field_key']?.toString() ??
+                                  match['question_id']?.toString() ??
+                                  'field';
+                              final value = match['value']?.toString() ?? '';
+                              return '$fieldKey: $value';
+                            })
+                            .join(' • ')
+                      : (item['data'] ?? item['answers'] ?? item).toString(),
+                  style: const TextStyle(fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -785,15 +798,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
           DataColumn(label: Text('Payload')),
         ],
         rows: results.map((item) {
-          final submittedAt =
-              item['submitted_at']?.toString() ??
-              item['submittedAt']?.toString() ??
-              '';
-          final submittedBy =
-              item['submitted_by']?.toString() ??
-              item['submittedBy']?.toString() ??
-              '';
-          final data = item['data'] ?? item['answers'] ?? item;
+          final metadata = _historyLookupMetadata(item);
+          final matches = _historyLookupMatches(item);
+          final submittedAt = metadata['submitted_at']?.toString() ?? '';
+          final submittedBy = metadata['submitted_by']?.toString() ?? '';
           return DataRow(
             cells: [
               DataCell(Text(submittedAt.isNotEmpty ? submittedAt : '-')),
@@ -802,7 +810,18 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 SizedBox(
                   width: 360,
                   child: Text(
-                    data.toString(),
+                    matches.isNotEmpty
+                        ? matches
+                              .map((match) {
+                                final fieldKey =
+                                    match['field_key']?.toString() ??
+                                    match['question_id']?.toString() ??
+                                    'field';
+                                final value = match['value']?.toString() ?? '';
+                                return '$fieldKey: $value';
+                              })
+                              .join(' • ')
+                        : (item['data'] ?? item['answers'] ?? item).toString(),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -827,6 +846,30 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       }
     }
     return current;
+  }
+
+  Map<String, dynamic> _historyLookupMetadata(Map<String, dynamic> item) {
+    final raw =
+        item['response_metadata'] ??
+        item['responseMetadata'] ??
+        item['metadata'] ??
+        item;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return const {};
+  }
+
+  List<Map<String, dynamic>> _historyLookupMatches(Map<String, dynamic> item) {
+    final raw =
+        item['matched_data'] ??
+        item['matchedData'] ??
+        item['matches'] ??
+        const [];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((entry) => Map<String, dynamic>.from(entry))
+        .toList();
   }
 
   Widget _buildBody(
@@ -1366,12 +1409,12 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           widgets.add(
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                            child: _SubmitSectionWidget(
-                              section: currentSection,
-                              questionSpacing: form.style.questionSpacing,
-                              visibilityMap: visibilityMap,
-                              requiredMap: requiredMap,
-                              dynamicOptions: _dynamicOptions,
+                              child: _SubmitSectionWidget(
+                                section: currentSection,
+                                questionSpacing: form.style.questionSpacing,
+                                visibilityMap: visibilityMap,
+                                requiredMap: requiredMap,
+                                dynamicOptions: _dynamicOptions,
                                 loadingFields: _loadingFields,
                                 fieldErrors: _fieldErrors,
                                 onTriggerAction: (config) =>
@@ -2580,15 +2623,10 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         ),
         const SizedBox(height: 8),
         ...results.map((item) {
-          final submittedAt =
-              item['submitted_at']?.toString() ??
-              item['submittedAt']?.toString() ??
-              '';
-          final submittedBy =
-              item['submitted_by']?.toString() ??
-              item['submittedBy']?.toString() ??
-              '';
-          final data = item['data'] ?? item['answers'] ?? item;
+          final metadata = _historyLookupMetadata(item);
+          final matches = _historyLookupMatches(item);
+          final submittedAt = metadata['submitted_at']?.toString() ?? '';
+          final submittedBy = metadata['submitted_by']?.toString() ?? '';
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Card(
@@ -2609,7 +2647,23 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(data.toString(), style: const TextStyle(fontSize: 12)),
+                    Text(
+                      matches.isNotEmpty
+                          ? matches
+                                .map((match) {
+                                  final fieldKey =
+                                      match['field_key']?.toString() ??
+                                      match['question_id']?.toString() ??
+                                      'field';
+                                  final value =
+                                      match['value']?.toString() ?? '';
+                                  return '$fieldKey: $value';
+                                })
+                                .join(' • ')
+                          : (item['data'] ?? item['answers'] ?? item)
+                                .toString(),
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ],
                 ),
               ),
@@ -2618,6 +2672,30 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
         }),
       ],
     );
+  }
+
+  Map<String, dynamic> _historyLookupMetadata(Map<String, dynamic> item) {
+    final raw =
+        item['response_metadata'] ??
+        item['responseMetadata'] ??
+        item['metadata'] ??
+        item;
+    if (raw is Map<String, dynamic>) return raw;
+    if (raw is Map) return Map<String, dynamic>.from(raw);
+    return const {};
+  }
+
+  List<Map<String, dynamic>> _historyLookupMatches(Map<String, dynamic> item) {
+    final raw =
+        item['matched_data'] ??
+        item['matchedData'] ??
+        item['matches'] ??
+        const [];
+    if (raw is! List) return const [];
+    return raw
+        .whereType<Map>()
+        .map((entry) => Map<String, dynamic>.from(entry))
+        .toList();
   }
 
   Widget _buildReadableSpecialField(

@@ -120,7 +120,7 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
             child: Padding(
               padding: EdgeInsets.all(DesignTokens.spaceL),
               child: Text(
-                'No specific settings for this field type.',
+                'This field type does not expose additional per-field settings in the current build.',
                 style: TextStyle(
                   color: AppColors.textGrey,
                   fontSize: DesignTokens.fontS,
