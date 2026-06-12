@@ -22,11 +22,13 @@ final formBuilderControllerProvider = StateNotifierProvider.autoDispose
 class FormBuilderController
     extends StateNotifier<AsyncValue<FormBuilderState>> {
   FormBuilderController({required this.ref, required String formKey})
-    : super(const AsyncValue.loading()) {
+    : _formKey = formKey,
+      super(const AsyncValue.loading()) {
     _init(formKey);
   }
 
   final Ref ref;
+  final String _formKey;
   final _uuid = const Uuid();
   String _projectId = '';
   String _formId = '';
@@ -84,6 +86,10 @@ class FormBuilderController
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  Future<void> reload() async {
+    await _init(_formKey);
   }
 
   void _captureHistorySnapshot() {
@@ -854,6 +860,18 @@ class FormBuilderController
     state = AsyncValue.data(
       state.value!.copyWith(
         selectedSectionId: sectionId,
+        selectedQuestionId: null,
+        selectedQuestionIds: const [],
+        isFormSelected: false,
+      ),
+    );
+  }
+
+  void clearSelection() {
+    if (state.value == null) return;
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        selectedSectionId: null,
         selectedQuestionId: null,
         selectedQuestionIds: const [],
         isFormSelected: false,

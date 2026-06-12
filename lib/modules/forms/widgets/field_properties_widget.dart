@@ -157,7 +157,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> w
                 .read(
                   formBuilderControllerProvider(widget.controllerKey).notifier,
                 )
-                .selectQuestion(null, null),
+                .clearSelection(),
           );
         }
 
@@ -230,7 +230,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> w
                                   widget.controllerKey,
                                 ).notifier,
                               )
-                              .selectQuestion(null, null),
+                              .clearSelection(),
                         ),
                       ],
                     ),

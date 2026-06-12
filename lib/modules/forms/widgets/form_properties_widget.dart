@@ -100,7 +100,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                         color: AppColors.textGrey,
                         size: 20,
                       ),
-                      onPressed: controller.selectForm,
+                      onPressed: controller.clearSelection,
                     ),
                   ],
                 ),
@@ -338,7 +338,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
       error: (e, s) => ErrorStateWidget(
         title: 'Unable to load form properties',
         message: e.toString(),
-        onRetry: controller.loadForm,
+        onRetry: controller.reload,
       ),
     );
   }

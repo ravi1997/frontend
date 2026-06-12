@@ -977,7 +977,23 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                                     ),
                                   )
                                   .value;
-                              if (state == null) return const SizedBox();
+                              if (state == null) {
+                                return const InputDecorator(
+                                  decoration: InputDecoration(
+                                    hintText: 'Target Field',
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                  ),
+                                  child: Text(
+                                    'Loading fields...',
+                                    style: TextStyle(
+                                      color: AppColors.textGrey,
+                                    ),
+                                  ),
+                                );
+                              }
 
                               final allQuestions = state.form.sections
                                   .expand((s) => s.questions)

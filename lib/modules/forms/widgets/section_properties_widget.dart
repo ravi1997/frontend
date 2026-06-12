@@ -77,7 +77,7 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
                 'The selected section could not be found. Clear the selection and choose another section.',
             icon: Icons.view_day_outlined,
             actionLabel: 'Clear selection',
-            onAction: () => controller.selectForm(),
+            onAction: () => controller.clearSelection(),
           );
         }
 
@@ -126,7 +126,7 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
                         color: AppColors.textGrey,
                         size: 20,
                       ),
-                      onPressed: controller.selectForm,
+                      onPressed: controller.clearSelection,
                     ),
                   ],
                 ),
