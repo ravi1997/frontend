@@ -9,6 +9,7 @@ import 'package:frontend/modules/forms/models/form_layout_type.dart';
 import 'package:frontend/modules/forms/models/section_layout_type.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
+import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'section_layout_widgets.dart';
 
 TextStyle _sectionTypographyStyle({
@@ -80,8 +81,21 @@ class FormRenderWidget extends ConsumerWidget {
             constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
             child: Column(
               children: [
+                if (formStyle.coverImageUrl.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusM),
+                    child: Image.network(
+                      formStyle.coverImageUrl,
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    ),
+                  ),
+                  const SizedBox(height: DesignTokens.spaceL),
+                ],
                 // Form Header
-                _buildFormHeader(context, form.title, locale),
+                _buildFormHeader(context, form, locale, formStyle),
                 const SizedBox(height: DesignTokens.spaceL),
 
                 // Sections
@@ -93,7 +107,8 @@ class FormRenderWidget extends ConsumerWidget {
                     int crossAxisCount = 1;
                     if (form.layout == FormLayoutType.twoColumns.name) {
                       crossAxisCount = 2;
-                    } else if (form.layout == FormLayoutType.threeColumns.name) {
+                    } else if (form.layout ==
+                        FormLayoutType.threeColumns.name) {
                       crossAxisCount = 3;
                     }
 
@@ -110,14 +125,17 @@ class FormRenderWidget extends ConsumerWidget {
                     return Wrap(
                       spacing: spacing,
                       runSpacing: spacing,
-                      children: form.sections.where((section) {
-                        return _isSectionVisible(section, availableWidth);
-                      }).map((section) {
-                        return SizedBox(
-                          width: itemWidth,
-                          child: _buildSection(context, section, locale),
-                        );
-                      }).toList(),
+                      children: form.sections
+                          .where((section) {
+                            return _isSectionVisible(section, availableWidth);
+                          })
+                          .map((section) {
+                            return SizedBox(
+                              width: itemWidth,
+                              child: _buildSection(context, section, locale),
+                            );
+                          })
+                          .toList(),
                     );
                   },
                 ),
@@ -135,7 +153,9 @@ class FormRenderWidget extends ConsumerWidget {
                         vertical: DesignTokens.spaceM,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                        borderRadius: BorderRadius.circular(
+                          DesignTokens.radiusS,
+                        ),
                       ),
                     ),
                     child: const Text(
@@ -152,12 +172,28 @@ class FormRenderWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildFormHeader(BuildContext context, Object? title, String locale) {
+  Widget _buildFormHeader(
+    BuildContext context,
+    BuilderForm form,
+    String locale,
+    FormStyle formStyle,
+  ) {
+    final headerColor = switch (formStyle.headerStyle) {
+      'banner' => PreviewUtils.parseColor(
+        formStyle.accentColor,
+        Theme.of(context).colorScheme.surface,
+      ),
+      _ => Theme.of(context).colorScheme.surface,
+    };
+    final onHeaderColor = formStyle.headerStyle == 'banner'
+        ? Colors.white
+        : AppColors.textDark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(DesignTokens.spaceL),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: headerColor,
         borderRadius: BorderRadius.circular(DesignTokens.radiusM),
         boxShadow: [
           BoxShadow(
@@ -170,10 +206,22 @@ class FormRenderWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (formStyle.logoUrl.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+              child: Image.network(
+                formStyle.logoUrl,
+                height: 56,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
+            const SizedBox(height: DesignTokens.spaceM),
+          ],
           Text(
-            title.translate(locale),
-            style: const TextStyle(
-              color: AppColors.textDark,
+            form.title.translate(locale),
+            style: TextStyle(
+              color: onHeaderColor,
               fontSize: DesignTokens.fontXL,
               fontWeight: FontWeight.bold,
             ),
@@ -382,7 +430,11 @@ class FormRenderWidget extends ConsumerWidget {
   // ---------------------------------------------------------------------------
   // Layout dispatcher
   // ---------------------------------------------------------------------------
-  Widget _buildSection(BuildContext context, FormSection section, String locale) {
+  Widget _buildSection(
+    BuildContext context,
+    FormSection section,
+    String locale,
+  ) {
     final sectionStyle = SectionStyle.fromJson(
       Map<String, dynamic>.from(section.ui['style'] as Map? ?? const {}),
     );
@@ -423,8 +475,9 @@ class FormRenderWidget extends ConsumerWidget {
           locale,
           sectionStyle,
         ),
-        childSections:
-            section.sections.map((c) => _buildSection(context, c, locale)).toList(),
+        childSections: section.sections
+            .map((c) => _buildSection(context, c, locale))
+            .toList(),
       );
     }
 
@@ -439,15 +492,14 @@ class FormRenderWidget extends ConsumerWidget {
         headerBg: headerBg,
         metadata: metadata,
         sectionStyle: sectionStyle,
-        buildQuestionsGrid: (s) =>
-            _buildQuestionsGrid(
-              context,
-              s,
-              locale,
-              SectionStyle.fromJson(
-                Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
-              ),
-            ),
+        buildQuestionsGrid: (s) => _buildQuestionsGrid(
+          context,
+          s,
+          locale,
+          SectionStyle.fromJson(
+            Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
+          ),
+        ),
       );
     }
 
@@ -461,15 +513,14 @@ class FormRenderWidget extends ConsumerWidget {
         headerBg: headerBg,
         metadata: metadata,
         sectionStyle: sectionStyle,
-        buildQuestionsGrid: (s) =>
-            _buildQuestionsGrid(
-              context,
-              s,
-              locale,
-              SectionStyle.fromJson(
-                Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
-              ),
-            ),
+        buildQuestionsGrid: (s) => _buildQuestionsGrid(
+          context,
+          s,
+          locale,
+          SectionStyle.fromJson(
+            Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}),
+          ),
+        ),
         buildChildSection: (s) => _buildSection(context, s, locale),
       );
     }
@@ -537,7 +588,8 @@ class FormRenderWidget extends ConsumerWidget {
       content = Align(alignment: contentAlignment, child: content);
     }
 
-    final extraShadow = (layout == SectionLayoutType.card || metadata['isCardLayout'] == true)
+    final extraShadow =
+        (layout == SectionLayoutType.card || metadata['isCardLayout'] == true)
         ? [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.10),
@@ -705,7 +757,7 @@ class _RenderFieldWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-                  width: style.labelColumnWidth,
+              width: style.labelColumnWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -733,7 +785,7 @@ class _RenderFieldWidget extends StatelessWidget {
         children: [
           labelWidget,
           if (helperWidget != null) ...[
-                const SizedBox(height: DesignTokens.spaceXS),
+            const SizedBox(height: DesignTokens.spaceXS),
             helperWidget,
           ],
           const SizedBox(height: DesignTokens.spaceS),
@@ -759,7 +811,9 @@ class _RenderFieldWidget extends StatelessWidget {
         break;
       case 'glass':
         fillColor = AppColors.fieldBackground.withValues(alpha: 0.3);
-        border = Border.all(color: AppColors.borderLight.withValues(alpha: 0.5));
+        border = Border.all(
+          color: AppColors.borderLight.withValues(alpha: 0.5),
+        );
         break;
       case 'minimalist':
         fillColor = Colors.transparent;
@@ -921,28 +975,28 @@ class _RenderFieldWidget extends StatelessWidget {
             : q.options;
         return Column(
           children: options.map((opt) {
-            final label =
-                (opt['option_label'] ?? opt['label'] ?? '').toString();
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: textStyle.color ?? AppColors.textGrey,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: DesignTokens.spaceS),
-                          Text(label, style: textStyle),
-                        ],
+            final label = (opt['option_label'] ?? opt['label'] ?? '')
+                .toString();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: textStyle.color ?? AppColors.textGrey,
                       ),
-                    );
-                  }).toList(),
+                    ),
+                  ),
+                  const SizedBox(width: DesignTokens.spaceS),
+                  Text(label, style: textStyle),
+                ],
+              ),
+            );
+          }).toList(),
         );
       case QuestionType.multipleChoice:
         final options = q.options.isEmpty
@@ -963,23 +1017,23 @@ class _RenderFieldWidget extends StatelessWidget {
             : q.options;
         return Column(
           children: options.map((opt) {
-            final label =
-                (opt['option_label'] ?? opt['label'] ?? '').toString();
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.radio_button_unchecked,
-                            size: 22,
-                            color: textStyle.color ?? AppColors.textGrey,
-                          ),
-                          const SizedBox(width: DesignTokens.spaceS),
-                          Text(label, style: textStyle),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+            final label = (opt['option_label'] ?? opt['label'] ?? '')
+                .toString();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.radio_button_unchecked,
+                    size: 22,
+                    color: textStyle.color ?? AppColors.textGrey,
+                  ),
+                  const SizedBox(width: DesignTokens.spaceS),
+                  Text(label, style: textStyle),
+                ],
+              ),
+            );
+          }).toList(),
         );
       case QuestionType.fileUpload:
         return Container(
@@ -1050,8 +1104,14 @@ class _RenderFieldWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('0', style: textStyle.copyWith(fontSize: DesignTokens.fontM)),
-                  Text('100', style: textStyle.copyWith(fontSize: DesignTokens.fontM)),
+                  Text(
+                    '0',
+                    style: textStyle.copyWith(fontSize: DesignTokens.fontM),
+                  ),
+                  Text(
+                    '100',
+                    style: textStyle.copyWith(fontSize: DesignTokens.fontM),
+                  ),
                 ],
               ),
             ),
@@ -1165,7 +1225,9 @@ class _RenderFieldWidget extends StatelessWidget {
                         width: 120,
                         child: Text(
                           'Row ${i + 1}',
-                          style: textStyle.copyWith(fontSize: DesignTokens.fontM),
+                          style: textStyle.copyWith(
+                            fontSize: DesignTokens.fontM,
+                          ),
                         ),
                       ),
                       ...List.generate(

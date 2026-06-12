@@ -160,6 +160,33 @@ class AuthService {
     );
   }
 
+  Future<UserModel> verifyOidcCallback(String code, String state) async {
+    final response = await _apiClient.post(
+      '/auth/oidc/callback',
+      data: {'code': code, 'state': state},
+    );
+    final data = _authData(response.data);
+    if (data == null) {
+      throw Exception('OIDC Callback response missing data');
+    }
+
+    await _handleAuthResponse(
+      _tokenFromData(data, 'access_token'),
+      _tokenFromData(data, 'refresh_token'),
+      _userFromData(data['user']),
+    );
+    final user = _userFromData(data['user']);
+    if (user != null) return user;
+
+    final currentUser = await _fetchCurrentUserOrNull();
+    if (currentUser != null) {
+      await _tokenService.setOrganizationId(currentUser.organizationId.toString());
+      return currentUser;
+    }
+
+    throw Exception('Failed to retrieve user info after OIDC login');
+  }
+
   Future<void> _handleAuthResponse(
     String? accessToken,
     String? refreshToken,

@@ -52,21 +52,26 @@ class FormQuestion {
     this.value,
     this.sectionId,
     this.order = 0,
-  })  : type = type ?? _questionTypeFromFieldType(fieldType),
-        fieldType = (type ?? _questionTypeFromFieldType(fieldType)).name;
+  }) : type = type ?? _questionTypeFromFieldType(fieldType),
+       fieldType = (type ?? _questionTypeFromFieldType(fieldType)).name;
 
   String get helperText => helpText ?? '';
   String? get validationRegex => validation['regex']?.toString();
   int? get minLength => (validation['min_length'] as num?)?.toInt();
   int? get maxLength => (validation['max_length'] as num?)?.toInt();
-  String? get customErrorMessage => validation['custom_error_message']?.toString();
+  String? get customErrorMessage =>
+      validation['custom_error_message']?.toString();
   dynamic get dateMin => validation['date_min'];
   dynamic get dateMax => validation['date_max'];
   dynamic get inputMask => validation['input_mask'];
   List<String> get allowedFileTypes =>
-      (metadata['allowedFileTypes'] as List? ?? const []).map((e) => e.toString()).toList();
-  dynamic get defaultValue => metadata['defaultValue'] ?? metadata['default_value'];
-  Map<String, dynamic>? get conditionalLogic => metadata['conditional_logic'] is Map
+      (metadata['allowedFileTypes'] as List? ?? const [])
+          .map((e) => e.toString())
+          .toList();
+  dynamic get defaultValue =>
+      metadata['defaultValue'] ?? metadata['default_value'];
+  Map<String, dynamic>? get conditionalLogic =>
+      metadata['conditional_logic'] is Map
       ? Map<String, dynamic>.from(metadata['conditional_logic'] as Map)
       : null;
   Map<String, dynamic>? get logic => metadata['logic'] is Map
@@ -89,11 +94,16 @@ class FormQuestion {
     final rawOptions = json['options'];
     return FormQuestion(
       id: json['id']?.toString() ?? '',
-      label: json['label']?.toString() ?? json['question_text']?.toString() ?? '',
-      fieldType: json['fieldType']?.toString() ?? json['field_type']?.toString() ?? json['type']?.toString(),
+      label:
+          json['label']?.toString() ?? json['question_text']?.toString() ?? '',
+      fieldType:
+          json['fieldType']?.toString() ??
+          json['field_type']?.toString() ??
+          json['type']?.toString(),
       helpText: json['help_text']?.toString() ?? json['helpText']?.toString(),
       placeholder: json['placeholder']?.toString(),
-      isRequired: json['is_required'] as bool? ?? json['required'] as bool? ?? false,
+      isRequired:
+          json['is_required'] as bool? ?? json['required'] as bool? ?? false,
       isHidden: json['is_hidden'] as bool? ?? false,
       isReadOnly: json['is_read_only'] as bool? ?? false,
       isRepeatable: json['is_repeatable'] as bool? ?? false,
@@ -102,14 +112,20 @@ class FormQuestion {
       repeatMax: (json['repeat_max'] as num?)?.toInt(),
       minValue: json['minValue'] as num? ?? json['min_value'] as num?,
       maxValue: json['maxValue'] as num? ?? json['max_value'] as num?,
-      validation: Map<String, dynamic>.from(json['validation'] ?? json['validation_schema'] ?? const {}),
-      metadata: Map<String, dynamic>.from(json['meta_data'] ?? json['metadata'] ?? const {}),
+      validation: Map<String, dynamic>.from(
+        json['validation'] ?? json['validation_schema'] ?? const {},
+      ),
+      metadata: Map<String, dynamic>.from(
+        json['meta_data'] ?? json['metadata'] ?? const {},
+      ),
       ui: Map<String, dynamic>.from(json['ui'] ?? const {}),
       style: Map<String, dynamic>.from(json['style'] ?? const {}),
       options: rawOptions is List ? rawOptions.toList() : const [],
-      variableName: json['variable_name']?.toString() ?? json['variableName']?.toString(),
+      variableName:
+          json['variable_name']?.toString() ?? json['variableName']?.toString(),
       value: json['value'],
-      sectionId: json['section_id']?.toString() ?? json['sectionId']?.toString(),
+      sectionId:
+          json['section_id']?.toString() ?? json['sectionId']?.toString(),
       order: (json['order'] as num?)?.toInt() ?? 0,
     );
   }
@@ -257,11 +273,16 @@ class FormSection {
       helpText: json['help_text']?.toString(),
       order: (json['order'] as num?)?.toInt() ?? 0,
       questions: (json['questions'] as List? ?? const [])
-          .map((q) => q is FormQuestion
-              ? q
-              : FormQuestion.fromJson(Map<String, dynamic>.from(q as Map)))
+          .map(
+            (q) => q is FormQuestion
+                ? q
+                : FormQuestion.fromJson(Map<String, dynamic>.from(q as Map)),
+          )
           .toList(),
-      layout: json['layout']?.toString() ?? ui['layout_type']?.toString() ?? 'standard',
+      layout:
+          json['layout']?.toString() ??
+          ui['layout_type']?.toString() ??
+          'standard',
       gridColumns: (json['grid_columns'] as num?)?.toInt() ?? 2,
       isHidden: json['is_hidden'] as bool? ?? false,
       isRepeatable: json['is_repeatable'] as bool? ?? false,
@@ -270,19 +291,27 @@ class FormSection {
       conditionalLogic: json['conditional_logic'] is Map
           ? Map<String, dynamic>.from(json['conditional_logic'])
           : null,
-      logic: json['logic'] is Map ? Map<String, dynamic>.from(json['logic']) : null,
+      logic: json['logic'] is Map
+          ? Map<String, dynamic>.from(json['logic'])
+          : null,
       sections: (json['sections'] as List? ?? const [])
-          .map((s) => s is FormSection
-              ? s
-              : FormSection.fromJson(Map<String, dynamic>.from(s as Map)))
+          .map(
+            (s) => s is FormSection
+                ? s
+                : FormSection.fromJson(Map<String, dynamic>.from(s as Map)),
+          )
           .toList(),
       responseTemplates: (json['response_templates'] as List? ?? const [])
           .map((e) => Map<String, dynamic>.from(e as Map))
           .toList(),
-      tags: (json['tags'] as List? ?? const []).map((e) => e.toString()).toList(),
+      tags: (json['tags'] as List? ?? const [])
+          .map((e) => e.toString())
+          .toList(),
       style: Map<String, dynamic>.from(json['style'] ?? const {}),
       ui: ui,
-      metadata: Map<String, dynamic>.from(json['meta_data'] ?? json['metadata'] ?? const {}),
+      metadata: Map<String, dynamic>.from(
+        json['meta_data'] ?? json['metadata'] ?? const {},
+      ),
     );
   }
 
@@ -376,12 +405,15 @@ class FormVersion {
       id: json['id']?.toString(),
       version: json['version']?.toString() ?? '1.0',
       sections: (json['sections'] as List? ?? const [])
-          .map((s) => s is FormSection
-              ? s
-              : FormSection.fromJson(Map<String, dynamic>.from(s as Map)))
+          .map(
+            (s) => s is FormSection
+                ? s
+                : FormSection.fromJson(Map<String, dynamic>.from(s as Map)),
+          )
           .toList(),
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? ''),
-      changeLog: json['changeLog']?.toString() ?? json['change_log']?.toString(),
+      changeLog:
+          json['changeLog']?.toString() ?? json['change_log']?.toString(),
     );
   }
 
@@ -415,6 +447,7 @@ class Form {
   final String title;
   final String status;
   final String slug;
+  final String? description;
   final String? organizationId;
   final String? createdBy;
   final String version;
@@ -427,6 +460,10 @@ class Form {
   final Map<String, dynamic> style;
   final Map<String, dynamic> workflows;
   final Map<String, dynamic> accessPolicy;
+  final Map<String, dynamic> submissionSettings;
+  final List<Map<String, dynamic>> quickResponses;
+  final Map<String, dynamic> dataExportSettings;
+  final Map<String, dynamic> advancedSettings;
   final Map<String, dynamic> metadata;
   final List<FormSection> sections;
   final List<FormVersion> versions;
@@ -437,6 +474,7 @@ class Form {
     required this.title,
     this.status = 'draft',
     this.slug = '',
+    this.description,
     this.organizationId,
     this.createdBy,
     this.version = '1.0',
@@ -449,6 +487,10 @@ class Form {
     this.style = const {},
     this.workflows = const {},
     this.accessPolicy = const {},
+    this.submissionSettings = const {},
+    this.quickResponses = const [],
+    this.dataExportSettings = const {},
+    this.advancedSettings = const {},
     this.metadata = const {},
     this.sections = const [],
     this.versions = const [],
@@ -459,36 +501,76 @@ class Form {
 
   factory Form.fromJson(Map<String, dynamic> json) {
     final sections = (json['sections'] as List? ?? const [])
-        .map((section) => section is FormSection
-            ? section
-            : FormSection.fromJson(Map<String, dynamic>.from(section as Map)))
+        .map(
+          (section) => section is FormSection
+              ? section
+              : FormSection.fromJson(Map<String, dynamic>.from(section as Map)),
+        )
         .toList();
     final versions = (json['versions'] as List? ?? const [])
-        .map((item) => item is FormVersion
-            ? item
-            : FormVersion.fromJson(Map<String, dynamic>.from(item as Map)))
+        .map(
+          (item) => item is FormVersion
+              ? item
+              : FormVersion.fromJson(Map<String, dynamic>.from(item as Map)),
+        )
         .toList();
+    List<Map<String, dynamic>> parseQuickResponses(dynamic raw) {
+      if (raw is! List) return const [];
+      return raw
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
     return Form(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled Form',
       status: json['status']?.toString() ?? 'draft',
       slug: json['slug']?.toString() ?? '',
-      organizationId: json['organizationId']?.toString() ?? json['organization_id']?.toString(),
-      createdBy: json['createdBy']?.toString() ?? json['created_by']?.toString(),
-      version: json['version']?.toString() ?? json['activeVersion']?.toString() ?? '1.0',
-      activeVersion: json['activeVersion']?.toString() ?? json['active_version']?.toString(),
+      description: json['description']?.toString(),
+      organizationId:
+          json['organizationId']?.toString() ??
+          json['organization_id']?.toString(),
+      createdBy:
+          json['createdBy']?.toString() ?? json['created_by']?.toString(),
+      version:
+          json['version']?.toString() ??
+          json['activeVersion']?.toString() ??
+          '1.0',
+      activeVersion:
+          json['activeVersion']?.toString() ??
+          json['active_version']?.toString(),
       isPublished: json['isPublished'] as bool? ?? false,
       isLatest: json['isLatest'] as bool? ?? true,
       isPublic: json['isPublic'] as bool? ?? false,
-      uiType: json['uiType']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
-      layout: json['layout']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
+      uiType:
+          json['uiType']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
+      layout:
+          json['layout']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
       style: Map<String, dynamic>.from(json['style'] ?? const {}),
       workflows: Map<String, dynamic>.from(json['workflows'] ?? const {}),
-      accessPolicy: Map<String, dynamic>.from(json['accessPolicy'] ?? json['access_policy'] ?? const {}),
+      accessPolicy: Map<String, dynamic>.from(
+        json['accessPolicy'] ?? json['access_policy'] ?? const {},
+      ),
+      submissionSettings: Map<String, dynamic>.from(
+        json['submissionSettings'] ?? json['submission_settings'] ?? const {},
+      ),
+      quickResponses: parseQuickResponses(
+        json['quickResponses'] ?? json['quick_responses'] ?? const [],
+      ),
+      dataExportSettings: Map<String, dynamic>.from(
+        json['dataExportSettings'] ??
+            json['data_export_settings'] ??
+            const {},
+      ),
+      advancedSettings: Map<String, dynamic>.from(
+        json['advancedSettings'] ?? json['advanced_settings'] ?? const {},
+      ),
       metadata: Map<String, dynamic>.from(json['metadata'] ?? const {}),
       sections: sections,
       versions: versions,
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? json['updated_at']?.toString() ?? ''),
+      updatedAt: DateTime.tryParse(
+        json['updatedAt']?.toString() ?? json['updated_at']?.toString() ?? '',
+      ),
     );
   }
 
@@ -497,6 +579,7 @@ class Form {
     'title': title,
     'status': status,
     'slug': slug,
+    'description': description,
     'organizationId': organizationId,
     'createdBy': createdBy,
     'version': version,
@@ -509,10 +592,14 @@ class Form {
     'style': style,
     'workflows': workflows,
     'accessPolicy': accessPolicy,
-    'metadata': metadata,
-    'sections': sections.map((e) => e.toJson()).toList(),
-    'versions': versions.map((e) => e.toJson()).toList(),
-    'updatedAt': updatedAt?.toIso8601String(),
+      'submissionSettings': submissionSettings,
+      'quickResponses': quickResponses,
+      'dataExportSettings': dataExportSettings,
+      'advancedSettings': advancedSettings,
+      'metadata': metadata,
+      'sections': sections.map((e) => e.toJson()).toList(),
+      'versions': versions.map((e) => e.toJson()).toList(),
+      'updatedAt': updatedAt?.toIso8601String(),
   };
 
   Form copyWith({
@@ -520,6 +607,7 @@ class Form {
     String? title,
     String? status,
     String? slug,
+    String? description,
     String? organizationId,
     String? createdBy,
     String? version,
@@ -533,6 +621,10 @@ class Form {
     Map<String, dynamic>? style,
     Map<String, dynamic>? workflows,
     Map<String, dynamic>? accessPolicy,
+    Map<String, dynamic>? submissionSettings,
+    List<Map<String, dynamic>>? quickResponses,
+    Map<String, dynamic>? dataExportSettings,
+    Map<String, dynamic>? advancedSettings,
     Map<String, dynamic>? metadata,
     List<FormSection>? sections,
     List<FormVersion>? versions,
@@ -543,6 +635,7 @@ class Form {
       title: title ?? this.title,
       status: status ?? this.status,
       slug: slug ?? this.slug,
+      description: description ?? this.description,
       organizationId: organizationId ?? this.organizationId,
       createdBy: createdBy ?? this.createdBy,
       version: version ?? this.version,
@@ -555,6 +648,10 @@ class Form {
       style: style ?? this.style,
       workflows: workflows ?? this.workflows,
       accessPolicy: accessPolicy ?? this.accessPolicy,
+      submissionSettings: submissionSettings ?? this.submissionSettings,
+      quickResponses: quickResponses ?? this.quickResponses,
+      dataExportSettings: dataExportSettings ?? this.dataExportSettings,
+      advancedSettings: advancedSettings ?? this.advancedSettings,
       metadata: metadata ?? this.metadata,
       sections: sections ?? this.sections,
       versions: versions ?? this.versions,
@@ -567,15 +664,20 @@ typedef BuilderForm = Form;
 typedef Question = FormQuestion;
 
 extension FormStyleMapX on Map<String, dynamic> {
-  String get backgroundColor => this['backgroundColor']?.toString() ?? '#FFFFFF';
+  String get backgroundColor =>
+      this['backgroundColor']?.toString() ?? '#FFFFFF';
   String get primaryColor => this['primaryColor']?.toString() ?? '#1976D2';
   String get layoutType => this['layoutType']?.toString() ?? 'singleColumn';
   double get maxWidth => (this['maxWidth'] as num?)?.toDouble() ?? 1200.0;
-  double get sectionSpacing => (this['sectionSpacing'] as num?)?.toDouble() ?? 16.0;
-  double get questionSpacing => (this['questionSpacing'] as num?)?.toDouble() ?? 12.0;
-  double get globalBorderRadius => (this['globalBorderRadius'] as num?)?.toDouble() ?? 8.0;
+  double get sectionSpacing =>
+      (this['sectionSpacing'] as num?)?.toDouble() ?? 16.0;
+  double get questionSpacing =>
+      (this['questionSpacing'] as num?)?.toDouble() ?? 12.0;
+  double get globalBorderRadius =>
+      (this['globalBorderRadius'] as num?)?.toDouble() ?? 8.0;
   String get titleColor => this['titleColor']?.toString() ?? '#212121';
-  String get descriptionColor => this['descriptionColor']?.toString() ?? '#757575';
+  String get descriptionColor =>
+      this['descriptionColor']?.toString() ?? '#757575';
   double get borderRadius => (this['borderRadius'] as num?)?.toDouble() ?? 4.0;
   String get borderColor => this['borderColor']?.toString() ?? '#E0E0E0';
   double get borderWidth => (this['borderWidth'] as num?)?.toDouble() ?? 1.0;
@@ -585,20 +687,27 @@ extension FormStyleMapX on Map<String, dynamic> {
   double get fixedWidth => (this['fixedWidth'] as num?)?.toDouble() ?? 200.0;
   String get labelColor => this['labelColor']?.toString() ?? '#212121';
   String get helperColor => this['helperColor']?.toString() ?? '#757575';
-  double get labelFontSize => (this['labelFontSize'] as num?)?.toDouble() ?? 14.0;
+  double get labelFontSize =>
+      (this['labelFontSize'] as num?)?.toDouble() ?? 14.0;
   String get labelFontWeight => this['labelFontWeight']?.toString() ?? 'normal';
-  double get helperFontSize => (this['helperFontSize'] as num?)?.toDouble() ?? 12.0;
-  String get helperFontWeight => this['helperFontWeight']?.toString() ?? 'normal';
+  double get helperFontSize =>
+      (this['helperFontSize'] as num?)?.toDouble() ?? 12.0;
+  String get helperFontWeight =>
+      this['helperFontWeight']?.toString() ?? 'normal';
   String get inputFontColor => this['inputFontColor']?.toString() ?? '#212121';
-  double get inputFontSize => (this['inputFontSize'] as num?)?.toDouble() ?? 14.0;
+  double get inputFontSize =>
+      (this['inputFontSize'] as num?)?.toDouble() ?? 14.0;
   String get inputFontWeight => this['inputFontWeight']?.toString() ?? 'normal';
   String get inputStyle => this['inputStyle']?.toString() ?? 'filled';
   String get focusColor => this['focusColor']?.toString() ?? '#1976D2';
   String get errorColor => this['errorColor']?.toString() ?? '#D32F2F';
-  double get verticalMargin => (this['verticalMargin'] as num?)?.toDouble() ?? 8.0;
-  double get containerPadding => (this['containerPadding'] as num?)?.toDouble() ?? 16.0;
+  double get verticalMargin =>
+      (this['verticalMargin'] as num?)?.toDouble() ?? 8.0;
+  double get containerPadding =>
+      (this['containerPadding'] as num?)?.toDouble() ?? 16.0;
   String get labelPosition => this['labelPosition']?.toString() ?? 'top';
-  double get labelColumnWidth => (this['labelColumnWidth'] as num?)?.toDouble() ?? 150.0;
+  double get labelColumnWidth =>
+      (this['labelColumnWidth'] as num?)?.toDouble() ?? 150.0;
   String get prefixIcon => this['prefixIcon']?.toString() ?? '';
   String get suffixIcon => this['suffixIcon']?.toString() ?? '';
   Map<String, dynamic> copyWith({

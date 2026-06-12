@@ -9,6 +9,8 @@ import 'package:frontend/modules/forms/widgets/signature_pad_widget.dart';
 import 'package:frontend/modules/forms/widgets/camera_capture_dialog.dart';
 import 'package:frontend/modules/forms/widgets/language_switcher.dart';
 import 'package:frontend/modules/forms/utility/form_action_button_utils.dart';
+import 'package:frontend/modules/forms/utility/quick_response_utils.dart';
+import 'package:frontend/modules/forms/utility/form_redirect.dart';
 import 'package:frontend/modules/forms/utility/submission_error_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,8 +21,10 @@ import 'package:frontend/core/services/snackbar_service.dart';
 import '../../../../app/theme/app_colors.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
 import 'package:frontend/modules/forms/models/question_type.dart';
+import 'package:frontend/modules/forms/models/form_style.dart';
 import 'package:frontend/modules/forms/models/section_layout_type.dart';
 import 'package:frontend/modules/forms/responses/controllers/form_submission_controller.dart';
+import 'package:frontend/modules/forms/responses/response_repository_provider.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/modules/forms/utility/preview_utils.dart';
 import 'package:frontend/modules/forms/utility/form_logic_engine.dart';
@@ -161,13 +165,15 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     _logicResult = FormLogicEngine.evaluate(form, formData);
     final visibilityMap = _logicResult!.visibility;
 
-    final formStyle = form.style;
+    final formStyle = FormStyle.fromJson(form.style);
     final canvasColor = PreviewUtils.parseColor(
       formStyle.backgroundColor,
       AppColors.builderBackground,
     );
     final primaryColor = PreviewUtils.parseColor(
-      formStyle.primaryColor,
+      formStyle.accentColor.isNotEmpty
+          ? formStyle.accentColor
+          : formStyle.primaryColor,
       AppColors.primary,
     );
 
@@ -190,25 +196,38 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
           leading: const SizedBox(),
           title: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: primaryColor.withValues(alpha: 0.1),
+              if (formStyle.logoUrl.isNotEmpty)
+                ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '',
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+                  child: Image.network(
+                    formStyle.logoUrl,
+                    height: 24,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
+                ),
+              if (formStyle.logoUrl.isNotEmpty) const SizedBox(width: 8),
+              Text(
+                form.title.translate(locale),
+                style: TextStyle(
+                  color: primaryColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],
           ),
           actions: [
+            if (form.quickResponses.isNotEmpty)
+              IconButton(
+                tooltip: 'Quick Responses',
+                onPressed: () => _showQuickResponsesPicker(context, form),
+                icon: Icon(
+                  Icons.auto_awesome,
+                  color: primaryColor,
+                ),
+              ),
             const LanguageSwitcher(),
             const SizedBox(width: 8),
             TextButton.icon(
@@ -444,6 +463,358 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     }
   }
 
+  Future<Map<String, dynamic>?> _handleAction(
+    Map<String, dynamic> config,
+  ) async {
+    final actionType = config['type']?.toString() ?? 'webhook';
+    if (actionType == 'history_lookup') {
+      final questionId = config['questionId']?.toString() ?? '';
+      final displayMode = config['displayMode']?.toString() ?? 'drawer';
+      final currentValue =
+          ref.read(submitFormDataProvider)[questionId]?.toString().trim() ?? '';
+
+      if (questionId.isEmpty || currentValue.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Enter a value before looking up history.'),
+            ),
+          );
+        }
+        return null;
+      }
+
+      final repository = ref.read(responseRepositoryProvider);
+      final rawResults = await repository.lookupSameFormResponses(
+        widget.formId,
+        questionId,
+        currentValue,
+      );
+      final limit = int.tryParse(config['resultLimit']?.toString() ?? '');
+      final results = limit != null && limit > 0
+          ? rawResults.take(limit).toList()
+          : rawResults;
+
+      final payload = <String, dynamic>{
+        'actionType': 'history_lookup',
+        'displayMode': displayMode,
+        'results': results,
+        'questionId': questionId,
+      };
+
+      if (displayMode == 'inline') {
+        return payload;
+      }
+
+      if (!mounted) return null;
+      if (displayMode == 'table') {
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              title: Text(config['buttonLabel']?.toString() ?? 'History'),
+              content: SizedBox(
+                width: 720,
+                child: _buildHistoryResultsTable(results),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        await showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (sheetContext) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildHistoryResultsList(results),
+              ),
+            );
+          },
+        );
+      }
+      return null;
+    }
+
+    final resolvedUrl = _interpolateUrl(
+      config['url'] ?? '',
+      ref.read(submitFormDataProvider),
+    );
+    await _triggerWebhook(config, resolvedUrl);
+    return null;
+  }
+
+  Future<void> _showQuickResponsesPicker(BuildContext context, BuilderForm form) async {
+    final quickResponses = form.quickResponses;
+    if (quickResponses.isEmpty) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final selected = <int>{};
+        var includeArchived = false;
+        var query = '';
+
+        List<int> visibleIndexes() {
+          return List<int>.generate(quickResponses.length, (index) => index)
+              .where((index) {
+                final response = quickResponses[index];
+                final archived = response['is_archived'] as bool? ??
+                    response['isArchived'] as bool? ??
+                    false;
+                if (!includeArchived && archived) return false;
+                if (query.trim().isEmpty) return true;
+                final haystack = <String>[
+                  response['name']?.toString() ?? '',
+                  response['description']?.toString() ?? '',
+                  ...(response['tags'] as List? ?? const []).map(
+                    (value) => value.toString(),
+                  ),
+                ].join(' ').toLowerCase();
+                return haystack.contains(query.trim().toLowerCase());
+              })
+              .toList();
+        }
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final indexes = visibleIndexes();
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Quick Responses',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      decoration: const InputDecoration(
+                        labelText: 'Search presets',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) => setState(() => query = value),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Include archived'),
+                      value: includeArchived,
+                      onChanged: (value) =>
+                          setState(() => includeArchived = value),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 360,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemBuilder: (context, visibleIndex) {
+                          final index = indexes[visibleIndex];
+                          final response = quickResponses[index];
+                          final archived = response['is_archived'] as bool? ??
+                              response['isArchived'] as bool? ??
+                              false;
+                          final isSelected = selected.contains(index);
+                          final description =
+                              response['description']?.toString() ?? '';
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: archived && !includeArchived
+                                ? null
+                                : (checked) {
+                                    setState(() {
+                                      if (checked == true) {
+                                        selected.add(index);
+                                      } else {
+                                        selected.remove(index);
+                                      }
+                                    });
+                                  },
+                            title: Text(
+                              response['name']?.toString() ?? 'Untitled preset',
+                            ),
+                            subtitle: Text(
+                              description.isNotEmpty
+                                  ? description
+                                  : '${(response['tags'] as List? ?? const []).length} tag(s)',
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                          );
+                        },
+                        separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemCount: indexes.length,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        onPressed: () {
+                          if (selected.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Select at least one quick response.'),
+                              ),
+                            );
+                            return;
+                          }
+                          final selectedResponses = selected
+                              .map((index) => quickResponses[index])
+                              .toList();
+                          final result = mergeQuickResponses(
+                            quickResponses: selectedResponses,
+                            currentValues: ref.read(submitFormDataProvider),
+                          );
+                          if (result.conflictingFields.isNotEmpty && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Skipped conflicting fields: ${result.conflictingFields.join(', ')}',
+                                ),
+                              ),
+                            );
+                          }
+                          ref
+                              .read(submitFormDataProvider.notifier)
+                              .update((state) => {
+                                    ...state,
+                                    ...result.mergedValues,
+                                  });
+                          Navigator.of(sheetContext).pop();
+                        },
+                        child: const Text('Apply to draft'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildHistoryResultsList(List<Map<String, dynamic>> results) {
+    if (results.isEmpty) {
+      return const Center(child: Text('No matching submissions found.'));
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: results.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final item = results[index];
+        final submittedAt =
+            item['submitted_at']?.toString() ??
+            item['submittedAt']?.toString() ??
+            '';
+        final submittedBy =
+            item['submitted_by']?.toString() ??
+            item['submittedBy']?.toString() ??
+            '';
+        final data = item['data'] ?? item['answers'] ?? item;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  submittedAt.isNotEmpty
+                      ? submittedAt
+                      : 'Submission ${index + 1}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (submittedBy.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Submitted by: $submittedBy',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Text(data.toString(), style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHistoryResultsTable(List<Map<String, dynamic>> results) {
+    if (results.isEmpty) {
+      return const Center(child: Text('No matching submissions found.'));
+    }
+
+    return SingleChildScrollView(
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('Submitted')),
+          DataColumn(label: Text('Submitted by')),
+          DataColumn(label: Text('Payload')),
+        ],
+        rows: results.map((item) {
+          final submittedAt =
+              item['submitted_at']?.toString() ??
+              item['submittedAt']?.toString() ??
+              '';
+          final submittedBy =
+              item['submitted_by']?.toString() ??
+              item['submittedBy']?.toString() ??
+              '';
+          final data = item['data'] ?? item['answers'] ?? item;
+          return DataRow(
+            cells: [
+              DataCell(Text(submittedAt.isNotEmpty ? submittedAt : '-')),
+              DataCell(Text(submittedBy.isNotEmpty ? submittedBy : '-')),
+              DataCell(
+                SizedBox(
+                  width: 360,
+                  child: Text(
+                    data.toString(),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   dynamic _getNestedValue(Map<String, dynamic> data, String path) {
     if (path.isEmpty) return data;
     final keys = path.split('.');
@@ -465,6 +836,12 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
     Map<String, bool> requiredMap,
   ) {
     if (_showSubmitted) {
+      final submissionSettings = form.submissionSettings;
+      final confirmationMessage = submissionSettings['confirmation_message']
+          ?.toString()
+          .trim();
+      final allowMultiple =
+          submissionSettings['allow_multiple_submissions'] == true;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -490,9 +867,11 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Thank you for your response.',
-              style: TextStyle(color: AppColors.textGrey, fontSize: 16),
+            Text(
+              confirmationMessage?.isNotEmpty == true
+                  ? confirmationMessage!
+                  : 'Thank you for your response.',
+              style: const TextStyle(color: AppColors.textGrey, fontSize: 16),
             ),
             const SizedBox(height: 32),
             ElevatedButton(
@@ -503,7 +882,9 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                   vertical: 16,
                 ),
               ),
-              child: const Text('Back to Preview'),
+              child: Text(
+                allowMultiple ? 'Submit Another Response' : 'Back to Preview',
+              ),
             ),
           ],
         ),
@@ -514,7 +895,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       return _buildReviewScreen(form, locale, visibilityMap);
     }
 
-    final formStyle = form.style;
+    final formStyle = FormStyle.fromJson(form.style);
 
     if (form.sections.isEmpty) {
       return _buildEmptyState();
@@ -529,6 +910,24 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (formStyle.coverImageUrl.isNotEmpty) ...[
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      formStyle.coverImageUrl,
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: formStyle.sectionSpacing),
+            ],
             Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: formStyle.maxWidth),
@@ -593,7 +992,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final formData = ref.watch(submitFormDataProvider);
     final visibleSections = form.sections
-        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
+        .where(
+          (s) =>
+              (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s),
+        )
         .toList();
 
     return SingleChildScrollView(
@@ -660,7 +1062,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                 Align(
                   alignment: isFullWidth ? alignment : Alignment.center,
                   child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxSectionWidth),
+                    constraints: BoxConstraints(maxWidth: maxSectionWidth),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -760,7 +1162,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FaIcon(FontAwesomeIcons.fileLines,
+          FaIcon(
+            FontAwesomeIcons.fileLines,
             size: 48,
             color: AppColors.textGrey.withValues(alpha: 0.3),
           ),
@@ -782,7 +1185,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final spacing = form.style.sectionSpacing;
     final visibleSections = form.sections
-        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
+        .where(
+          (s) =>
+              (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s),
+        )
         .toList();
 
     return LayoutBuilder(
@@ -840,13 +1246,7 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         dynamicOptions: _dynamicOptions,
                         loadingFields: _loadingFields,
                         fieldErrors: _fieldErrors,
-                        onTriggerAction: (config) => _triggerWebhook(
-                          config,
-                          _interpolateUrl(
-                            config['url'] ?? '',
-                            ref.read(submitFormDataProvider),
-                          ),
-                        ),
+                        onTriggerAction: (config) => _handleAction(config),
                         instanceIndex: section.isRepeatable ? i : null,
                       ),
                     ),
@@ -899,7 +1299,10 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
   ) {
     final sections = form.sections;
     final visibleSections = sections
-        .where((s) => (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s))
+        .where(
+          (s) =>
+              (visibilityMap[s.id] ?? true) && _isSectionVisibleForPublished(s),
+        )
         .toList();
 
     if (_currentStep >= visibleSections.length) {
@@ -963,21 +1366,16 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                           widgets.add(
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                              child: _SubmitSectionWidget(
-                                section: currentSection,
-                                questionSpacing: form.style.questionSpacing,
-                                visibilityMap: visibilityMap,
-                                requiredMap: requiredMap,
-                                dynamicOptions: _dynamicOptions,
+                            child: _SubmitSectionWidget(
+                              section: currentSection,
+                              questionSpacing: form.style.questionSpacing,
+                              visibilityMap: visibilityMap,
+                              requiredMap: requiredMap,
+                              dynamicOptions: _dynamicOptions,
                                 loadingFields: _loadingFields,
                                 fieldErrors: _fieldErrors,
-                                onTriggerAction: (config) => _triggerWebhook(
-                                  config,
-                                  _interpolateUrl(
-                                    config['url'] ?? '',
-                                    ref.read(submitFormDataProvider),
-                                  ),
-                                ),
+                                onTriggerAction: (config) =>
+                                    _handleAction(config),
                                 instanceIndex: currentSection.isRepeatable
                                     ? i
                                     : null,
@@ -1043,7 +1441,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         if (_currentStep < visibleSections.length - 1)
                           ElevatedButton(
                             onPressed: () {
-                              final valid = _formKey.currentState?.validate() ?? true;
+                              final valid =
+                                  _formKey.currentState?.validate() ?? true;
                               final complete = !currentRequiresGate
                                   ? true
                                   : _isSectionComplete(
@@ -1069,7 +1468,8 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
                         else
                           ElevatedButton(
                             onPressed: () {
-                              final valid = _formKey.currentState?.validate() ?? true;
+                              final valid =
+                                  _formKey.currentState?.validate() ?? true;
                               final complete = !currentRequiresGate
                                   ? true
                                   : _isSectionComplete(
@@ -1115,57 +1515,69 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
       onPressed: submissionState.isLoading
           ? null
           : () async {
-                if (!(_formKey.currentState?.validate() ?? true)) {
-                  ref
-                      .read(snackbarServiceProvider)
-                      .showError('Please fix errors in the form');
+              if (!(_formKey.currentState?.validate() ?? true)) {
+                ref
+                    .read(snackbarServiceProvider)
+                    .showError('Please fix errors in the form');
+                return;
+              }
+
+              final formData = ref.read(submitFormDataProvider);
+              final repeatInstances = ref.read(repeatInstancesProvider);
+              final submissionData = {
+                ...formData,
+
+                'timestamp': DateFormat(
+                  "E, d MMM y HH:mm:ss 'GMT'",
+                ).format(DateTime.now().toUtc()),
+              };
+              final success = await ref
+                  .read(formSubmissionControllerProvider.notifier)
+                  .submit(
+                    projectId: widget.projectId,
+                    formId: form.id,
+                    answers: submissionData,
+                    visibilityMap: _logicResult!.visibility,
+                    repeatInstances: repeatInstances,
+                  );
+
+              if (success) {
+                final submissionSettings = form.submissionSettings;
+                final redirectEnabled =
+                    submissionSettings['redirect_after_submit'] == true;
+                final redirectUrl =
+                    submissionSettings['redirect_url']?.toString() ?? '';
+
+                if (redirectEnabled && redirectUrl.isNotEmpty) {
+                  if (!mounted) return;
+                  await handlePostSubmitRedirect(context, redirectUrl);
                   return;
                 }
 
-                final formData = ref.read(submitFormDataProvider);
-                final repeatInstances = ref.read(repeatInstancesProvider);
-                final submissionData = {
-                  ...formData,
-
-                  'timestamp': DateFormat(
-                    "E, d MMM y HH:mm:ss 'GMT'",
-                  ).format(DateTime.now().toUtc()),
-                };
-                final success = await ref
-                    .read(formSubmissionControllerProvider.notifier)
-                    .submit(
-                      projectId: widget.projectId,
-                      formId: form.id,
-                      answers: submissionData,
-                      visibilityMap: _logicResult!.visibility,
-                      repeatInstances: repeatInstances,
-                    );
-
-                if (success) {
+                setState(() {
+                  _showSubmitted = true;
+                  _isReviewing = false;
+                });
+              } else {
+                final errorState = ref
+                    .read(formSubmissionControllerProvider)
+                    .error;
+                if (errorState is ApiException &&
+                    errorState.details != null &&
+                    mounted) {
                   setState(() {
-                    _showSubmitted = true;
-                    _isReviewing = false;
+                    applySubmissionFieldErrors(
+                      errorState.details,
+                      (field, message) => _fieldErrors[field] = message,
+                    );
                   });
-                } else {
-                  final errorState = ref
-                      .read(formSubmissionControllerProvider)
-                      .error;
-                  if (errorState is ApiException &&
-                      errorState.details != null &&
-                      mounted) {
-                    setState(() {
-                      applySubmissionFieldErrors(
-                        errorState.details,
-                        (field, message) => _fieldErrors[field] = message,
-                      );
-                    });
 
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(errorState.message)));
-                  }
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(errorState.message)));
                 }
-              },
+              }
+            },
       primaryColor: primaryColor,
       borderRadius: form.style.globalBorderRadius,
       small: small,
@@ -1181,7 +1593,6 @@ class _FormSubmitPageState extends ConsumerState<FormSubmitPage> {
           : const Text('Submit'),
     );
   }
-
 }
 
 class _SubmitSectionWidget extends ConsumerWidget {
@@ -1192,7 +1603,8 @@ class _SubmitSectionWidget extends ConsumerWidget {
   final Map<String, List<FormQuestionOption>> dynamicOptions;
   final Map<String, bool> loadingFields;
   final Map<String, String?> fieldErrors;
-  final Future<void> Function(Map<String, dynamic>) onTriggerAction;
+  final Future<Map<String, dynamic>?> Function(Map<String, dynamic>)
+  onTriggerAction;
   final int? instanceIndex;
 
   const _SubmitSectionWidget({
@@ -1392,7 +1804,8 @@ class _SubmitFieldWidget extends ConsumerStatefulWidget {
   final List<FormQuestionOption>? dynamicOptions;
   final bool isLoading;
   final String? error;
-  final Future<void> Function(Map<String, dynamic>)? onTriggerAction;
+  final Future<Map<String, dynamic>?> Function(Map<String, dynamic>)?
+  onTriggerAction;
   final int? instanceIndex;
   final int? questionInstanceIndex;
   final String? sectionId;
@@ -1417,6 +1830,8 @@ class _SubmitFieldWidget extends ConsumerStatefulWidget {
 class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
   late TextEditingController _controller;
   bool _isActionRunning = false;
+  List<Map<String, dynamic>>? _lookupResults;
+  String? _lookupDisplayMode;
 
   String get _fieldId {
     if (widget.instanceIndex != null && widget.sectionId != null) {
@@ -1586,6 +2001,10 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               helperWidget,
             ],
           ],
+          if (_lookupResults != null && _lookupDisplayMode == 'inline') ...[
+            const SizedBox(height: 12),
+            _buildInlineLookupResults(),
+          ],
         ],
       ),
     );
@@ -1665,7 +2084,6 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
       maxValue: q.maxValue?.toDouble(),
       customError: q.customErrorMessage,
     );
-
     switch (q.type) {
       case QuestionType.shortText:
       case QuestionType.password:
@@ -2138,6 +2556,70 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
     }
   }
 
+  Widget _buildInlineLookupResults() {
+    final results = _lookupResults ?? const [];
+    if (results.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.green.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+        ),
+        child: const Text('No matching submissions found.'),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'History lookup results',
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 8),
+        ...results.map((item) {
+          final submittedAt =
+              item['submitted_at']?.toString() ??
+              item['submittedAt']?.toString() ??
+              '';
+          final submittedBy =
+              item['submitted_by']?.toString() ??
+              item['submittedBy']?.toString() ??
+              '';
+          final data = item['data'] ?? item['answers'] ?? item;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      submittedAt.isNotEmpty ? submittedAt : 'Submission',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (submittedBy.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Submitted by: $submittedBy',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Text(data.toString(), style: const TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   Widget _buildReadableSpecialField(
     FormQuestion q,
     TextStyle textStyle,
@@ -2547,18 +3029,20 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
 
   Widget _buildToggleField(FormQuestion q, WidgetRef ref, TextStyle textStyle) {
     final current = ref.read(submitFormDataProvider)[_fieldId] == true;
-    return SwitchListTile(
-      value: current,
-      onChanged: (val) {
-        ref
-            .read(submitFormDataProvider.notifier)
-            .update((state) => {...state, _fieldId: val});
-        setState(() {});
-      },
-      title: Text(
-        q.label.translate(ref.read(localeControllerProvider).languageCode),
+    final label = q.label;
+    return Material(
+      color: Colors.transparent,
+      child: SwitchListTile(
+        value: current,
+        onChanged: (val) {
+          ref
+              .read(submitFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val});
+          setState(() {});
+        },
+        title: Text(label.isEmpty ? q.type.label : label, style: textStyle),
+        contentPadding: EdgeInsets.zero,
       ),
-      contentPadding: EdgeInsets.zero,
     );
   }
 
@@ -2612,7 +3096,24 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
               : () async {
                   setState(() => _isActionRunning = true);
                   if (widget.onTriggerAction != null) {
-                    await widget.onTriggerAction!(actionConfig);
+                    final result = await widget.onTriggerAction!(actionConfig);
+                    if (result != null && result['displayMode'] == 'inline') {
+                      final rawResults = result['results'];
+                      setState(() {
+                        _lookupDisplayMode = 'inline';
+                        _lookupResults = rawResults is List
+                            ? rawResults
+                                  .whereType<Map>()
+                                  .map((e) => Map<String, dynamic>.from(e))
+                                  .toList()
+                            : <Map<String, dynamic>>[];
+                      });
+                    } else {
+                      setState(() {
+                        _lookupDisplayMode = null;
+                        _lookupResults = null;
+                      });
+                    }
                   }
                   setState(() => _isActionRunning = false);
                 },
@@ -2867,14 +3368,12 @@ class _SubmitFieldWidgetState extends ConsumerState<_SubmitFieldWidget> {
       }
 
       final file = result.files.first;
-      ref.read(submitFormDataProvider.notifier).update(
+      ref
+          .read(submitFormDataProvider.notifier)
+          .update(
             (s) => {
               ...s,
-              q.id: {
-                'name': file.name,
-                'size': file.size,
-                'bytes': file.bytes,
-              },
+              q.id: {'name': file.name, 'size': file.size, 'bytes': file.bytes},
             },
           );
     }

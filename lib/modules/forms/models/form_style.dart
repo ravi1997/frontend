@@ -2,6 +2,12 @@ class FormStyle {
   final String backgroundColor;
   final String fontFamily;
   final String primaryColor;
+  final String accentColor;
+  final String logoUrl;
+  final String coverImageUrl;
+  final String faviconUrl;
+  final String headerStyle;
+  final String thankYouTheme;
   final double globalBorderRadius;
   final double sectionSpacing;
   final double questionSpacing;
@@ -12,6 +18,12 @@ class FormStyle {
     this.backgroundColor = '#FFFFFF',
     this.fontFamily = 'Roboto',
     this.primaryColor = '#1976D2',
+    this.accentColor = '#1976D2',
+    this.logoUrl = '',
+    this.coverImageUrl = '',
+    this.faviconUrl = '',
+    this.headerStyle = 'default',
+    this.thankYouTheme = 'default',
     this.globalBorderRadius = 8.0,
     this.sectionSpacing = 16.0,
     this.questionSpacing = 12.0,
@@ -24,6 +36,13 @@ class FormStyle {
       backgroundColor: json['backgroundColor'] ?? '#FFFFFF',
       fontFamily: json['fontFamily'] ?? 'Roboto',
       primaryColor: json['primaryColor'] ?? '#1976D2',
+      accentColor: json['accentColor'] ?? json['primaryColor'] ?? '#1976D2',
+      logoUrl: json['logoUrl'] ?? json['logo_url'] ?? '',
+      coverImageUrl: json['coverImageUrl'] ?? json['cover_image_url'] ?? '',
+      faviconUrl: json['faviconUrl'] ?? json['favicon_url'] ?? '',
+      headerStyle: json['headerStyle'] ?? json['header_style'] ?? 'default',
+      thankYouTheme:
+          json['thankYouTheme'] ?? json['thank_you_theme'] ?? 'default',
       globalBorderRadius: (json['globalBorderRadius'] ?? 8.0).toDouble(),
       sectionSpacing: (json['sectionSpacing'] ?? 16.0).toDouble(),
       questionSpacing: (json['questionSpacing'] ?? 12.0).toDouble(),
@@ -37,6 +56,12 @@ class FormStyle {
       'backgroundColor': backgroundColor,
       'fontFamily': fontFamily,
       'primaryColor': primaryColor,
+      'accentColor': accentColor,
+      'logoUrl': logoUrl,
+      'coverImageUrl': coverImageUrl,
+      'faviconUrl': faviconUrl,
+      'headerStyle': headerStyle,
+      'thankYouTheme': thankYouTheme,
       'globalBorderRadius': globalBorderRadius,
       'sectionSpacing': sectionSpacing,
       'questionSpacing': questionSpacing,
@@ -311,7 +336,8 @@ class SectionStyle {
       borderWidth: borderWidth ?? this.borderWidth,
       elevation: elevation ?? this.elevation,
       showHeader: showHeader ?? this.showHeader,
-      headerBackgroundColor: headerBackgroundColor ?? this.headerBackgroundColor,
+      headerBackgroundColor:
+          headerBackgroundColor ?? this.headerBackgroundColor,
       titleColor: titleColor ?? this.titleColor,
       descriptionColor: descriptionColor ?? this.descriptionColor,
     );

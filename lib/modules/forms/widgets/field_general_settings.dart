@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/shared/models/form_models.dart' hide Form;
@@ -40,10 +41,15 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _defaultValueController;
   late TextEditingController _dividerTextController;
+  late TextEditingController _repeatMinController;
+  late TextEditingController _repeatMaxController;
+  late TextEditingController _buttonLabelController;
+  late TextEditingController _webhookUrlController;
   bool _isSlugLocked = true;
 
   String _generateSlug(String text) {
-    return text.toLowerCase()
+    return text
+        .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9\s_]'), '')
         .trim()
         .replaceAll(RegExp(r'\s+'), '_');
@@ -58,9 +64,23 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     _dividerTextController = TextEditingController(
       text: widget.question.metadata['dividerText']?.toString() ?? '',
     );
+    _repeatMinController = TextEditingController(
+      text: (widget.question.repeatMin ?? 1).toString(),
+    );
+    _repeatMaxController = TextEditingController(
+      text: widget.question.repeatMax?.toString() ?? '',
+    );
+    final actionConfig = widget.question.actionConfig ?? {};
+    _buttonLabelController = TextEditingController(
+      text: actionConfig['buttonLabel'] ?? 'Search',
+    );
+    _webhookUrlController = TextEditingController(
+      text: actionConfig['webhookUrl'] ?? '',
+    );
 
     final labelSlug = _generateSlug(widget.labelController.text);
-    if (widget.variableNameController.text.isNotEmpty && widget.variableNameController.text != labelSlug) {
+    if (widget.variableNameController.text.isNotEmpty &&
+        widget.variableNameController.text != labelSlug) {
       _isSlugLocked = false;
     }
   }
@@ -82,13 +102,53 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             widget.question.metadata['dividerText']?.toString() ?? '';
       }
     }
+    final nextRepeatMin = (widget.question.repeatMin ?? 1).toString();
+    if (_repeatMinController.text != nextRepeatMin) {
+      if (!FocusScope.of(context).hasFocus) {
+        _repeatMinController.text = nextRepeatMin;
+      }
+    }
+    final nextRepeatMax = widget.question.repeatMax?.toString() ?? '';
+    if (_repeatMaxController.text != nextRepeatMax) {
+      if (!FocusScope.of(context).hasFocus) {
+        _repeatMaxController.text = nextRepeatMax;
+      }
+    }
+    final nextActionConfig = widget.question.actionConfig ?? {};
+    final nextButtonLabel = nextActionConfig['buttonLabel'] ?? 'Search';
+    if (_buttonLabelController.text != nextButtonLabel) {
+      if (!FocusScope.of(context).hasFocus) {
+        _buttonLabelController.text = nextButtonLabel;
+      }
+    }
+    final nextWebhookUrl = nextActionConfig['webhookUrl'] ?? '';
+    if (_webhookUrlController.text != nextWebhookUrl) {
+      if (!FocusScope.of(context).hasFocus) {
+        _webhookUrlController.text = nextWebhookUrl;
+      }
+    }
   }
 
   @override
   void dispose() {
     _defaultValueController.dispose();
     _dividerTextController.dispose();
+    _repeatMinController.dispose();
+    _repeatMaxController.dispose();
+    _buttonLabelController.dispose();
+    _webhookUrlController.dispose();
     super.dispose();
+  }
+
+  void _selectAll(TextEditingController controller) {
+    Future.delayed(Duration.zero, () {
+      if (controller.text.isNotEmpty) {
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      }
+    });
   }
 
   void _updateActionConfig(
@@ -98,17 +158,16 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
     final newConfig = Map<String, dynamic>.from(actionConfig);
     update(newConfig);
     _controller().updateQuestion(
-          widget.question.copyWith(
-            logic: {
-              ...widget.question.logic ?? {},
-              'actionConfig': newConfig,
-            },
-          ),
-        );
+      widget.question.copyWith(
+        logic: {...widget.question.logic ?? {}, 'actionConfig': newConfig},
+      ),
+    );
   }
 
   FormBuilderController _controller() {
-    return ref.read(formBuilderControllerProvider(widget.controllerKey).notifier);
+    return ref.read(
+      formBuilderControllerProvider(widget.controllerKey).notifier,
+    );
   }
 
   bool get _showLabel =>
@@ -313,7 +372,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                         setState(() {
                           _isSlugLocked = !_isSlugLocked;
                           if (_isSlugLocked) {
-                            final slug = _generateSlug(widget.labelController.text);
+                            final slug = _generateSlug(
+                              widget.labelController.text,
+                            );
                             widget.variableNameController.text = slug;
                             ref
                                 .read(
@@ -327,38 +388,55 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                           }
                         });
                       },
-                      tooltip: _isSlugLocked ? 'Unlock to edit manually' : 'Lock to auto-generate from label',
+                      tooltip: _isSlugLocked
+                          ? 'Unlock to edit manually'
+                          : 'Lock to auto-generate from label',
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                TextFormField(
-                  controller: widget.variableNameController,
-                  readOnly: _isSlugLocked,
-                  decoration: InputDecoration(
-                    hintText: 'my_custom_field',
-                    hintStyle: const TextStyle(color: Colors.black26),
-                    filled: true,
-                    fillColor: _isSlugLocked
-                        ? AppColors.builderElement.withValues(alpha: 0.5)
-                        : AppColors.builderElement,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  ),
-                  onChanged: (val) {
-                    ref
-                        .read(
-                          formBuilderControllerProvider(
-                            widget.controllerKey,
-                          ).notifier,
-                        )
-                        .updateQuestion(
-                          widget.question.copyWith(variableName: val),
-                        );
+                Focus(
+                  onFocusChange: (hasFocus) {
+                    if (hasFocus && !_isSlugLocked) {
+                      _selectAll(widget.variableNameController);
+                    }
                   },
+                  child: TextFormField(
+                    controller: widget.variableNameController,
+                    readOnly: _isSlugLocked,
+                    decoration: InputDecoration(
+                      hintText: 'my_custom_field',
+                      hintStyle: const TextStyle(color: Colors.black26),
+                      filled: true,
+                      fillColor: _isSlugLocked
+                          ? AppColors.builderElement.withValues(alpha: 0.5)
+                          : AppColors.builderElement,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                    ),
+                    onTap: () {
+                      if (!_isSlugLocked) {
+                        _selectAll(widget.variableNameController);
+                      }
+                    },
+                    onChanged: (val) {
+                      ref
+                          .read(
+                            formBuilderControllerProvider(
+                              widget.controllerKey,
+                            ).notifier,
+                          )
+                          .updateQuestion(
+                            widget.question.copyWith(variableName: val),
+                          );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -450,10 +528,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   ),
                   initialValue: null,
                   items: const [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('None'),
-                    ),
+                    DropdownMenuItem<String?>(value: null, child: Text('None')),
                     DropdownMenuItem<String?>(
                       value: 'phone',
                       child: Text('Phone Number'),
@@ -479,7 +554,8 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                       mask = '(###) ###-####';
                       regex = r'^\(\d{3}\) \d{3}-\d{4}$';
                     } else if (value == 'email') {
-                      regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+                      regex =
+                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
                     } else if (value == 'currency') {
                       mask = '\$###,###.##';
                       regex = r'^\$?\d+(,\d{3})*(\.\d{1,2})?$';
@@ -490,10 +566,14 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
 
                     var q = widget.question;
                     if (mask != null) {
-                      q = q.copyWith(metadata: {...q.metadata, 'inputMask': mask});
+                      q = q.copyWith(
+                        metadata: {...q.metadata, 'inputMask': mask},
+                      );
                     }
                     if (regex != null) {
-                      q = q.copyWith(validation: {...q.validation, 'regex': regex});
+                      q = q.copyWith(
+                        validation: {...q.validation, 'regex': regex},
+                      );
                     }
 
                     _controller().updateQuestion(q);
@@ -583,6 +663,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     key: ValueKey('${widget.question.id}-repeat-min'),
                     initialValue: (widget.question.repeatMin ?? 1).toString(),
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       labelText: 'Minimum repeats',
                       labelStyle: TextStyle(color: AppColors.textDark),
@@ -618,6 +699,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     key: ValueKey('${widget.question.id}-repeat-max'),
                     initialValue: widget.question.repeatMax?.toString() ?? '',
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       labelText: 'Maximum repeats',
                       hintText: 'Unlimited',
@@ -907,9 +989,7 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                                 iconEnabledColor: AppColors.textDark,
                                 hint: const Text(
                                   'Target Field',
-                                  style: TextStyle(
-                                    color: AppColors.textGrey,
-                                  ),
+                                  style: TextStyle(color: AppColors.textGrey),
                                 ),
                                 items: allQuestions.map((q) {
                                   return DropdownMenuItem<String?>(
@@ -999,9 +1079,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               );
               if (picked != null) {
                 _controller().updateQuestionDefaultValue(
-                      widget.question.id,
-                      picked.toIso8601String().split('T').first,
-                    );
+                  widget.question.id,
+                  picked.toIso8601String().split('T').first,
+                );
               }
             },
             child: Container(
@@ -1139,7 +1219,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ...{for (var opt in options) opt.value: opt}.values.map(
                 (opt) => DropdownMenuItem<String?>(
                   value: opt.value,
-                  child: Text(opt.label, style: const TextStyle(color: AppColors.textDark)),
+                  child: Text(
+                    opt.label,
+                    style: const TextStyle(color: AppColors.textDark),
+                  ),
                 ),
               ),
             ],
@@ -1245,12 +1328,12 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                             final liveQuestion = liveState == null
                                 ? widget.question
                                 : liveState.form.sections
-                                        .expand((s) => s.questions)
-                                        .where(
-                                          (q) => q.id == widget.question.id,
-                                        )
-                                        .firstOrNull ??
-                                    widget.question;
+                                          .expand((s) => s.questions)
+                                          .where(
+                                            (q) => q.id == widget.question.id,
+                                          )
+                                          .firstOrNull ??
+                                      widget.question;
 
                             final newOptions = List<Map<String, dynamic>>.from(
                               liveQuestion.options.isEmpty
@@ -1308,22 +1391,33 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
             newOptions.insert(newIndex, item);
 
             // Re-assign order
-            final orderedOptions = newOptions.asMap().entries.map((e) {
-              return {...e.value, 'order': e.key};
-            }).toList().cast<Map<String, dynamic>>();
+            final orderedOptions = newOptions
+                .asMap()
+                .entries
+                .map((e) {
+                  return {...e.value, 'order': e.key};
+                })
+                .toList()
+                .cast<Map<String, dynamic>>();
 
-            _controller().updateQuestion(question.copyWith(options: orderedOptions));
+            _controller().updateQuestion(
+              question.copyWith(options: orderedOptions),
+            );
           },
           itemBuilder: (context, index) {
             final option = options[index];
             final optionValue = (option['option_value'] ?? '').toString();
             final isMultiple = question.type == QuestionType.checkboxes;
-            
+
             // Handle lists or comma-separated default values
             final isDefault = isMultiple
                 ? (question.defaultValue is List
-                    ? (question.defaultValue as List).contains(optionValue)
-                    : (question.defaultValue?.toString().split(',').contains(optionValue) ?? false))
+                      ? (question.defaultValue as List).contains(optionValue)
+                      : (question.defaultValue
+                                ?.toString()
+                                .split(',')
+                                .contains(optionValue) ??
+                            false))
                 : question.defaultValue?.toString() == optionValue;
 
             final isDuplicate = duplicateValues.contains(
@@ -1341,19 +1435,25 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   final currentDefaults = question.defaultValue is List
                       ? List<String>.from(question.defaultValue as List)
                       : (question.defaultValue?.toString().isNotEmpty == true
-                          ? question.defaultValue!.toString().split(',')
-                          : <String>[]);
+                            ? question.defaultValue!.toString().split(',')
+                            : <String>[]);
                   if (currentDefaults.contains(optionValue)) {
                     currentDefaults.remove(optionValue);
                   } else {
                     currentDefaults.add(optionValue);
                   }
-                  _controller().updateQuestionDefaultValue(question.id, currentDefaults);
+                  _controller().updateQuestionDefaultValue(
+                    question.id,
+                    currentDefaults,
+                  );
                 } else {
                   if (isDefault) {
                     _controller().updateQuestionDefaultValue(question.id, null);
                   } else {
-                    _controller().updateQuestionDefaultValue(question.id, optionValue);
+                    _controller().updateQuestionDefaultValue(
+                      question.id,
+                      optionValue,
+                    );
                   }
                 }
               },
@@ -1364,12 +1464,16 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                   'option_label': newValue,
                   'option_value': newValue,
                 };
-                _controller().updateQuestion(question.copyWith(options: newOptions));
+                _controller().updateQuestion(
+                  question.copyWith(options: newOptions),
+                );
               },
               onDelete: () {
                 final newOptions = List<Map<String, dynamic>>.from(options);
                 newOptions.removeAt(index);
-                _controller().updateQuestion(question.copyWith(options: newOptions));
+                _controller().updateQuestion(
+                  question.copyWith(options: newOptions),
+                );
               },
             );
           },
@@ -1384,7 +1488,9 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               'option_value': 'Option ${newOptions.length + 1}',
               'order': newOptions.length,
             });
-            _controller().updateQuestion(question.copyWith(options: newOptions));
+            _controller().updateQuestion(
+              question.copyWith(options: newOptions),
+            );
           },
           icon: const Icon(Icons.add, size: 16),
           label: const Text('Add Option'),
@@ -1402,7 +1508,6 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
       ],
     );
   }
-
 }
 
 class _OptionRow extends StatefulWidget {
@@ -1484,8 +1589,12 @@ class _OptionRowState extends State<_OptionRow> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Icon(
-                      widget.isDefault ? Icons.radio_button_checked : Icons.radio_button_off,
-                      color: widget.isDefault ? AppColors.brandBlue : AppColors.textGrey,
+                      widget.isDefault
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: widget.isDefault
+                          ? AppColors.brandBlue
+                          : AppColors.textGrey,
                       size: 20,
                     ),
                   ),

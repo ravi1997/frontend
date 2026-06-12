@@ -35,7 +35,8 @@ class FieldPropertiesWidget extends ConsumerStatefulWidget {
       _FieldPropertiesWidgetState();
 }
 
-class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
+class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   late TextEditingController _labelController;
   late TextEditingController _variableNameController;
   late TextEditingController _helperTextController;
@@ -53,6 +54,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 6, vsync: this);
     _labelController = TextEditingController();
     _variableNameController = TextEditingController();
     _helperTextController = TextEditingController();
@@ -70,6 +72,7 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _labelController.dispose();
     _variableNameController.dispose();
     _helperTextController.dispose();
@@ -145,192 +148,192 @@ class _FieldPropertiesWidgetState extends ConsumerState<FieldPropertiesWidget> {
 
         _syncControllers(question, state.editingLocale);
 
-        return DefaultTabController(
-          length: 6,
-          child: PropertiesPanelShell(
-            header: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(DesignTokens.spaceL),
-                  child: Wrap(
-                    spacing: DesignTokens.spaceS,
-                    runSpacing: DesignTokens.spaceS,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    alignment: WrapAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const FaIcon(
-                            FontAwesomeIcons.sliders,
-                            size: 16,
-                            color: AppColors.textGrey,
+        return PropertiesPanelShell(
+          header: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(DesignTokens.spaceL),
+                child: Wrap(
+                  spacing: DesignTokens.spaceS,
+                  runSpacing: DesignTokens.spaceS,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const FaIcon(
+                          FontAwesomeIcons.sliders,
+                          size: 16,
+                          color: AppColors.textGrey,
+                        ),
+                        const SizedBox(width: DesignTokens.spaceS),
+                        const Text(
+                          'Field Properties',
+                          style: TextStyle(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.bold,
+                            fontSize: DesignTokens.fontM,
                           ),
-                          const SizedBox(width: DesignTokens.spaceS),
-                          const Text(
-                            'Field Properties',
-                            style: TextStyle(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.bold,
-                              fontSize: DesignTokens.fontM,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () {
-                              ref
-                                  .read(customFieldsProvider)
-                                  .saveAsTemplate(
-                                    question.label.translate(
-                                      state.editingLocale,
-                                    ),
-                                    'My Fields',
-                                    question,
-                                  );
-                              ref
-                                  .read(snackbarServiceProvider)
-                                  .showSuccess('Field saved as template!');
-                            },
-                            icon: const Icon(Icons.star_border, size: 16),
-                            label: const Text(
-                              'Save Template',
-                              style: TextStyle(fontSize: DesignTokens.fontS),
-                            ),
-                          ),
-                          const SizedBox(width: DesignTokens.spaceXS),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              color: AppColors.textGrey,
-                              size: 20,
-                            ),
-                            onPressed: () => ref
-                                .read(
-                                  formBuilderControllerProvider(
-                                    widget.controllerKey,
-                                  ).notifier,
-                                )
-                                .selectQuestion(null, null),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                // Tab Bar
-                Material(
-                  color: Theme.of(context).colorScheme.surface,
-                  child: TabBar(
-                    isScrollable: true,
-                    tabs: const [
-                      Tab(text: 'General'),
-                      Tab(text: 'Layout'),
-                      Tab(text: 'Validation'),
-                      Tab(text: 'Specific'),
-                      Tab(text: 'Style'),
-                      Tab(text: 'Logic'),
-                    ],
-                    labelColor: AppColors.brandBlue,
-                    unselectedLabelColor: AppColors.textGrey,
-                    indicatorColor: AppColors.brandBlue,
-                    indicatorWeight: 3,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: DesignTokens.fontS,
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                const Divider(color: AppColors.borderLight, height: 1),
-
-                // Properties Content
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      // General Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: FieldGeneralSettings(
-                          controllerKey: widget.controllerKey,
-                          projectId: widget.projectId,
-                          formId: widget.formId,
-                          question: question,
-                          labelController: _labelController,
-                          variableNameController: _variableNameController,
-                          helperTextController: _helperTextController,
-                          placeholderController: _placeholderController,
-                        ),
-                      ),
-
-                      // Layout Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: FieldLayoutSettings(
-                          projectId: widget.projectId,
-                          formId: widget.formId,
-                          question: question,
-                        ),
-                      ),
-
-                      // Validation Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: DynamicPropertiesPanel(
-                          question: question,
-                          onQuestionChanged: (updatedQuestion) {
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {
                             ref
-                                .read(
-                                  formBuilderControllerProvider(
-                                    widget.controllerKey,
-                                  ).notifier,
-                                )
-                                .updateQuestion(updatedQuestion);
+                                .read(customFieldsProvider)
+                                .saveAsTemplate(
+                                  question.label.translate(
+                                    state.editingLocale,
+                                  ),
+                                  'My Fields',
+                                  question,
+                                );
+                            ref
+                                .read(snackbarServiceProvider)
+                                .showSuccess('Field saved as template!');
                           },
+                          icon: const Icon(Icons.star_border, size: 16),
+                          label: const Text(
+                            'Save Template',
+                            style: TextStyle(fontSize: DesignTokens.fontS),
+                          ),
                         ),
-                      ),
-
-                      // Specific Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: FieldSpecificSettings(
-                          formId: widget.formId,
-                          question: question,
+                        const SizedBox(width: DesignTokens.spaceXS),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            color: AppColors.textGrey,
+                            size: 20,
+                          ),
+                          onPressed: () => ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .selectQuestion(null, null),
                         ),
-                      ),
-
-                      // Style Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: FieldStyleSettings(
-                          formId: widget.formId,
-                          question: question,
-                          prefixIconController: _prefixIconController,
-                          suffixIconController: _suffixIconController,
-                        ),
-                      ),
-
-                      // Logic Tab
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(DesignTokens.spaceL),
-                        child: FieldLogicSettings(
-                          projectId: widget.projectId,
-                          formId: widget.formId,
-                          question: question,
-                          sections: state.form.sections,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              // Tab Bar
+              Material(
+                color: Theme.of(context).colorScheme.surface,
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabs: const [
+                    Tab(text: 'General'),
+                    Tab(text: 'Layout'),
+                    Tab(text: 'Validation'),
+                    Tab(text: 'Specific'),
+                    Tab(text: 'Style'),
+                    Tab(text: 'Logic'),
+                  ],
+                  labelColor: AppColors.brandBlue,
+                  unselectedLabelColor: AppColors.textGrey,
+                  indicatorColor: AppColors.brandBlue,
+                  indicatorWeight: 3,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: DesignTokens.fontS,
                   ),
                 ),
-              ],
-            ),
+              ),
+              const Divider(color: AppColors.borderLight, height: 1),
+
+              // Properties Content
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    // General Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: FieldGeneralSettings(
+                        controllerKey: widget.controllerKey,
+                        projectId: widget.projectId,
+                        formId: widget.formId,
+                        question: question,
+                        labelController: _labelController,
+                        variableNameController: _variableNameController,
+                        helperTextController: _helperTextController,
+                        placeholderController: _placeholderController,
+                      ),
+                    ),
+
+                    // Layout Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: FieldLayoutSettings(
+                        projectId: widget.projectId,
+                        formId: widget.formId,
+                        question: question,
+                      ),
+                    ),
+
+                    // Validation Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: DynamicPropertiesPanel(
+                        question: question,
+                        onQuestionChanged: (updatedQuestion) {
+                          ref
+                              .read(
+                                formBuilderControllerProvider(
+                                  widget.controllerKey,
+                                ).notifier,
+                              )
+                              .updateQuestion(updatedQuestion);
+                        },
+                      ),
+                    ),
+
+                    // Specific Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: FieldSpecificSettings(
+                        formId: widget.formId,
+                        question: question,
+                      ),
+                    ),
+
+                    // Style Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: FieldStyleSettings(
+                        formId: widget.formId,
+                        question: question,
+                        prefixIconController: _prefixIconController,
+                        suffixIconController: _suffixIconController,
+                      ),
+                    ),
+
+                    // Logic Tab
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(DesignTokens.spaceL),
+                      child: FieldLogicSettings(
+                        projectId: widget.projectId,
+                        formId: widget.formId,
+                        question: question,
+                        sections: state.form.sections,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },

@@ -21,9 +21,7 @@ class ProjectDashboardPage extends ConsumerStatefulWidget {
       _ProjectDashboardPageState();
 }
 
-class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
   Map<String, dynamic>? _project;
   List<dynamic> _forms = const [];
   bool _loading = true;
@@ -35,15 +33,8 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
     _loadProject();
     _loadForms();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadProject() async {
@@ -630,6 +621,8 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final currentTab =
+        GoRouterState.of(context).uri.queryParameters['tab'] ?? 'overview';
     final title = _project?['title']?.toString() ?? 'Project dashboard';
     final description =
         _project?['description']?.toString() ?? 'No project details available.';
@@ -1013,57 +1006,59 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage>
                             borderRadius: BorderRadius.circular(DesignTokens.radiusL),
                             border: Border.all(color: cs.outline),
                           ),
-                          child: TabBar(
-                            controller: _tabController,
-                            isScrollable: true,
-                            labelColor: cs.onSurface,
-                            unselectedLabelColor: cs.onSurface.withValues(alpha: 0.65),
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            indicator: BoxDecoration(
-                              color: DesignTokens.primarySoft,
-                              borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-                            ),
-                            tabs: const [
-                              Tab(text: 'Overview'),
-                              Tab(text: 'Forms'),
-                              Tab(text: 'Members'),
-                              Tab(text: 'Analytics'),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _RouteTabChip(
+                                label: 'Overview',
+                                selected: currentTab == 'overview',
+                                onTap: () => context.go(
+                                  '/projects/${widget.projectId}?tab=overview',
+                                ),
+                              ),
+                              _RouteTabChip(
+                                label: 'Forms',
+                                selected: currentTab == 'forms',
+                                onTap: () => context.go(
+                                  '/projects/${widget.projectId}?tab=forms',
+                                ),
+                              ),
+                              _RouteTabChip(
+                                label: 'Members',
+                                selected: currentTab == 'members',
+                                onTap: () => context.go(
+                                  '/projects/${widget.projectId}?tab=members',
+                                ),
+                              ),
+                              _RouteTabChip(
+                                label: 'Analytics',
+                                selected: currentTab == 'analytics',
+                                onTap: () => context.go(
+                                  '/projects/${widget.projectId}?tab=analytics',
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 20),
-                        SizedBox(
-                          height: 520,
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _OverviewTab(
-                                projectId: widget.projectId,
-                                title: title,
-                                description: description,
-                                status: status,
-                              ),
-                              _FormsTab(
-                                projectId: widget.projectId,
-                                forms: _forms,
-                                loading: _formsLoading,
-                                error: _formsError,
-                                onRetry: _loadForms,
-                              ),
-                              _MembersTab(
-                                members: _extractProjectMembers(),
-                                hasMismatch: _memberDataMismatch,
-                                onInvite: _inviteMember,
-                                onManageAccess: _manageAccess,
-                                onCopyShareLink: _copyShareLink,
-                              ),
-                              _AnalyticsTab(
-                                projectId: widget.projectId,
-                                forms: _buildRecentForms(),
-                                statusCounts: _formStatusCounts(),
-                              ),
-                            ],
-                          ),
+                        _ProjectTabContent(
+                          currentTab: currentTab,
+                          projectId: widget.projectId,
+                          title: title,
+                          description: description,
+                          status: status,
+                          forms: _forms,
+                          loading: _formsLoading,
+                          error: _formsError,
+                          memberDataMismatch: _memberDataMismatch,
+                          members: _extractProjectMembers(),
+                          onRetry: _loadForms,
+                          onInvite: _inviteMember,
+                          onManageAccess: _manageAccess,
+                          onCopyShareLink: _copyShareLink,
+                          recentForms: _buildRecentForms(),
+                          statusCounts: _formStatusCounts(),
                         ),
                       ],
                     ),
@@ -1333,6 +1328,105 @@ class _AnalyticsTab extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _RouteTabChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RouteTabChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      labelStyle: TextStyle(
+        color: selected ? cs.onPrimary : cs.onSurface,
+        fontWeight: FontWeight.w600,
+      ),
+      selectedColor: DesignTokens.primary,
+      backgroundColor: cs.surface,
+      side: BorderSide(color: cs.outline),
+    );
+  }
+}
+
+class _ProjectTabContent extends StatelessWidget {
+  final String currentTab;
+  final String projectId;
+  final String title;
+  final String description;
+  final String status;
+  final List<dynamic> forms;
+  final bool loading;
+  final String? error;
+  final bool memberDataMismatch;
+  final List<String> members;
+  final VoidCallback onRetry;
+  final VoidCallback onInvite;
+  final VoidCallback onManageAccess;
+  final VoidCallback onCopyShareLink;
+  final List<Map<String, dynamic>> recentForms;
+  final Map<String, int> statusCounts;
+
+  const _ProjectTabContent({
+    required this.currentTab,
+    required this.projectId,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.forms,
+    required this.loading,
+    required this.error,
+    required this.memberDataMismatch,
+    required this.members,
+    required this.onRetry,
+    required this.onInvite,
+    required this.onManageAccess,
+    required this.onCopyShareLink,
+    required this.recentForms,
+    required this.statusCounts,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final child = switch (currentTab) {
+      'forms' => _FormsTab(
+          projectId: projectId,
+          forms: forms,
+          loading: loading,
+          error: error,
+          onRetry: onRetry,
+        ),
+      'members' => _MembersTab(
+          members: members,
+          hasMismatch: memberDataMismatch,
+          onInvite: onInvite,
+          onManageAccess: onManageAccess,
+          onCopyShareLink: onCopyShareLink,
+        ),
+      'analytics' => _AnalyticsTab(
+          projectId: projectId,
+          forms: recentForms,
+          statusCounts: statusCounts,
+        ),
+      _ => _OverviewTab(
+          projectId: projectId,
+          title: title,
+          description: description,
+          status: status,
+        ),
+    };
+    return SizedBox(height: 520, child: child);
   }
 }
 

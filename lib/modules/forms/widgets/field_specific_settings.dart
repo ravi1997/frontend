@@ -5,6 +5,7 @@ import 'package:frontend/modules/forms/models/question_type.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/forms/widgets/field_history_lookup_settings.dart';
 import 'property_builder_utils.dart';
 
 class FieldSpecificSettings extends ConsumerStatefulWidget {
@@ -59,6 +60,19 @@ class _FieldSpecificSettingsState extends ConsumerState<FieldSpecificSettings> {
           _buildSignatureSettings(metadata),
         if (widget.question.type == QuestionType.shortText)
           _buildShortTextSettings(metadata),
+        if ([
+          QuestionType.shortText,
+          QuestionType.number,
+          QuestionType.email,
+          QuestionType.mobile,
+          QuestionType.tel,
+          QuestionType.url,
+          QuestionType.password,
+        ].contains(widget.question.type))
+          FieldHistoryLookupSettings(
+            formId: widget.formId,
+            question: widget.question,
+          ),
         if (widget.question.type == QuestionType.multiSelect ||
             widget.question.type == QuestionType.multiCheckbox)
           _buildMultiSelectSettings(metadata),

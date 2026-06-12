@@ -156,6 +156,16 @@ class AuthController extends AsyncNotifier<UserModel?> {
     if (!ref.mounted) return;
     state = result;
   }
+
+  Future<void> handleOidcCallback(String code, String callbackState) async {
+    state = const AsyncValue.loading();
+    final result = await AsyncValue.guard<UserModel?>(() async {
+      final service = ref.read(authServiceProvider);
+      return service.verifyOidcCallback(code, callbackState);
+    });
+    if (!ref.mounted) return;
+    state = result;
+  }
 }
 
 final otpControllerProvider = NotifierProvider<OtpController, int>(

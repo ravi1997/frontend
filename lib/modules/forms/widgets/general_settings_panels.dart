@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class FormGeneralSettings extends StatelessWidget {
+class FormGeneralSettings extends StatefulWidget {
   final Map<String, dynamic> form;
   final Function(Map<String, dynamic>) onChanged;
 
@@ -11,29 +11,109 @@ class FormGeneralSettings extends StatelessWidget {
   });
 
   @override
+  State<FormGeneralSettings> createState() => _FormGeneralSettingsState();
+}
+
+class _FormGeneralSettingsState extends State<FormGeneralSettings> {
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _descriptionFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(
+      text: widget.form['title']?.toString() ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.form['description']?.toString() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant FormGeneralSettings oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncController(
+      _titleController,
+      widget.form['title']?.toString() ?? '',
+      _titleFocusNode,
+    );
+    _syncController(
+      _descriptionController,
+      widget.form['description']?.toString() ?? '',
+      _descriptionFocusNode,
+    );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _titleFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _syncController(
+    TextEditingController controller,
+    String next,
+    FocusNode focusNode,
+  ) {
+    if (focusNode.hasFocus) return;
+    if (controller.text == next) return;
+    controller.text = next;
+  }
+
+  void _selectAll(TextEditingController controller) {
+    Future.delayed(Duration.zero, () {
+      if (controller.text.isNotEmpty) {
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('General Settings', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: form['title'] ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Form Title',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_titleController);
+          },
+          child: TextFormField(
+            controller: _titleController,
+            focusNode: _titleFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Form Title',
+              border: OutlineInputBorder(),
+            ),
+            onTap: () => _selectAll(_titleController),
+            onChanged: (value) => widget.onChanged({...widget.form, 'title': value}),
           ),
-          onChanged: (value) => onChanged({...form, 'title': value}),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: form['description'] ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Description',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_descriptionController);
+          },
+          child: TextFormField(
+            controller: _descriptionController,
+            focusNode: _descriptionFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            onTap: () => _selectAll(_descriptionController),
+            onChanged: (value) => widget.onChanged({...widget.form, 'description': value}),
           ),
-          maxLines: 3,
-          onChanged: (value) => onChanged({...form, 'description': value}),
         ),
       ],
     );
@@ -57,12 +137,42 @@ class SectionGeneralSettings extends StatefulWidget {
 class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
   late List<String> _tags;
   late TextEditingController _tagController;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _helpTextController;
+  late TextEditingController _orderController;
+  late TextEditingController _idController;
+  late TextEditingController _shortLabelController;
+  final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _descriptionFocusNode = FocusNode();
+  final FocusNode _helpTextFocusNode = FocusNode();
+  final FocusNode _orderFocusNode = FocusNode();
+  final FocusNode _idFocusNode = FocusNode();
+  final FocusNode _shortLabelFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _tags = _readTags(widget.section['tags']);
     _tagController = TextEditingController();
+    _titleController = TextEditingController(
+      text: widget.section['title']?.toString() ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.section['description']?.toString() ?? '',
+    );
+    _helpTextController = TextEditingController(
+      text: widget.section['help_text']?.toString() ?? '',
+    );
+    _orderController = TextEditingController(
+      text: widget.section['order']?.toString() ?? '',
+    );
+    _idController = TextEditingController(
+      text: widget.section['id']?.toString() ?? '',
+    );
+    _shortLabelController = TextEditingController(
+      text: widget.section['short_label']?.toString() ?? '',
+    );
   }
 
   @override
@@ -72,12 +182,75 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
       _tags = _readTags(widget.section['tags']);
       _tagController.clear();
     }
+    _syncController(
+      _titleController,
+      widget.section['title']?.toString() ?? '',
+      _titleFocusNode,
+    );
+    _syncController(
+      _descriptionController,
+      widget.section['description']?.toString() ?? '',
+      _descriptionFocusNode,
+    );
+    _syncController(
+      _helpTextController,
+      widget.section['help_text']?.toString() ?? '',
+      _helpTextFocusNode,
+    );
+    _syncController(
+      _orderController,
+      widget.section['order']?.toString() ?? '',
+      _orderFocusNode,
+    );
+    _syncController(
+      _idController,
+      widget.section['id']?.toString() ?? '',
+      _idFocusNode,
+    );
+    _syncController(
+      _shortLabelController,
+      widget.section['short_label']?.toString() ?? '',
+      _shortLabelFocusNode,
+    );
   }
 
   @override
   void dispose() {
     _tagController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _helpTextController.dispose();
+    _orderController.dispose();
+    _idController.dispose();
+    _shortLabelController.dispose();
+    _titleFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    _helpTextFocusNode.dispose();
+    _orderFocusNode.dispose();
+    _idFocusNode.dispose();
+    _shortLabelFocusNode.dispose();
     super.dispose();
+  }
+
+  void _syncController(
+    TextEditingController controller,
+    String next,
+    FocusNode focusNode,
+  ) {
+    if (focusNode.hasFocus) return;
+    if (controller.text == next) return;
+    controller.text = next;
+  }
+
+  void _selectAll(TextEditingController controller) {
+    Future.delayed(Duration.zero, () {
+      if (controller.text.isNotEmpty) {
+        controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: controller.text.length,
+        );
+      }
+    });
   }
 
   List<String> _readTags(dynamic value) {
@@ -115,81 +288,113 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
       children: [
         Text('General Settings', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['title']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Section Title',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_titleController);
+          },
+          child: TextFormField(
+            controller: _titleController,
+            focusNode: _titleFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Section Title',
+              border: OutlineInputBorder(),
+            ),
+            onTap: () => _selectAll(_titleController),
+            onChanged: (value) =>
+                widget.onChanged({...widget.section, 'title': value}),
           ),
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'title': value,
-          }),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['description']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Description',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_descriptionController);
+          },
+          child: TextFormField(
+            controller: _descriptionController,
+            focusNode: _descriptionFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            onTap: () => _selectAll(_descriptionController),
+            onChanged: (value) =>
+                widget.onChanged({...widget.section, 'description': value}),
           ),
-          maxLines: 3,
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'description': value,
-          }),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['help_text']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Help text',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_helpTextController);
+          },
+          child: TextFormField(
+            controller: _helpTextController,
+            focusNode: _helpTextFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Help text',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2,
+            onTap: () => _selectAll(_helpTextController),
+            onChanged: (value) =>
+                widget.onChanged({...widget.section, 'help_text': value}),
           ),
-          maxLines: 2,
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'help_text': value,
-          }),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['order']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Order',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_orderController);
+          },
+          child: TextFormField(
+            controller: _orderController,
+            focusNode: _orderFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Order',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+            onTap: () => _selectAll(_orderController),
+            onChanged: (value) => widget.onChanged({
+              ...widget.section,
+              'order': int.tryParse(value),
+            }),
           ),
-          keyboardType: TextInputType.number,
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'order': int.tryParse(value),
-          }),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['id']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Internal key / slug',
-            helperText: 'Unique identifier used for logic and API references.',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_idController);
+          },
+          child: TextFormField(
+            controller: _idController,
+            focusNode: _idFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Internal key / slug',
+              helperText: 'Unique identifier used for logic and API references.',
+              border: OutlineInputBorder(),
+            ),
+            onTap: () => _selectAll(_idController),
+            onChanged: (value) =>
+                widget.onChanged({...widget.section, 'id': value}),
           ),
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'id': value,
-          }),
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          initialValue: widget.section['short_label']?.toString() ?? '',
-          decoration: const InputDecoration(
-            labelText: 'Short label',
-            helperText: 'Shown in stepper indicators and breadcrumbs.',
-            border: OutlineInputBorder(),
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus) _selectAll(_shortLabelController);
+          },
+          child: TextFormField(
+            controller: _shortLabelController,
+            focusNode: _shortLabelFocusNode,
+            decoration: const InputDecoration(
+              labelText: 'Short label',
+              helperText: 'Shown in stepper indicators and breadcrumbs.',
+              border: OutlineInputBorder(),
+            ),
+            onTap: () => _selectAll(_shortLabelController),
+            onChanged: (value) =>
+                widget.onChanged({...widget.section, 'short_label': value}),
           ),
-          onChanged: (value) => widget.onChanged({
-            ...widget.section,
-            'short_label': value,
-          }),
         ),
         const SizedBox(height: 16),
         if (_tags.isNotEmpty) ...[
@@ -227,14 +432,24 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
         Wrap(
           spacing: 6,
           runSpacing: 6,
-          children: const ['personal', 'billing', 'contact', 'survey', 'feedback', 'security']
-              .where((t) => !_tags.contains(t))
-              .map((tag) => ActionChip(
-                    label: Text(tag, style: const TextStyle(fontSize: 12)),
-                    onPressed: () => _commitTag(tag),
-                    visualDensity: VisualDensity.compact,
-                  ))
-              .toList(),
+          children:
+              const [
+                    'personal',
+                    'billing',
+                    'contact',
+                    'survey',
+                    'feedback',
+                    'security',
+                  ]
+                  .where((t) => !_tags.contains(t))
+                  .map(
+                    (tag) => ActionChip(
+                      label: Text(tag, style: const TextStyle(fontSize: 12)),
+                      onPressed: () => _commitTag(tag),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  )
+                  .toList(),
         ),
         const SizedBox(height: 24),
         const Text(
@@ -250,10 +465,14 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           title: const Text('Allow Collapsing'),
-          subtitle: const Text('Allow users to expand or collapse this section.'),
+          subtitle: const Text(
+            'Allow users to expand or collapse this section.',
+          ),
           value: widget.section['metadata']?['allowCollapsing'] ?? true,
           onChanged: (val) {
-            final metadata = Map<String, dynamic>.from(widget.section['metadata'] ?? const {});
+            final metadata = Map<String, dynamic>.from(
+              widget.section['metadata'] ?? const {},
+            );
             metadata['allowCollapsing'] = val;
             widget.onChanged({...widget.section, 'metadata': metadata});
           },
@@ -265,7 +484,9 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
             subtitle: const Text('Render the section collapsed by default.'),
             value: widget.section['metadata']?['startCollapsed'] ?? false,
             onChanged: (val) {
-              final metadata = Map<String, dynamic>.from(widget.section['metadata'] ?? const {});
+              final metadata = Map<String, dynamic>.from(
+                widget.section['metadata'] ?? const {},
+              );
               metadata['startCollapsed'] = val;
               widget.onChanged({...widget.section, 'metadata': metadata});
             },
@@ -278,17 +499,16 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
   }
 
   Widget _buildIconPicker() {
-    final metadata = Map<String, dynamic>.from(widget.section['metadata'] ?? const {});
+    final metadata = Map<String, dynamic>.from(
+      widget.section['metadata'] ?? const {},
+    );
     final currentIcon = metadata['icon'] as String?;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
           'Section Icon',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         GestureDetector(
@@ -390,9 +610,14 @@ class _SectionGeneralSettingsState extends State<SectionGeneralSettings> {
                   (e) => IconButton(
                     icon: Icon(e.value),
                     onPressed: () {
-                      final metadata = Map<String, dynamic>.from(widget.section['metadata'] ?? const {});
+                      final metadata = Map<String, dynamic>.from(
+                        widget.section['metadata'] ?? const {},
+                      );
                       metadata['icon'] = e.key;
-                      widget.onChanged({...widget.section, 'metadata': metadata});
+                      widget.onChanged({
+                        ...widget.section,
+                        'metadata': metadata,
+                      });
                       Navigator.pop(context);
                     },
                   ),

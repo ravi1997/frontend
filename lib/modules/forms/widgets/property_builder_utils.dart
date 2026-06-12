@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:frontend/app/theme/app_colors.dart';
 import 'package:frontend/app/theme/tokens.dart';
@@ -17,13 +18,16 @@ class PropertyBuilderUtils {
     TextStyle? labelStyle,
     TextStyle? hintStyle,
     Color? fillColor,
+    bool selectAllOnFocus = true,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: labelStyle ??
+          style:
+              labelStyle ??
               const TextStyle(
                 color: AppColors.textDark,
                 fontSize: DesignTokens.fontS,
@@ -31,32 +35,59 @@ class PropertyBuilderUtils {
               ),
         ),
         const SizedBox(height: DesignTokens.spaceS),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          validator: validator,
-          readOnly: readOnly,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            hintText: placeholder,
-            hintStyle: hintStyle ?? const TextStyle(color: Colors.black26),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.spaceM,
-              vertical: DesignTokens.spaceS + 6,
+        Focus(
+          onFocusChange: (hasFocus) {
+            if (hasFocus && selectAllOnFocus) {
+              Future.delayed(Duration.zero, () {
+                if (controller.text.isNotEmpty) {
+                  controller.selection = TextSelection(
+                    baseOffset: 0,
+                    extentOffset: controller.text.length,
+                  );
+                }
+              });
+            }
+          },
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            validator: validator,
+            readOnly: readOnly,
+            maxLines: maxLines,
+            inputFormatters: inputFormatters,
+            decoration: InputDecoration(
+              hintText: placeholder,
+              hintStyle: hintStyle ?? const TextStyle(color: Colors.black26),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: DesignTokens.spaceM,
+                vertical: DesignTokens.spaceS + 6,
+              ),
+              filled: true,
+              fillColor: fillColor ?? AppColors.builderElement,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                borderSide: const BorderSide(color: AppColors.primary),
+              ),
             ),
-            filled: true,
-            fillColor: fillColor ?? AppColors.builderElement,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
-              borderSide: const BorderSide(color: AppColors.primary),
-            ),
+            style: textStyle ?? const TextStyle(color: AppColors.textDark),
+            onChanged: onChanged,
+            onTap: selectAllOnFocus
+                ? () {
+                    Future.delayed(Duration.zero, () {
+                      if (controller.text.isNotEmpty) {
+                        controller.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: controller.text.length,
+                        );
+                      }
+                    });
+                  }
+                : null,
           ),
-          style: textStyle ?? const TextStyle(color: AppColors.textDark),
-          onChanged: onChanged,
         ),
       ],
     );
@@ -81,7 +112,10 @@ class PropertyBuilderUtils {
         const SizedBox(height: DesignTokens.spaceXS),
         Text(
           description,
-          style: const TextStyle(color: AppColors.textGrey, fontSize: DesignTokens.fontS),
+          style: const TextStyle(
+            color: AppColors.textGrey,
+            fontSize: DesignTokens.fontS,
+          ),
         ),
       ],
     ];
@@ -161,6 +195,23 @@ class PropertyBuilderUtils {
       validator: validator,
       showHexInput: showHexInput,
     );
+  }
+
+  static bool isValidHexColor(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) return false;
+    final hex = normalized.startsWith('#')
+        ? normalized.substring(1)
+        : normalized;
+    final match = RegExp(r'^[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$').hasMatch(hex);
+    return match;
+  }
+
+  static String normalizeHexColor(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return '#000000';
+    if (trimmed.startsWith('#')) return trimmed.toUpperCase();
+    return '#${trimmed.toUpperCase()}';
   }
 
   static Widget buildDropdown<T>({
@@ -314,8 +365,31 @@ class _StatefulColorPickerState extends State<_StatefulColorPicker> {
               Expanded(
                 child: TextFormField(
                   controller: _controller,
-                  onChanged: widget.onChanged,
-                  validator: widget.validator,
+                  onChanged: (value) {
+                    final normalized = PropertyBuilderUtils.normalizeHexColor(
+                      value,
+                    );
+                    if (PropertyBuilderUtils.isValidHexColor(normalized)) {
+                      widget.onChanged(normalized);
+                    } else {
+                      widget.onChanged(value);
+                    }
+                  },
+                  validator:
+                      widget.validator ??
+                      (value) {
+                        final next = value?.trim() ?? '';
+                        if (next.isEmpty) return null;
+                        return PropertyBuilderUtils.isValidHexColor(next)
+                            ? null
+                            : 'Enter a valid hex color like #FFFFFF';
+                      },
+                  onTap: () {
+                    _controller.selection = TextSelection(
+                      baseOffset: 0,
+                      extentOffset: _controller.text.length,
+                    );
+                  },
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
@@ -331,6 +405,10 @@ class _StatefulColorPickerState extends State<_StatefulColorPicker> {
                     ),
                   ),
                   style: const TextStyle(fontSize: 14),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9a-fA-F#]')),
+                    LengthLimitingTextInputFormatter(9),
+                  ],
                 ),
               ),
             ],
@@ -382,7 +460,10 @@ class _StatefulColorPickerState extends State<_StatefulColorPicker> {
       builder: (dialogContext) {
         var tempColor = _pickedColor;
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
             child: SingleChildScrollView(
@@ -463,8 +544,7 @@ class _StatefulColorPickerState extends State<_StatefulColorPicker> {
                                     Expanded(
                                       child: FilledButton(
                                         onPressed: () {
-                                          final value =
-                                              _formatColor(tempColor);
+                                          final value = _formatColor(tempColor);
                                           widget.onChanged(value);
                                           _controller.text = value;
                                           _pickedColor = tempColor;
@@ -528,14 +608,23 @@ class _StatefulColorPickerState extends State<_StatefulColorPicker> {
 
   Color _parseColor(String value) {
     try {
-      return Color(int.parse(value.replaceAll('#', '0xFF')));
+      final normalized = PropertyBuilderUtils.normalizeHexColor(value);
+      final hex = normalized.substring(1);
+      if (hex.length == 6) {
+        return Color(int.parse('0xFF$hex'));
+      }
+      return Color(int.parse('0x$hex'));
     } catch (_) {
       return Colors.transparent;
     }
   }
 
   String _formatColor(Color color) {
-    final hex = color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase();
+    final hex = color
+        .toARGB32()
+        .toRadixString(16)
+        .padLeft(8, '0')
+        .toUpperCase();
     return '#${hex.substring(2)}';
   }
 }

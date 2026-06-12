@@ -34,19 +34,22 @@ class SectionPropertiesWidget extends ConsumerStatefulWidget {
       _SectionPropertiesWidgetState();
 }
 
-class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidget> {
+class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidget> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 9, vsync: this);
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
@@ -81,75 +84,76 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
 
         final sectionJson = activeSection.toJson();
 
-        return DefaultTabController(
-          length: 9,
-          child: PropertiesPanelShell(
-            header: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(DesignTokens.spaceL),
-                  child: Row(
-                    children: [
-                      const FaIcon(
-                        FontAwesomeIcons.layerGroup,
-                        size: 16,
-                        color: AppColors.textGrey,
-                      ),
-                      const SizedBox(width: DesignTokens.spaceS),
-                      const Flexible(
-                        child: Text(
-                          'Section Properties',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: AppColors.textDark,
-                            fontWeight: FontWeight.bold,
-                            fontSize: DesignTokens.fontM,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: AppColors.textGrey,
-                          size: 20,
-                        ),
-                        onPressed: controller.selectForm,
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(color: AppColors.borderLight, height: 1),
-                Material(
-                  color: Theme.of(context).colorScheme.surface,
-                  child: TabBar(
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    tabs: const [
-                      Tab(text: 'General'),
-                      Tab(text: 'Layout'),
-                      Tab(text: 'Style'),
-                      Tab(text: 'Logic'),
-                      Tab(text: 'Visibility'),
-                      Tab(text: 'Behavior'),
-                      Tab(text: 'A11y'),
-                      Tab(text: 'Analytics'),
-                      Tab(text: 'Advanced'),
-                    ],
-                    labelColor: AppColors.brandBlue,
-                    unselectedLabelColor: AppColors.textGrey,
-                    indicatorColor: AppColors.brandBlue,
-                    indicatorWeight: 3,
-                    labelStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: DesignTokens.fontS,
+        return PropertiesPanelShell(
+          header: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(DesignTokens.spaceL),
+                child: Row(
+                  children: [
+                    const FaIcon(
+                      FontAwesomeIcons.layerGroup,
+                      size: 16,
+                      color: AppColors.textGrey,
                     ),
+                    const SizedBox(width: DesignTokens.spaceS),
+                    const Flexible(
+                      child: Text(
+                        'Section Properties',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: DesignTokens.fontM,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close,
+                        color: AppColors.textGrey,
+                        size: 20,
+                      ),
+                      onPressed: controller.selectForm,
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: AppColors.borderLight, height: 1),
+              Material(
+                color: Theme.of(context).colorScheme.surface,
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  tabs: const [
+                    Tab(text: 'General'),
+                    Tab(text: 'Layout'),
+                    Tab(text: 'Style'),
+                    Tab(text: 'Logic'),
+                    Tab(text: 'Visibility'),
+                    Tab(text: 'Behavior'),
+                    Tab(text: 'A11y'),
+                    Tab(text: 'Analytics'),
+                    Tab(text: 'Advanced'),
+                  ],
+                  labelColor: AppColors.brandBlue,
+                  unselectedLabelColor: AppColors.textGrey,
+                  indicatorColor: AppColors.brandBlue,
+                  indicatorWeight: 3,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: DesignTokens.fontS,
                   ),
                 ),
-              ],
-            ),
-            body: TabBarView(
-              children: [
+              ),
+            ],
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
                 PaddedScrollTab(
                   child: SectionGeneralSettings(
                     section: sectionJson,
@@ -315,7 +319,6 @@ class _SectionPropertiesWidgetState extends ConsumerState<SectionPropertiesWidge
                 ),
               ],
             ),
-          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),

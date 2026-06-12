@@ -40,8 +40,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isRegistering = state.matchedLocation == '/register';
       final isForgotPassword = state.matchedLocation == '/forgot-password';
       final isVerifyingOtp = state.matchedLocation == '/verify-otp';
+      final isOidcCallback = state.matchedLocation == '/oidc/callback';
       final isAuthPath =
-          isLoggingIn || isRegistering || isForgotPassword || isVerifyingOtp;
+          isLoggingIn || isRegistering || isForgotPassword || isVerifyingOtp || isOidcCallback;
       final isPublicPath = state.matchedLocation.contains('/f/');
 
       if (!isAuth && !isAuthPath && !isPublicPath) return '/login';
@@ -76,6 +77,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/oidc/callback',
+        builder: (context, state) {
+          final code = state.uri.queryParameters['code'] ?? '';
+          final callbackState = state.uri.queryParameters['state'] ?? '';
+          return OidcCallbackScreen(code: code, state: callbackState);
+        },
+      ),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),

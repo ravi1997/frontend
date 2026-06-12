@@ -19,16 +19,16 @@ class SectionExtraField {
     this.keyName,
     this.label, {
     this.fallback = false,
-  })  : isToggle = true,
-        isChips = false,
-        isNumeric = false,
-        isDropdown = false,
-        lines = 1,
-        hintText = null,
-        min = 0,
-        max = 0,
-        defaultValue = 0,
-        options = const [];
+  }) : isToggle = true,
+       isChips = false,
+       isNumeric = false,
+       isDropdown = false,
+       lines = 1,
+       hintText = null,
+       min = 0,
+       max = 0,
+       defaultValue = 0,
+       options = const [];
 
   const SectionExtraField.text(
     this.keyName,
@@ -36,29 +36,26 @@ class SectionExtraField {
     this.hintText,
     this.lines = 1,
     this.fallback = false,
-  })  : isToggle = false,
-        isChips = false,
-        isNumeric = false,
-        isDropdown = false,
-        min = 0,
-        max = 0,
-        defaultValue = 0,
-        options = const [];
+  }) : isToggle = false,
+       isChips = false,
+       isNumeric = false,
+       isDropdown = false,
+       min = 0,
+       max = 0,
+       defaultValue = 0,
+       options = const [];
 
-  const SectionExtraField.chips(
-    this.keyName,
-    this.label, {
-    this.hintText,
-  })  : isToggle = false,
-        isChips = true,
-        isNumeric = false,
-        isDropdown = false,
-        lines = 1,
-        fallback = false,
-        min = 0,
-        max = 0,
-        defaultValue = 0,
-        options = const [];
+  const SectionExtraField.chips(this.keyName, this.label, {this.hintText})
+    : isToggle = false,
+      isChips = true,
+      isNumeric = false,
+      isDropdown = false,
+      lines = 1,
+      fallback = false,
+      min = 0,
+      max = 0,
+      defaultValue = 0,
+      options = const [];
 
   const SectionExtraField.numeric(
     this.keyName,
@@ -66,29 +63,26 @@ class SectionExtraField {
     this.min = 0.0,
     this.max = 400.0,
     this.defaultValue = 0.0,
-  })  : isToggle = false,
-        isChips = false,
-        isNumeric = true,
-        isDropdown = false,
-        lines = 1,
-        hintText = null,
-        fallback = false,
-        options = const [];
+  }) : isToggle = false,
+       isChips = false,
+       isNumeric = true,
+       isDropdown = false,
+       lines = 1,
+       hintText = null,
+       fallback = false,
+       options = const [];
 
-  const SectionExtraField.dropdown(
-    this.keyName,
-    this.label,
-    this.options,
-  )  : isToggle = false,
-        isChips = false,
-        isNumeric = false,
-        isDropdown = true,
-        lines = 1,
-        hintText = null,
-        fallback = false,
-        min = 0,
-        max = 0,
-        defaultValue = 0;
+  const SectionExtraField.dropdown(this.keyName, this.label, this.options)
+    : isToggle = false,
+      isChips = false,
+      isNumeric = false,
+      isDropdown = true,
+      lines = 1,
+      hintText = null,
+      fallback = false,
+      min = 0,
+      max = 0,
+      defaultValue = 0;
 }
 
 class SectionExtraSettings extends StatelessWidget {
@@ -111,11 +105,29 @@ class SectionExtraSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final metadata = _metadata();
+    final intro = switch (title) {
+      'Behavior' =>
+        'Behavior settings control how the section behaves at runtime and during navigation.',
+      'A11y' =>
+        'Accessibility metadata helps assistive technologies describe this section correctly.',
+      'Analytics' =>
+        'Analytics settings determine what section events are tracked.',
+      'Advanced' =>
+        'Advanced settings store implementation details and power-user overrides.',
+      _ => 'Section metadata settings.',
+    };
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(title, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 16),
+        Text(
+          intro,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade700),
+        ),
         const SizedBox(height: 16),
         ...fields.map((field) {
           final current = metadata[field.keyName];
@@ -123,17 +135,17 @@ class SectionExtraSettings extends StatelessWidget {
           if (field.isChips) {
             final chips = (metadata[field.keyName] is List)
                 ? (metadata[field.keyName] as List)
-                    .map((e) => e.toString())
-                    .where((e) => e.isNotEmpty)
-                    .toList()
+                      .map((e) => e.toString())
+                      .where((e) => e.isNotEmpty)
+                      .toList()
                 : (metadata[field.keyName] is String &&
-                        (metadata[field.keyName] as String).isNotEmpty)
-                    ? (metadata[field.keyName] as String)
-                        .split(',')
-                        .map((s) => s.trim())
-                        .where((s) => s.isNotEmpty)
-                        .toList()
-                    : <String>[];
+                      (metadata[field.keyName] as String).isNotEmpty)
+                ? (metadata[field.keyName] as String)
+                      .split(',')
+                      .map((s) => s.trim())
+                      .where((s) => s.isNotEmpty)
+                      .toList()
+                : <String>[];
 
             void removeChip(String chip) {
               final updated = List<String>.from(chips)..remove(chip);
@@ -194,7 +206,8 @@ class SectionExtraSettings extends StatelessWidget {
 
           if (field.isNumeric) {
             final raw = metadata[field.keyName];
-            final currentValue = (raw is num
+            final currentValue =
+                (raw is num
                     ? raw.toDouble()
                     : double.tryParse(raw?.toString() ?? '')) ??
                 field.defaultValue;

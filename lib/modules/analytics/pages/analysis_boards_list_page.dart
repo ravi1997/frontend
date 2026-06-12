@@ -1,41 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/analytics/analysis_dashboard.dart';
+import 'package:frontend/modules/analytics/analytics_providers.dart';
 
-class ProjectAnalysisBoardsListPage extends StatefulWidget {
+class ProjectAnalysisBoardsListPage extends ConsumerStatefulWidget {
   final String projectId;
 
   const ProjectAnalysisBoardsListPage({super.key, required this.projectId});
 
   @override
-  State<ProjectAnalysisBoardsListPage> createState() =>
+  ConsumerState<ProjectAnalysisBoardsListPage> createState() =>
       _ProjectAnalysisBoardsListPageState();
 }
 
 class _ProjectAnalysisBoardsListPageState
-    extends State<ProjectAnalysisBoardsListPage> {
-  final List<Map<String, dynamic>> _mockBoards = [
-    {
-      'id': 'board-101',
-      'title': 'Year-over-Year Health Metrics Board',
-      'description':
-          'Cross-reference and ratio aspects tracking responder ages and scoring variances across 2025/2026.',
-      'nodesCount': 3,
-      'createdAt': 'May 26, 2026',
-    },
-    {
-      'id': 'board-102',
-      'title': 'Operational Statistics Aggregator',
-      'description': 'Real-time MIN/MAX peaks monitoring complete cohort answer metrics.',
-      'nodesCount': 4,
-      'createdAt': 'May 27, 2026',
-    },
-  ];
+    extends ConsumerState<ProjectAnalysisBoardsListPage> {
+  late Future<List<AnalysisDashboard>> _dashboardsFuture;
 
-  void _showStubNotice(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboards();
+  }
+
+  void _loadDashboards() {
+    _dashboardsFuture = ref
+        .read(analysisDashboardRepositoryProvider)
+        .listDashboards();
   }
 
   @override
@@ -45,87 +41,91 @@ class _ProjectAnalysisBoardsListPageState
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
-        title: const Text('Analysis boards'),
+        title: const Text('Analysis dashboards'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh dashboards',
+            onPressed: () {
+              setState(_loadDashboards);
+            },
+            icon: const Icon(Icons.refresh_outlined),
+          ),
+        ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: Responsive.pagePadding(context),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: Responsive.maxContentWidth(context)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _HeroCard(
-                    projectId: widget.projectId,
-                    onCreateBoard: () => _showStubNotice(
-                      'Board creation is not wired yet. This page is a stub list.',
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spaceL),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isCompact = constraints.maxWidth < 760;
+        child: FutureBuilder<List<AnalysisDashboard>>(
+          future: _dashboardsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return _ErrorState(
+                message: snapshot.error.toString(),
+                onRetry: () => setState(_loadDashboards),
+              );
+            }
 
-                      if (isCompact) {
-                        return Column(
-                          children: _mockBoards
-                              .map(
-                                (board) => Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: DesignTokens.spaceM,
-                                  ),
-                                  child: _BoardCard(
-                                    board: board,
-                                    onOpen: () => _showStubNotice(
-                                      'Board editor route is not wired yet for ${board['id']}.',
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      }
-
-                      return Column(
-                        children: _mockBoards
-                            .map(
-                              (board) => Padding(
-                                padding: const EdgeInsets.only(bottom: DesignTokens.spaceM),
-                                child: _BoardCard(
-                                  board: board,
-                                  onOpen: () => _showStubNotice(
-                                    'Board editor route is not wired yet for ${board['id']}.',
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      );
-                    },
+            final dashboards = snapshot.data ?? const <AnalysisDashboard>[];
+            return SingleChildScrollView(
+              padding: Responsive.pagePadding(context),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: Responsive.maxContentWidth(context),
                   ),
-                ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _HeroCard(
+                        projectId: widget.projectId,
+                        dashboardCount: dashboards.length,
+                      ),
+                      const SizedBox(height: DesignTokens.spaceL),
+                      if (dashboards.isEmpty)
+                        _EmptyState(projectId: widget.projectId)
+                      else
+                        ...dashboards.map(
+                          (dashboard) => Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: DesignTokens.spaceM,
+                            ),
+                            child: _DashboardCard(
+                              dashboard: dashboard,
+                              onOpen: () => _showDetails(context, dashboard),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  void _showDetails(BuildContext context, AnalysisDashboard dashboard) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => _DashboardDetailsSheet(dashboard: dashboard),
     );
   }
 }
 
 class _HeroCard extends StatelessWidget {
   final String projectId;
-  final VoidCallback onCreateBoard;
+  final int dashboardCount;
 
-  const _HeroCard({
-    required this.projectId,
-    required this.onCreateBoard,
-  });
+  const _HeroCard({required this.projectId, required this.dashboardCount});
 
   @override
   Widget build(BuildContext context) {
@@ -143,54 +143,34 @@ class _HeroCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 720;
-          final titleStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              );
-
-          final bodyStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withValues(alpha: 0.82),
-                height: 1.5,
-              );
-
-          final content = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analysis dashboards',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceS),
+          Text(
+            'Project ID: $projectId',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.84),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceL),
+          Wrap(
+            spacing: DesignTokens.spaceS,
+            runSpacing: DesignTokens.spaceS,
             children: [
-              Text('Analysis boards', style: titleStyle),
-              const SizedBox(height: DesignTokens.spaceS),
-              Text(
-                'Design, wire, and execute complex cross-form calculations visually.',
-                style: bodyStyle,
-              ),
-              const SizedBox(height: DesignTokens.spaceS),
-              Text(
-                'Project ID: $projectId',
-                style: bodyStyle,
-              ),
-              const SizedBox(height: DesignTokens.spaceL),
-              Wrap(
-                spacing: DesignTokens.spaceS,
-                runSpacing: DesignTokens.spaceS,
-                children: const [
-                  _HeroTag(label: 'Status', value: 'Stub list'),
-                  _HeroTag(label: 'Routing', value: 'Board editor not wired'),
-                ],
-              ),
-              const SizedBox(height: DesignTokens.spaceL),
-              FilledButton.icon(
-                onPressed: onCreateBoard,
-                icon: const Icon(Icons.add),
-                label: const Text('Create board'),
-              ),
+              _HeroTag(label: 'Dashboards', value: '$dashboardCount'),
+              const _HeroTag(label: 'Scope', value: 'Repository-backed'),
             ],
-          );
-
-          if (compact) return content;
-          return content;
-        },
+          ),
+        ],
       ),
     );
   }
@@ -217,23 +197,27 @@ class _HeroTag extends StatelessWidget {
       child: Text(
         '$label: $value',
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 }
 
-class _BoardCard extends StatelessWidget {
-  final Map<String, dynamic> board;
+class _DashboardCard extends StatelessWidget {
+  final AnalysisDashboard dashboard;
   final VoidCallback onOpen;
 
-  const _BoardCard({required this.board, required this.onOpen});
+  const _DashboardCard({required this.dashboard, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final updatedAt = dashboard.updatedAt == null
+        ? 'Unknown'
+        : DateFormat.yMMMd().add_jm().format(dashboard.updatedAt!.toLocal());
+
     return Material(
       color: cs.surface,
       borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
@@ -246,65 +230,57 @@ class _BoardCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
             border: Border.all(color: cs.outline),
           ),
-          child: Row(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: DesignTokens.primarySoft,
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-                ),
-                child: const Icon(
-                  Icons.hub_outlined,
-                  color: DesignTokens.primary,
-                ),
-              ),
-              const SizedBox(width: DesignTokens.spaceM),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      board['title']?.toString() ?? 'Untitled board',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                          ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      board['description']?.toString() ?? '',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            height: 1.45,
-                            color: cs.onSurface.withValues(alpha: 0.65),
-                          ),
-                    ),
-                    const SizedBox(height: DesignTokens.spaceM),
-                    Wrap(
-                      spacing: DesignTokens.spaceS,
-                      runSpacing: DesignTokens.spaceS,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _MetaChip(
-                          label: 'Nodes',
-                          value: '${board['nodesCount'] ?? 0}',
+                        Text(
+                          dashboard.title,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: cs.onSurface,
+                              ),
                         ),
-                        _MetaChip(
-                          label: 'Created',
-                          value: board['createdAt']?.toString() ?? 'Unknown',
-                        ),
-                        const _MetaChip(label: 'Stub', value: 'No editor route'),
+                        if ((dashboard.description ?? '').isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            dashboard.description!,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: cs.onSurface.withValues(alpha: 0.72),
+                                  height: 1.55,
+                                ),
+                          ),
+                        ],
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: cs.onSurface.withValues(alpha: 0.5),
+                  ),
+                ],
               ),
-              const SizedBox(width: DesignTokens.spaceS),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: cs.onSurface.withValues(alpha: 0.32),
-                size: 16,
+              const SizedBox(height: DesignTokens.spaceM),
+              Wrap(
+                spacing: DesignTokens.spaceS,
+                runSpacing: DesignTokens.spaceS,
+                children: [
+                  _InfoPill(label: 'Layout', value: dashboard.layout),
+                  _InfoPill(
+                    label: 'Widgets',
+                    value: '${dashboard.widgets.length}',
+                  ),
+                  _InfoPill(label: 'Roles', value: '${dashboard.roles.length}'),
+                  _InfoPill(label: 'Updated', value: updatedAt),
+                ],
               ),
             ],
           ),
@@ -314,30 +290,294 @@ class _BoardCard extends StatelessWidget {
   }
 }
 
-class _MetaChip extends StatelessWidget {
+class _InfoPill extends StatelessWidget {
   final String label;
   final String value;
 
-  const _MetaChip({required this.label, required this.value});
+  const _InfoPill({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: DesignTokens.spaceS,
-        vertical: 6,
+        horizontal: DesignTokens.spaceM,
+        vertical: DesignTokens.spaceS,
       ),
       decoration: BoxDecoration(
-        color: cs.onSurface.withValues(alpha: 0.06),
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
       ),
       child: Text(
         '$label: $value',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: cs.onSurface.withValues(alpha: 0.78),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardDetailsSheet extends StatelessWidget {
+  final AnalysisDashboard dashboard;
+
+  const _DashboardDetailsSheet({required this.dashboard});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.82,
+      minChildSize: 0.45,
+      maxChildSize: 0.95,
+      builder: (context, controller) {
+        return SingleChildScrollView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(
+            DesignTokens.spaceL,
+            0,
+            DesignTokens.spaceL,
+            DesignTokens.spaceL,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                dashboard.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spaceS),
+              Text(
+                dashboard.slug ?? dashboard.id,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.66),
+                ),
+              ),
+              const SizedBox(height: DesignTokens.spaceM),
+              if ((dashboard.description ?? '').isNotEmpty)
+                Text(
+                  dashboard.description!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    height: 1.55,
+                    color: cs.onSurface.withValues(alpha: 0.75),
+                  ),
+                ),
+              const SizedBox(height: DesignTokens.spaceL),
+              _sectionTitle(context, 'Metadata'),
+              const SizedBox(height: DesignTokens.spaceS),
+              Wrap(
+                spacing: DesignTokens.spaceS,
+                runSpacing: DesignTokens.spaceS,
+                children: [
+                  _InfoPill(label: 'Layout', value: dashboard.layout),
+                  _InfoPill(
+                    label: 'Widgets',
+                    value: '${dashboard.widgets.length}',
+                  ),
+                  _InfoPill(label: 'Roles', value: '${dashboard.roles.length}'),
+                  _InfoPill(
+                    label: 'Created',
+                    value: _formatDate(dashboard.createdAt),
+                  ),
+                  _InfoPill(
+                    label: 'Updated',
+                    value: _formatDate(dashboard.updatedAt),
+                  ),
+                ],
+              ),
+              const SizedBox(height: DesignTokens.spaceL),
+              _sectionTitle(context, 'Widgets'),
+              const SizedBox(height: DesignTokens.spaceS),
+              if (dashboard.widgets.isEmpty)
+                Text(
+                  'No widgets are configured on this dashboard.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
+                )
+              else
+                Column(
+                  children: dashboard.widgets
+                      .map(
+                        (widget) => Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: DesignTokens.spaceS,
+                          ),
+                          child: _WidgetTile(widget: widget),
+                        ),
+                      )
+                      .toList(),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+        fontWeight: FontWeight.w800,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown';
+    return DateFormat.yMMMd().format(date.toLocal());
+  }
+}
+
+class _WidgetTile extends StatelessWidget {
+  final AnalysisWidget widget;
+
+  const _WidgetTile({required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(DesignTokens.spaceM),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusL),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${widget.type} • ${widget.calculationType}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.68),
+            ),
+          ),
+          if (widget.groupByField != null || widget.aggregateField != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              [
+                if (widget.groupByField != null)
+                  'Group by ${widget.groupByField}',
+                if (widget.aggregateField != null)
+                  'Aggregate ${widget.aggregateField}',
+              ].join(' • '),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurface.withValues(alpha: 0.68),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  final String projectId;
+
+  const _EmptyState({required this.projectId});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(DesignTokens.spaceXL),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'No dashboards yet',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: DesignTokens.spaceS),
+          Text(
+            'Create an analysis dashboard from the backend or keep this section hidden until dashboards are configured.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              height: 1.55,
               color: cs.onSurface.withValues(alpha: 0.72),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Padding(
+        padding: Responsive.pagePadding(context),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Container(
+            padding: const EdgeInsets.all(DesignTokens.spaceXL),
+            decoration: BoxDecoration(
+              color: cs.errorContainer.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusXL),
+              border: Border.all(color: cs.error.withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Could not load dashboards',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: cs.onErrorContainer,
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spaceS),
+                Text(
+                  message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onErrorContainer.withValues(alpha: 0.8),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spaceL),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_outlined),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

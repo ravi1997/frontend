@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'auth_controller.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:web/web.dart' as web;
+import 'package:frontend/core/networking/dio_provider.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/core/widgets/responsive.dart';
@@ -147,6 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 onLogin: _handleLogin,
                 onForgotPassword: () => context.push('/forgot-password'),
                 onSignUp: () => context.push('/register'),
+                onSsoLogin: _handleSsoLogin,
                 showBrand: false,
               ),
             ),
@@ -181,11 +185,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             onLogin: _handleLogin,
             onForgotPassword: () => context.push('/forgot-password'),
             onSignUp: () => context.push('/register'),
+            onSsoLogin: _handleSsoLogin,
             showBrand: true,
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _handleSsoLogin() async {
+    try {
+      final apiClient = ref.read(dioProvider);
+      final response = await apiClient.get('/auth/oidc/login?organization_id=default');
+      final authUrl = response.data['data']['auth_url'] as String;
+      if (kIsWeb) {
+        web.window.location.href = authUrl;
+      }
+    } catch (e) {
+      ref.read(snackbarServiceProvider).showError('Failed to initiate SSO: $e');
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -517,6 +535,7 @@ class _LoginCard extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onForgotPassword;
   final VoidCallback onSignUp;
+  final VoidCallback onSsoLogin;
   final bool showBrand;
 
   const _LoginCard({
@@ -535,6 +554,7 @@ class _LoginCard extends StatelessWidget {
     required this.onLogin,
     required this.onForgotPassword,
     required this.onSignUp,
+    required this.onSsoLogin,
     required this.showBrand,
   });
 
@@ -772,7 +792,7 @@ class _LoginCard extends StatelessWidget {
                       child: _SocialButton(
                         icon: FontAwesomeIcons.building,
                         label: 'Login with AIIMS SSO',
-                        onTap: () {},
+                        onTap: onSsoLogin,
                       ),
                     ),
                   ],

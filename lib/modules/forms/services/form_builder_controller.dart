@@ -586,7 +586,9 @@ class FormBuilderController
     if (state.value == null) return;
     final sections = state.value!.form.sections;
     if (sections.isEmpty) {
-      _log('addQuestionToActiveSection: no sections exist — add a section first.');
+      _log(
+        'addQuestionToActiveSection: no sections exist — add a section first.',
+      );
       return;
     }
     final targetId = state.value!.selectedSectionId ?? sections.first.id;
@@ -753,13 +755,10 @@ class FormBuilderController
 
   void updateQuestionLabel(String questionId, String label) {
     if (state.value == null) return;
-    final locale = state.value!.editingLocale;
     final sections = _updateQuestionRecursive(
       state.value!.form.sections,
       questionId,
-      (question) => question.copyWith(
-        label: _updateLocalizedField(question.label, label, locale),
-      ),
+      (question) => question.copyWith(label: label),
     );
 
     state = AsyncValue.data(

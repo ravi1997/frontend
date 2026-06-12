@@ -87,6 +87,25 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
     return questions;
   }
 
+  FormQuestion? _questionById(String id) {
+    for (final section in widget.sections) {
+      final found = _findQuestionInSection(section, id);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  FormQuestion? _findQuestionInSection(FormSection section, String id) {
+    for (final question in section.questions) {
+      if (question.id == id) return question;
+    }
+    for (final nested in section.sections) {
+      final found = _findQuestionInSection(nested, id);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
   List<_QuestionOption> _flattenQuestions(FormSection section) {
     final questions = <_QuestionOption>[];
     for (final question in section.questions) {
@@ -94,10 +113,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
           ? question.variableName!
           : question.id;
       questions.add(
-        _QuestionOption(
-          id: question.id,
-          label: '${question.label} ($varName)',
-        ),
+        _QuestionOption(id: question.id, label: '${question.label} ($varName)'),
       );
     }
     for (final nested in section.sections) {
@@ -118,11 +134,9 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
 
   void _save() {
     Navigator.pop(context, {
+      'targetId': widget.question.id,
       'action': _action,
-      'conditionGroup': {
-        'matchType': _matchType,
-        'rules': _conditions,
-      },
+      'conditionGroup': {'matchType': _matchType, 'rules': _conditions},
       'version': 3,
     });
   }
@@ -130,6 +144,11 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final targetQuestion =
+        _questionById(
+          (widget.initialRule?['targetId'] ?? widget.question.id).toString(),
+        ) ??
+        widget.question;
     return Dialog(
       child: Container(
         constraints: BoxConstraints(
@@ -150,7 +169,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
             ),
             const SizedBox(height: DesignTokens.spaceL),
             Text(
-              'Logic rules configuration for: ${widget.question.label}',
+              'Logic rules configuration for: ${targetQuestion.label}',
               style: TextStyle(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
               ),
@@ -207,7 +226,8 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                     );
                   }
                   final condition = _conditions[index];
-                  final currentTrigger = condition['triggerId']?.toString() ??
+                  final currentTrigger =
+                      condition['triggerId']?.toString() ??
                       _questionOptions.firstOrNull?.id ??
                       widget.question.id;
                   final currentOperator =
@@ -250,7 +270,9 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: DropdownButtonFormField<String>(
-                                key: ValueKey('operator:$index:$currentOperator'),
+                                key: ValueKey(
+                                  'operator:$index:$currentOperator',
+                                ),
                                 initialValue: currentOperator,
                                 decoration: const InputDecoration(
                                   labelText: 'Operator',
@@ -317,10 +339,7 @@ class _LogicRuleDialogState extends State<LogicRuleDialog> {
                   child: const Text('Cancel'),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _save,
-                  child: const Text('Save'),
-                ),
+                ElevatedButton(onPressed: _save, child: const Text('Save')),
               ],
             ),
           ],

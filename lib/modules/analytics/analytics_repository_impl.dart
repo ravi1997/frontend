@@ -28,11 +28,13 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       fieldDistributions: {
         for (final field in distribution.fieldDistributions)
           field.fieldLabel: field.options
-              .map((o) => DistributionData(
-                    label: o.label,
-                    count: o.count,
-                    percentage: o.percentage,
-                  ))
+              .map(
+                (o) => DistributionData(
+                  label: o.label,
+                  count: o.count,
+                  percentage: o.percentage,
+                ),
+              )
               .toList(),
       },
     );
@@ -42,26 +44,66 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   Future<AnalyticsSummary> getAnalyticsSummary(String formId) async {
     try {
       final response = await _apiClient.get('/forms/$formId/analytics/summary');
-      final data = response.data is Map<String, dynamic>
-          ? response.data as Map<String, dynamic>
-          : <String, dynamic>{};
-      final total = (data['total_responses'] as num? ?? 0).toInt();
+      final data = _asMap(response.data);
+      final total = _readInt(data, [
+        'total_submissions',
+        'total_responses',
+        'count',
+      ]);
+      final completionRate =
+          _readNullableDouble(data, [
+            'completion_rate',
+            'completion_percentage',
+          ]) ??
+          (total == 0 ? 0 : 1);
       return AnalyticsSummary(
         formId: formId,
         totalSubmissions: total,
-        completionRate: total == 0 ? 0 : 1,
+        completionRate: completionRate,
+        uniqueResponders: _readNullableInt(data, [
+          'unique_responders',
+          'unique_users',
+        ]),
+        averageCompletionTime: _readNullableDouble(data, [
+          'average_completion_time',
+          'average_duration',
+        ]),
+        statusBreakdown: _readStatusBreakdown(data),
       );
     } catch (e, st) {
       _logger.e('analytics summary failed', error: e, stackTrace: st);
-      return AnalyticsSummary(formId: formId, totalSubmissions: 0, completionRate: 0);
+      return AnalyticsSummary(
+        formId: formId,
+        totalSubmissions: 0,
+        completionRate: 0,
+      );
     }
   }
 
   @override
-  Future<AnalyticsTimeline> getAnalyticsTimeline(String formId, {int days = 30}) async {
+  Future<AnalyticsTimeline> getAnalyticsTimeline(
+    String formId, {
+    int days = 30,
+  }) async {
     try {
-      await _apiClient.get('/forms/$formId/analytics/timeline');
-      return AnalyticsTimeline(formId: formId, dataPoints: const []);
+      final response = await _apiClient.get(
+        '/forms/$formId/analytics/timeline',
+        queryParameters: {'days': days},
+      );
+      if (response.data is List) {
+        return AnalyticsTimeline(
+          formId: formId,
+          dataPoints: (response.data as List)
+              .map((e) => TimelineDataPoint.fromJson(_asMap(e)))
+              .toList(),
+        );
+      }
+      final data = _asMap(response.data);
+      return AnalyticsTimeline.fromJson({
+        ...data,
+        'form_id': data['form_id'] ?? formId,
+        'data_points': data['data_points'] ?? data['timeline'] ?? const [],
+      });
     } catch (e, st) {
       _logger.e('analytics timeline failed', error: e, stackTrace: st);
       return AnalyticsTimeline(formId: formId, dataPoints: const []);
@@ -71,10 +113,90 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   @override
   Future<AnalyticsDistribution> getAnalyticsDistribution(String formId) async {
     try {
-      return AnalyticsDistribution(formId: formId, fieldDistributions: const []);
+      final response = await _apiClient.get(
+        '/forms/$formId/analytics/distribution',
+      );
+      if (response.data is List) {
+        return AnalyticsDistribution(
+          formId: formId,
+          fieldDistributions: (response.data as List)
+              .map((e) => FieldDistribution.fromJson(_asMap(e)))
+              .toList(),
+        );
+      }
+      final data = _asMap(response.data);
+      return AnalyticsDistribution.fromJson({
+        ...data,
+        'form_id': data['form_id'] ?? formId,
+        'field_distributions':
+            data['field_distributions'] ?? data['fields'] ?? const [],
+      });
     } catch (e, st) {
       _logger.e('analytics distribution failed', error: e, stackTrace: st);
-      return AnalyticsDistribution(formId: formId, fieldDistributions: const []);
+      return AnalyticsDistribution(
+        formId: formId,
+        fieldDistributions: const [],
+      );
     }
+  }
+
+  Map<String, dynamic> _asMap(dynamic data) {
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return <String, dynamic>{};
+  }
+
+  int _readInt(
+    Map<String, dynamic> data,
+    List<String> keys, {
+    int fallback = 0,
+  }) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is num) return value.toInt();
+      if (value is String) {
+        final parsed = int.tryParse(value);
+        if (parsed != null) return parsed;
+      }
+    }
+    return fallback;
+  }
+
+  int? _readNullableInt(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is num) return value.toInt();
+      if (value is String) {
+        final parsed = int.tryParse(value);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  double? _readNullableDouble(Map<String, dynamic> data, List<String> keys) {
+    for (final key in keys) {
+      final value = data[key];
+      if (value is num) return value.toDouble();
+      if (value is String) {
+        final parsed = double.tryParse(value);
+        if (parsed != null) return parsed;
+      }
+    }
+    return null;
+  }
+
+  Map<String, int>? _readStatusBreakdown(Map<String, dynamic> data) {
+    final raw = data['status_breakdown'];
+    if (raw is Map) {
+      return raw.map((key, value) {
+        if (value is num) return MapEntry(key.toString(), value.toInt());
+        if (value is String) {
+          return MapEntry(key.toString(), int.tryParse(value) ?? 0);
+        }
+        return MapEntry(key.toString(), 0);
+      });
+    }
+    return null;
   }
 }

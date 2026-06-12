@@ -179,10 +179,12 @@ class ApiEndpoints {
   static const String listFeatureFlags = '/admin/feature-flags/';
 
   /// PUT - Update global feature flag default state (Superadmin only)
-  static String updateGlobalFeatureFlag(String flagKey) => '/admin/feature-flags/$flagKey';
+  static String updateGlobalFeatureFlag(String flagKey) =>
+      '/admin/feature-flags/$flagKey';
 
   /// PUT - Configure feature flag override for a specific organization (Superadmin only)
-  static String updateFeatureFlagOverride(String flagKey, String orgId) => '/admin/feature-flags/$flagKey/override/$orgId';
+  static String updateFeatureFlagOverride(String flagKey, String orgId) =>
+      '/admin/feature-flags/$flagKey/override/$orgId';
 
   // ============================================================================
   // Form Management Endpoints (§5-6)
@@ -577,7 +579,7 @@ class ApiEndpoints {
     String questionId,
     String value,
   ) =>
-      '/forms/fetch/external?form_id=$formId&question_id=$questionId&value=$value';
+      '/forms/fetch/external?form_id=${Uri.encodeQueryComponent(formId)}&question_id=${Uri.encodeQueryComponent(questionId)}&value=${Uri.encodeQueryComponent(value)}';
 
   /// GET - Same-form data lookup
   /// Headers: { "Authorization": "Bearer {token}" }
@@ -586,7 +588,8 @@ class ApiEndpoints {
     String formId,
     String questionId,
     String value,
-  ) => '/forms/$formId/fetch/same?question_id=$questionId&value=$value';
+  ) =>
+      '/forms/${Uri.encodeComponent(formId)}/fetch/same?question_id=${Uri.encodeQueryComponent(questionId)}&value=${Uri.encodeQueryComponent(value)}';
 
   // ============================================================================
   // Summarization API (§15)

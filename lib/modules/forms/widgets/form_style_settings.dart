@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/forms/widgets/property_builder_utils.dart';
+import 'package:frontend/modules/forms/widgets/form_branding_settings.dart';
 
 class FormStyleSettings extends StatelessWidget {
   final Map<String, dynamic> form;
@@ -13,7 +14,16 @@ class FormStyleSettings extends StatelessWidget {
   });
 
   Widget _buildColorSwatches(String value, ValueChanged<String> onChanged) {
-    final colors = ['#FFFFFF', '#F5F5F5', '#E0E0E0', '#2196F3', '#4CAF50', '#FFC107', '#F44336', '#9C27B0'];
+    final colors = [
+      '#FFFFFF',
+      '#F5F5F5',
+      '#E0E0E0',
+      '#2196F3',
+      '#4CAF50',
+      '#FFC107',
+      '#F44336',
+      '#9C27B0',
+    ];
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Wrap(
@@ -44,7 +54,9 @@ class FormStyleSettings extends StatelessWidget {
                   ? Icon(
                       Icons.check,
                       size: 14,
-                      color: col.toLowerCase() == '#ffffff' ? Colors.black : Colors.white,
+                      color: col.toLowerCase() == '#ffffff'
+                          ? Colors.black
+                          : Colors.white,
                     )
                   : null,
             ),
@@ -60,12 +72,16 @@ class FormStyleSettings extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Style Settings',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('Style Settings', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: DesignTokens.spaceM),
-        const Text('Quick Palette', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+        const Text(
+          'Quick Palette',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
         const SizedBox(height: 6),
         _buildColorSwatches(
           backgroundColor,
@@ -79,6 +95,7 @@ class FormStyleSettings extends StatelessWidget {
             onChanged({...form, 'backgroundColor': value});
           },
         ),
+        FormBrandingSettings(form: form, onChanged: onChanged),
       ],
     );
   }

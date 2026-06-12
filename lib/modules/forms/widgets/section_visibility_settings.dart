@@ -52,8 +52,8 @@ class SectionVisibilitySettings extends StatelessWidget {
     final environment = isPreviewOnly
         ? 'preview_only'
         : isPublishedOnly
-            ? 'published_only'
-            : 'all';
+        ? 'published_only'
+        : 'all';
 
     final theme = Theme.of(context);
 
@@ -61,6 +61,29 @@ class SectionVisibilitySettings extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Visibility', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 16),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.4,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.dividerColor),
+          ),
+          child: Text(
+            'Current visibility: ${environment == "all"
+                ? "All environments"
+                : environment == "preview_only"
+                ? "Preview only"
+                : "Published only"} • '
+            'Mobile: ${showOnMobile ? "on" : "off"} • '
+            'Tablet: ${showOnTablet ? "on" : "off"} • '
+            'Desktop: ${showOnDesktop ? "on" : "off"}',
+            style: theme.textTheme.bodySmall,
+          ),
+        ),
         const SizedBox(height: 16),
         _switchTile(
           title: 'Show on mobile',

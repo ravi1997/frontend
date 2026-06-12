@@ -2,7 +2,10 @@ import 'form_response.dart';
 
 abstract class ResponseRepository {
   Future<List<FormResponse>> getResponsesForForm(String formId);
-  Future<List<FormResponse>> getProjectResponses(String projectId, String formId);
+  Future<List<FormResponse>> getProjectResponses(
+    String projectId,
+    String formId,
+  );
   Future<FormResponse> getResponseDetail(String formId, String responseId);
   Future<FormResponse> getProjectResponseDetail(
     String projectId,
@@ -12,7 +15,15 @@ abstract class ResponseRepository {
   Future<void> submitResponse(FormResponse response);
   Future<void> submitProjectResponse(String projectId, FormResponse response);
   Future<List<FormResponse>> aiSearch(String formId, String query);
-  Future<List<ResponseHistory>> getResponseHistory(String formId, String responseId);
+  Future<List<Map<String, dynamic>>> lookupSameFormResponses(
+    String formId,
+    String questionId,
+    String value,
+  );
+  Future<List<ResponseHistory>> getResponseHistory(
+    String formId,
+    String responseId,
+  );
   Future<List<ResponseHistory>> getProjectResponseHistory(
     String projectId,
     String formId,

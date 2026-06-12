@@ -19,24 +19,12 @@ class FormDashboardPage extends ConsumerStatefulWidget {
   ConsumerState<FormDashboardPage> createState() => _FormDashboardPageState();
 }
 
-class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _FormDashboardPageState extends ConsumerState<FormDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentTab =
+        GoRouterState.of(context).uri.queryParameters['tab'] ?? 'overview';
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -138,95 +126,46 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
                       borderRadius: BorderRadius.circular(DesignTokens.radiusL),
                       border: Border.all(color: cs.outline),
                     ),
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      labelColor: cs.onSurface,
-                      unselectedLabelColor: cs.onSurface.withValues(alpha: 0.55),
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicator: BoxDecoration(
-                        color: DesignTokens.primarySoft,
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusM),
-                      ),
-                      tabs: const [
-                        Tab(text: 'Overview'),
-                        Tab(text: 'Responses'),
-                        Tab(text: 'Analytics'),
-                        Tab(text: 'Builder'),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _RouteTabChip(
+                          label: 'Overview',
+                          selected: currentTab == 'overview',
+                          onTap: () => context.go(
+                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=overview',
+                          ),
+                        ),
+                        _RouteTabChip(
+                          label: 'Responses',
+                          selected: currentTab == 'responses',
+                          onTap: () => context.go(
+                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=responses',
+                          ),
+                        ),
+                        _RouteTabChip(
+                          label: 'Analytics',
+                          selected: currentTab == 'analytics',
+                          onTap: () => context.go(
+                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=analytics',
+                          ),
+                        ),
+                        _RouteTabChip(
+                          label: 'Builder',
+                          selected: currentTab == 'builder',
+                          onTap: () => context.go(
+                            '/projects/${widget.projectId}/forms/${widget.formId}?tab=builder',
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: DesignTokens.spaceL),
-                  SizedBox(
-                    height: Responsive.isMobile(context) ? 640 : 560,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _FormDashboardTab(
-                          title: 'Overview',
-                          message:
-                              'Project-scoped form details will appear here, along with status, publishing state, and quick actions.',
-                          actions: [
-                            _DashboardAction(
-                              label: 'Open responses',
-                              icon: Icons.list_alt_outlined,
-                              onPressed: () => context.push(
-                                '/projects/${widget.projectId}/forms/${widget.formId}/responses',
-                              ),
-                            ),
-                            _DashboardAction(
-                              label: 'View analytics',
-                              icon: Icons.show_chart_outlined,
-                              onPressed: () => context.push(
-                                '/projects/${widget.projectId}/forms/${widget.formId}/analytics',
-                              ),
-                            ),
-                          ],
-                        ),
-                        _FormDashboardTab(
-                          title: 'Responses',
-                          message:
-                              'This tab is a shortcut to the submissions dashboard for the selected form.',
-                          actions: [
-                            _DashboardAction(
-                              label: 'Open responses',
-                              icon: Icons.list_alt_outlined,
-                              onPressed: () => context.push(
-                                '/projects/${widget.projectId}/forms/${widget.formId}/responses',
-                              ),
-                            ),
-                          ],
-                        ),
-                        _FormDashboardTab(
-                          title: 'Analytics',
-                          message:
-                              'Use this area to inspect response trends, completion rates, and submission activity.',
-                          actions: [
-                            _DashboardAction(
-                              label: 'Open analytics',
-                              icon: Icons.analytics_outlined,
-                              onPressed: () => context.push(
-                                '/projects/${widget.projectId}/forms/${widget.formId}/analytics',
-                              ),
-                            ),
-                          ],
-                        ),
-                        _FormDashboardTab(
-                          title: 'Builder',
-                          message:
-                              'Jump into the builder when you are ready to edit sections, questions, and styling.',
-                          actions: [
-                            _DashboardAction(
-                              label: 'Edit form',
-                              icon: Icons.edit_outlined,
-                              onPressed: () => context.push(
-                                '/projects/${widget.projectId}/forms/${widget.formId}/edit',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  _FormDashboardTabContent(
+                    currentTab: currentTab,
+                    projectId: widget.projectId,
+                    formId: widget.formId,
                   ),
                 ],
               ),
@@ -235,6 +174,117 @@ class _FormDashboardPageState extends ConsumerState<FormDashboardPage>
         ),
       ),
     );
+  }
+}
+
+class _RouteTabChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RouteTabChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      labelStyle: TextStyle(
+        color: selected ? cs.onPrimary : cs.onSurface,
+        fontWeight: FontWeight.w600,
+      ),
+      selectedColor: DesignTokens.primary,
+      backgroundColor: cs.surface,
+      side: BorderSide(color: cs.outline),
+    );
+  }
+}
+
+class _FormDashboardTabContent extends StatelessWidget {
+  final String currentTab;
+  final String projectId;
+  final String formId;
+
+  const _FormDashboardTabContent({
+    required this.currentTab,
+    required this.projectId,
+    required this.formId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final child = switch (currentTab) {
+      'responses' => _FormDashboardTab(
+          title: 'Responses',
+          message:
+              'This tab is a shortcut to the submissions dashboard for the selected form.',
+          actions: [
+            _DashboardAction(
+              label: 'Open responses',
+              icon: Icons.list_alt_outlined,
+              onPressed: () => context.push(
+                '/projects/$projectId/forms/$formId/responses',
+              ),
+            ),
+          ],
+        ),
+      'analytics' => _FormDashboardTab(
+          title: 'Analytics',
+          message:
+              'Use this area to inspect response trends, completion rates, and submission activity.',
+          actions: [
+            _DashboardAction(
+              label: 'Open analytics',
+              icon: Icons.analytics_outlined,
+              onPressed: () => context.push(
+                '/projects/$projectId/forms/$formId/analytics',
+              ),
+            ),
+          ],
+        ),
+      'builder' => _FormDashboardTab(
+          title: 'Builder',
+          message:
+              'Jump into the builder when you are ready to edit sections, questions, and styling.',
+          actions: [
+            _DashboardAction(
+              label: 'Edit form',
+              icon: Icons.edit_outlined,
+              onPressed: () => context.push(
+                '/projects/$projectId/forms/$formId/edit',
+              ),
+            ),
+          ],
+        ),
+      _ => _FormDashboardTab(
+          title: 'Overview',
+          message:
+              'Project-scoped form details will appear here, along with status, publishing state, and quick actions.',
+          actions: [
+            _DashboardAction(
+              label: 'Open responses',
+              icon: Icons.list_alt_outlined,
+              onPressed: () => context.push(
+                '/projects/$projectId/forms/$formId/responses',
+              ),
+            ),
+            _DashboardAction(
+              label: 'View analytics',
+              icon: Icons.show_chart_outlined,
+              onPressed: () => context.push(
+                '/projects/$projectId/forms/$formId/analytics',
+              ),
+            ),
+          ],
+        ),
+    };
+    return SizedBox(height: Responsive.isMobile(context) ? 640 : 560, child: child);
   }
 }
 

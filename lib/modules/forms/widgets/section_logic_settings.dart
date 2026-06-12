@@ -24,23 +24,22 @@ class SectionLogicSettings extends StatelessWidget {
       return Map<String, dynamic>.from(logic);
     }
 
-    final rules = logic is Map ? (logic['rules'] as List? ?? const []) : const [];
+    final rules = logic is Map
+        ? (logic['rules'] as List? ?? const [])
+        : const [];
     return {
       'version': 3,
-      'rules': rules
-          .whereType<Map>()
-          .map((rule) {
-            final mapped = Map<String, dynamic>.from(rule);
-            if (mapped.containsKey('conditionGroup')) return mapped;
-            return {
-              'action': mapped['action'] ?? 'show',
-              'conditionGroup': {
-                'matchType': 'and',
-                'rules': [mapped],
-              },
-            };
-          })
-          .toList(),
+      'rules': rules.whereType<Map>().map((rule) {
+        final mapped = Map<String, dynamic>.from(rule);
+        if (mapped.containsKey('conditionGroup')) return mapped;
+        return {
+          'action': mapped['action'] ?? 'show',
+          'conditionGroup': {
+            'matchType': 'and',
+            'rules': [mapped],
+          },
+        };
+      }).toList(),
     };
   }
 
@@ -48,31 +47,43 @@ class SectionLogicSettings extends StatelessWidget {
     onChanged({...section, 'conditional_logic': logic});
   }
 
-  List<_QuestionOption> _questionOptions() {
-    final options = <_QuestionOption>[];
+  FormQuestion? _firstQuestion() {
     for (final section in sections) {
-      options.addAll(_flattenSectionQuestions(section));
+      if (section.questions.isNotEmpty) return section.questions.first;
+      for (final nested in section.sections) {
+        final found = _firstQuestionInSection(nested);
+        if (found != null) return found;
+      }
     }
-    return options;
+    return null;
   }
 
-  List<_QuestionOption> _flattenSectionQuestions(FormSection section) {
-    final options = <_QuestionOption>[];
+  FormQuestion? _firstQuestionInSection(FormSection section) {
+    if (section.questions.isNotEmpty) return section.questions.first;
+    for (final nested in section.sections) {
+      final found = _firstQuestionInSection(nested);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  FormQuestion? _questionById(String id) {
+    for (final section in sections) {
+      final found = _findQuestionInSection(section, id);
+      if (found != null) return found;
+    }
+    return null;
+  }
+
+  FormQuestion? _findQuestionInSection(FormSection section, String id) {
     for (final question in section.questions) {
-      final varName = question.variableName?.isNotEmpty == true
-          ? question.variableName!
-          : question.id;
-      options.add(
-        _QuestionOption(
-          id: question.id,
-          label: '${question.label} ($varName)',
-        ),
-      );
+      if (question.id == id) return question;
     }
     for (final nested in section.sections) {
-      options.addAll(_flattenSectionQuestions(nested));
+      final found = _findQuestionInSection(nested, id);
+      if (found != null) return found;
     }
-    return options;
+    return null;
   }
 
   @override
@@ -87,10 +98,7 @@ class SectionLogicSettings extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Logic Settings',
-          style: theme.textTheme.titleLarge,
-        ),
+        Text('Logic Settings', style: theme.textTheme.titleLarge),
         const SizedBox(height: 16),
         Text(
           'Use rules to show or hide this section based on answers elsewhere in the form.',
@@ -111,9 +119,23 @@ class SectionLogicSettings extends StatelessWidget {
               if (rules.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    'No logic rules defined yet.',
-                    style: theme.textTheme.bodySmall,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'No logic rules defined yet.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Add a rule to show or hide this section based on answers elsewhere in the form.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.72,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               else
@@ -126,10 +148,13 @@ class SectionLogicSettings extends StatelessWidget {
                       locale: locale,
                       sections: sections,
                       onEdit: () async {
+                        final targetId = entry.value['targetId']?.toString();
                         final result = await showDialog<Map<String, dynamic>>(
                           context: context,
                           builder: (context) => LogicRuleDialog(
-                            question: sections.first.questions.first,
+                            question: targetId != null
+                                ? _questionById(targetId) ?? _firstQuestion()!
+                                : _firstQuestion()!,
                             sections: sections,
                             initialRule: entry.value,
                             locale: locale,
@@ -138,6 +163,7 @@ class SectionLogicSettings extends StatelessWidget {
                         );
                         if (result == null) return;
                         final newRules = List<Map<String, dynamic>>.from(rules);
+                        result['targetId'] ??= targetId ?? _firstQuestion()?.id;
                         newRules[entry.key] = result;
                         _updateLogic({...logicState, 'rules': newRules});
                       },
@@ -151,13 +177,13 @@ class SectionLogicSettings extends StatelessWidget {
                 ),
               const SizedBox(height: 8),
               ElevatedButton.icon(
-                onPressed: _questionOptions().isEmpty
+                onPressed: _firstQuestion() == null
                     ? null
                     : () async {
                         final result = await showDialog<Map<String, dynamic>>(
                           context: context,
                           builder: (context) => LogicRuleDialog(
-                            question: sections.first.questions.first,
+                            question: _firstQuestion()!,
                             sections: sections,
                             locale: locale,
                             allowedActions: const ['show', 'hide'],
@@ -227,17 +253,14 @@ class _LogicSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final action = rule['action']?.toString() ?? 'show';
-    final conditions = ((rule['conditionGroup'] as Map?)?['rules'] as List? ?? const [])
-        .whereType<Map>()
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
+    final conditions =
+        ((rule['conditionGroup'] as Map?)?['rules'] as List? ?? const [])
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
 
-    final color = action == 'hide'
-        ? Colors.orange
-        : AppColors.brandBlue;
-    final icon = action == 'hide'
-        ? Icons.visibility_off
-        : Icons.visibility;
+    final color = action == 'hide' ? Colors.orange : AppColors.brandBlue;
+    final icon = action == 'hide' ? Icons.visibility_off : Icons.visibility;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -255,10 +278,7 @@ class _LogicSummaryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 action.toUpperCase(),
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: color, fontWeight: FontWeight.w700),
               ),
               const Spacer(),
               IconButton(
@@ -279,10 +299,14 @@ class _LogicSummaryCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'If ${conditions.length} condition(s) are met:',
-            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 4),
-          ...conditions.take(2).map(
+          ...conditions
+              .take(2)
+              .map(
                 (condition) => Text(
                   '• ${_getFieldLabel(condition['triggerId']?.toString() ?? '')} ${condition['operator'] ?? ''} ${condition['value'] ?? ''}',
                   maxLines: 1,
@@ -291,22 +315,9 @@ class _LogicSummaryCard extends StatelessWidget {
                 ),
               ),
           if (conditions.length > 2)
-            Text(
-              '...',
-              style: theme.textTheme.bodySmall,
-            ),
+            Text('...', style: theme.textTheme.bodySmall),
         ],
       ),
     );
   }
-}
-
-class _QuestionOption {
-  final String id;
-  final String label;
-
-  const _QuestionOption({
-    required this.id,
-    required this.label,
-  });
 }

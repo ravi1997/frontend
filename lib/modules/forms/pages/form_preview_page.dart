@@ -2654,20 +2654,23 @@ class _PreviewFieldWidgetState extends ConsumerState<_PreviewFieldWidget> {
 
   Widget _buildToggleField(FormQuestion q, WidgetRef ref, String locale) {
     final current = ref.read(previewFormDataProvider)[_fieldId] == true;
-    return SwitchListTile(
-      value: current,
-      onChanged: (val) {
-        ref
-            .read(previewFormDataProvider.notifier)
-            .update((state) => {...state, _fieldId: val});
-        setState(() {});
-      },
-      title: Text(
-        q.placeholder.translate(locale).isEmpty
-            ? q.type.label
-            : q.placeholder.translate(locale),
+    final placeholder = q.placeholder;
+    final title = placeholder == null || placeholder.trim().isEmpty
+        ? q.type.label
+        : placeholder;
+    return Material(
+      color: Colors.transparent,
+      child: SwitchListTile(
+        value: current,
+        onChanged: (val) {
+          ref
+              .read(previewFormDataProvider.notifier)
+              .update((state) => {...state, _fieldId: val});
+          setState(() {});
+        },
+        title: Text(title),
+        contentPadding: EdgeInsets.zero,
       ),
-      contentPadding: EdgeInsets.zero,
     );
   }
 

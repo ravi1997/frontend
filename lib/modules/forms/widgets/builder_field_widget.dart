@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/tokens.dart';
-import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 
 import 'package:frontend/modules/forms/models/form_style.dart';
@@ -82,7 +81,7 @@ class BuilderFieldWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildLabelText(context),
-                        if (_helperText(question).translate(locale).isNotEmpty)
+                        if (_localizedText(_helperText(question), locale).isNotEmpty)
                           ...[
                           const SizedBox(height: DesignTokens.spaceXS),
                           _buildHelperText(context),
@@ -97,7 +96,7 @@ class BuilderFieldWidget extends StatelessWidget {
             ] else ...[
               // Top or Hidden
               if (!isHidden &&
-                  _helperText(question).translate(locale).isNotEmpty) ...[
+                  _localizedText(_helperText(question), locale).isNotEmpty) ...[
                 const SizedBox(height: DesignTokens.spaceXS),
                 _buildHelperText(context),
               ],
@@ -129,7 +128,7 @@ class BuilderFieldWidget extends StatelessWidget {
           Expanded(
             child: isHidden
                 ? Text(
-                    '${question.label.translate(locale)} (Hidden)',
+                    '${_localizedText(question.label, locale)} (Hidden)',
                     style: const TextStyle(
                       color: AppColors.textGrey,
                       fontStyle: FontStyle.italic,
@@ -163,9 +162,9 @@ class BuilderFieldWidget extends StatelessWidget {
 
     return RichText(
       text: TextSpan(
-        text: question.label.translate(locale).isEmpty
+        text: _localizedText(question.label, locale).isEmpty
             ? 'Untitled ${question.type.label}'
-            : question.label.translate(locale),
+            : _localizedText(question.label, locale),
         style: TextStyle(
           color: labelColor,
           fontSize: style.labelFontSize,
@@ -191,7 +190,7 @@ class BuilderFieldWidget extends StatelessWidget {
     final helperColor = _parseHexColor(style.helperColor, AppColors.textGrey);
 
     return Text(
-      _helperText(question).translate(locale),
+      _localizedText(_helperText(question), locale),
       style: TextStyle(
         color: helperColor,
         fontSize: style.helperFontSize,
@@ -223,6 +222,17 @@ class BuilderFieldWidget extends StatelessWidget {
 
   dynamic _placeholder(FormQuestion q) {
     return q.metadata['placeholder'] ?? '';
+  }
+
+  String _localizedText(dynamic value, String locale) {
+    if (value is String) return value;
+    if (value is Map) {
+      final map = Map<String, dynamic>.from(value);
+      if (map.containsKey(locale)) return map[locale].toString();
+      if (map.containsKey('en')) return map['en'].toString();
+      if (map.isNotEmpty) return map.values.first.toString();
+    }
+    return '';
   }
 
   FontWeight _parseFontWeight(String weight) {
@@ -336,9 +346,9 @@ class BuilderFieldWidget extends StatelessWidget {
                 ),
               Expanded(
                 child: Text(
-                  _placeholder(q).translate(locale).isEmpty
+                  _localizedText(_placeholder(q), locale).isEmpty
                       ? _getPlaceholderForType(q.type)
-                      : _placeholder(q).translate(locale),
+                      : _localizedText(_placeholder(q), locale),
                   style: textStyle.copyWith(
                     color: textStyle.color?.withValues(alpha: 0.5),
                   ),
@@ -360,9 +370,9 @@ class BuilderFieldWidget extends StatelessWidget {
           decoration: containerDecor,
           alignment: Alignment.topLeft,
           child: Text(
-            _placeholder(q).translate(locale).isEmpty
+            _localizedText(_placeholder(q), locale).isEmpty
                 ? 'Long answer text...'
-                : _placeholder(q).translate(locale),
+                : _localizedText(_placeholder(q), locale),
             style: textStyle.copyWith(
               color: textStyle.color?.withValues(alpha: 0.5),
             ),
@@ -376,9 +386,9 @@ class BuilderFieldWidget extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                _placeholder(q).translate(locale).isEmpty
+                _localizedText(_placeholder(q), locale).isEmpty
                     ? 'Select an option'
-                    : _placeholder(q).translate(locale),
+                    : _localizedText(_placeholder(q), locale),
                 style: textStyle.copyWith(
                   color: textStyle.color?.withValues(alpha: 0.5),
                 ),
