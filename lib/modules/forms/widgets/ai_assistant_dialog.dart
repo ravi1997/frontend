@@ -279,10 +279,14 @@ class _AiAssistantDialogState extends ConsumerState<AiAssistantDialog>
                     const SizedBox(height: DesignTokens.spaceM),
                     TextButton(
                       onPressed: () {
-                        // Logic to add this field
-                        // ref.read(formBuilderControllerProvider(widget.formId).notifier).addQuestion(...)
-                        ref.read(snackbarServiceProvider).showInfo(
-                          'Adding field suggestions currently requires manual confirmation in this version.',
+                        ref
+                            .read(
+                              formBuilderControllerProvider(widget.formId)
+                                  .notifier,
+                            )
+                            .addSuggestedQuestionToActiveSection(s);
+                        ref.read(snackbarServiceProvider).showSuccess(
+                          'Added "${s['label'] ?? 'suggested field'}" to the form.',
                         );
                       },
                       child: const Text('Add to Form'),

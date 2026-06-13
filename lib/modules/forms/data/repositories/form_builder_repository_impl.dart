@@ -220,6 +220,34 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
     }
   }
 
+  @override
+  Future<bool> isSlugAvailable(
+    String slug, {
+    String? formId,
+    String? projectId,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiEndpoints.checkSlugAvailable,
+        queryParameters: {'slug': slug, if (formId != null) 'form_id': formId},
+      );
+      final data = response.data;
+      if (data is Map) {
+        final nested = data['data'];
+        if (nested is Map && nested['available'] is bool) {
+          return nested['available'] as bool;
+        }
+        if (data['available'] is bool) {
+          return data['available'] as bool;
+        }
+      }
+      return false;
+    } catch (e, s) {
+      _logger.w('Failed to check slug availability', error: e, stackTrace: s);
+      return false;
+    }
+  }
+
   /// Extract form_id from various backend response shapes.
   String _extractFormId(dynamic data) {
     if (data is Map) {

@@ -36,6 +36,11 @@ abstract class FormBuilderRepository {
   });
   Future<Map<String, dynamic>> saveDraft(String projectId, BuilderForm form);
   Future<Map<String, dynamic>> getBuilderMetadata();
+  Future<bool> isSlugAvailable(
+    String slug, {
+    String? formId,
+    String? projectId,
+  });
   Future<Map<String, dynamic>> exportSchema(String projectId, String formId);
   Future<BuilderForm> restoreFormVersion(
     String projectId,

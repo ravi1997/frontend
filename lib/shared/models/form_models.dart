@@ -83,9 +83,35 @@ class FormQuestion {
   QuestionStyle get styleObject => QuestionStyle.fromJson(style);
 
   static QuestionType _questionTypeFromFieldType(String? fieldType) {
-    final name = fieldType?.trim() ?? 'shortText';
+    final name = fieldType?.trim().toLowerCase() ?? 'shorttext';
+    final compact = name.replaceAll(RegExp(r'[\s_-]+'), '');
+    final aliases = <String, QuestionType>{
+      'shorttext': QuestionType.shortText,
+      'paragraph': QuestionType.paragraph,
+      'multiplechoice': QuestionType.multipleChoice,
+      'checkboxes': QuestionType.checkboxes,
+      'dropdown': QuestionType.dropdown,
+      'fileupload': QuestionType.fileUpload,
+      'multifileupload': QuestionType.multiFileUpload,
+      'signaturepad': QuestionType.signaturePad,
+      'phonenumber': QuestionType.phoneNumber,
+      'mobile': QuestionType.mobile,
+      'email': QuestionType.email,
+      'date': QuestionType.date,
+      'time': QuestionType.time,
+      'rating': QuestionType.rating,
+      'number': QuestionType.number,
+      'url': QuestionType.url,
+      'search': QuestionType.search,
+      'file': QuestionType.file,
+    };
+    if (aliases.containsKey(compact)) {
+      return aliases[compact]!;
+    }
     return QuestionType.values.firstWhere(
-      (value) => value.name == name || value.toString() == name,
+      (value) =>
+          value.name.toLowerCase() == name ||
+          value.toString().toLowerCase().contains(name),
       orElse: () => QuestionType.shortText,
     );
   }

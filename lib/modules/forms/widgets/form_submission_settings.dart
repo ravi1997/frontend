@@ -103,6 +103,38 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
     widget.onChanged({...widget.form, 'submissionSettings': settings});
   }
 
+  bool _isValidRedirectUrl(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return false;
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null) return false;
+    return uri.scheme == 'http' || uri.scheme == 'https';
+  }
+
+  String? _redirectValidator(String? value, bool enabled) {
+    final trimmed = value?.trim() ?? '';
+    if (!enabled) return null;
+    if (trimmed.isEmpty) {
+      return 'Redirect URL is required.';
+    }
+    if (!_isValidRedirectUrl(trimmed)) {
+      return 'Enter a valid http(s) URL.';
+    }
+    return null;
+  }
+
+  String? _positiveIntValidator(String? value, {required bool required}) {
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      return required ? 'This field is required.' : null;
+    }
+    final parsed = int.tryParse(trimmed);
+    if (parsed == null || parsed < 1) {
+      return 'Enter a positive number.';
+    }
+    return null;
+  }
+
   Map<String, dynamic> _draftSettings(Map<String, dynamic> settings) {
     return Map<String, dynamic>.from(
       settings['draft_handling'] ?? settings['draftHandling'] ?? const {},
@@ -124,144 +156,167 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
         draft['restore_mode']?.toString() ??
         'token';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Submission Settings',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Control confirmation, redirects, repeat submissions, and draft resume behavior.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildTextField(
-          label: 'Confirmation message',
-          placeholder: 'Your response has been saved.',
-          controller: _confirmationController,
-          maxLines: 3,
-          onChanged: (val) => _emit({...settings, 'confirmation_message': val}),
-        ),
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Redirect after submit',
-          value: redirectEnabled,
-          description: 'Send respondents to a different page after submit.',
-          onChanged: (val) => _emit({
-            ...settings,
-            'redirect_after_submit': val,
-            'redirect_url': val ? settings['redirect_url'] : null,
-          }),
-        ),
-        if (redirectEnabled) ...[
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildTextField(
-            label: 'Redirect URL',
-            placeholder: 'https://example.com/thanks',
-            controller: _redirectController,
-            onChanged: (val) => _emit({
-              ...settings,
-              'redirect_after_submit': true,
-              'redirect_url': val,
-            }),
-          ),
-        ],
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Allow multiple submissions',
-          value: allowMultiple,
-          description: 'Let the same respondent submit more than once.',
-          onChanged: (val) =>
-              _emit({...settings, 'allow_multiple_submissions': val}),
-        ),
-        const SizedBox(height: 16),
-        PropertyBuilderUtils.buildSwitch(
-          label: 'Save and resume',
-          value: saveAndResume,
-          description: 'Allow long forms to be resumed later.',
-          onChanged: (val) => _emit({
-            ...settings,
-            'save_and_resume': val,
-            'draft_handling': val ? settings['draft_handling'] : null,
-          }),
-        ),
-        if (saveAndResume) ...[
-          const SizedBox(height: 16),
-          const Text(
-            'Draft handling',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          PropertyBuilderUtils.buildSwitch(
-            label: 'Auto-save progress',
-            value: autoSave,
-            onChanged: (val) {
-              final next = _draftSettings(settings);
-              next['autoSave'] = val;
-              next['auto_save'] = val;
-              _emit({...settings, 'draft_handling': next});
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildSwitch(
-            label: 'Manual save',
-            value: manualSave,
-            onChanged: (val) {
-              final next = _draftSettings(settings);
-              next['manualSave'] = val;
-              next['manual_save'] = val;
-              _emit({...settings, 'draft_handling': next});
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildTextField(
-            label: 'Draft expiration (days)',
-            controller: _draftExpiryController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (val) {
-              final next = _draftSettings(settings);
-              final parsed = int.tryParse(val);
-              next['expirationDays'] = parsed;
-              next['expiration_days'] = parsed;
-              _emit({...settings, 'draft_handling': next});
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildTextField(
-            label: 'Draft cleanup (days)',
-            controller: _draftCleanupController,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (val) {
-              final next = _draftSettings(settings);
-              final parsed = int.tryParse(val);
-              next['cleanupAfterDays'] = parsed;
-              next['cleanup_after_days'] = parsed;
-              _emit({...settings, 'draft_handling': next});
-            },
-          ),
-          const SizedBox(height: 12),
-          PropertyBuilderUtils.buildDropdown<String>(
-            label: 'Resume mode',
-            value: restoreMode,
-            items: const [
-              DropdownMenuItem(value: 'token', child: Text('Recovery token')),
-              DropdownMenuItem(value: 'login', child: Text('Login required')),
-              DropdownMenuItem(value: 'session', child: Text('Same session')),
+    return Form(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Submission Settings',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Control confirmation, redirects, repeat submissions, and draft resume behavior.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            PropertyBuilderUtils.buildTextField(
+              label: 'Confirmation message',
+              placeholder: 'Your response has been saved.',
+              controller: _confirmationController,
+              maxLines: 3,
+              onChanged: (val) =>
+                  _emit({...settings, 'confirmation_message': val}),
+            ),
+            const SizedBox(height: 16),
+            PropertyBuilderUtils.buildSwitch(
+              label: 'Redirect after submit',
+              value: redirectEnabled,
+              description: 'Send respondents to a different page after submit.',
+              onChanged: (val) => _emit({
+                ...settings,
+                'redirect_after_submit': val,
+                'redirect_url': val ? settings['redirect_url'] : null,
+              }),
+            ),
+            if (redirectEnabled) ...[
+              const SizedBox(height: 12),
+              PropertyBuilderUtils.buildTextField(
+                label: 'Redirect URL',
+                placeholder: 'https://example.com/thanks',
+                validator: (value) => _redirectValidator(value, redirectEnabled),
+                controller: _redirectController,
+                key: const Key('submission-settings-redirect-url'),
+                onChanged: (val) => _emit({
+                  ...settings,
+                  'redirect_after_submit': true,
+                  'redirect_url': val,
+                }),
+              ),
             ],
-            onChanged: (val) {
-              if (val == null) return;
-              final next = _draftSettings(settings);
-              next['restoreMode'] = val;
-              next['restore_mode'] = val;
-              _emit({...settings, 'draft_handling': next});
-            },
-          ),
-        ],
-      ],
+            const SizedBox(height: 16),
+            PropertyBuilderUtils.buildSwitch(
+              label: 'Allow multiple submissions',
+              value: allowMultiple,
+              description: 'Let the same respondent submit more than once.',
+              onChanged: (val) =>
+                  _emit({...settings, 'allow_multiple_submissions': val}),
+            ),
+            const SizedBox(height: 16),
+            PropertyBuilderUtils.buildSwitch(
+              label: 'Save and resume',
+              value: saveAndResume,
+              description: 'Allow long forms to be resumed later.',
+              onChanged: (val) => _emit({
+                ...settings,
+                'save_and_resume': val,
+                'draft_handling': val ? settings['draft_handling'] : null,
+              }),
+            ),
+            if (saveAndResume) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Draft handling',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              PropertyBuilderUtils.buildSwitch(
+                label: 'Auto-save progress',
+                value: autoSave,
+                onChanged: (val) {
+                  final next = _draftSettings(settings);
+                  next['autoSave'] = val;
+                  next['auto_save'] = val;
+                  _emit({...settings, 'draft_handling': next});
+                },
+              ),
+              const SizedBox(height: 12),
+              PropertyBuilderUtils.buildSwitch(
+                label: 'Manual save',
+                value: manualSave,
+                onChanged: (val) {
+                  final next = _draftSettings(settings);
+                  next['manualSave'] = val;
+                  next['manual_save'] = val;
+                  _emit({...settings, 'draft_handling': next});
+                },
+              ),
+              const SizedBox(height: 12),
+              PropertyBuilderUtils.buildTextField(
+                label: 'Draft expiration (days)',
+                controller: _draftExpiryController,
+                keyboardType: TextInputType.number,
+                key: const Key('submission-settings-draft-expiration-days'),
+                validator: (value) =>
+                    _positiveIntValidator(value, required: false),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (val) {
+                  final next = _draftSettings(settings);
+                  final parsed = int.tryParse(val);
+                  next['expirationDays'] = parsed;
+                  next['expiration_days'] = parsed;
+                  _emit({...settings, 'draft_handling': next});
+                },
+              ),
+              const SizedBox(height: 12),
+              PropertyBuilderUtils.buildTextField(
+                label: 'Draft cleanup (days)',
+                controller: _draftCleanupController,
+                keyboardType: TextInputType.number,
+                key: const Key('submission-settings-draft-cleanup-days'),
+                validator: (value) =>
+                    _positiveIntValidator(value, required: false),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (val) {
+                  final next = _draftSettings(settings);
+                  final parsed = int.tryParse(val);
+                  next['cleanupAfterDays'] = parsed;
+                  next['cleanup_after_days'] = parsed;
+                  _emit({...settings, 'draft_handling': next});
+                },
+              ),
+              const SizedBox(height: 12),
+              PropertyBuilderUtils.buildDropdown<String>(
+                label: 'Resume mode',
+                value: restoreMode,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'token',
+                    child: Text('Recovery token'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'login',
+                    child: Text('Login required'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'session',
+                    child: Text('Same session'),
+                  ),
+                ],
+                onChanged: (val) {
+                  if (val == null) return;
+                  final next = _draftSettings(settings);
+                  next['restoreMode'] = val;
+                  next['restore_mode'] = val;
+                  _emit({...settings, 'draft_handling': next});
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

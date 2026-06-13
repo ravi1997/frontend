@@ -786,8 +786,6 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
   Widget _buildFieldActions(WidgetRef ref) {
     final actionConfig = widget.question.actionConfig ?? {};
     final hasButton = actionConfig['hasButton'] ?? false;
-    final buttonLabel = actionConfig['buttonLabel'] ?? 'Search';
-    final webhookUrl = actionConfig['webhookUrl'] ?? '';
     final webhookMethod = actionConfig['webhookMethod'] ?? 'GET';
     final mappings = List<Map<String, dynamic>>.from(
       actionConfig['mappings'] ?? [],
@@ -828,21 +826,15 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
               ),
               if (hasButton) ...[
                 const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: buttonLabel,
-                  decoration: const InputDecoration(
-                    labelText: 'Button Label',
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.white,
-                    labelStyle: TextStyle(color: AppColors.textDark),
-                  ),
-                  style: const TextStyle(color: AppColors.textDark),
+                PropertyBuilderUtils.buildTextField(
+                  label: 'Button Label',
+                  controller: _buttonLabelController,
                   onChanged: (val) {
                     _updateActionConfig(actionConfig, (config) {
                       config['buttonLabel'] = val;
                     });
                   },
+                  placeholder: 'Search',
                 ),
                 const SizedBox(height: 16),
                 LayoutBuilder(
@@ -888,19 +880,10 @@ class _FieldGeneralSettingsState extends ConsumerState<FieldGeneralSettings> {
                     );
                     final urlField = SizedBox(
                       width: double.infinity,
-                      child: TextFormField(
-                        initialValue: webhookUrl,
-                        decoration: const InputDecoration(
-                          labelText: 'Webhook URL',
-                          hintText: 'https://api.example.com/search',
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Colors.white,
-                          labelStyle: TextStyle(color: AppColors.textDark),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
-                        ),
-                        style: const TextStyle(color: AppColors.textDark),
+                      child: PropertyBuilderUtils.buildTextField(
+                        label: 'Webhook URL',
+                        controller: _webhookUrlController,
+                        placeholder: 'https://api.example.com/search',
                         onChanged: (val) {
                           _updateActionConfig(actionConfig, (config) {
                             config['webhookUrl'] = val;

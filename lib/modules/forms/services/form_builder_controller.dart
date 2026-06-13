@@ -601,6 +601,108 @@ class FormBuilderController
     addQuestion(targetId, type);
   }
 
+  QuestionType _questionTypeFromSuggestionFieldType(String? fieldType) {
+    final normalized = (fieldType ?? '').trim().toLowerCase();
+    final compact = normalized.replaceAll(RegExp(r'[\s_-]+'), '');
+    final aliases = <String, QuestionType>{
+      'shorttext': QuestionType.shortText,
+      'paragraph': QuestionType.paragraph,
+      'multiplechoice': QuestionType.multipleChoice,
+      'checkboxes': QuestionType.checkboxes,
+      'dropdown': QuestionType.dropdown,
+      'fileupload': QuestionType.fileUpload,
+      'multifileupload': QuestionType.multiFileUpload,
+      'signaturepad': QuestionType.signaturePad,
+      'phonenumber': QuestionType.phoneNumber,
+      'mobile': QuestionType.mobile,
+      'email': QuestionType.email,
+      'date': QuestionType.date,
+      'time': QuestionType.time,
+      'rating': QuestionType.rating,
+      'number': QuestionType.number,
+      'url': QuestionType.url,
+      'search': QuestionType.search,
+      'file': QuestionType.file,
+    };
+
+    if (aliases.containsKey(compact)) {
+      return aliases[compact]!;
+    }
+
+    for (final type in QuestionType.values) {
+      final name = type.name.toLowerCase();
+      final pretty = type.label.toLowerCase().replaceAll(' ', '');
+      if (normalized == name ||
+          compact == name.replaceAll(' ', '') ||
+          compact == pretty) {
+        return type;
+      }
+    }
+    return QuestionType.shortText;
+  }
+
+  void addSuggestedQuestionToActiveSection(Map<String, dynamic> suggestion) {
+    if (state.value == null) return;
+    final sections = state.value!.form.sections;
+    if (sections.isEmpty) {
+      _log(
+        'addSuggestedQuestionToActiveSection: no sections exist — add a section first.',
+      );
+      return;
+    }
+
+    final targetId = state.value!.selectedSectionId ?? sections.first.id;
+    final type = _questionTypeFromSuggestionFieldType(
+      suggestion['field_type']?.toString() ?? suggestion['fieldType']?.toString(),
+    );
+    final label = (suggestion['label']?.toString() ?? '').trim();
+    final reason = (suggestion['reason']?.toString() ?? '').trim();
+    final options = suggestion['options'];
+
+    final baseQuestion = FieldRegistry.getDefaultQuestion(type);
+    final parsedOptions = options is List
+        ? options
+            .map((option) {
+              final value = option?.toString().trim() ?? '';
+              if (value.isEmpty) return null;
+              return {
+                'id': _uuid.v4(),
+                'option_label': value,
+                'option_value': value,
+                'order': 0,
+              };
+            })
+            .whereType<Map<String, dynamic>>()
+            .toList()
+        : null;
+
+    final newQuestion = baseQuestion.copyWith(
+      label: label.isEmpty ? baseQuestion.label : label,
+      metadata: {
+        ...baseQuestion.metadata,
+        if (reason.isNotEmpty) 'ai_reason': reason,
+      },
+      options: parsedOptions ?? baseQuestion.options,
+    );
+
+    final sectionsUpdated = state.value!.form.sections.map((s) {
+      if (s.id == targetId) {
+        return s.copyWith(questions: [...s.questions, newQuestion]);
+      }
+      return s;
+    }).toList();
+
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        form: _replaceFormSections(state.value!.form, sectionsUpdated),
+        selectedQuestionId: newQuestion.id,
+        selectedSectionId: targetId,
+        isFormSelected: false,
+      ),
+    );
+    _markDirty();
+  }
+
   /// Resolves the insertion section and calls [addFromTemplate].
   /// Section-type and workflow-type templates ignore the section target.
   void addTemplateToActiveSection(CustomFieldTemplate template) {

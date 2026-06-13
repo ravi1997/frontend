@@ -29,6 +29,7 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
   String _headerMode = 'labels';
   String _anonymizationMode = 'none';
   bool _seededDefaults = false;
+  bool _includeAttachments = false;
 
   TextEditingController get _delimiterControllerValue => _delimiterController!;
   TextEditingController get _emptyFieldControllerValue =>
@@ -100,6 +101,10 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
         _anonymization['mode']?.toString() ??
         _anonymization['type']?.toString() ??
         'none';
+    _includeAttachments =
+        csvSettings['include_attachments'] as bool? ??
+        csvSettings['includeAttachments'] as bool? ??
+        false;
 
     _delimiterController = _seedController(
       _delimiterController,
@@ -319,7 +324,6 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
   }
 
   Map<String, dynamic> _normalizedExportSettings() {
-    final csvSettings = _csvSettings;
     final fieldMapping = <String, String>{};
     final anonymizedFields = <String>[];
     final usedLabels = <String>{};
@@ -355,10 +359,7 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
         'encoding': _encodingControllerValue.text.trim().isEmpty
             ? 'utf-8'
             : _encodingControllerValue.text.trim(),
-        'include_attachments':
-            csvSettings['include_attachments'] as bool? ??
-            csvSettings['includeAttachments'] as bool? ??
-            false,
+        'include_attachments': _includeAttachments,
       },
       'retention_days': int.tryParse(_retentionControllerValue.text.trim()),
       'field_mapping': fieldMapping,
@@ -475,6 +476,15 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
           label: 'Encoding',
           controller: _encodingControllerValue,
           onChanged: (_) => _emitCurrent(),
+        ),
+        const SizedBox(height: 12),
+        PropertyBuilderUtils.buildSwitch(
+          label: 'Include attachments',
+          value: _includeAttachments,
+          onChanged: (value) {
+            setState(() => _includeAttachments = value);
+            _emitCurrent();
+          },
         ),
         const SizedBox(height: 16),
         const Text(

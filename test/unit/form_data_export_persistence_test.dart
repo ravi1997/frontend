@@ -98,6 +98,10 @@ void main() {
       find.byKey(const Key('data-export-retention-days')),
       '45',
     );
+    final switches = find.byType(Switch);
+    await tester.ensureVisible(switches.first);
+    await tester.tap(switches.first);
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(Key('data-export-field-$questionId')),
       'email_address',
@@ -118,6 +122,7 @@ void main() {
 
     expect(exportSettings['retention_days'], 45);
     expect(csvDefaults['delimiter'], ',');
+    expect(csvDefaults['include_attachments'], isTrue);
     expect(mappings[questionId], 'email_address');
     expect(anonymizedFields, contains(questionId));
 
@@ -130,6 +135,12 @@ void main() {
         savedExportSettings['field_mapping'] as Map<String, dynamic>;
 
     expect(savedExportSettings['retention_days'], 45);
+    expect(
+      (savedExportSettings['csv_defaults'] as Map<String, dynamic>)[
+        'include_attachments'
+      ],
+      isTrue,
+    );
     expect(savedMappings[questionId], 'email_address');
     expect(
       (savedExportSettings['anonymization'] as Map<String, dynamic>)['fields'],

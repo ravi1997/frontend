@@ -193,6 +193,35 @@ void main() {
     );
   });
 
+  group('FormBuilderController — addSuggestedQuestionToActiveSection', () {
+    test('inserts an AI suggestion into the active section', () async {
+      final container = await _makeContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(
+        formBuilderControllerProvider(_key).notifier,
+      );
+
+      notifier.addSuggestedQuestionToActiveSection({
+        'label': 'Emergency Contact',
+        'field_type': 'phone_number',
+        'reason': 'Collect an emergency phone number.',
+      });
+
+      final stateAfter = container
+          .read(formBuilderControllerProvider(_key))
+          .value!;
+      expect(stateAfter.form.sections[0].questions, hasLength(1));
+      expect(stateAfter.form.sections[0].questions[0].label, 'Emergency Contact');
+      expect(stateAfter.form.sections[0].questions[0].type, QuestionType.phoneNumber);
+      expect(stateAfter.selectedQuestionId, isNotNull);
+      expect(
+        stateAfter.form.sections[0].questions[0].metadata['ai_reason'],
+        'Collect an emergency phone number.',
+      );
+    });
+  });
+
   group('FormBuilderController — addQuestion (direct, section-specific)', () {
     test(
       'click insert is distinct from selection-only: state has both new question and selection',

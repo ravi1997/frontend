@@ -10,6 +10,7 @@ class PropertyBuilderUtils {
     String? placeholder,
     required TextEditingController controller,
     required Function(String) onChanged,
+    Key? key,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
     bool readOnly = false,
@@ -49,6 +50,7 @@ class PropertyBuilderUtils {
             }
           },
           child: TextFormField(
+            key: key,
             controller: controller,
             keyboardType: keyboardType,
             validator: validator,
