@@ -9,6 +9,7 @@ import 'package:frontend/modules/dashboard/dashboard_page.dart';
 import 'package:frontend/modules/dashboard/form_dashboard_page.dart';
 import 'package:frontend/modules/dashboard/project_dashboard_page.dart';
 import 'package:frontend/modules/forms/pages/form_builder_page.dart';
+import 'package:frontend/modules/forms/pages/form_version_history_page.dart';
 import 'package:frontend/modules/forms/pages/form_preview_page.dart';
 import 'package:frontend/modules/forms/pages/form_submit_page.dart';
 import 'package:frontend/modules/form_builder/responses/pages/response_detail_page.dart';
@@ -121,6 +122,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             formId: formId,
             projectId: projectId,
             mode: mode,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/projects/:projectId/forms/:formId/versions',
+        name: 'formVersionHistory',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          final formId = state.pathParameters['formId']!;
+          final title = state.uri.queryParameters['title'] ?? '';
+          return FormVersionHistoryPage(
+            projectId: projectId,
+            formId: formId,
+            formTitle: title,
           );
         },
       ),

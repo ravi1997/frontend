@@ -10,6 +10,7 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
+import 'git_commit_dialog.dart';
 import 'git_merge_dialog.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/core/widgets/responsive.dart';
@@ -172,6 +173,32 @@ class FormBuilderTopBar extends ConsumerWidget {
                   ),
                 );
               }
+            },
+          ),
+          const SizedBox(width: DesignTokens.spaceS),
+          _TopBarActionButton(
+            icon: FontAwesomeIcons.codeFork,
+            label: 'Commit',
+            onTap: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => GitCommitDialog(
+                  controllerKey: controllerKey,
+                  projectId: projectId,
+                  formId: formId,
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: DesignTokens.spaceS),
+          _TopBarActionButton(
+            icon: FontAwesomeIcons.clockRotateLeft,
+            label: 'History',
+            onTap: () {
+              context.push(
+                '/projects/$projectId/forms/$formId/versions?title=${Uri.encodeComponent(formTitle.translate(editingLocale))}',
+              );
             },
           ),
           const SizedBox(width: DesignTokens.spaceS),

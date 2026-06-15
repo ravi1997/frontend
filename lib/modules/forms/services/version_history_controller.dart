@@ -142,6 +142,13 @@ class VersionHistoryController extends ChangeNotifier {
       final versions = await repository.getVersionHistory(_projectId, _formId);
       final sortedVersions = List<FormVersionHistory>.from(versions)
         ..sort((a, b) => b.created_at.compareTo(a.created_at));
+      if (sortedVersions.isEmpty) {
+        state = state.copyWith(
+          isRestoring: false,
+          error: 'Failed to restore version: no version history available',
+        );
+        return false;
+      }
       state = state.copyWith(
         versions: sortedVersions,
         isRestoring: false,

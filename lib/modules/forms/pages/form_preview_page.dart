@@ -544,7 +544,7 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        'Preview Mode: Workflows (Email/Slack) will be simulated in logs.',
+                        'Preview Mode: Workflow actions are not executed.',
                         style: TextStyle(
                           color: AppColors.textGrey.withValues(alpha: 0.8),
                           fontSize: 12,
