@@ -11,7 +11,8 @@ enum DashboardWidgetType {
   dataTable('data_table'),
   textLabel('text_label'),
   imageWidget('image'),
-  filterWidget('filter_widget');
+  filterWidget('filter_widget'),
+  llmPrompt('llm_prompt');
 
   final String value;
   const DashboardWidgetType(this.value);
@@ -37,6 +38,9 @@ enum DashboardWidgetType {
       'image_widget' => 'image',
       'filter_widget' => 'filter_widget',
       'filter' => 'filter_widget',
+      'llm_prompt' => 'llm_prompt',
+      'llm_prompt_node' => 'llm_prompt',
+      'llm' => 'llm_prompt',
       _ => normalized,
     };
     return DashboardWidgetType.values.firstWhere(
@@ -54,6 +58,7 @@ enum DashboardWidgetType {
         DashboardWidgetType.textLabel => 'Text / Label',
         DashboardWidgetType.imageWidget => 'Image',
         DashboardWidgetType.filterWidget => 'Filter Widget',
+        DashboardWidgetType.llmPrompt => 'LLM Prompt',
       };
 }
 

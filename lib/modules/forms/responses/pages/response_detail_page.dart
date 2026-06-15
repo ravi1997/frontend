@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/forms/data/ai_service.dart';
 import 'package:frontend/modules/forms/responses/controllers/responses_controller.dart';
 import 'package:frontend/modules/forms/responses/form_response.dart';
 
@@ -129,6 +130,15 @@ class ResponseDetailPage extends ConsumerWidget {
                                   )
                                   .toList(),
                             ),
+                    ),
+                    const SizedBox(height: DesignTokens.spaceL),
+                    _SectionCard(
+                      title: 'AI insights',
+                      child: _AIInsightsCard(
+                        projectId: projectId,
+                        formId: formId,
+                        responseId: responseId,
+                      ),
                     ),
                     const SizedBox(height: DesignTokens.spaceL),
                     _SectionCard(
@@ -322,6 +332,168 @@ class _HeroTag extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
+    );
+  }
+}
+
+class _AIInsightsCard extends ConsumerStatefulWidget {
+  final String projectId;
+  final String formId;
+  final String responseId;
+
+  const _AIInsightsCard({
+    required this.projectId,
+    required this.formId,
+    required this.responseId,
+  });
+
+  @override
+  ConsumerState<_AIInsightsCard> createState() => _AIInsightsCardState();
+}
+
+class _AIInsightsCardState extends ConsumerState<_AIInsightsCard> {
+  Map<String, dynamic>? _analysis;
+  Map<String, dynamic>? _anomalies;
+  String? _error;
+  bool _loadingAnalysis = false;
+  bool _loadingAnomalies = false;
+
+  Future<void> _runAnalysis() async {
+    setState(() {
+      _loadingAnalysis = true;
+      _error = null;
+    });
+    try {
+      final result = await ref
+          .read(aiServiceProvider)
+          .analyzeResponse(widget.formId, widget.responseId);
+      if (!mounted) return;
+      setState(() => _analysis = result);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingAnalysis = false);
+      }
+    }
+  }
+
+  Future<void> _runAnomalyCheck() async {
+    setState(() {
+      _loadingAnomalies = true;
+      _error = null;
+    });
+    try {
+      final result = await ref.read(aiServiceProvider).detectAnomalies(
+        widget.formId,
+      );
+      if (!mounted) return;
+      setState(() => _anomalies = result);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _loadingAnomalies = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    Widget payloadCard(Map<String, dynamic>? payload) {
+      if (payload == null || payload.isEmpty) {
+        return Text(
+          'No AI data yet.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                height: 1.55,
+                color: cs.onSurface.withValues(alpha: 0.72),
+              ),
+        );
+      }
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          payload.entries
+              .map((entry) => '${entry.key}: ${entry.value}')
+              .join('\n'),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: DesignTokens.spaceS,
+          runSpacing: DesignTokens.spaceS,
+          children: [
+            FilledButton.tonalIcon(
+              onPressed: _loadingAnalysis ? null : _runAnalysis,
+              icon: _loadingAnalysis
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.insights_outlined),
+              label: const Text('Analyze response'),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: _loadingAnomalies ? null : _runAnomalyCheck,
+              icon: _loadingAnomalies
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.warning_amber_outlined),
+              label: const Text('Check anomalies'),
+            ),
+          ],
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            _error!,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.error,
+                ),
+          ),
+        ],
+        if (_analysis != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Analysis result',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          payloadCard(_analysis),
+        ],
+        if (_anomalies != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            'Anomaly check',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          payloadCard(_anomalies),
+        ],
+      ],
     );
   }
 }

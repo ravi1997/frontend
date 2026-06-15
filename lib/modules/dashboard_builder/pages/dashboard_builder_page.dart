@@ -211,6 +211,7 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
         DashboardWidgetType.textLabel => 240,
         DashboardWidgetType.imageWidget => 300,
         DashboardWidgetType.filterWidget => 220,
+        DashboardWidgetType.llmPrompt => 420,
         _ => 420,
       };
 
@@ -220,6 +221,7 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
         DashboardWidgetType.textLabel => 60,
         DashboardWidgetType.imageWidget => 200,
         DashboardWidgetType.filterWidget => 80,
+        DashboardWidgetType.llmPrompt => 220,
         _ => 280,
       };
 
@@ -246,6 +248,11 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
             'label': 'Filter',
             'field': '',
             'filter_type': 'select',
+          },
+        DashboardWidgetType.llmPrompt => {
+            'title': 'LLM Prompt',
+            'prompt': 'Describe what this node should generate or analyze.',
+            'model': 'gpt-4.1-mini',
           },
       };
 
@@ -673,6 +680,7 @@ class _WidgetLibraryItemState extends State<_WidgetLibraryItem> {
         DashboardWidgetType.textLabel => Icons.text_fields_rounded,
         DashboardWidgetType.imageWidget => Icons.image_outlined,
         DashboardWidgetType.filterWidget => Icons.filter_list_rounded,
+        DashboardWidgetType.llmPrompt => Icons.auto_awesome_outlined,
       };
 
   @override
@@ -964,6 +972,7 @@ class _WidgetContent extends StatelessWidget {
       DashboardWidgetType.textLabel => _TextLabelWidget(widget: widget),
       DashboardWidgetType.imageWidget => _ImageWidget(widget: widget),
       DashboardWidgetType.filterWidget => _FilterWidget(widget: widget),
+      DashboardWidgetType.llmPrompt => _LLMPromptWidget(widget: widget),
     };
   }
 }
@@ -1278,6 +1287,93 @@ class _FilterWidget extends StatelessWidget {
             ),
           ),
           Icon(Icons.arrow_drop_down, color: cs.onSurfaceVariant),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── LLM Prompt Widget ───────────────────────────────────────────────────────
+
+class _LLMPromptWidget extends StatelessWidget {
+  final DashboardWidget widget;
+  const _LLMPromptWidget({required this.widget});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final props = widget.properties;
+    final title = props['title'] as String? ?? 'LLM Prompt';
+    final prompt = props['prompt'] as String? ??
+        'Describe what this node should generate or analyze.';
+    final model = props['model'] as String? ?? 'gpt-4.1-mini';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            cs.primary.withValues(alpha: 0.12),
+            cs.surfaceContainerLowest,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome_outlined, size: 18, color: cs.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              Chip(
+                label: Text(
+                  model,
+                  style: GoogleFonts.inter(fontSize: 10),
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            prompt,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: cs.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              'Ready to run against analysis data',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: cs.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

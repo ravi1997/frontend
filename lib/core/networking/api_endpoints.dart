@@ -186,6 +186,12 @@ class ApiEndpoints {
   static String updateFeatureFlagOverride(String flagKey, String orgId) =>
       '/admin/feature-flags/$flagKey/override/$orgId';
 
+  /// GET - List API keys for the current organization (Superadmin only)
+  static const String listApiKeys = '/admin/api-keys/';
+
+  /// POST - Create API key for the current organization (Superadmin only)
+  static const String createApiKey = '/admin/api-keys/';
+
   // ============================================================================
   // Form Management Endpoints (§5-6)
   // ============================================================================
@@ -808,6 +814,24 @@ class ApiEndpoints {
   /// GET - Webhook logs
   /// Headers: { "Authorization": "Bearer {token}" }
   static String webhookLogs(String webhookId) => '/webhooks/logs';
+
+  /// GET - List webhooks for a form (admin)
+  static String adminWebhooks = '/admin/webhooks/';
+
+  /// POST - Create webhook for a form (admin)
+  static String createAdminWebhook = '/admin/webhooks/';
+
+  /// DELETE - Delete a webhook by id (admin)
+  static String deleteAdminWebhook(String webhookId) =>
+      '/admin/webhooks/$webhookId';
+
+  /// POST - Trigger a test for a webhook by id (admin)
+  static String testAdminWebhook(String webhookId) =>
+      '/admin/webhooks/$webhookId/test';
+
+  /// GET - Logs for a webhook by id (admin)
+  static String adminWebhookLogs(String webhookId) =>
+      '/admin/webhooks/$webhookId/logs';
 
   // ============================================================================
   // SMS API (§21)

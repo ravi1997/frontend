@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ import 'package:frontend/modules/analytics/form_analytics.dart';
 import 'package:frontend/modules/analytics/pages/analytics_page.dart';
 import 'package:frontend/modules/analytics/pages/analysis_boards_list_page.dart';
 import 'package:frontend/modules/forms/responses/form_response.dart';
+import 'package:frontend/modules/forms/data/ai_service.dart';
 import 'package:frontend/modules/forms/responses/pages/response_detail_page.dart';
 import 'package:frontend/modules/forms/responses/pages/response_list_page.dart';
 import 'package:frontend/modules/forms/responses/response_repository.dart';
@@ -45,6 +47,55 @@ void main() {
       find.textContaining('Submitted by alice@example.com'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('response list page renders sentiment trends', (
+    tester,
+  ) async {
+    final repo = _FakeResponseRepository(
+      responses: [
+        _response(id: 'resp-1', submittedBy: 'alice@example.com'),
+      ],
+    );
+    final aiService = _FakeAIService(
+      analysis: const {},
+      anomalies: const {},
+      sentiment: {
+        'total_responses': 4,
+        'analyzed_responses': 3,
+        'average_score': 0.42,
+        'distribution': {
+          'positive': 2,
+          'neutral': 1,
+          'negative': 1,
+          'unprocessed': 1,
+        },
+      },
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          responseRepositoryProvider.overrideWithValue(repo),
+          aiServiceProvider.overrideWithValue(aiService),
+        ],
+        child: const MaterialApp(
+          home: ResponseListPage(projectId: 'project-1', formId: 'form-1'),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sentiment trends'), findsOneWidget);
+    expect(find.text('Total'), findsWidgets);
+    expect(find.text('Analyzed'), findsWidgets);
+    expect(find.text('Avg score'), findsWidgets);
+    expect(find.textContaining('Positive: 2'), findsOneWidget);
+    expect(find.textContaining('Neutral: 1'), findsOneWidget);
+    expect(find.textContaining('Negative: 1'), findsOneWidget);
+    expect(find.textContaining('Pending: 1'), findsOneWidget);
   });
 
   testWidgets('response detail page renders answers and history', (
@@ -87,6 +138,69 @@ void main() {
     expect(find.text('P-120'), findsOneWidget);
     expect(find.text('created'), findsOneWidget);
     expect(find.textContaining('casey@example.com'), findsWidgets);
+  });
+
+  testWidgets('response detail page renders ai insights actions', (
+    tester,
+  ) async {
+    final repo = _FakeResponseRepository(
+      detail: _response(
+        id: 'resp-9',
+        submittedBy: 'casey@example.com',
+        answers: {'patient_id': 'P-120', 'notes': 'Follow up required'},
+      ),
+      history: const [],
+    );
+    final aiService = _FakeAIService(
+      analysis: {
+        'score': 0.81,
+        'summary': 'Highly positive response',
+      },
+      anomalies: {
+        'flagged': 1,
+        'notes': 'One field looks unusual',
+      },
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          responseRepositoryProvider.overrideWithValue(repo),
+          aiServiceProvider.overrideWithValue(aiService),
+        ],
+        child: const MaterialApp(
+          home: ResponseDetailPage(
+            projectId: 'project-1',
+            formId: 'form-1',
+            responseId: 'resp-9',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('AI insights'), findsOneWidget);
+    expect(find.text('Analyze response'), findsOneWidget);
+    expect(find.text('Check anomalies'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Analyze response'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Analyze response'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('score: 0.81'), findsOneWidget);
+    expect(find.textContaining('summary: Highly positive response'), findsOneWidget);
+
+    await tester.tap(find.text('Check anomalies'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('flagged: 1'), findsOneWidget);
+    expect(find.textContaining('notes: One field looks unusual'), findsOneWidget);
   });
 
   testWidgets('analytics page renders repository-backed metrics', (
@@ -280,6 +394,32 @@ class _FakeResponseRepository implements ResponseRepository {
     String formId,
     List<Map<String, dynamic>> filters,
   ) async => responses;
+}
+
+class _FakeAIService extends AIService {
+  final Map<String, dynamic> sentiment;
+  final Map<String, dynamic> analysis;
+  final Map<String, dynamic> anomalies;
+
+  _FakeAIService({
+    this.sentiment = const {},
+    required this.analysis,
+    required this.anomalies,
+  }) : super(Dio());
+
+  @override
+  Future<Map<String, dynamic>> analyzeResponse(
+    String formId,
+    String responseId,
+  ) async => analysis;
+
+  @override
+  Future<Map<String, dynamic>> detectAnomalies(String formId) async =>
+      anomalies;
+
+  @override
+  Future<Map<String, dynamic>> getFormSentimentTrends(String formId) async =>
+      sentiment;
 }
 
 class _FakeAnalyticsRepository implements AnalyticsRepository {

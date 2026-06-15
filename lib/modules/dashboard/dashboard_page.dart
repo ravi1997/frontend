@@ -197,7 +197,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           final dashboardState = ref.watch(dashboardControllerProvider);
           final data = dashboardState.asData?.value;
-          final projects = _filteredProjects(data?.projects ?? const []);
+          final searchQuery = ref.watch(dashboardSearchQueryProvider);
+          final projects = _filteredProjects(
+            data?.projects ?? const [],
+            searchQuery,
+          );
           final padding = Responsive.pagePadding(context);
 
           return RefreshIndicator(
@@ -246,7 +250,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         onFilterChanged: (value) {
                           setState(() => _filter = value);
                         },
-                        onSearchChanged: (_) => setState(() {}),
+                        onSearchChanged: (value) {
+                          ref
+                              .read(dashboardSearchQueryProvider.notifier)
+                              .setQuery(value);
+                        },
                         onCreateProject: _createProject,
                       ),
                       const SizedBox(height: 16),
@@ -307,13 +315,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  List<ProjectSummary> _filteredProjects(List<ProjectSummary> projects) {
-    final query = _searchController.text.trim().toLowerCase();
+  List<ProjectSummary> _filteredProjects(
+    List<ProjectSummary> projects,
+    String query,
+  ) {
+    final search = query.trim().toLowerCase();
     return projects.where((project) {
       final matchesQuery =
-          query.isEmpty ||
-          project.title.toLowerCase().contains(query) ||
-          project.description.toLowerCase().contains(query);
+          search.isEmpty ||
+          project.title.toLowerCase().contains(search) ||
+          project.description.toLowerCase().contains(search);
       final matchesFilter =
           _filter == 'All' ||
           project.status.toLowerCase() == _filter.toLowerCase();

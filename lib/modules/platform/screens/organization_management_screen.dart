@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import '../organization_repository.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
@@ -242,6 +243,18 @@ class _OrganizationManagementScreenState extends ConsumerState<OrganizationManag
             icon: const Icon(Icons.refresh),
             onPressed: _fetchOrgs,
           ),
+          TextButton.icon(
+            onPressed: () => context.go('/admin/api-keys'),
+            icon: const Icon(Icons.vpn_key),
+            label: const Text('API Keys'),
+          ),
+          const SizedBox(width: 8),
+          TextButton.icon(
+            onPressed: () => context.go('/admin/webhooks'),
+            icon: const Icon(Icons.webhook),
+            label: const Text('Webhooks'),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading

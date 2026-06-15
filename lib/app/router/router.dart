@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/analytics/pages/analytics_page.dart';
+import 'package:frontend/modules/analytics/pages/analysis_boards_list_page.dart';
 import 'package:frontend/modules/auth/auth_screens.dart';
 import 'package:frontend/modules/dashboard/dashboard_page.dart';
 import 'package:frontend/modules/dashboard/form_dashboard_page.dart';
@@ -18,6 +19,8 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/modules/platform/screens/organization_management_screen.dart';
 import 'package:frontend/modules/platform/screens/feature_flags_screen.dart';
+import 'package:frontend/modules/platform/screens/api_key_management_screen.dart';
+import 'package:frontend/modules/platform/screens/webhook_management_screen.dart';
 import 'package:frontend/modules/platform/screens/ai_ops_screen.dart';
 import 'package:frontend/modules/dashboard_builder/pages/dashboard_builder_page.dart';
 import 'package:frontend/modules/dashboard_builder/pages/public_dashboard_page.dart';
@@ -186,6 +189,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AnalyticsPage(projectId: projectId, formId: formId);
         },
       ),
+      GoRoute(
+        path: '/projects/:projectId/analysis-boards',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          return ProjectAnalysisBoardsListPage(projectId: projectId);
+        },
+      ),
       // ── Dashboard Builder ──────────────────────────────────────────
       GoRoute(
         path: '/projects/:projectId/dashboards/:dashboardId',
@@ -213,6 +223,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/feature-flags',
         builder: (context, state) => const FeatureFlagsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/api-keys',
+        builder: (context, state) => const ApiKeyManagementScreen(),
+      ),
+      GoRoute(
+        path: '/admin/webhooks',
+        builder: (context, state) => const WebhookManagementScreen(),
       ),
       GoRoute(
         path: '/admin/ai-ops',

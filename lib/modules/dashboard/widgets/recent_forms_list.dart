@@ -14,6 +14,7 @@ class RecentFormsList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filteredForms = ref.watch(filteredRecentFormsProvider);
     final searchQuery = ref.watch(dashboardSearchQueryProvider);
+    final sortBy = ref.watch(dashboardSortByProvider);
 
     return Container(
       width: double.infinity,
@@ -42,7 +43,38 @@ class RecentFormsList extends ConsumerWidget {
               color: const Color(0xFF6B7280),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                'Sort by',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF374151),
+                ),
+              ),
+              DropdownButton<String>(
+                value: sortBy,
+                items: const ['Newest First', 'Oldest First', 'Alphabetical']
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) return;
+                  ref.read(dashboardSortByProvider.notifier).setSort(value);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
           if (filteredForms.isEmpty)
             Center(
               child: Padding(

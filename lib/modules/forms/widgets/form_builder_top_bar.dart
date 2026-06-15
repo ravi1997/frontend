@@ -9,6 +9,7 @@ import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
+import 'llm_copilot_drawer.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
 import 'git_commit_dialog.dart';
 import 'git_merge_dialog.dart';
@@ -209,6 +210,17 @@ class FormBuilderTopBar extends ConsumerWidget {
               showDialog(
                 context: context,
                 builder: (context) => AiAssistantDialog(formId: formId),
+              );
+            },
+          ),
+          const SizedBox(width: DesignTokens.spaceS),
+          _TopBarActionButton(
+            icon: FontAwesomeIcons.robot,
+            label: 'Copilot',
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) => LlmCopilotDrawer(formId: formId),
               );
             },
           ),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/forms/data/ai_service.dart';
 import 'package:frontend/modules/forms/responses/controllers/responses_controller.dart';
 import 'package:frontend/modules/forms/responses/form_response.dart';
 
@@ -64,10 +66,16 @@ class ResponseListPage extends ConsumerWidget {
                   const SizedBox(height: DesignTokens.spaceM),
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return _HeroCard(
-                    projectId: projectId,
-                    formId: formId,
-                    responseCount: responses.length,
+                  return Column(
+                    children: [
+                      _HeroCard(
+                        projectId: projectId,
+                        formId: formId,
+                        responseCount: responses.length,
+                      ),
+                      const SizedBox(height: DesignTokens.spaceM),
+                      _SentimentTrendsCard(formId: formId),
+                    ],
                   );
                 }
 
@@ -180,6 +188,188 @@ class _HeroTag extends StatelessWidget {
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           color: Colors.white,
           fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _SentimentTrendsCard extends ConsumerStatefulWidget {
+  final String formId;
+
+  const _SentimentTrendsCard({required this.formId});
+
+  @override
+  ConsumerState<_SentimentTrendsCard> createState() =>
+      _SentimentTrendsCardState();
+}
+
+class _SentimentTrendsCardState extends ConsumerState<_SentimentTrendsCard> {
+  late Future<Map<String, dynamic>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = ref.read(aiServiceProvider).getFormSentimentTrends(widget.formId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _future,
+      builder: (context, snapshot) {
+        final cs = Theme.of(context).colorScheme;
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Sentiment trends could not be loaded.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.72),
+                  ),
+            ),
+          );
+        }
+
+        final data = snapshot.data ?? const <String, dynamic>{};
+        final distribution = Map<String, dynamic>.from(
+          data['distribution'] as Map? ?? const {},
+        );
+        final totalResponses = data['total_responses'] ?? 0;
+        final analyzedResponses = data['analyzed_responses'] ?? 0;
+        final averageScore = (data['average_score'] as num?)?.toDouble() ?? 0;
+
+        Widget stat(String label, Object value) {
+          return Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: Theme.of(context).textTheme.labelMedium),
+                  const SizedBox(height: 6),
+                  Text(
+                    value.toString(),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Sentiment trends',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF111827),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'AI sentiment analysis for submitted responses',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  stat('Total', totalResponses),
+                  const SizedBox(width: 12),
+                  stat('Analyzed', analyzedResponses),
+                  const SizedBox(width: 12),
+                  stat('Avg score', averageScore.toStringAsFixed(2)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _SentimentChip(
+                    label: 'Positive',
+                    value: distribution['positive'] ?? 0,
+                    color: const Color(0xFF10B981),
+                  ),
+                  _SentimentChip(
+                    label: 'Neutral',
+                    value: distribution['neutral'] ?? 0,
+                    color: const Color(0xFF6B7280),
+                  ),
+                  _SentimentChip(
+                    label: 'Negative',
+                    value: distribution['negative'] ?? 0,
+                    color: const Color(0xFFEF4444),
+                  ),
+                  _SentimentChip(
+                    label: 'Pending',
+                    value: distribution['unprocessed'] ?? 0,
+                    color: const Color(0xFF2563EB),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SentimentChip extends StatelessWidget {
+  final String label;
+  final Object value;
+  final Color color;
+
+  const _SentimentChip({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
       ),
     );

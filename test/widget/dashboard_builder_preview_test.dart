@@ -34,6 +34,15 @@ class _FakeDashboardBuilderRepository extends DashboardBuilderRepository {
             properties: const {'title': 'Completed submissions'},
             resolvedData: includeData ? {'value': 42} : null,
           ),
+          DashboardWidget(
+            id: 'widget-2',
+            type: DashboardWidgetType.llmPrompt,
+            properties: const {
+              'title': 'Summary prompt',
+              'prompt': 'Summarize the submissions for anomalies.',
+              'model': 'gpt-4.1-mini',
+            },
+          ),
         ],
       ),
       settings: const DashboardSettings(autoRefresh: false),
@@ -70,11 +79,17 @@ void main() {
 
     expect(find.text('Operations Dashboard'), findsOneWidget);
     expect(find.text('42'), findsNothing);
+    expect(find.text('LLM Prompt'), findsOneWidget);
 
     await tester.tap(find.text('Preview'));
     await tester.pumpAndSettle();
 
     expect(repo.includeDataRequests, greaterThanOrEqualTo(1));
     expect(find.text('42'), findsOneWidget);
+    expect(find.text('Summary prompt'), findsOneWidget);
+    expect(
+      find.textContaining('Summarize the submissions for anomalies.'),
+      findsOneWidget,
+    );
   });
 }
