@@ -47,6 +47,12 @@ class _ProjectAnalysisBoardsListPageState
           onPressed: () => context.pop(),
         ),
         actions: [
+          TextButton.icon(
+            onPressed: () => _createDashboard(context),
+            icon: const Icon(Icons.add_circle_outline),
+            label: const Text('Create board'),
+          ),
+          const SizedBox(width: DesignTokens.spaceXS),
           IconButton(
             tooltip: 'Refresh dashboards',
             onPressed: () {
@@ -116,8 +122,90 @@ class _ProjectAnalysisBoardsListPageState
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (context) => _DashboardDetailsSheet(dashboard: dashboard),
+      builder: (context) => _DashboardDetailsSheet(
+        projectId: widget.projectId,
+        dashboard: dashboard,
+      ),
     );
+  }
+
+  Future<void> _createDashboard(BuildContext context) async {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('New analysis board'),
+        content: SizedBox(
+          width: 420,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleCtrl,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Board title*',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: DesignTokens.spaceM),
+                TextField(
+                  controller: descCtrl,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (titleCtrl.text.trim().isEmpty) return;
+              Navigator.of(dialogContext).pop(true);
+            },
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      final created = await ref.read(analysisDashboardRepositoryProvider).createDashboard(
+            AnalysisDashboard(
+              id: DateTime.now().microsecondsSinceEpoch.toString(),
+              title: titleCtrl.text.trim(),
+              slug: null,
+              description: descCtrl.text.trim().isEmpty
+                  ? null
+                  : descCtrl.text.trim(),
+            ),
+          );
+      if (!context.mounted) return;
+      setState(_loadDashboards);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Created ${created.title}'),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create board: $e')),
+      );
+    }
   }
 }
 
@@ -319,10 +407,49 @@ class _InfoPill extends StatelessWidget {
   }
 }
 
-class _DashboardDetailsSheet extends StatelessWidget {
+class _DashboardDetailsSheet extends ConsumerStatefulWidget {
+  final String projectId;
   final AnalysisDashboard dashboard;
 
-  const _DashboardDetailsSheet({required this.dashboard});
+  const _DashboardDetailsSheet({
+    required this.projectId,
+    required this.dashboard,
+  });
+
+  @override
+  ConsumerState<_DashboardDetailsSheet> createState() =>
+      _DashboardDetailsSheetState();
+}
+
+class _DashboardDetailsSheetState
+    extends ConsumerState<_DashboardDetailsSheet> {
+  bool _running = false;
+
+  Future<void> _runBoard(BuildContext context) async {
+    setState(() => _running = true);
+    try {
+      final result = await ref
+          .read(analysisDashboardRepositoryProvider)
+          .executeBoard(widget.projectId, widget.dashboard.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Board executed: ${result['message'] ?? 'Calculations executed successfully'}',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Board execution failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _running = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -345,7 +472,7 @@ class _DashboardDetailsSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                dashboard.title,
+                widget.dashboard.title,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: cs.onSurface,
@@ -353,15 +480,15 @@ class _DashboardDetailsSheet extends StatelessWidget {
               ),
               const SizedBox(height: DesignTokens.spaceS),
               Text(
-                dashboard.slug ?? dashboard.id,
+                widget.dashboard.slug ?? widget.dashboard.id,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.66),
                 ),
               ),
               const SizedBox(height: DesignTokens.spaceM),
-              if ((dashboard.description ?? '').isNotEmpty)
+              if ((widget.dashboard.description ?? '').isNotEmpty)
                 Text(
-                  dashboard.description!,
+                  widget.dashboard.description!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     height: 1.55,
                     color: cs.onSurface.withValues(alpha: 0.75),
@@ -374,26 +501,40 @@ class _DashboardDetailsSheet extends StatelessWidget {
                 spacing: DesignTokens.spaceS,
                 runSpacing: DesignTokens.spaceS,
                 children: [
-                  _InfoPill(label: 'Layout', value: dashboard.layout),
+                  _InfoPill(label: 'Layout', value: widget.dashboard.layout),
                   _InfoPill(
                     label: 'Widgets',
-                    value: '${dashboard.widgets.length}',
+                    value: '${widget.dashboard.widgets.length}',
                   ),
-                  _InfoPill(label: 'Roles', value: '${dashboard.roles.length}'),
+                  _InfoPill(label: 'Roles', value: '${widget.dashboard.roles.length}'),
                   _InfoPill(
                     label: 'Created',
-                    value: _formatDate(dashboard.createdAt),
+                    value: _formatDate(widget.dashboard.createdAt),
                   ),
                   _InfoPill(
                     label: 'Updated',
-                    value: _formatDate(dashboard.updatedAt),
+                    value: _formatDate(widget.dashboard.updatedAt),
                   ),
                 ],
               ),
               const SizedBox(height: DesignTokens.spaceL),
+              _sectionTitle(context, 'Actions'),
+              const SizedBox(height: DesignTokens.spaceS),
+              FilledButton.icon(
+                onPressed: _running ? null : () => _runBoard(context),
+                icon: _running
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.play_arrow_rounded),
+                label: const Text('Run board'),
+              ),
+              const SizedBox(height: DesignTokens.spaceL),
               _sectionTitle(context, 'Widgets'),
               const SizedBox(height: DesignTokens.spaceS),
-              if (dashboard.widgets.isEmpty)
+              if (widget.dashboard.widgets.isEmpty)
                 Text(
                   'No widgets are configured on this dashboard.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -402,7 +543,7 @@ class _DashboardDetailsSheet extends StatelessWidget {
                 )
               else
                 Column(
-                  children: dashboard.widgets
+                  children: widget.dashboard.widgets
                       .map(
                         (widget) => Padding(
                           padding: const EdgeInsets.only(

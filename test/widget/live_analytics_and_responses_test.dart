@@ -471,13 +471,13 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
   }
 }
 
-class _FakeAnalysisDashboardRepository implements AnalysisDashboardRepository {
+class _FakeAnalysisDashboardRepository extends AnalysisDashboardRepository {
   final List<AnalysisDashboard> dashboards;
 
-  _FakeAnalysisDashboardRepository({this.dashboards = const []});
+  _FakeAnalysisDashboardRepository({this.dashboards = const []}) : super(Dio());
 
   @override
-  Future<void> createDashboard(AnalysisDashboard dashboard) async {}
+  Future<AnalysisDashboard> createDashboard(AnalysisDashboard dashboard) async => dashboard;
 
   @override
   Future<void> deleteDashboard(String id) async {}
@@ -490,4 +490,10 @@ class _FakeAnalysisDashboardRepository implements AnalysisDashboardRepository {
 
   @override
   Future<void> updateDashboard(String id, AnalysisDashboard dashboard) async {}
+
+  @override
+  Future<Map<String, dynamic>> executeBoard(
+    String projectId,
+    String boardId,
+  ) async => const {};
 }

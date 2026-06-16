@@ -91,6 +91,11 @@ class FormQuestion {
       'multiplechoice': QuestionType.multipleChoice,
       'checkboxes': QuestionType.checkboxes,
       'dropdown': QuestionType.dropdown,
+      'select': QuestionType.dropdown,
+      'radio': QuestionType.multipleChoice,
+      'note': QuestionType.divider,
+      'hidden': QuestionType.spacer,
+      'boolean': QuestionType.booleanValue,
       'fileupload': QuestionType.fileUpload,
       'multifileupload': QuestionType.multiFileUpload,
       'signaturepad': QuestionType.signaturePad,
@@ -547,6 +552,7 @@ class Form {
           .map((item) => Map<String, dynamic>.from(item))
           .toList();
     }
+
     return Form(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled Form',
@@ -584,9 +590,7 @@ class Form {
         json['quickResponses'] ?? json['quick_responses'] ?? const [],
       ),
       dataExportSettings: Map<String, dynamic>.from(
-        json['dataExportSettings'] ??
-            json['data_export_settings'] ??
-            const {},
+        json['dataExportSettings'] ?? json['data_export_settings'] ?? const {},
       ),
       advancedSettings: Map<String, dynamic>.from(
         json['advancedSettings'] ?? json['advanced_settings'] ?? const {},
@@ -618,14 +622,14 @@ class Form {
     'style': style,
     'workflows': workflows,
     'accessPolicy': accessPolicy,
-      'submissionSettings': submissionSettings,
-      'quickResponses': quickResponses,
-      'dataExportSettings': dataExportSettings,
-      'advancedSettings': advancedSettings,
-      'metadata': metadata,
-      'sections': sections.map((e) => e.toJson()).toList(),
-      'versions': versions.map((e) => e.toJson()).toList(),
-      'updatedAt': updatedAt?.toIso8601String(),
+    'submissionSettings': submissionSettings,
+    'quickResponses': quickResponses,
+    'dataExportSettings': dataExportSettings,
+    'advancedSettings': advancedSettings,
+    'metadata': metadata,
+    'sections': sections.map((e) => e.toJson()).toList(),
+    'versions': versions.map((e) => e.toJson()).toList(),
+    'updatedAt': updatedAt?.toIso8601String(),
   };
 
   Form copyWith({

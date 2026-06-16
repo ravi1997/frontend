@@ -1,31 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:frontend/core/services/connectivity_service.dart';
 import 'package:frontend/core/errors/app_exception.dart';
 import 'package:frontend/modules/forms/responses/form_response.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/modules/forms/responses/response_repository_provider.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
-import 'package:frontend/modules/auth/auth_models.dart';
+import 'package:frontend/core/storage/local_database.dart';
+import 'package:drift/drift.dart';
+
+final localDatabaseProvider = Provider<LocalDatabase>((ref) {
+  final db = LocalDatabase();
+  ref.onDispose(() => db.close());
+  return db;
+});
 
 final syncServiceProvider = AsyncNotifierProvider<SyncService, void>(
   SyncService.new,
 );
 
+class SyncConflict {
+  final String pendingUploadId;
+  final String projectId;
+  final FormResponse localResponse;
+  final FormResponse serverResponse;
+
+  SyncConflict({
+    required this.pendingUploadId,
+    required this.projectId,
+    required this.localResponse,
+    required this.serverResponse,
+  });
+}
+
 class SyncService extends AsyncNotifier<void> {
-  Box? _box;
+  LocalDatabase get _db => ref.read(localDatabaseProvider);
   String? _currentUserId;
+  List<FormResponse> _cachedPending = [];
+  SyncConflict? activeConflict;
 
   void _log(String message) {
     debugPrint(message);
-  }
-
-  String _boxNameForUser(String organizationId, String userId) {
-    return 'pending_submissions_${organizationId}_$userId';
-  }
-
-  UserModel? _currentUser() {
-    return ref.read(authControllerProvider).value;
   }
 
   @override
@@ -33,25 +48,14 @@ class SyncService extends AsyncNotifier<void> {
     final user = ref.watch(authControllerProvider).value;
 
     if (user == null) {
-      if (_box != null) {
-        // Only close the box, DO NOT clear it, so that pending submissions
-        // are preserved and can be synced once the user logs back in.
-        await _box!.close();
-        _box = null;
-        _currentUserId = null;
-      }
+      _currentUserId = null;
+      _cachedPending = [];
+      activeConflict = null;
       return;
     }
 
-    if (_currentUserId != user.id) {
-      if (_box != null) {
-        await _box!.close();
-      }
-      _currentUserId = user.id;
-      // Scoping box by organizationId and userId to prevent data leakage between users/orgs
-      final organizationId = user.organizationId ?? 'default';
-      _box = await Hive.openBox(_boxNameForUser(organizationId, user.id));
-    }
+    _currentUserId = user.id;
+    await _refreshCachedPending();
 
     // Try to sync on startup if online
     if (ref.read(connectivityServiceProvider).isConnected) {
@@ -59,49 +63,51 @@ class SyncService extends AsyncNotifier<void> {
     }
   }
 
+  Future<void> _refreshCachedPending() async {
+    final rows = await _db.select(_db.pendingUploads).get();
+    _cachedPending = rows.map((row) {
+      final decoded = jsonDecode(row.payloadJson) as Map<String, dynamic>;
+      final responseData = Map<String, dynamic>.from(decoded['response'] as Map);
+      return FormResponse.fromJson(responseData);
+    }).toList();
+    ref.notifyListeners();
+  }
+
   Future<void> addPendingSubmission(
     FormResponse response, {
     String? projectId,
   }) async {
-    await _ensureBox();
-    if (_box == null) return;
-    // Wrapping the response along with the optional projectId to preserve project scoping on sync
-    await _box!.put(response.id, {
+    final responseId = response.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final payload = jsonEncode({
       'response': response.toJson(),
       'projectId': projectId,
     });
-    ref.notifyListeners();
+
+    await _db.into(_db.pendingUploads).insertOnConflictUpdate(
+      PendingUploadsCompanion(
+        id: Value(responseId),
+        formId: Value(response.formId),
+        payloadJson: Value(payload),
+        queuedAt: Value(DateTime.now()),
+        retryCount: const Value(0),
+      ),
+    );
+
+    await _refreshCachedPending();
   }
 
   Future<void> syncPendingSubmissions() async {
-    await _ensureBox();
-    if (_box == null || _box!.isEmpty) return;
+    final rows = await _db.select(_db.pendingUploads).get();
+    if (rows.isEmpty) return;
 
     final repository = ref.read(responseRepositoryProvider);
-    final keys = List<String>.from(_box!.keys);
 
-    for (final key in keys) {
-      final value = _box!.get(key);
+    for (final row in rows) {
       try {
-        if (value == null) continue;
-
-        final FormResponse response;
-        final String? projectId;
-
-        // Backward compatibility support for legacy responses stored as plain Maps
-        if (value is Map && value.containsKey('response')) {
-          final Map<String, dynamic> data = Map<String, dynamic>.from(
-            value['response'] as Map,
-          );
-          response = FormResponse.fromJson(data);
-          projectId = value['projectId'] as String?;
-        } else if (value is Map) {
-          final Map<String, dynamic> data = Map<String, dynamic>.from(value);
-          response = FormResponse.fromJson(data);
-          projectId = null;
-        } else {
-          continue;
-        }
+        final decoded = jsonDecode(row.payloadJson) as Map<String, dynamic>;
+        final responseData = Map<String, dynamic>.from(decoded['response'] as Map);
+        final response = FormResponse.fromJson(responseData);
+        final projectId = decoded['projectId'] as String?;
 
         // Ensure we only sync if the user is still logged in and matches
         if (_currentUserId == null) break;
@@ -111,52 +117,71 @@ class SyncService extends AsyncNotifier<void> {
         } else {
           await repository.submitResponse(response);
         }
-        await _box!.delete(key);
-        _log('Synced submission: $key for user $_currentUserId');
+        
+        // Delete upon successful submission
+        await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+        _log('Synced submission: ${row.id} for user $_currentUserId');
       } catch (e) {
-        _log('Failed to sync submission $key: $e');
+        _log('Failed to sync submission ${row.id}: $e');
+        
+        if (e is ApiException && e.statusCode == 409) {
+          final decoded = jsonDecode(row.payloadJson) as Map<String, dynamic>;
+          final responseData = Map<String, dynamic>.from(decoded['response'] as Map);
+          final response = FormResponse.fromJson(responseData);
+          final projectId = decoded['projectId'] as String? ?? '';
+
+          try {
+            final serverResponse = await repository.getProjectResponseDetail(
+              projectId,
+              response.formId,
+              response.id!,
+            );
+            activeConflict = SyncConflict(
+              pendingUploadId: row.id,
+              projectId: projectId,
+              localResponse: response,
+              serverResponse: serverResponse,
+            );
+            ref.notifyListeners();
+            // Pause further syncing until conflict is resolved
+            break;
+          } catch (fetchError) {
+            _log('Failed to fetch conflicting server response: $fetchError');
+          }
+        }
+        
         // Handle permanently invalid submissions (e.g. 400 Bad Request, 403 Forbidden)
         // by deleting them from the queue so they do not block subsequent submissions.
         if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
-          await _box!.delete(key);
+          await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+        } else {
+          // Increment retry count
+          await (_db.update(_db.pendingUploads)
+            ..where((t) => t.id.equals(row.id)))
+            .write(PendingUploadsCompanion(retryCount: Value(row.retryCount + 1)));
         }
       }
     }
+    await _refreshCachedPending();
+  }
+
+  void clearActiveConflict() {
+    activeConflict = null;
     ref.notifyListeners();
   }
 
   Future<void> clearData() async {
-    if (_box != null) {
-      await _box!.clear();
-      await _box!.close();
-      _box = null;
-      _currentUserId = null;
-    }
+    await _db.delete(_db.pendingUploads).go();
+    _cachedPending = [];
+    _currentUserId = null;
+    activeConflict = null;
+    ref.notifyListeners();
   }
 
   List<FormResponse> getPendingSubmissions() {
-    if (_box == null) return [];
-    return _box!.values.map((value) {
-      if (value is Map && value.containsKey('response')) {
-        return FormResponse.fromJson(
-          Map<String, dynamic>.from(value['response'] as Map),
-        );
-      }
-      return FormResponse.fromJson(Map<String, dynamic>.from(value as Map));
-    }).toList();
+    return _cachedPending;
   }
 
-  bool get hasPendingSubmissions => _box?.isNotEmpty ?? false;
-  int get pendingCount => _box?.length ?? 0;
-
-  Future<void> _ensureBox() async {
-    if (_box != null) return;
-
-    final user = _currentUser();
-    if (user == null) return;
-
-    _currentUserId = user.id;
-    final organizationId = user.organizationId ?? 'default';
-    _box = await Hive.openBox(_boxNameForUser(organizationId, user.id));
-  }
+  bool get hasPendingSubmissions => _cachedPending.isNotEmpty;
+  int get pendingCount => _cachedPending.length;
 }

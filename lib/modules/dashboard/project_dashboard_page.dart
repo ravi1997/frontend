@@ -10,7 +10,10 @@ import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
+import 'package:frontend/modules/dashboard/widgets/analysis_boards_entry_card.dart';
 import 'package:frontend/modules/dashboard_builder/pages/project_dashboards_section.dart';
+import 'package:frontend/modules/forms/responses/data/services/sync_service.dart';
+import 'package:frontend/modules/forms/widgets/response_merge_dialog.dart';
 
 class ProjectDashboardPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -630,6 +633,30 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
     final status = _project?['status']?.toString() ?? 'draft';
     final cs = Theme.of(context).colorScheme;
 
+    ref.listen(syncServiceProvider, (previous, next) {
+      final syncService = ref.read(syncServiceProvider.notifier);
+      if (syncService.activeConflict != null) {
+        final conflict = syncService.activeConflict!;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => ResponseMergeDialog(
+            pendingUploadId: conflict.pendingUploadId,
+            projectId: conflict.projectId,
+            localResponse: conflict.localResponse,
+            serverResponse: conflict.serverResponse,
+          ),
+        ).then((_) {
+          syncService.clearActiveConflict();
+        });
+      }
+    });
+
+    ref.watch(syncServiceProvider);
+    final syncService = ref.read(syncServiceProvider.notifier);
+    final hasPending = syncService.hasPendingSubmissions;
+    final pendingCount = syncService.pendingCount;
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
@@ -655,6 +682,34 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (hasPending)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: DesignTokens.spaceM),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade50,
+                              border: Border.all(color: Colors.amber.shade300),
+                              borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.cloud_off_outlined, color: Colors.amber),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'You have $pendingCount offline submission(s) pending sync.',
+                                  style: TextStyle(color: Colors.amber.shade900, fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                TextButton.icon(
+                                  onPressed: () async {
+                                    await ref.read(syncServiceProvider.notifier).syncPendingSubmissions();
+                                  },
+                                  icon: const Icon(Icons.sync, size: 16),
+                                  label: const Text('Sync Now'),
+                                )
+                              ],
+                            ),
+                          ),
                         LayoutBuilder(
                           builder: (context, constraints) {
                             final isCompact = constraints.maxWidth < 860;
@@ -1067,6 +1122,9 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                           onCopyShareLink: _copyShareLink,
                           recentForms: _buildRecentForms(),
                           statusCounts: _formStatusCounts(),
+                          onOpenAnalysisBoards: () => context.push(
+                            '/projects/${widget.projectId}/analysis-boards',
+                          ),
                         ),
                       ],
                     ),
@@ -1277,11 +1335,13 @@ class _AnalyticsTab extends StatelessWidget {
   final String projectId;
   final List<Map<String, dynamic>> forms;
   final Map<String, int> statusCounts;
+  final VoidCallback onOpenAnalysisBoards;
 
   const _AnalyticsTab({
     required this.projectId,
     required this.forms,
     required this.statusCounts,
+    required this.onOpenAnalysisBoards,
   });
 
   @override
@@ -1334,6 +1394,11 @@ class _AnalyticsTab extends StatelessWidget {
                       .toList(),
                 ),
         ),
+        const SizedBox(height: 16),
+        AnalysisBoardsEntryCard(
+          projectId: projectId,
+          onOpen: onOpenAnalysisBoards,
+        ),
       ],
     );
   }
@@ -1385,6 +1450,7 @@ class _ProjectTabContent extends StatelessWidget {
   final VoidCallback onCopyShareLink;
   final List<Map<String, dynamic>> recentForms;
   final Map<String, int> statusCounts;
+  final VoidCallback onOpenAnalysisBoards;
 
   const _ProjectTabContent({
     required this.currentTab,
@@ -1403,6 +1469,7 @@ class _ProjectTabContent extends StatelessWidget {
     required this.onCopyShareLink,
     required this.recentForms,
     required this.statusCounts,
+    required this.onOpenAnalysisBoards,
   });
 
   @override
@@ -1427,6 +1494,7 @@ class _ProjectTabContent extends StatelessWidget {
           projectId: projectId,
           forms: recentForms,
           statusCounts: statusCounts,
+          onOpenAnalysisBoards: onOpenAnalysisBoards,
         ),
       _ => _OverviewTab(
           projectId: projectId,

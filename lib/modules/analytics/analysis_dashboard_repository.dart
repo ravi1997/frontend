@@ -18,8 +18,16 @@ class AnalysisDashboardRepository {
     return AnalysisDashboard.fromJson(response.data);
   }
 
-  Future<void> createDashboard(AnalysisDashboard dashboard) async {
-    await _dio.post('/dashboard/', data: dashboard.toJson());
+  Future<AnalysisDashboard> createDashboard(
+    AnalysisDashboard dashboard,
+  ) async {
+    final payload = Map<String, dynamic>.from(dashboard.toJson())
+      ..removeWhere((_, value) => value == null);
+    final response = await _dio.post('/dashboard/', data: payload);
+    final data = Map<String, dynamic>.from(response.data['data'] as Map);
+    return AnalysisDashboard.fromJson(
+      Map<String, dynamic>.from(data['dashboard'] as Map),
+    );
   }
 
   Future<void> updateDashboard(String id, AnalysisDashboard dashboard) async {
@@ -28,5 +36,15 @@ class AnalysisDashboardRepository {
 
   Future<void> deleteDashboard(String id) async {
     await _dio.delete('/dashboard/$id');
+  }
+
+  Future<Map<String, dynamic>> executeBoard(
+    String projectId,
+    String boardId,
+  ) async {
+    final response = await _dio.get(
+      '/api/v1/projects/$projectId/analysis-boards/$boardId/execute',
+    );
+    return Map<String, dynamic>.from(response.data as Map);
   }
 }

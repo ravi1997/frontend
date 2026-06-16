@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
+import 'package:frontend/core/networking/api_endpoints.dart';
 
 class GitBranchCommit {
   final String id;
@@ -110,7 +111,7 @@ class GitController extends StateNotifier<GitState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final response = await _apiClient.get(
-        '/mahasangraha/api/v1/projects/$projectId/forms/$formId/commits',
+        ApiEndpoints.formCommits(projectId, formId),
       );
       final list = (response.data['data'] as List?) ?? [];
       final commits = list
@@ -132,7 +133,7 @@ class GitController extends StateNotifier<GitState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       final response = await _apiClient.post(
-        '/mahasangraha/api/v1/projects/$projectId/forms/$formId/commits',
+        ApiEndpoints.formCommits(projectId, formId),
         data: {'message': message, 'form_data': formData},
       );
       state = state.copyWith(isLoading: false);
@@ -157,7 +158,7 @@ class GitController extends StateNotifier<GitState> {
     state = state.copyWith(isLoading: true, error: null, conflicts: []);
     try {
       final response = await _apiClient.post(
-        '/mahasangraha/api/v1/projects/$projectId/forms/$formId/merge',
+        ApiEndpoints.formMerge(projectId, formId),
         data: {
           'theirs_commit_id': theirsCommitId,
           'mine_commit_id': mineCommitId,

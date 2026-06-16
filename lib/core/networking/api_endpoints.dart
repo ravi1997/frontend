@@ -299,6 +299,18 @@ class ApiEndpoints {
       '/projects/$projectId/forms';
 
   // ============================================================================
+  // Form Git/Commit Endpoints
+  // ============================================================================
+
+  /// GET/POST - List commits or create a commit for a specific form
+  static String formCommits(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/commits';
+
+  /// POST - Merge form branches
+  static String formMerge(String projectId, String formId) =>
+      '/projects/$projectId/forms/$formId/merge';
+
+  // ============================================================================
   // Form Version Endpoints
   // ============================================================================
 
