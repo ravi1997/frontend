@@ -13,6 +13,7 @@ import 'package:frontend/modules/forms/pages/form_builder_page.dart';
 import 'package:frontend/modules/forms/pages/form_version_history_page.dart';
 import 'package:frontend/modules/forms/pages/form_preview_page.dart';
 import 'package:frontend/modules/forms/pages/form_submit_page.dart';
+import 'package:frontend/modules/forms/pages/json_ui_preview_page.dart';
 import 'package:frontend/modules/form_builder/responses/pages/response_detail_page.dart';
 import 'package:frontend/modules/form_builder/responses/pages/response_list_page.dart';
 import 'package:frontend/shared/models/form_models.dart';
@@ -172,6 +173,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             projectId: state.uri.queryParameters['projectId'] ?? '',
           );
         },
+      ),
+      GoRoute(
+        path: '/json-ui-preview',
+        builder: (context, state) => const JsonUiPreviewPage(),
       ),
       GoRoute(
         path: '/projects/:projectId/f/:formId',
