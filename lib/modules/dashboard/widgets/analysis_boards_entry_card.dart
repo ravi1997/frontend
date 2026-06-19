@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:frontend/app/theme/tokens.dart';
+import 'package:frontend/modules/analysis_coder/analysis_coder_module.dart';
 
 class AnalysisBoardsEntryCard extends StatelessWidget {
   final String projectId;
@@ -66,7 +68,9 @@ class AnalysisBoardsEntryCard extends StatelessWidget {
                   runSpacing: 8,
                   children: [
                     FilledButton.icon(
-                      onPressed: onOpen,
+                      onPressed: () {
+                        AnalysisCoderModule.navigateTo(context, projectId);
+                      },
                       icon: const Icon(Icons.open_in_new),
                       label: const Text('Open analysis boards'),
                     ),

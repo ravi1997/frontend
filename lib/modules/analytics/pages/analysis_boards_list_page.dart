@@ -7,6 +7,7 @@ import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard.dart';
 import 'package:frontend/modules/analytics/analytics_providers.dart';
+import 'package:frontend/modules/analysis_coder/analysis_coder_module.dart';
 
 class ProjectAnalysisBoardsListPage extends ConsumerStatefulWidget {
   final String projectId;
@@ -51,6 +52,12 @@ class _ProjectAnalysisBoardsListPageState
             onPressed: () => _createDashboard(context),
             icon: const Icon(Icons.add_circle_outline),
             label: const Text('Create board'),
+          ),
+          const SizedBox(width: DesignTokens.spaceXS),
+          TextButton.icon(
+            onPressed: () => AnalysisCoderModule.navigateTo(context, widget.projectId),
+            icon: const Icon(Icons.code),
+            label: const Text('Analysis coder'),
           ),
           const SizedBox(width: DesignTokens.spaceXS),
           IconButton(
