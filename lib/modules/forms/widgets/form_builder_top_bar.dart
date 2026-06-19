@@ -10,6 +10,7 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'ai_assistant_dialog.dart';
 import 'llm_copilot_drawer.dart';
+import 'form_builder_assistant_widget.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
 import 'git_commit_dialog.dart';
 import 'git_merge_dialog.dart';
@@ -209,7 +210,17 @@ class FormBuilderTopBar extends ConsumerWidget {
             onTap: () {
               showDialog(
                 context: context,
-                builder: (context) => AiAssistantDialog(formId: formId),
+                builder: (context) => Dialog(
+                  insetPadding: EdgeInsets.zero,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.7,
+                    child: FormBuilderAssistantWidget(
+                      formId: formId,
+                      projectId: projectId,
+                    ),
+                  ),
+                ),
               );
             },
           ),

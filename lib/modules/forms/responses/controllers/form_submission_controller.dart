@@ -72,4 +72,55 @@ class FormSubmissionController extends Notifier<AsyncValue<void>> {
       return true; // Still "success" because it's queued
     }
   }
+
+  Future<bool> submitFormResponse({
+    required String formId,
+    required Map<String, dynamic> responseData,
+  }) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final repository = ref.read(responseRepositoryProvider);
+      
+      // Extract project ID from response data if available
+      final projectId = responseData['project_id'] ?? '';
+      
+      // Create form response object
+      final response = FormResponse(
+        id: const Uuid().v4(),
+        formId: formId,
+        organizationId: responseData['organization_id'] ?? '',
+        submittedBy: responseData['submitted_by'] ?? '',
+        submittedAt: DateTime.now(),
+        answers: responseData['answers'] ?? {},
+      );
+
+      // Submit the response
+      await repository.submitProjectResponse(projectId, response);
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
+        state = AsyncValue.error(e, st);
+        return false;
+      }
+
+      // Queue submission for later retry when the backend is unreachable
+      final response = FormResponse(
+        id: const Uuid().v4(),
+        formId: formId,
+        organizationId: responseData['organization_id'] ?? '',
+        submittedBy: responseData['submitted_by'] ?? '',
+        submittedAt: DateTime.now(),
+        answers: responseData['answers'] ?? {},
+      );
+
+      final projectId = responseData['project_id'] ?? '';
+      await ref
+          .read(syncServiceProvider.notifier)
+          .addPendingSubmission(response, projectId: projectId);
+      state = const AsyncValue.data(null);
+      return true; // Still "success" because it's queued
+    }
+  }
 }

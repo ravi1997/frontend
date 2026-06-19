@@ -6,6 +6,7 @@ import 'package:frontend/modules/forms/responses/form_response.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:frontend/modules/forms/responses/response_repository_provider.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
+import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/core/storage/local_database.dart';
 import 'package:drift/drift.dart';
 
@@ -18,6 +19,21 @@ final localDatabaseProvider = Provider<LocalDatabase>((ref) {
 final syncServiceProvider = AsyncNotifierProvider<SyncService, void>(
   SyncService.new,
 );
+
+bool pendingSubmissionBelongsToScope(
+  Map<String, dynamic> payload, {
+  required String? userId,
+  required String? organizationId,
+}) {
+  final responseData = payload['response'];
+  if (responseData is! Map) return false;
+  final response = FormResponse.fromJson(Map<String, dynamic>.from(responseData));
+  final sameUser = userId != null && response.submittedBy == userId;
+  final sameOrg = organizationId == null ||
+      organizationId.isEmpty ||
+      response.organizationId == organizationId;
+  return sameUser && sameOrg;
+}
 
 class SyncConflict {
   final String pendingUploadId;
@@ -36,6 +52,7 @@ class SyncConflict {
 class SyncService extends AsyncNotifier<void> {
   LocalDatabase get _db => ref.read(localDatabaseProvider);
   String? _currentUserId;
+  String? _currentOrganizationId;
   List<FormResponse> _cachedPending = [];
   SyncConflict? activeConflict;
 
@@ -46,15 +63,18 @@ class SyncService extends AsyncNotifier<void> {
   @override
   Future<void> build() async {
     final user = ref.watch(authControllerProvider).value;
+    final tokens = ref.watch(tokenServiceProvider).value;
 
     if (user == null) {
       _currentUserId = null;
+      _currentOrganizationId = null;
       _cachedPending = [];
       activeConflict = null;
       return;
     }
 
     _currentUserId = user.id;
+    _currentOrganizationId = user.organizationId ?? tokens?.organizationId;
     await _refreshCachedPending();
 
     // Try to sync on startup if online
@@ -64,13 +84,31 @@ class SyncService extends AsyncNotifier<void> {
   }
 
   Future<void> _refreshCachedPending() async {
-    final rows = await _db.select(_db.pendingUploads).get();
+    final rows = await _scopedPendingUploads();
     _cachedPending = rows.map((row) {
       final decoded = jsonDecode(row.payloadJson) as Map<String, dynamic>;
       final responseData = Map<String, dynamic>.from(decoded['response'] as Map);
       return FormResponse.fromJson(responseData);
     }).toList();
     ref.notifyListeners();
+  }
+
+  Future<List<PendingUpload>> _scopedPendingUploads() async {
+    final rows = await _db.select(_db.pendingUploads).get();
+    return rows.where(_matchesCurrentScope).toList();
+  }
+
+  bool _matchesCurrentScope(dynamic row) {
+    if (_currentUserId == null) {
+      return false;
+    }
+
+    final decoded = jsonDecode(row.payloadJson) as Map<String, dynamic>;
+    return pendingSubmissionBelongsToScope(
+      decoded,
+      userId: _currentUserId,
+      organizationId: _currentOrganizationId,
+    );
   }
 
   Future<void> addPendingSubmission(
@@ -81,6 +119,8 @@ class SyncService extends AsyncNotifier<void> {
     final payload = jsonEncode({
       'response': response.toJson(),
       'projectId': projectId,
+      'submittedBy': _currentUserId,
+      'organizationId': _currentOrganizationId ?? response.organizationId,
     });
 
     await _db.into(_db.pendingUploads).insertOnConflictUpdate(
@@ -97,7 +137,7 @@ class SyncService extends AsyncNotifier<void> {
   }
 
   Future<void> syncPendingSubmissions() async {
-    final rows = await _db.select(_db.pendingUploads).get();
+    final rows = await _scopedPendingUploads();
     if (rows.isEmpty) return;
 
     final repository = ref.read(responseRepositoryProvider);
@@ -171,9 +211,13 @@ class SyncService extends AsyncNotifier<void> {
   }
 
   Future<void> clearData() async {
-    await _db.delete(_db.pendingUploads).go();
+    final rows = await _scopedPendingUploads();
+    for (final row in rows) {
+      await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+    }
     _cachedPending = [];
     _currentUserId = null;
+    _currentOrganizationId = null;
     activeConflict = null;
     ref.notifyListeners();
   }
