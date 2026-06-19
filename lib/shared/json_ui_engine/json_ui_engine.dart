@@ -6,6 +6,8 @@ import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_logic_evaluator.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:signature/signature.dart';
 
 class JsonUiEngine extends StatelessWidget {
   final Map<String, dynamic> schema;
@@ -646,6 +648,475 @@ class JsonUiEngine extends StatelessWidget {
           ),
         );
 
+      case 'color_picker':
+        final currentVal = answers[id]?.value?.toString() ?? '#000000';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: _parseColor(currentVal),
+                      border: Border.all(color: Colors.grey.shade400),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextFormField(
+                      initialValue: currentVal,
+                      decoration: InputDecoration(
+                        hintText: '#RRGGBB',
+                        errorText: errorText,
+                        border: const OutlineInputBorder(),
+                      ),
+                      onChanged: (val) {
+                        if (_isValidColor(val)) {
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: val, displayValue: val),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+      case 'datetime_picker':
+      case 'datetime':
+        final currentVal = answers[id]?.value?.toString() ?? '';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: TextFormField(
+            key: ValueKey(currentVal),
+            initialValue: currentVal,
+            readOnly: true,
+            decoration: InputDecoration(
+              labelText: displayLabel,
+              errorText: errorText,
+              border: const OutlineInputBorder(),
+              suffixIcon: const Icon(Icons.event),
+            ),
+            onTap: () async {
+              final initialDate = DateTime.tryParse(currentVal) ?? DateTime.now();
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: initialDate,
+                firstDate: DateTime(1950),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null && context.mounted) {
+                final pickedTime = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(initialDate),
+                );
+                if (pickedTime != null) {
+                  final finalDateTime = DateTime(
+                    picked.year,
+                    picked.month,
+                    picked.day,
+                    pickedTime.hour,
+                    pickedTime.minute,
+                  );
+                  final formatted = DateFormat('yyyy-MM-dd HH:mm').format(finalDateTime);
+                  onAnswerChanged(
+                    id,
+                    AnswerValue(value: formatted, displayValue: formatted),
+                  );
+                }
+              }
+            },
+          ),
+        );
+
+      case 'date_range_picker':
+      case 'date_range':
+        final currentVal = answers[id]?.value as List? ?? [];
+        final List<String> range = List<String>.from(currentVal);
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'From',
+                        hintText: range.isNotEmpty ? range[0] : 'Start date',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: const Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(1950),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          final formatted = DateFormat('yyyy-MM-dd').format(picked);
+                          final updatedRange = range.isNotEmpty ? [formatted, range[1]] : [formatted, ''];
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: updatedRange, displayValue: updatedRange.join(' to ')),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'To',
+                        hintText: range.length > 1 ? range[1] : 'End date',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: const Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(1950),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          final formatted = DateFormat('yyyy-MM-dd').format(picked);
+                          final updatedRange = range.isNotEmpty ? [range[0], formatted] : ['', formatted];
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: updatedRange, displayValue: updatedRange.join(' to ')),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+      case 'image_capture':
+      case 'image_picker':
+        final currentVal = answers[id]?.value?.toString() ?? '';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              if (currentVal.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Image.network(currentVal, fit: BoxFit.cover),
+                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final picker = ImagePicker();
+                        final image = await picker.pickImage(source: ImageSource.camera);
+                        if (image != null) {
+                          // In a real app, you would upload this to a server
+                          // For now, we'll just store the path
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: image.path, displayValue: image.name),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Camera'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final picker = ImagePicker();
+                        final image = await picker.pickImage(source: ImageSource.gallery);
+                        if (image != null) {
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: image.path, displayValue: image.name),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.photo_library),
+                      label: const Text('Gallery'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+      case 'signature':
+      case 'signature_pad':
+        final SignatureController controller = SignatureController(
+          penStrokeWidth: 2,
+          penColor: Colors.black,
+          exportBackgroundColor: Colors.white,
+        );
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Signature(
+                  controller: controller,
+                  height: 150,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        controller.clear();
+                      },
+                      child: const Text('Clear'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final signature = await controller.toPngBytes();
+                        if (signature != null) {
+                          // In a real app, you would upload this to a server
+                          // For now, we'll store a placeholder
+                          onAnswerChanged(
+                            id,
+                            AnswerValue(value: 'signature_${DateTime.now().millisecondsSinceEpoch}.png', displayValue: 'Signature captured'),
+                          );
+                        }
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+      case 'audio_record':
+      case 'voice_recorder':
+        final currentVal = answers[id]?.value?.toString() ?? '';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              if (currentVal.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.audio_file),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(currentVal)),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // In a real app, you would implement audio recording
+                      // For now, we'll store a placeholder
+                      onAnswerChanged(
+                        id,
+                        AnswerValue(value: 'audio_${DateTime.now().millisecondsSinceEpoch}.mp3', displayValue: 'Audio recorded'),
+                      );
+                    },
+                    icon: const Icon(Icons.mic),
+                    label: const Text('Record'),
+                  ),
+                  const SizedBox(width: 8),
+                  if (currentVal.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // Play audio - placeholder implementation
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Audio playback would start here')),
+                        );
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Play'),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+
+      case 'heading':
+      case 'title':
+        final level = (node['level'] as num?)?.toInt() ?? 1;
+        final fontSize = 24.0 - (level - 1) * 4.0;
+        final fontWeight = level == 1 ? FontWeight.bold : FontWeight.w600;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Text(
+            node['text']?.toString() ?? displayLabel,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+            ),
+          ),
+        );
+
+      case 'paragraph':
+      case 'description':
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            node['text']?.toString() ?? '',
+            style: TextStyle(
+              fontSize: 16.0,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        );
+
+      case 'divider':
+      case 'separator':
+        return const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          child: Divider(),
+        );
+
+      case 'image_display':
+      case 'image':
+        final imageUrl = node['url']?.toString() ?? node['src']?.toString() ?? '';
+        if (imageUrl.isNotEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Image.network(
+              imageUrl,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: double.infinity,
+                  height: 200,
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.broken_image),
+                );
+              },
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+
+      case 'video_display':
+      case 'video':
+        final videoUrl = node['url']?.toString() ?? node['src']?.toString() ?? '';
+        if (videoUrl.isNotEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              color: Colors.grey.shade200,
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.play_circle_outline, size: 48),
+                    SizedBox(height: 8),
+                    Text('Video Player'),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+
+      case 'button_group':
+      case 'segmented_button':
+        final options = node['options'] as List? ?? [];
+        final currentVal = answers[id]?.value?.toString();
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(displayLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: options.map((option) {
+                  final optStr = option.toString();
+                  final isSelected = currentVal == optStr;
+                  return ChoiceChip(
+                    label: Text(optStr),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        onAnswerChanged(
+                          id,
+                          AnswerValue(value: optStr, displayValue: optStr),
+                        );
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        );
+
       default:
         return Container(
           padding: const EdgeInsets.all(4.0),
@@ -662,5 +1133,18 @@ class JsonUiEngine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _buildWidget(context, schema);
+  }
+
+  Color _parseColor(String colorString) {
+    try {
+      return Color(int.parse(colorString.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return Colors.black;
+    }
+  }
+
+  bool _isValidColor(String colorString) {
+    final colorRegex = RegExp(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$');
+    return colorRegex.hasMatch(colorString);
   }
 }

@@ -14,6 +14,7 @@ import 'package:frontend/modules/forms/pages/form_version_history_page.dart';
 import 'package:frontend/modules/forms/pages/form_preview_page.dart';
 import 'package:frontend/modules/forms/pages/form_submit_page.dart';
 import 'package:frontend/modules/forms/pages/json_ui_preview_page.dart';
+import 'package:frontend/modules/forms/pages/form_viewer_page.dart';
 import 'package:frontend/modules/form_builder/responses/pages/response_detail_page.dart';
 import 'package:frontend/modules/form_builder/responses/pages/response_list_page.dart';
 import 'package:frontend/shared/models/form_models.dart';
@@ -25,6 +26,7 @@ import 'package:frontend/modules/platform/screens/webhook_management_screen.dart
 import 'package:frontend/modules/platform/screens/ai_ops_screen.dart';
 import 'package:frontend/modules/dashboard_builder/pages/dashboard_builder_page.dart';
 import 'package:frontend/modules/dashboard_builder/pages/public_dashboard_page.dart';
+import 'package:frontend/modules/analysis_coder/screens/analysis_coder_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
@@ -187,6 +189,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/forms/:formId/view',
+        builder: (context, state) {
+          final formId = state.pathParameters['formId']!;
+          final formSchema = state.uri.queryParameters['schema'] ?? '{}';
+          final projectId = state.uri.queryParameters['projectId'];
+          return FormViewerPage(
+            formId: formId,
+            formSchema: formSchema,
+            projectId: projectId,
+          );
+        },
+      ),
+      GoRoute(
         path: '/projects/:projectId/forms/:formId/analytics',
         builder: (context, state) {
           final formId = state.pathParameters['formId']!;
@@ -199,6 +214,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final projectId = state.pathParameters['projectId']!;
           return ProjectAnalysisBoardsListPage(projectId: projectId);
+        },
+      ),
+      GoRoute(
+        path: '/projects/:projectId/analysis-coder',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          final analysisId = state.uri.queryParameters['analysisId'];
+          return AnalysisCoderScreen(
+            projectId: projectId,
+            analysisId: analysisId,
+          );
         },
       ),
       // ── Dashboard Builder ──────────────────────────────────────────
