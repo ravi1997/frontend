@@ -1,1 +1,1 @@
-export 'package:frontend/core/errors/app_exception_legacy.dart';
+export 'package:frontend/core/errors/app_exception.dart';

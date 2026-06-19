@@ -234,7 +234,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final projectId = state.pathParameters['projectId']!;
           final dashboardId = state.pathParameters['dashboardId']!;
           return DashboardBuilderPage(
-            projectId: projectId,
+            organizationId: projectId,
             dashboardId: dashboardId,
           );
         },

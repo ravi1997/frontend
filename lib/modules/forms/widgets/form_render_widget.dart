@@ -530,13 +530,15 @@ class FormRenderWidget extends ConsumerWidget {
     if (layout == SectionLayoutType.wizard && hasSubSections) {
       return WizardSection(
         section: section,
-        steps: section.sections as List,
+        steps: section.sections,
         locale: locale,
         sectionBg: sectionBg,
         metadata: metadata,
-        sectionStyle: sectionStyle,
+        sectionStyle: SectionStyle.fromJson(
+          Map<String, dynamic>.from(section.ui['style'] as Map? ?? const {}),
+        ),
         buildQuestionsGrid: (s) =>
-            _buildQuestionsGrid(context, s, locale, s.style),
+            _buildQuestionsGrid(context, s, locale, SectionStyle.fromJson(Map<String, dynamic>.from(s.ui['style'] as Map? ?? const {}))),
       );
     }
 

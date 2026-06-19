@@ -1,13 +1,15 @@
-// ignore_for_file: avoid_dynamic_calls
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/tokens.dart';
+import '../../../../app/localization/locale_controller.dart';
+import 'package:frontend/shared/models/form_models.dart';
+import 'package:frontend/modules/forms/models/form_style.dart';
 
 // ---------------------------------------------------------------------------
 // ACCORDION — collapsible section; works standalone (no sub-sections needed)
 // ---------------------------------------------------------------------------
 class AccordionSection extends StatefulWidget {
-  final dynamic section;
+  final FormSection section;
   final String locale;
   final Color sectionBg;
   final Map<String, dynamic> metadata;
@@ -60,7 +62,7 @@ class _AccordionSectionState extends State<AccordionSection>
   @override
   Widget build(BuildContext context) {
     final title =
-        (widget.section.title?.translate(widget.locale) as String?) ?? '';
+        widget.section.title.translate(widget.locale);
     return Container(
       margin: const EdgeInsets.only(bottom: DesignTokens.spaceL),
       decoration: BoxDecoration(
@@ -130,14 +132,14 @@ class _AccordionSectionState extends State<AccordionSection>
 // Condition: section.sections.isNotEmpty
 // ---------------------------------------------------------------------------
 class TabbedSection extends StatefulWidget {
-  final dynamic section;
-  final List<dynamic> tabs;
+  final FormSection section;
+  final List<FormSection> tabs;
   final String locale;
   final Color sectionBg;
   final Color headerBg;
   final Map<String, dynamic> metadata;
-  final dynamic sectionStyle;
-  final Widget Function(dynamic) buildQuestionsGrid;
+  final SectionStyle sectionStyle;
+  final Widget Function(FormSection) buildQuestionsGrid;
 
   const TabbedSection({
     super.key,
@@ -173,10 +175,9 @@ class _TabbedSectionState extends State<TabbedSection>
 
   @override
   Widget build(BuildContext context) {
-    final showHeader = widget.sectionStyle.showHeader as bool? ?? false;
-    final radius = widget.sectionStyle.borderRadius as double? ?? 10.0;
-    final sectionTitle =
-        (widget.section.title?.translate(widget.locale) as String?) ?? '';
+    final showHeader = widget.sectionStyle.showHeader;
+    final radius = widget.sectionStyle.borderRadius;
+    final sectionTitle = widget.section.title.translate(widget.locale);
     final tabPosition = widget.metadata['tabPosition']?.toString() ?? 'top';
     final scrollable = widget.metadata['tabScrollable'] as bool? ?? true;
 
@@ -187,7 +188,7 @@ class _TabbedSectionState extends State<TabbedSection>
       unselectedLabelColor: AppColors.textGrey,
       indicatorColor: AppColors.primary,
       tabs: widget.tabs.map<Tab>((tab) {
-        final label = (tab.title?.translate(widget.locale) as String?) ?? '';
+        final label = tab.title.translate(widget.locale);
         return Tab(text: label.isEmpty ? 'Tab' : label);
       }).toList(),
     );
@@ -257,14 +258,14 @@ class _TabbedSectionState extends State<TabbedSection>
 // Condition: section.sections.isNotEmpty
 // ---------------------------------------------------------------------------
 class SidebarSection extends StatefulWidget {
-  final dynamic section;
+  final FormSection section;
   final String locale;
   final Color sectionBg;
   final Color headerBg;
   final Map<String, dynamic> metadata;
-  final dynamic sectionStyle;
-  final Widget Function(dynamic) buildQuestionsGrid;
-  final Widget Function(dynamic) buildChildSection;
+  final SectionStyle sectionStyle;
+  final Widget Function(FormSection) buildQuestionsGrid;
+  final Widget Function(FormSection) buildChildSection;
 
   const SidebarSection({
     super.key,
@@ -287,11 +288,10 @@ class _SidebarSectionState extends State<SidebarSection> {
 
   @override
   Widget build(BuildContext context) {
-    final children = widget.section.sections as List;
-    final showHeader = widget.sectionStyle.showHeader as bool? ?? false;
-    final radius = widget.sectionStyle.borderRadius as double? ?? 10.0;
-    final sectionTitle =
-        (widget.section.title?.translate(widget.locale) as String?) ?? '';
+    final children = widget.section.sections;
+    final showHeader = widget.sectionStyle.showHeader;
+    final radius = widget.sectionStyle.borderRadius;
+    final sectionTitle = widget.section.title.translate(widget.locale);
     final sidebarWidth =
         (widget.metadata['sidebarWidth'] as num?)?.toDouble() ?? 180.0;
     final sidebarPosition =
@@ -336,7 +336,7 @@ class _SidebarSectionState extends State<SidebarSection> {
           ...children.asMap().entries.map((e) {
             final i = e.key;
             final s = e.value;
-            final label = (s.title?.translate(widget.locale) as String?) ?? '';
+            final label = s.title.translate(widget.locale);
             final isActive = i == _selected;
             return InkWell(
               onTap: () => setState(() => _selected = i),
@@ -421,13 +421,13 @@ class _SidebarSectionState extends State<SidebarSection> {
 // Condition: section.sections.isNotEmpty
 // ---------------------------------------------------------------------------
 class WizardSection extends StatefulWidget {
-  final dynamic section;
-  final List<dynamic> steps;
+  final FormSection section;
+  final List<FormSection> steps;
   final String locale;
   final Color sectionBg;
   final Map<String, dynamic> metadata;
-  final dynamic sectionStyle;
-  final Widget Function(dynamic) buildQuestionsGrid;
+  final SectionStyle sectionStyle;
+  final Widget Function(FormSection) buildQuestionsGrid;
 
   const WizardSection({
     super.key,
@@ -452,10 +452,8 @@ class _WizardSectionState extends State<WizardSection> {
     final steps = widget.steps;
     final total = steps.length;
     final currentSection = steps[_currentStep];
-    final radius = widget.sectionStyle.borderRadius as double? ?? 10.0;
-    final stepTitle =
-        (currentSection.title?.translate(widget.locale) as String?) ??
-        'Step ${_currentStep + 1}';
+    final radius = widget.sectionStyle.borderRadius;
+    final stepTitle = currentSection.title.translate(widget.locale);
     final showProgress = widget.metadata['wizardShowProgress'] as bool? ?? true;
     final allowBack = widget.metadata['wizardAllowBack'] as bool? ?? true;
 
@@ -595,13 +593,13 @@ class _WizardSectionState extends State<WizardSection> {
 // Condition: section.sections.length >= 2
 // ---------------------------------------------------------------------------
 class MasonrySection extends StatelessWidget {
-  final dynamic section;
+  final FormSection section;
   final String locale;
   final Color sectionBg;
   final Color headerBg;
   final Map<String, dynamic> metadata;
-  final dynamic sectionStyle;
-  final Widget Function(dynamic) buildChildSection;
+  final SectionStyle sectionStyle;
+  final Widget Function(FormSection) buildChildSection;
 
   const MasonrySection({
     super.key,
@@ -616,10 +614,10 @@ class MasonrySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final children = section.sections as List;
-    final radius = sectionStyle.borderRadius as double? ?? 10.0;
-    final showHeader = sectionStyle.showHeader as bool? ?? false;
-    final sectionTitle = (section.title?.translate(locale) as String?) ?? '';
+    final children = section.sections;
+    final radius = sectionStyle.borderRadius;
+    final showHeader = sectionStyle.showHeader;
+    final sectionTitle = section.title.translate(locale);
 
     final leftItems = <Widget>[];
     final rightItems = <Widget>[];

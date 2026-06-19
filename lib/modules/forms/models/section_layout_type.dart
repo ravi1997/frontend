@@ -1,38 +1,66 @@
-import 'package:json_annotation/json_annotation.dart';
-
 enum SectionLayoutType {
-  @JsonValue('flex')
   standard,
-  @JsonValue('grid-cols-2')
   grid,
-  @JsonValue('grid-cols-3')
   threeColumns,
-  @JsonValue('full-width')
   fullWidth,
-  @JsonValue('list')
   list,
-  @JsonValue('sidebar')
   sidebar,
-  @JsonValue('accordion')
   accordion,
-  @JsonValue('tabbed')
   tabbed,
-  @JsonValue('custom')
   custom,
-  @JsonValue('overlay')
   overlay,
-  @JsonValue('dashboard')
   dashboard,
-  @JsonValue('centered')
   centered,
-  @JsonValue('wizard')
   wizard,
-  @JsonValue('masonry')
   masonry,
-  @JsonValue('fixed')
   fixed,
-  @JsonValue('card')
   card,
+}
+
+extension SectionLayoutTypeWire on SectionLayoutType {
+  String get wireValue {
+    switch (this) {
+      case SectionLayoutType.standard:
+        return 'flex';
+      case SectionLayoutType.grid:
+        return 'grid-cols-2';
+      case SectionLayoutType.threeColumns:
+        return 'grid-cols-3';
+      case SectionLayoutType.fullWidth:
+        return 'full-width';
+      case SectionLayoutType.list:
+        return 'list';
+      case SectionLayoutType.sidebar:
+        return 'sidebar';
+      case SectionLayoutType.accordion:
+        return 'accordion';
+      case SectionLayoutType.tabbed:
+        return 'tabbed';
+      case SectionLayoutType.custom:
+        return 'custom';
+      case SectionLayoutType.overlay:
+        return 'overlay';
+      case SectionLayoutType.dashboard:
+        return 'dashboard';
+      case SectionLayoutType.centered:
+        return 'centered';
+      case SectionLayoutType.wizard:
+        return 'wizard';
+      case SectionLayoutType.masonry:
+        return 'masonry';
+      case SectionLayoutType.fixed:
+        return 'fixed';
+      case SectionLayoutType.card:
+        return 'card';
+    }
+  }
+
+  static SectionLayoutType fromWireValue(String value) {
+    return SectionLayoutType.values.firstWhere(
+      (item) => item.wireValue == value,
+      orElse: () => SectionLayoutType.standard,
+    );
+  }
 }
 
 extension SectionLayoutTypeExtension on SectionLayoutType {

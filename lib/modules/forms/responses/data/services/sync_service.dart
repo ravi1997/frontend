@@ -8,7 +8,6 @@ import 'package:frontend/modules/forms/responses/response_repository_provider.da
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/core/storage/local_database.dart';
-import 'package:drift/drift.dart';
 
 final localDatabaseProvider = Provider<LocalDatabase>((ref) {
   final db = LocalDatabase();
@@ -93,8 +92,8 @@ class SyncService extends AsyncNotifier<void> {
     ref.notifyListeners();
   }
 
-  Future<List<PendingUpload>> _scopedPendingUploads() async {
-    final rows = await _db.select(_db.pendingUploads).get();
+  Future<List<PendingUploadRecord>> _scopedPendingUploads() async {
+    final rows = await _db.listPendingUploads();
     return rows.where(_matchesCurrentScope).toList();
   }
 
@@ -123,13 +122,13 @@ class SyncService extends AsyncNotifier<void> {
       'organizationId': _currentOrganizationId ?? response.organizationId,
     });
 
-    await _db.into(_db.pendingUploads).insertOnConflictUpdate(
-      PendingUploadsCompanion(
-        id: Value(responseId),
-        formId: Value(response.formId),
-        payloadJson: Value(payload),
-        queuedAt: Value(DateTime.now()),
-        retryCount: const Value(0),
+    await _db.upsertPendingUpload(
+      PendingUploadRecord(
+        id: responseId,
+        formId: response.formId,
+        payloadJson: payload,
+        queuedAt: DateTime.now(),
+        retryCount: 0,
       ),
     );
 
@@ -159,7 +158,7 @@ class SyncService extends AsyncNotifier<void> {
         }
         
         // Delete upon successful submission
-        await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+        await _db.deletePendingUpload(row.id);
         _log('Synced submission: ${row.id} for user $_currentUserId');
       } catch (e) {
         _log('Failed to sync submission ${row.id}: $e');
@@ -193,12 +192,9 @@ class SyncService extends AsyncNotifier<void> {
         // Handle permanently invalid submissions (e.g. 400 Bad Request, 403 Forbidden)
         // by deleting them from the queue so they do not block subsequent submissions.
         if (e is ApiException && (e.statusCode == 400 || e.statusCode == 403)) {
-          await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+          await _db.deletePendingUpload(row.id);
         } else {
-          // Increment retry count
-          await (_db.update(_db.pendingUploads)
-            ..where((t) => t.id.equals(row.id)))
-            .write(PendingUploadsCompanion(retryCount: Value(row.retryCount + 1)));
+          await _db.incrementPendingRetryCount(row.id);
         }
       }
     }
@@ -213,7 +209,7 @@ class SyncService extends AsyncNotifier<void> {
   Future<void> clearData() async {
     final rows = await _scopedPendingUploads();
     for (final row in rows) {
-      await (_db.delete(_db.pendingUploads)..where((t) => t.id.equals(row.id))).go();
+      await _db.deletePendingUpload(row.id);
     }
     _cachedPending = [];
     _currentUserId = null;

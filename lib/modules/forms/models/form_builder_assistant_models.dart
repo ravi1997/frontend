@@ -1,16 +1,6 @@
-"""
-lib/modules/forms/models/form_builder_assistant_models.dart
-Models for the Form Builder Assistant.
-"""
-
-import 'package:json_annotation/json_annotation.dart';
-
-part 'form_builder_assistant_models.g.dart';
-
-@JsonSerializable()
 class FormBuilderAssistantMessage {
   final String id;
-  final String role; // 'user' or 'assistant'
+  final String role;
   final String content;
   final List<FormBuilderAssistantAction> actions;
   final Map<String, dynamic>? metadata;
@@ -25,12 +15,18 @@ class FormBuilderAssistantMessage {
     required this.createdAt,
   });
 
-  factory FormBuilderAssistantMessage.fromJson(Map<String, dynamic> json) =>
-      _$FormBuilderAssistantMessageFromJson(json);
-  Map<String, dynamic> toJson() => _$FormBuilderAssistantMessageToJson(this);
+  factory FormBuilderAssistantMessage.fromJson(Map<String, dynamic> json) {
+    return FormBuilderAssistantMessage(
+      id: json['id']?.toString() ?? '',
+      role: json['role']?.toString() ?? 'assistant',
+      content: json['content']?.toString() ?? '',
+      actions: const [],
+      metadata: json['metadata'] as Map<String, dynamic>?,
+      createdAt: DateTime.now(),
+    );
+  }
 }
 
-@JsonSerializable()
 class FormBuilderAssistantAction {
   final String id;
   final String type;
@@ -46,12 +42,15 @@ class FormBuilderAssistantAction {
     this.description,
   });
 
-  factory FormBuilderAssistantAction.fromJson(Map<String, dynamic> json) =>
-      _$FormBuilderAssistantActionFromJson(json);
-  Map<String, dynamic> toJson() => _$FormBuilderAssistantActionToJson(this);
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type,
+        'label': label,
+        'parameters': parameters,
+        'description': description,
+      };
 }
 
-@JsonSerializable()
 class FormBuilderAssistantSession {
   final String id;
   final String formId;
@@ -71,12 +70,19 @@ class FormBuilderAssistantSession {
     required this.isActive,
   });
 
-  factory FormBuilderAssistantSession.fromJson(Map<String, dynamic> json) =>
-      _$FormBuilderAssistantSessionFromJson(json);
-  Map<String, dynamic> toJson() => _$FormBuilderAssistantSessionToJson(this);
+  factory FormBuilderAssistantSession.fromJson(Map<String, dynamic> json) {
+    return FormBuilderAssistantSession(
+      id: json['id']?.toString() ?? '',
+      formId: json['formId']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      messages: const [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      isActive: true,
+    );
+  }
 }
 
-@JsonSerializable()
 class FormBuilderAssistantState {
   final String sessionId;
   final List<FormBuilderAssistantMessage> messages;
@@ -92,23 +98,23 @@ class FormBuilderAssistantState {
     this.context,
   });
 
-  factory FormBuilderAssistantState.fromJson(Map<String, dynamic> json) =>
-      _$FormBuilderAssistantStateFromJson(json);
-  Map<String, dynamic> toJson() => _$FormBuilderAssistantStateToJson(this);
+  FormBuilderAssistantState copyWith({
+    String? sessionId,
+    List<FormBuilderAssistantMessage>? messages,
+    bool? isProcessing,
+    String? error,
+    Map<String, dynamic>? context,
+  }) {
+    return FormBuilderAssistantState(
+      sessionId: sessionId ?? this.sessionId,
+      messages: messages ?? this.messages,
+      isProcessing: isProcessing ?? this.isProcessing,
+      error: error ?? this.error,
+      context: context ?? this.context,
+    );
+  }
 }
 
-// Action types
 class FormBuilderAssistantActionTypes {
   static const String addField = 'add_field';
-  static const String modifyField = 'modify_field';
-  static const String removeField = 'remove_field';
-  static const String addSection = 'add_section';
-  static const String modifySection = 'modify_section';
-  static const String removeSection = 'remove_section';
-  static const String setTheme = 'set_theme';
-  static const String configureLogic = 'configure_logic';
-  static const String setValidation = 'set_validation';
-  static const String arrangeLayout = 'arrange_layout';
-  static const String addTranslation = 'add_translation';
-  static const String setAccessibility = 'set_accessibility';
 }

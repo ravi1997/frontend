@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 class DashboardWidgetModel {
   final String id;
   final String widgetType;
@@ -326,7 +328,7 @@ class DashboardCanvasModel {
       'background_color': backgroundColor,
       'grid_enabled': gridEnabled,
       'grid_size': gridSize,
-      'snap_to_grid': snapTo_grid,
+      'snap_to_grid': snapToGrid,
       'theme': theme,
     };
   }
@@ -458,6 +460,10 @@ class DashboardModel {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+}
+
+extension DashboardModelName on DashboardModel {
+  String get name => title;
 }
 
 class DashboardSettings {

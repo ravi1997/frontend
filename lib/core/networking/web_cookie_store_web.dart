@@ -1,10 +1,8 @@
-// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
-
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 
 String? readCookieValue(String cookieName) {
-  final cookies = html.document.cookie;
-  if (cookies == null || cookies.isEmpty) return null;
+  final cookies = web.window.document.cookie;
+  if (cookies.isEmpty) return null;
 
   final candidateNames = switch (cookieName) {
     'X-CSRF-TOKEN-ACCESS' => const ['csrf_access_token', 'csrf_token'],

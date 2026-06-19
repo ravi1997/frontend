@@ -1,11 +1,9 @@
-import 'package:json_annotation/json_annotation.dart';
 import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/id_reader.dart';
 
 // Updated for custom date parsing
 class FormDto {
   // Handle backend UUIDs from `id` or `_id`; do not fall back to slug.
-  @JsonKey(name: 'id', readValue: IdReader.readIdWithSlugCallback)
   final String id;
   final String title;
   final String status;
@@ -17,35 +15,19 @@ class FormDto {
   // The backend returns a list of version objects under 'versions'
   final List<FormVersionDto> versions;
 
-  @JsonKey(
-    name: 'created_at',
-    fromJson: AppDateUtils.parse,
-    toJson: AppDateUtils.toIso8601,
-  )
   final DateTime? createdAt;
 
-  @JsonKey(
-    name: 'updated_at',
-    fromJson: AppDateUtils.parse,
-    toJson: AppDateUtils.toIso8601,
-  )
   final DateTime? updatedAt;
 
   // Workflows might be a Map or dynamic
   final Map<String, dynamic> workflows;
 
   // Access Policy
-  @JsonKey(name: 'accessPolicy')
   final Map<String, dynamic>? accessPolicy;
-  @JsonKey(name: 'submissionSettings')
   final Map<String, dynamic> submissionSettings;
-  @JsonKey(name: 'advancedSettings')
   final Map<String, dynamic> advancedSettings;
-  @JsonKey(name: 'dataExportSettings')
   final Map<String, dynamic> dataExportSettings;
-  @JsonKey(name: 'style')
   final Map<String, dynamic> style;
-  @JsonKey(name: 'quickResponses')
   final List<Map<String, dynamic>> quickResponses;
 
   const FormDto({
@@ -229,11 +211,6 @@ class FormVersionDto {
   final String version;
   final List<Map<String, dynamic>> sections;
 
-  @JsonKey(
-    name: 'created_at',
-    fromJson: AppDateUtils.parse,
-    toJson: AppDateUtils.toIso8601,
-  )
   final DateTime? createdAt;
 
   const FormVersionDto({

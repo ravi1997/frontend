@@ -123,11 +123,11 @@ class _PublicDashboardPageState extends ConsumerState<PublicDashboardPage> {
             Container(
               height: 48,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withAlpha((0.3 * 255).round()),
               child: Row(
                 children: [
                   Icon(Icons.dashboard_rounded,
-                      size: 18, color: Colors.white.withOpacity(0.7)),
+                      size: 18, color: Colors.white.withAlpha((0.7 * 255).round())),
                   const SizedBox(width: 8),
                   Text(
                     dash.name,
@@ -141,7 +141,7 @@ class _PublicDashboardPageState extends ConsumerState<PublicDashboardPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
+                      color: Colors.green.withAlpha((0.2 * 255).round()),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
@@ -188,7 +188,7 @@ class _PublicDashboardPageState extends ConsumerState<PublicDashboardPage> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
+                                    color: Colors.black.withAlpha((0.08 * 255).round()),
                                     blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),

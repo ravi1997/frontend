@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:drift/drift.dart';
-import 'package:frontend/core/storage/local_database.dart';
-import 'package:frontend/modules/forms/responses/form_response.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/core/services/connectivity_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/shared/models/form_models.dart';
+import 'package:frontend/core/storage/local_database.dart';
 import 'package:frontend/modules/forms/responses/data/services/sync_service.dart';
 
 final offlineSyncServiceProvider = AsyncNotifierProvider<OfflineSyncService, void>(
@@ -67,12 +64,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
     final user = ref.read(authControllerProvider).value;
     if (user != null) {
       // Cache user profile in local database
-      await _db.into(_db.cachedForms).insertOnConflictUpdate(
-        CachedFormsCompanion(
-          id: Value('user_profile_${_currentUserId}'),
-          title: Value('User Profile'),
-          slug: Value('user_profile'),
-          rawJson: Value(jsonEncode(user.toJson())),
+      await _db.upsertCachedForm(
+        CachedFormRecord(
+          id: 'user_profile_$_currentUserId',
+          title: 'User Profile',
+          slug: 'user_profile',
+          rawJson: jsonEncode(user.toJson()),
+          cachedAt: DateTime.now(),
         ),
       );
     }
@@ -91,12 +89,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
       'synced_at': DateTime.now().toIso8601String(),
     };
 
-    await _db.into(_db.cachedForms).insertOnConflictUpdate(
-      CachedFormsCompanion(
-        id: Value('org_memberships_${_currentUserId}'),
-        title: Value('Organization Memberships'),
-        slug: Value('org_memberships'),
-        rawJson: Value(jsonEncode(orgData)),
+    await _db.upsertCachedForm(
+      CachedFormRecord(
+        id: 'org_memberships_$_currentUserId',
+        title: 'Organization Memberships',
+        slug: 'org_memberships',
+        rawJson: jsonEncode(orgData),
+        cachedAt: DateTime.now(),
       ),
     );
   }
@@ -120,12 +119,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
       ],
     };
 
-    await _db.into(_db.cachedForms).insertOnConflictUpdate(
-      CachedFormsCompanion(
-        id: Value('projects_${_currentUserId}'),
-        title: Value('Projects'),
-        slug: Value('projects'),
-        rawJson: Value(jsonEncode(projectsData)),
+    await _db.upsertCachedForm(
+      CachedFormRecord(
+        id: 'projects_$_currentUserId',
+        title: 'Projects',
+        slug: 'projects',
+        rawJson: jsonEncode(projectsData),
+        cachedAt: DateTime.now(),
       ),
     );
   }
@@ -167,12 +167,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
       'synced_at': DateTime.now().toIso8601String(),
     };
 
-    await _db.into(_db.cachedForms).insertOnConflictUpdate(
-      CachedFormsCompanion(
-        id: Value('form_schema_${_currentOrgId}_form_1'),
-        title: Value('Sample Form'),
-        slug: Value('sample_form'),
-        rawJson: Value(jsonEncode(formSchema)),
+    await _db.upsertCachedForm(
+      CachedFormRecord(
+        id: 'form_schema_${_currentOrgId}_form_1',
+        title: 'Sample Form',
+        slug: 'sample_form',
+        rawJson: jsonEncode(formSchema),
+        cachedAt: DateTime.now(),
       ),
     );
   }
@@ -197,12 +198,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
       'synced_at': DateTime.now().toIso8601String(),
     };
 
-    await _db.into(_db.cachedForms).insertOnConflictUpdate(
-      CachedFormsCompanion(
-        id: Value('notifications_${_currentUserId}'),
-        title: Value('Notifications'),
-        slug: Value('notifications'),
-        rawJson: Value(jsonEncode(notifications)),
+    await _db.upsertCachedForm(
+      CachedFormRecord(
+        id: 'notifications_$_currentUserId',
+        title: 'Notifications',
+        slug: 'notifications',
+        rawJson: jsonEncode(notifications),
+        cachedAt: DateTime.now(),
       ),
     );
   }
@@ -235,12 +237,13 @@ class OfflineSyncService extends AsyncNotifier<void> {
       'synced_at': DateTime.now().toIso8601String(),
     };
 
-    await _db.into(_db.cachedForms).insertOnConflictUpdate(
-      CachedFormsCompanion(
-        id: Value('plugin_schemas_${_currentOrgId}'),
-        title: Value('Plugin Schemas'),
-        slug: Value('plugin_schemas'),
-        rawJson: Value(jsonEncode(pluginSchemas)),
+    await _db.upsertCachedForm(
+      CachedFormRecord(
+        id: 'plugin_schemas_$_currentOrgId',
+        title: 'Plugin Schemas',
+        slug: 'plugin_schemas',
+        rawJson: jsonEncode(pluginSchemas),
+        cachedAt: DateTime.now(),
       ),
     );
   }
@@ -248,11 +251,10 @@ class OfflineSyncService extends AsyncNotifier<void> {
   /// Get cached form schema by ID
   Future<Map<String, dynamic>?> getCachedFormSchema(String formId) async {
     try {
-      final cachedForm = await (_db.select(_db.cachedForms)
-            ..where((t) => t.id.equals('form_schema_${_currentOrgId}_$formId')))
-          .getSingle();
-      
-      return jsonDecode(cachedForm.rawJson) as Map<String, dynamic>;
+      final cachedForm = await _db.getCachedForm('form_schema_${_currentOrgId}_$formId');
+      return cachedForm == null
+          ? null
+          : jsonDecode(cachedForm.rawJson) as Map<String, dynamic>;
     } catch (e) {
       return null;
     }
@@ -261,11 +263,10 @@ class OfflineSyncService extends AsyncNotifier<void> {
   /// Get cached projects
   Future<Map<String, dynamic>?> getCachedProjects() async {
     try {
-      final cachedProjects = await (_db.select(_db.cachedForms)
-            ..where((t) => t.id.equals('projects_${_currentUserId}')))
-          .getSingle();
-      
-      return jsonDecode(cachedProjects.rawJson) as Map<String, dynamic>;
+      final cachedProjects = await _db.getCachedForm('projects_$_currentUserId');
+      return cachedProjects == null
+          ? null
+          : jsonDecode(cachedProjects.rawJson) as Map<String, dynamic>;
     } catch (e) {
       return null;
     }
@@ -274,11 +275,10 @@ class OfflineSyncService extends AsyncNotifier<void> {
   /// Get cached notifications
   Future<Map<String, dynamic>?> getCachedNotifications() async {
     try {
-      final cachedNotifications = await (_db.select(_db.cachedForms)
-            ..where((t) => t.id.equals('notifications_${_currentUserId}')))
-          .getSingle();
-      
-      return jsonDecode(cachedNotifications.rawJson) as Map<String, dynamic>;
+      final cachedNotifications = await _db.getCachedForm('notifications_$_currentUserId');
+      return cachedNotifications == null
+          ? null
+          : jsonDecode(cachedNotifications.rawJson) as Map<String, dynamic>;
     } catch (e) {
       return null;
     }
@@ -289,9 +289,9 @@ class OfflineSyncService extends AsyncNotifier<void> {
     if (_currentUserId == null) return;
 
     await Future.wait([
-      _db.delete(_db.cachedForms).go(),
-      _db.delete(_db.cachedResponses).go(),
-      _db.delete(_db.pendingUploads).go(),
+      _db.deleteAllCachedForms(),
+      _db.deleteAllCachedResponses(),
+      _db.deleteAllPendingUploads(),
     ]);
 
     debugPrint('Cleared all cached data for user: $_currentUserId');

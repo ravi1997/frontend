@@ -1,7 +1,7 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
-
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> openExternalUrl(String url) async {
-  html.window.location.assign(url);
+  final uri = Uri.tryParse(url.trim());
+  if (uri == null) return;
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
 }

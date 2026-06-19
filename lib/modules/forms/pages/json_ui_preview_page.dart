@@ -242,7 +242,7 @@ class _JsonUiPreviewPageState extends State<JsonUiPreviewPage> {
                     border: Border.all(color: const Color(0xFF2E2E38)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withAlpha((0.2 * 255).round()),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )

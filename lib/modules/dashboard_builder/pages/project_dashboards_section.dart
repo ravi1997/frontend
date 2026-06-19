@@ -190,7 +190,7 @@ class _EmptyState extends StatelessWidget {
         color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: cs.outlineVariant.withOpacity(0.5),
+          color: cs.outlineVariant.withAlpha((0.5 * 255).round()),
           style: BorderStyle.solid,
         ),
       ),
@@ -338,14 +338,14 @@ class _DashboardCardState extends ConsumerState<_DashboardCard> {
             boxShadow: _hover
                 ? [
                     BoxShadow(
-                      color: cs.primary.withOpacity(0.15),
+                      color: cs.primary.withAlpha((0.15 * 255).round()),
                       blurRadius: 16,
                       offset: const Offset(0, 4),
                     )
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withAlpha((0.06 * 255).round()),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     )
@@ -360,8 +360,8 @@ class _DashboardCardState extends ConsumerState<_DashboardCard> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        cs.primaryContainer.withOpacity(0.6),
-                        cs.secondaryContainer.withOpacity(0.4),
+                        cs.primaryContainer.withAlpha((0.6 * 255).round()),
+                        cs.secondaryContainer.withAlpha((0.4 * 255).round()),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -377,7 +377,7 @@ class _DashboardCardState extends ConsumerState<_DashboardCard> {
                         Icon(
                           Icons.dashboard_rounded,
                           size: 40,
-                          color: cs.primary.withOpacity(0.5),
+                          color: cs.primary.withAlpha((0.5 * 255).round()),
                         ),
                         const SizedBox(height: 4),
                         Text(

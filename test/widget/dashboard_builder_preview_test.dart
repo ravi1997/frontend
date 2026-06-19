@@ -68,7 +68,7 @@ void main() {
         ],
         child: const MaterialApp(
           home: DashboardBuilderPage(
-            projectId: 'project-1',
+            organizationId: 'project-1',
             dashboardId: 'dashboard-1',
           ),
         ),

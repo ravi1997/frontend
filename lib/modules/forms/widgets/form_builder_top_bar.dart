@@ -8,7 +8,6 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
-import 'ai_assistant_dialog.dart';
 import 'llm_copilot_drawer.dart';
 import 'form_builder_assistant_widget.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';

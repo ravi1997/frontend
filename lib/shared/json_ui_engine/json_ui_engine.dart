@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../models/answer_value.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -120,7 +122,6 @@ class JsonUiEngine extends StatelessWidget {
 
       case 'text_field':
       case 'short_text':
-      case 'paragraph':
       case 'password':
       case 'number':
       case 'email':
@@ -173,7 +174,7 @@ class JsonUiEngine extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: DropdownButtonFormField<String>(
-            value: options.map((o) => o.toString()).contains(currentVal) ? currentVal : null,
+            initialValue: options.map((o) => o.toString()).contains(currentVal) ? currentVal : null,
             decoration: InputDecoration(
               labelText: displayLabel,
               errorText: errorText,
@@ -211,18 +212,27 @@ class JsonUiEngine extends StatelessWidget {
                 Text(errorText, style: const TextStyle(color: Colors.red, fontSize: 12)),
               ...options.map((option) {
                 final optStr = option.toString();
-                return RadioListTile<String>(
-                  title: Text(optStr),
-                  value: optStr,
-                  groupValue: currentVal,
-                  onChanged: (val) {
-                    if (val != null) {
-                      onAnswerChanged(
-                        id,
-                        AnswerValue(value: val, displayValue: val),
-                      );
-                    }
+                final isSelected = currentVal == optStr;
+                return InkWell(
+                  onTap: () {
+                    onAnswerChanged(
+                      id,
+                      AnswerValue(value: optStr, displayValue: optStr),
+                    );
                   },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(optStr)),
+                      ],
+                    ),
+                  ),
                 );
               }),
             ],

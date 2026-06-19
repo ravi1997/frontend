@@ -277,7 +277,7 @@ class _ResponseMergeDialogState extends ConsumerState<ResponseMergeDialog> {
                         
                         // Successfully resolved and submitted! Clean from database queue
                         final db = ref.read(localDatabaseProvider);
-                        await (db.delete(db.pendingUploads)..where((t) => t.id.equals(widget.pendingUploadId))).go();
+                        await db.deletePendingUpload(widget.pendingUploadId);
                         
                         // Force refresh of pending items
                         await syncService.syncPendingSubmissions();

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class AIAssistantDialog extends StatelessWidget {
-  final void Function(Map<String, dynamic>) onFormGenerated;
+class FormBuilderCopilot extends StatelessWidget {
   final dynamic currentForm;
+  final void Function(Map<String, dynamic>) onFormUpdated;
 
-  const AIAssistantDialog({
+  const FormBuilderCopilot({
     super.key,
     this.currentForm,
-    required this.onFormGenerated,
+    required this.onFormUpdated,
   });
 
   @override
