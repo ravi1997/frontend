@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/dashboard_builder/models/dashboard_canvas_models.dart';
 import 'package:frontend/modules/dashboard_builder/pages/dashboard_builder_page.dart';
 import 'package:frontend/modules/dashboard_builder/repositories/dashboard_builder_repository.dart';
@@ -10,7 +11,7 @@ import 'package:frontend/modules/dashboard_builder/repositories/dashboard_builde
 class _FakeDashboardBuilderRepository extends DashboardBuilderRepository {
   int includeDataRequests = 0;
 
-  _FakeDashboardBuilderRepository() : super(Dio());
+  _FakeDashboardBuilderRepository() : super(ApiClient(Dio()));
 
   @override
   Future<DashboardModel> getCanvas(
@@ -59,6 +60,13 @@ class _FakeDashboardBuilderRepository extends DashboardBuilderRepository {
 void main() {
   testWidgets('dashboard builder preview mode renders resolved data',
       (tester) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    
     final repo = _FakeDashboardBuilderRepository();
 
     await tester.pumpWidget(
