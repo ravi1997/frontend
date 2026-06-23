@@ -268,11 +268,10 @@ class _FormPreviewPageState extends ConsumerState<FormPreviewPage> {
     try {
       debugPrint('Triggering logic webhook: $resolvedUrl');
 
-      final apiClient = ref.read(dioProvider);
-      final response = await apiClient.get(resolvedUrl);
-      final responseData = response.data;
+      final apiClient = ref.read(apiClientProvider);
+      final responseData = (await apiClient.getMap(resolvedUrl));
 
-      if (mappings != null && responseData is Map<String, dynamic>) {
+      if (mappings != null) {
         final updates = <String, dynamic>{};
         final optUpdates = <String, List<FormQuestionOption>>{};
 

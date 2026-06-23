@@ -1,24 +1,18 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/networking/api_client.dart';
 import '../../../core/networking/dio_provider.dart';
-import '../../../core/networking/api_endpoints.dart';
 
 class FeatureFlagRepository {
   FeatureFlagRepository(this._apiClient);
 
-  final Dio _apiClient;
+  final ApiClient _apiClient;
 
   /// Retrieves all feature flags and overrides.
   Future<List<Map<String, dynamic>>> listFeatureFlags() async {
-    final response = await _apiClient.get(ApiEndpoints.listFeatureFlags);
-    final data = response.data;
-    if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-    }
-    return const [];
+    return (await _apiClient.listFeatureFlags())
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
   }
 
   /// Updates a global feature flag default state.
@@ -26,15 +20,7 @@ class FeatureFlagRepository {
     String flagKey,
     bool isEnabled,
   ) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.updateGlobalFeatureFlag(flagKey),
-      data: {'is_enabled': isEnabled},
-    );
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
+    return _apiClient.updateGlobalFeatureFlag(flagKey, isEnabled);
   }
 
   /// Configures a feature flag override for a specific organization.
@@ -43,18 +29,10 @@ class FeatureFlagRepository {
     String orgId,
     bool isEnabled,
   ) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.updateFeatureFlagOverride(flagKey, orgId),
-      data: {'is_enabled': isEnabled},
-    );
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
+    return _apiClient.updateFeatureFlagOverride(flagKey, orgId, isEnabled);
   }
 }
 
 final featureFlagRepositoryProvider = Provider<FeatureFlagRepository>((ref) {
-  return FeatureFlagRepository(ref.watch(dioProvider));
+  return FeatureFlagRepository(ref.watch(apiClientProvider));
 });

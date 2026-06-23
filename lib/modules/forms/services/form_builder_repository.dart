@@ -81,6 +81,5 @@ abstract class FormBuilderRepository {
 
 final formBuilderRepositoryProvider = Provider<FormBuilderRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(dioProvider);
-  return FormBuilderRepositoryImpl(apiClient);
+  return FormBuilderRepositoryImpl(ref.watch(apiClientProvider));
 });

@@ -52,10 +52,9 @@ void main() {
     final payload = FormMapper.toBackendJson(form);
     expect(payload['slug'], 'demo-form');
     expect(payload['description'], 'Demo description');
-    expect(payload['submissionSettings'], isA<Map>());
-    expect(payload['dataExportSettings'], isA<Map>());
+    expect(payload['submission_settings'], isA<Map>());
     expect(payload['data_export_settings'], isA<Map>());
-    expect(payload['advancedSettings'], isA<Map>());
+    expect(payload['advanced_settings'], isA<Map>());
     expect(payload['style'], isA<Map>());
   });
 
@@ -65,12 +64,12 @@ void main() {
       'title': 'Demo',
       'slug': 'demo-form',
       'description': 'Demo description',
-      'submissionSettings': {
+      'submission_settings': {
         'confirmation_message': 'Thanks',
         'redirect_after_submit': true,
         'redirect_url': 'https://example.com/thanks',
       },
-      'dataExportSettings': {
+      'data_export_settings': {
         'csv_defaults': {'delimiter': ';', 'header_mode': 'keys'},
         'retention_days': 21,
         'field_mapping': {'ssn': 'Government ID'},
@@ -79,7 +78,7 @@ void main() {
           'fields': ['ssn'],
         },
       },
-      'advancedSettings': {
+      'advanced_settings': {
         'slug': 'demo-form',
         'internalCode': 'DEMO_01',
         'localeDefault': 'en-US',

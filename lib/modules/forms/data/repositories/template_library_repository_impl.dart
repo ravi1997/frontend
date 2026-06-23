@@ -1,6 +1,6 @@
 import 'package:logger/logger.dart';
 import 'package:uuid/uuid.dart';
-import 'package:dio/dio.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/forms/models/form_template.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/template_library_repository.dart';
@@ -9,7 +9,7 @@ import 'package:frontend/modules/forms/services/template_library_repository.dart
 ///
 /// Provides pre-built form templates and manages template operations.
 class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
   final Logger _logger = Logger();
   final Uuid _uuid = const Uuid();
 
@@ -36,8 +36,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     }
 
     try {
-      final response = await _apiClient.get('/templates');
-      final List<dynamic> data = response.data['templates'] ?? [];
+      final List<dynamic> data = await _apiClient.listTemplates();
       _cachedTemplates = data
           .map((json) => FormTemplate.fromJson(json))
           .toList();
@@ -71,8 +70,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   @override
   Future<FormTemplate> getTemplateById(String templateId) async {
     try {
-      final response = await _apiClient.get('/templates/$templateId');
-      return FormTemplate.fromJson(response.data);
+      return FormTemplate.fromJson(await _apiClient.getTemplate(templateId));
     } catch (e, s) {
       _logger.w(
         'Failed to fetch template by ID from API, using defaults',
@@ -94,12 +92,9 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     String formName,
   ) async {
     try {
-      final response = await _apiClient.post(
-        '/templates/$templateId/create-form',
-        data: {'name': formName},
-      );
+      final response = await _apiClient.createFormFromTemplate(templateId, formName);
       await incrementUsageCount(templateId);
-      return response.data['formId'];
+      return response['formId'];
     } catch (e, s) {
       _logger.w(
         'API create form failed, creating locally',
@@ -127,7 +122,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
         style: template.form.style,
       );
       // Save the form (this would normally call the form repository)
-      await _apiClient.post('/forms', data: newForm.toJson());
+      await _apiClient.postMap('/forms', data: newForm.toJson());
       await incrementUsageCount(templateId);
       return newForm.id;
     }
@@ -136,7 +131,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   @override
   Future<void> incrementUsageCount(String templateId) async {
     try {
-      await _apiClient.post('/templates/$templateId/increment-usage');
+      await _apiClient.incrementTemplateUsage(templateId);
     } catch (e, s) {
       // Silently fail for offline mode
       _logger.d('Failed to increment usage count', error: e, stackTrace: s);
@@ -152,17 +147,14 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
     List<String> tags,
   ) async {
     try {
-      final response = await _apiClient.post(
-        '/templates',
-        data: {
-          'formId': formId,
-          'name': templateName,
-          'description': description,
-          'category': category.name,
-          'tags': tags,
-        },
+      final response = await _apiClient.createCustomTemplate(
+        formId,
+        templateName,
+        description,
+        category,
+        tags,
       );
-      return FormTemplate.fromJson(response.data);
+      return FormTemplate.fromJson(response);
     } catch (e, s) {
       _logger.w(
         'API create template failed, creating locally',
@@ -193,7 +185,7 @@ class TemplateLibraryRepositoryImpl implements TemplateLibraryRepository {
   @override
   Future<void> deleteTemplate(String templateId) async {
     try {
-      await _apiClient.delete('/templates/$templateId');
+      await _apiClient.deleteTemplate(templateId);
     } catch (e, s) {
       _logger.e('Failed to delete template', error: e, stackTrace: s);
       throw Exception('Failed to delete template');

@@ -31,9 +31,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
   int _slugValidationEpoch = 0;
 
   Map<String, dynamic> get _settings => Map<String, dynamic>.from(
-    widget.form['advancedSettings'] ??
-        widget.form['advanced_settings'] ??
-        const {},
+    widget.form['advanced_settings'] ?? const {},
   );
 
   @override
@@ -46,24 +44,21 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
     );
     _internalCodeController = TextEditingController(
       text:
-          settings['internalCode']?.toString() ??
           settings['internal_code']?.toString() ??
           '',
     );
     _localeController = TextEditingController(
       text:
-          settings['localeDefault']?.toString() ??
           settings['locale_default']?.toString() ??
           'en',
     );
     _fallbackController = TextEditingController(
       text:
-          settings['fallbackLanguage']?.toString() ??
           settings['fallback_language']?.toString() ??
           'en',
     );
     final apiIds = Map<String, dynamic>.from(
-      settings['apiIdentifiers'] ?? settings['api_identifiers'] ?? const {},
+      settings['api_identifiers'] ?? const {},
     );
     _apiIdController = TextEditingController(
       text: apiIds['api']?.toString() ?? '',
@@ -79,7 +74,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
     super.didUpdateWidget(oldWidget);
     final settings = _settings;
     final apiIds = Map<String, dynamic>.from(
-      settings['apiIdentifiers'] ?? settings['api_identifiers'] ?? const {},
+      settings['api_identifiers'] ?? const {},
     );
     _sync(
       _slugController,
@@ -87,21 +82,15 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
     );
     _sync(
       _internalCodeController,
-      settings['internalCode']?.toString() ??
-          settings['internal_code']?.toString() ??
-          '',
+      settings['internal_code']?.toString() ?? '',
     );
     _sync(
       _localeController,
-      settings['localeDefault']?.toString() ??
-          settings['locale_default']?.toString() ??
-          'en',
+      settings['locale_default']?.toString() ?? 'en',
     );
     _sync(
       _fallbackController,
-      settings['fallbackLanguage']?.toString() ??
-          settings['fallback_language']?.toString() ??
-          'en',
+      settings['fallback_language']?.toString() ?? 'en',
     );
     _sync(_apiIdController, apiIds['api']?.toString() ?? '');
     _sync(_webhookIdController, apiIds['webhook']?.toString() ?? '');
@@ -188,21 +177,19 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
     widget.onChanged({
       ...widget.form,
       'slug': settings['slug'],
-      'advancedSettings': settings,
+      'advanced_settings': settings,
     });
   }
 
   Map<String, dynamic> _apiIdentifiers(Map<String, dynamic> settings) {
     return Map<String, dynamic>.from(
-      settings['apiIdentifiers'] ?? settings['api_identifiers'] ?? const {},
+      settings['api_identifiers'] ?? const {},
     );
   }
 
   Map<String, dynamic> _experimentalFlags(Map<String, dynamic> settings) {
     return Map<String, dynamic>.from(
-      settings['experimentalFlags'] ??
-          settings['experimental_flags'] ??
-          const {},
+      settings['experimental_flags'] ?? const {},
     );
   }
 
@@ -261,21 +248,21 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
             label: 'Internal code',
             placeholder: 'ONB_2026',
             controller: _internalCodeController,
-            onChanged: (val) => _emit({...settings, 'internalCode': val}),
+            onChanged: (val) => _emit({...settings, 'internal_code': val}),
           ),
           const SizedBox(height: 12),
           PropertyBuilderUtils.buildTextField(
             label: 'Default locale',
             placeholder: 'en',
             controller: _localeController,
-            onChanged: (val) => _emit({...settings, 'localeDefault': val}),
+            onChanged: (val) => _emit({...settings, 'locale_default': val}),
           ),
           const SizedBox(height: 12),
           PropertyBuilderUtils.buildTextField(
             label: 'Fallback language',
             placeholder: 'en',
             controller: _fallbackController,
-            onChanged: (val) => _emit({...settings, 'fallbackLanguage': val}),
+            onChanged: (val) => _emit({...settings, 'fallback_language': val}),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -290,7 +277,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
             onChanged: (val) {
               final identifiers = _apiIdentifiers(settings);
               identifiers['api'] = val;
-              _emit({...settings, 'apiIdentifiers': identifiers});
+              _emit({...settings, 'api_identifiers': identifiers});
             },
           ),
           const SizedBox(height: 12),
@@ -301,7 +288,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
             onChanged: (val) {
               final identifiers = _apiIdentifiers(settings);
               identifiers['webhook'] = val;
-              _emit({...settings, 'apiIdentifiers': identifiers});
+              _emit({...settings, 'api_identifiers': identifiers});
             },
           ),
           const SizedBox(height: 16),
@@ -317,7 +304,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
             onChanged: (val) {
               final flags = _experimentalFlags(settings);
               flags['history_lookup'] = val;
-              _emit({...settings, 'experimentalFlags': flags});
+              _emit({...settings, 'experimental_flags': flags});
             },
           ),
           const SizedBox(height: 12),
@@ -328,7 +315,7 @@ class _FormAdvancedSettingsState extends ConsumerState<FormAdvancedSettings> {
             onChanged: (val) {
               final flags = _experimentalFlags(settings);
               flags['beta_builder'] = val;
-              _emit({...settings, 'experimentalFlags': flags});
+              _emit({...settings, 'experimental_flags': flags});
             },
           ),
           const SizedBox(height: 16),

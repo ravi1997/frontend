@@ -39,16 +39,16 @@ class FormMapper {
       'version': activeVersion,
       'isLatest': true,
       'sections': sections,
-      'quickResponses': quickResponses,
+      'quick_responses': quickResponses,
       'layout': dto.uiType ?? 'flex',
       'updatedAt': dto.updatedAt?.toIso8601String(),
       'workflows': dto.workflows,
-      'accessPolicy': dto.accessPolicy,
-      'submissionSettings': Map<String, dynamic>.from(dto.submissionSettings),
-      'dataExportSettings': _normalizeDataExportSettings(
+      'access_policy': dto.accessPolicy,
+      'submission_settings': Map<String, dynamic>.from(dto.submissionSettings),
+      'data_export_settings': _normalizeDataExportSettings(
         dto.dataExportSettings,
       ),
-      'advancedSettings': Map<String, dynamic>.from(dto.advancedSettings),
+      'advanced_settings': Map<String, dynamic>.from(dto.advancedSettings),
       'style': Map<String, dynamic>.from(dto.style),
       'versionHistory': dto.versions.map((v) {
         return {
@@ -94,23 +94,17 @@ class FormMapper {
         versionData?['sections'] ?? mapData['sections'] ?? [];
     final advancedSettings = Map<String, dynamic>.from(
       versionData?['advanced_settings'] ??
-          versionData?['advancedSettings'] ??
           mapData['advanced_settings'] ??
-          mapData['advancedSettings'] ??
           const <String, dynamic>{},
     );
     final dataExportSettings = _normalizeDataExportSettings(
       versionData?['data_export_settings'] ??
-          versionData?['dataExportSettings'] ??
           mapData['data_export_settings'] ??
-          mapData['dataExportSettings'] ??
           const <String, dynamic>{},
     );
     final quickResponses = _normalizeQuickResponses(
       versionData?['quick_responses'] ??
-          versionData?['quickResponses'] ??
           mapData['quick_responses'] ??
-          mapData['quickResponses'] ??
           const [],
     );
 
@@ -129,12 +123,10 @@ class FormMapper {
       'layout': mapData['uiType'] ?? mapData['ui_type'] ?? 'flex',
       'updatedAt': mapData['updated_at'],
       'workflows': mapData['workflows'] ?? <String, dynamic>{},
-      'accessPolicy': mapData['access_policy'] ?? mapData['accessPolicy'],
+      'accessPolicy': mapData['access_policy'],
       'submissionSettings':
           versionData?['submission_settings'] ??
-          versionData?['submissionSettings'] ??
           mapData['submission_settings'] ??
-          mapData['submissionSettings'] ??
           <String, dynamic>{},
       'dataExportSettings': dataExportSettings,
       'advancedSettings': advancedSettings,
@@ -151,25 +143,6 @@ class FormMapper {
     };
 
     return BuilderForm.fromJson(transformedData);
-  }
-
-  // ── Create payload (POST /forms/) ────────────────────────────────────────
-  // Backend expects minimal fields for creation. Sections are optional on
-  // create — the backend initializes an empty version automatically.
-  static Map<String, dynamic> toCreatePayload(BuilderForm form) {
-    return {
-      'title': form.title,
-      'status': form.status,
-      'description': '',
-      'default_language': 'en',
-      'supported_languages': ['en'],
-    };
-  }
-
-  // ── Update payload (PUT /forms/<id>) ─────────────────────────────────────
-  // For metadata-only updates. Sections are NOT included here.
-  static Map<String, dynamic> toUpdatePayload(BuilderForm form) {
-    return {'title': form.title, 'status': form.status};
   }
 
   // ── Legacy full payload (used for backwards compat) ──────────────────────
@@ -191,7 +164,7 @@ class FormMapper {
         {
           'version': form.version,
           'sections': sectionJson,
-          'quickResponses': quickResponses,
+          'quick_responses': quickResponses,
           'created_at': DateTime.now().toIso8601String(),
         },
       ],
@@ -199,15 +172,10 @@ class FormMapper {
       'workflows': workflowJson,
       'metadata': {...form.metadata, 'workflowSettings': workflowJson},
       'access_policy': form.accessPolicy,
-      'accessPolicy': form.accessPolicy,
       'submission_settings': form.submissionSettings,
-      'submissionSettings': form.submissionSettings,
       'quick_responses': quickResponses,
-      'quickResponses': quickResponses,
       'data_export_settings': dataExportJson,
-      'dataExportSettings': dataExportJson,
       'advanced_settings': form.advancedSettings,
-      'advancedSettings': form.advancedSettings,
       'style': form.style,
       'ui_type': _formLayoutToApi(form.layout),
     };
@@ -229,15 +197,10 @@ class FormMapper {
       'workflows': workflowJson,
       'metadata': {...form.metadata, 'workflowSettings': workflowJson},
       'access_policy': form.accessPolicy,
-      'accessPolicy': form.accessPolicy,
       'submission_settings': form.submissionSettings,
-      'submissionSettings': form.submissionSettings,
       'quick_responses': quickResponses,
-      'quickResponses': quickResponses,
       'data_export_settings': dataExportJson,
-      'dataExportSettings': dataExportJson,
       'advanced_settings': form.advancedSettings,
-      'advancedSettings': form.advancedSettings,
       'style': form.style,
       'ui_type': _formLayoutToApi(form.layout),
       // 'is_template': form.isTemplate, // If applicable
@@ -249,7 +212,7 @@ class FormMapper {
     return {
       'version': form.version,
       'sections': form.sections.map(_sectionToBackendJson).toList(),
-      'quickResponses': _normalizeQuickResponses(form.quickResponses),
+      'quick_responses': _normalizeQuickResponses(form.quickResponses),
       'created_at': DateTime.now().toIso8601String(),
     };
   }

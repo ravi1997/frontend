@@ -559,41 +559,32 @@ class Form {
       status: json['status']?.toString() ?? 'draft',
       slug: json['slug']?.toString() ?? '',
       description: json['description']?.toString(),
-      organizationId:
-          json['organizationId']?.toString() ??
-          json['organization_id']?.toString(),
-      createdBy:
-          json['createdBy']?.toString() ?? json['created_by']?.toString(),
+      organizationId: json['organization_id']?.toString(),
+      createdBy: json['created_by']?.toString(),
       version:
           json['version']?.toString() ??
-          json['activeVersion']?.toString() ??
+          json['active_version']?.toString() ??
           '1.0',
-      activeVersion:
-          json['activeVersion']?.toString() ??
-          json['active_version']?.toString(),
-      isPublished: json['isPublished'] as bool? ?? false,
-      isLatest: json['isLatest'] as bool? ?? true,
-      isPublic: json['isPublic'] as bool? ?? false,
-      uiType:
-          json['uiType']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
-      layout:
-          json['layout']?.toString() ?? json['ui_type']?.toString() ?? 'flex',
+      activeVersion: json['active_version']?.toString(),
+      isPublished: json['is_published'] as bool? ?? false,
+      isLatest: json['is_latest'] as bool? ?? true,
+      isPublic: json['is_public'] as bool? ?? false,
+      uiType: json['ui_type']?.toString() ?? 'flex',
+      layout: json['ui_type']?.toString() ?? 'flex',
       style: Map<String, dynamic>.from(json['style'] ?? const {}),
       workflows: Map<String, dynamic>.from(json['workflows'] ?? const {}),
       accessPolicy: Map<String, dynamic>.from(
-        json['accessPolicy'] ?? json['access_policy'] ?? const {},
+        json['access_policy'] ?? const {},
       ),
       submissionSettings: Map<String, dynamic>.from(
-        json['submissionSettings'] ?? json['submission_settings'] ?? const {},
+        json['submission_settings'] ?? const {},
       ),
-      quickResponses: parseQuickResponses(
-        json['quickResponses'] ?? json['quick_responses'] ?? const [],
-      ),
+      quickResponses: parseQuickResponses(json['quick_responses'] ?? const []),
       dataExportSettings: Map<String, dynamic>.from(
-        json['dataExportSettings'] ?? json['data_export_settings'] ?? const {},
+        json['data_export_settings'] ?? const {},
       ),
       advancedSettings: Map<String, dynamic>.from(
-        json['advancedSettings'] ?? json['advanced_settings'] ?? const {},
+        json['advanced_settings'] ?? const {},
       ),
       metadata: Map<String, dynamic>.from(json['metadata'] ?? const {}),
       sections: sections,
@@ -610,22 +601,22 @@ class Form {
     'status': status,
     'slug': slug,
     'description': description,
-    'organizationId': organizationId,
-    'createdBy': createdBy,
+    'organization_id': organizationId,
+    'created_by': createdBy,
     'version': version,
-    'activeVersion': activeVersion,
-    'isPublished': isPublished,
-    'isLatest': isLatest,
-    'isPublic': isPublic,
-    'uiType': uiType,
+    'active_version': activeVersion,
+    'is_published': isPublished,
+    'is_latest': isLatest,
+    'is_public': isPublic,
+    'ui_type': uiType,
     'layout': layout,
     'style': style,
     'workflows': workflows,
-    'accessPolicy': accessPolicy,
-    'submissionSettings': submissionSettings,
-    'quickResponses': quickResponses,
-    'dataExportSettings': dataExportSettings,
-    'advancedSettings': advancedSettings,
+    'access_policy': accessPolicy,
+    'submission_settings': submissionSettings,
+    'quick_responses': quickResponses,
+    'data_export_settings': dataExportSettings,
+    'advanced_settings': advancedSettings,
     'metadata': metadata,
     'sections': sections.map((e) => e.toJson()).toList(),
     'versions': versions.map((e) => e.toJson()).toList(),

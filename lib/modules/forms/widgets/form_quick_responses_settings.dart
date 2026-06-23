@@ -20,7 +20,7 @@ class FormQuickResponsesSettings extends StatefulWidget {
 class _FormQuickResponsesSettingsState
     extends State<FormQuickResponsesSettings> {
   List<Map<String, dynamic>> get _responses {
-    final raw = widget.form['quickResponses'] ?? widget.form['quick_responses'];
+    final raw = widget.form['quick_responses'];
     if (raw is! List) return const [];
     return raw.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
   }
@@ -28,7 +28,6 @@ class _FormQuickResponsesSettingsState
   void _emit(List<Map<String, dynamic>> responses) {
     widget.onChanged({
       ...widget.form,
-      'quickResponses': responses,
       'quick_responses': responses,
     });
   }
@@ -66,19 +65,15 @@ class _FormQuickResponsesSettingsState
       text: (response['tags'] as List? ?? const []).join(', '),
     );
     final ownerController = TextEditingController(
-      text: response['owner_id']?.toString() ??
-          response['ownerId']?.toString() ??
-          '',
+      text: response['owner_id']?.toString() ?? '',
     );
     final fieldValuesController = TextEditingController(
       text: const JsonEncoder.withIndent('  ').convert(
-        response['field_values'] ?? response['fieldValues'] ?? const {},
+        response['field_values'] ?? const {},
       ),
     );
     String visibility = response['visibility']?.toString() ?? 'personal';
-    bool isArchived = response['is_archived'] as bool? ??
-        response['isArchived'] as bool? ??
-        false;
+    bool isArchived = response['is_archived'] as bool? ?? false;
     String? errorText;
 
     return showDialog<Map<String, dynamic>>(

@@ -23,9 +23,7 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
   late TextEditingController _draftCleanupController;
 
   Map<String, dynamic> get _settings => Map<String, dynamic>.from(
-    widget.form['submissionSettings'] ??
-        widget.form['submission_settings'] ??
-        const {},
+    widget.form['submission_settings'] ?? const {},
   );
 
   @override
@@ -33,7 +31,7 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
     super.initState();
     final settings = _settings;
     final draft = Map<String, dynamic>.from(
-      settings['draft_handling'] ?? settings['draftHandling'] ?? const {},
+      settings['draft_handling'] ?? const {},
     );
     _confirmationController = TextEditingController(
       text: settings['confirmation_message']?.toString() ?? '',
@@ -60,7 +58,7 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
     super.didUpdateWidget(oldWidget);
     final settings = _settings;
     final draft = Map<String, dynamic>.from(
-      settings['draft_handling'] ?? settings['draftHandling'] ?? const {},
+      settings['draft_handling'] ?? const {},
     );
     _sync(
       _confirmationController,
@@ -100,7 +98,7 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
   }
 
   void _emit(Map<String, dynamic> settings) {
-    widget.onChanged({...widget.form, 'submissionSettings': settings});
+    widget.onChanged({...widget.form, 'submission_settings': settings});
   }
 
   bool _isValidRedirectUrl(String value) {
@@ -137,7 +135,7 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
 
   Map<String, dynamic> _draftSettings(Map<String, dynamic> settings) {
     return Map<String, dynamic>.from(
-      settings['draft_handling'] ?? settings['draftHandling'] ?? const {},
+      settings['draft_handling'] ?? const {},
     );
   }
 
@@ -148,13 +146,9 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
     final saveAndResume = settings['save_and_resume'] == true;
     final allowMultiple = settings['allow_multiple_submissions'] == true;
     final draft = _draftSettings(settings);
-    final autoSave = draft['autoSave'] == true || draft['auto_save'] == true;
-    final manualSave =
-        draft['manualSave'] == true || draft['manual_save'] == true;
-    final restoreMode =
-        draft['restoreMode']?.toString() ??
-        draft['restore_mode']?.toString() ??
-        'token';
+    final autoSave = draft['auto_save'] == true;
+    final manualSave = draft['manual_save'] == true;
+    final restoreMode = draft['restore_mode']?.toString() ?? 'token';
 
     return Form(
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -237,7 +231,6 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
                 value: autoSave,
                 onChanged: (val) {
                   final next = _draftSettings(settings);
-                  next['autoSave'] = val;
                   next['auto_save'] = val;
                   _emit({...settings, 'draft_handling': next});
                 },
@@ -248,7 +241,6 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
                 value: manualSave,
                 onChanged: (val) {
                   final next = _draftSettings(settings);
-                  next['manualSave'] = val;
                   next['manual_save'] = val;
                   _emit({...settings, 'draft_handling': next});
                 },
@@ -265,7 +257,6 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
                 onChanged: (val) {
                   final next = _draftSettings(settings);
                   final parsed = int.tryParse(val);
-                  next['expirationDays'] = parsed;
                   next['expiration_days'] = parsed;
                   _emit({...settings, 'draft_handling': next});
                 },
@@ -282,7 +273,6 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
                 onChanged: (val) {
                   final next = _draftSettings(settings);
                   final parsed = int.tryParse(val);
-                  next['cleanupAfterDays'] = parsed;
                   next['cleanup_after_days'] = parsed;
                   _emit({...settings, 'draft_handling': next});
                 },
@@ -308,7 +298,6 @@ class _FormSubmissionSettingsState extends State<FormSubmissionSettings> {
                 onChanged: (val) {
                   if (val == null) return;
                   final next = _draftSettings(settings);
-                  next['restoreMode'] = val;
                   next['restore_mode'] = val;
                   _emit({...settings, 'draft_handling': next});
                 },

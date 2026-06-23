@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/forms/models/condition_rule.dart';
 import 'package:frontend/modules/forms/services/condition_repository.dart';
 
@@ -7,7 +7,7 @@ import 'package:frontend/modules/forms/services/condition_repository.dart';
 ///
 /// Handles CRUD operations for conditional logic rules via the backend API.
 class ConditionRepositoryImpl implements ConditionRepository {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
   final Logger _logger = Logger();
 
   ConditionRepositoryImpl(this._apiClient);
@@ -15,8 +15,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<List<ConditionalRule>> getRules(String formId) async {
     try {
-      final response = await _apiClient.get('/forms/$formId/conditions');
-      final data = response.data as List<dynamic>;
+      final data = await _apiClient.getRules(formId);
 
       final rules = data.map((item) {
         return ConditionalRule.fromJson(item as Map<String, dynamic>);
@@ -40,10 +39,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
     String fieldId,
   ) async {
     try {
-      final response = await _apiClient.get(
-        '/forms/$formId/conditions?fieldId=$fieldId',
-      );
-      final data = response.data as List<dynamic>;
+      final data = await _apiClient.getRulesForField(formId, fieldId);
 
       final rules = data.map((item) {
         return ConditionalRule.fromJson(item as Map<String, dynamic>);
@@ -64,10 +60,9 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<ConditionalRule> getRule(String ruleId) async {
     try {
-      final response = await _apiClient.get('/conditions/$ruleId');
-
+      final response = await _apiClient.getRule(ruleId);
       _logger.i('Loaded rule: $ruleId');
-      return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
+      return ConditionalRule.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to load rule', error: e, stackTrace: stack);
       throw _createException('Failed to load rule: $ruleId', e, stack);
@@ -77,13 +72,9 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<ConditionalRule> createRule(ConditionalRule rule) async {
     try {
-      final response = await _apiClient.post(
-        '/forms/${rule.targetId.split('.')[0]}/conditions',
-        data: rule.toJson(),
-      );
-
+      final response = await _apiClient.createRule(rule);
       _logger.i('Created rule: ${rule.name}');
-      return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
+      return ConditionalRule.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to create rule', error: e, stackTrace: stack);
       throw _createException('Failed to create rule: ${rule.name}', e, stack);
@@ -93,13 +84,9 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<ConditionalRule> updateRule(ConditionalRule rule) async {
     try {
-      final response = await _apiClient.put(
-        '/conditions/${rule.id}',
-        data: rule.toJson(),
-      );
-
+      final response = await _apiClient.updateRule(rule);
       _logger.i('Updated rule: ${rule.name}');
-      return ConditionalRule.fromJson(response.data as Map<String, dynamic>);
+      return ConditionalRule.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to update rule', error: e, stackTrace: stack);
       throw _createException('Failed to update rule: ${rule.name}', e, stack);
@@ -109,7 +96,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<void> deleteRule(String ruleId) async {
     try {
-      await _apiClient.delete('/conditions/$ruleId');
+      await _apiClient.deleteRule(ruleId);
       _logger.i('Deleted rule: $ruleId');
     } catch (e, stack) {
       _logger.e('Failed to delete rule', error: e, stackTrace: stack);
@@ -120,10 +107,7 @@ class ConditionRepositoryImpl implements ConditionRepository {
   @override
   Future<void> reorderRules(String formId, List<String> ruleIds) async {
     try {
-      await _apiClient.put(
-        '/forms/$formId/conditions/reorder',
-        data: {'ruleIds': ruleIds},
-      );
+      await _apiClient.reorderRules(formId, ruleIds);
       _logger.i('Reordered rules for form: $formId');
     } catch (e, stack) {
       _logger.e('Failed to reorder rules', error: e, stackTrace: stack);
@@ -137,16 +121,11 @@ class ConditionRepositoryImpl implements ConditionRepository {
     Map<String, dynamic> fieldValues,
   ) async {
     try {
-      final response = await _apiClient.post(
-        '/forms/$formId/conditions/evaluate',
-        data: {'fieldValues': fieldValues},
-      );
-
-      final data = response.data as Map<String, dynamic>;
+      final data = await _apiClient.evaluateRules(formId, fieldValues);
       final results = <String, bool>{};
 
       for (final entry in data.entries) {
-        results[entry.key] = entry.value as bool;
+        results[entry.key] = entry.value;
       }
 
       return results;

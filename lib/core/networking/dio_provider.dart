@@ -7,6 +7,7 @@ import 'unified_network_interceptor.dart';
 import 'package:frontend/modules/auth/auth_service.dart';
 import 'package:frontend/core/services/snackbar_service.dart';
 import 'api_endpoints.dart';
+import 'api_client.dart';
 import 'app_config.dart';
 import 'web_cookie_store.dart'
     if (dart.library.html) 'web_cookie_store_web.dart';
@@ -33,7 +34,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   final tokenService = ref.read(tokenServiceProvider.notifier);
   final snackbarService = ref.read(snackbarServiceProvider);
-  final authService = AuthService(dio, tokenService);
+  final authService = AuthService(ApiClient(dio), tokenService);
 
   dio.interceptors.add(
     UnifiedNetworkInterceptor(snackbarService: snackbarService),
@@ -74,4 +75,8 @@ final dioProvider = Provider<Dio>((ref) {
   });
 
   return dio;
+});
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient(ref.watch(dioProvider));
 });

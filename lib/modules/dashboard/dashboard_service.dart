@@ -1,45 +1,28 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
 
 class DashboardService {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
 
   DashboardService(this._apiClient);
 
   Future<DashboardData> getDashboardData() async {
-    // Fetch dashboard stats from analytics endpoint
-    final statsResponse = await _apiClient.get(ApiEndpoints.getDashboardStats);
-    final statsData = _asMap(statsResponse.data);
-
-    // Fetch projects as the primary dashboard source.
-    final projectsResponse = await _apiClient.get(ApiEndpoints.listProjects);
-    final projectsData = projectsResponse.data;
-    final projectsMap = _asMap(projectsData);
-    final List<dynamic> projectsJson = projectsData is List
-        ? projectsData
-        : _asList(
-            projectsMap['items'] ??
-                projectsMap['data'] ??
-                projectsMap['results'],
-          );
-
-    final dashboardProjects = projectsJson.map((json) {
-      final map = _asMap(json);
-      return MapEntry(ProjectSummary.fromJson(map), map);
-    }).toList();
+    final statsData = await _apiClient.getDashboardStats();
+    final projectsData = await _apiClient.listProjects();
+    final dashboardProjects = projectsData
+        .map((json) {
+          final map = _asMap(json);
+          return MapEntry(ProjectSummary.fromJson(map), map);
+        })
+        .toList();
 
     dashboardProjects.sort(
       (a, b) => a.key.title.toLowerCase().compareTo(b.key.title.toLowerCase()),
     );
 
-    final List<ProjectSummary> projects = dashboardProjects
-        .map((entry) => entry.key)
-        .toList();
-
-    // Keep the dashboard usable even if analytics returns partial data.
+    final projects = dashboardProjects.map((entry) => entry.key).toList();
     final recentForms = dashboardProjects.map((entry) {
       final project = entry.key;
       final projectMap = entry.value;
@@ -57,13 +40,10 @@ class DashboardService {
 
     return DashboardData(
       stats: DashboardStats(
-        totalForms: (statsData['total_forms'] as num? ?? projects.length)
-            .toInt(),
+        totalForms: (statsData['total_forms'] as num? ?? projects.length).toInt(),
         activeForms:
             (statsData['active_forms'] as num? ??
-                    projects
-                        .where((f) => f.status.toLowerCase() == 'published')
-                        .length)
+                    projects.where((f) => f.status.toLowerCase() == 'published').length)
                 .toInt(),
         totalResponses: (statsData['total_responses'] as num? ?? 0).toInt(),
       ),
@@ -73,8 +53,7 @@ class DashboardService {
   }
 
   Future<void> deleteForm(String id) async {
-    // Dashboard cards are project summaries in the current API contract.
-    await _apiClient.delete(ApiEndpoints.deleteProject(id));
+    await _apiClient.deleteProject(id);
   }
 
   Future<void> duplicateForm(String originalFormId, String newTitle) async {
@@ -93,13 +72,6 @@ class DashboardService {
     return <String, dynamic>{};
   }
 
-  List<dynamic> _asList(dynamic value) {
-    if (value is List) {
-      return value;
-    }
-    return const [];
-  }
-
   DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
     if (value is DateTime) return value;
@@ -108,6 +80,5 @@ class DashboardService {
 }
 
 final dashboardServiceProvider = Provider<DashboardService>((ref) {
-  final apiClient = ref.watch(dioProvider);
-  return DashboardService(apiClient);
+  return DashboardService(ref.watch(apiClientProvider));
 });

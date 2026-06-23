@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/analytics/analytics_distribution.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard_repository.dart';
@@ -405,7 +406,7 @@ class _FakeAIService extends AIService {
     this.sentiment = const {},
     required this.analysis,
     required this.anomalies,
-  }) : super(Dio());
+  }) : super(ApiClient(Dio()));
 
   @override
   Future<Map<String, dynamic>> analyzeResponse(
@@ -474,7 +475,7 @@ class _FakeAnalyticsRepository implements AnalyticsRepository {
 class _FakeAnalysisDashboardRepository extends AnalysisDashboardRepository {
   final List<AnalysisDashboard> dashboards;
 
-  _FakeAnalysisDashboardRepository({this.dashboards = const []}) : super(Dio());
+  _FakeAnalysisDashboardRepository({this.dashboards = const []}) : super(ApiClient(Dio()));
 
   @override
   Future<AnalysisDashboard> createDashboard(AnalysisDashboard dashboard) async => dashboard;

@@ -33,6 +33,5 @@ abstract class WorkflowRepository {
 }
 
 final workflowRepositoryProvider = Provider<WorkflowRepository>((ref) {
-  final apiClient = ref.watch(dioProvider);
-  return WorkflowRepositoryImpl(apiClient);
+  return WorkflowRepositoryImpl(ref.watch(apiClientProvider));
 });

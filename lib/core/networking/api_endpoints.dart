@@ -544,6 +544,12 @@ class ApiEndpoints {
   /// Headers: { "Authorization": "Bearer {token}" }
   static String getResponseHistory(String formId, String responseId) =>
       '/forms/$formId/responses/$responseId/history';
+  static String getProjectResponseHistory(
+    String projectId,
+    String formId,
+    String responseId,
+  ) =>
+      '/projects/$projectId/forms/$formId/responses/$responseId/history';
 
   // ============================================================================
   // Export API (§10)

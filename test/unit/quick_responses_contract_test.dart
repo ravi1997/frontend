@@ -56,10 +56,10 @@ void main() {
         {
           'version': '1.0',
           'sections': const [],
-          'quickResponses': const [],
+          'quick_responses': const [],
         },
       ],
-      'quickResponses': [
+      'quick_responses': [
         {
           'name': 'Patient preset',
           'description': 'Fill intake fields',
@@ -80,7 +80,7 @@ void main() {
     final payload = FormMapper.toBackendJson(form);
     expect(payload['quick_responses'], hasLength(1));
     expect(
-      (payload['versions'] as List).first['quickResponses'],
+      (payload['versions'] as List).first['quick_responses'],
       hasLength(1),
     );
   });

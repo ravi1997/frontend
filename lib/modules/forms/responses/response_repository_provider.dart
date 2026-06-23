@@ -5,5 +5,5 @@ import 'data/repositories/response_repository_impl.dart';
 import 'response_repository.dart';
 
 final responseRepositoryProvider = Provider<ResponseRepository>((ref) {
-  return ResponseRepositoryImpl(ref.watch(dioProvider));
+  return ResponseRepositoryImpl(ref.watch(apiClientProvider));
 });

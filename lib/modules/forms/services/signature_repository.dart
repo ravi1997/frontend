@@ -58,6 +58,5 @@ abstract class SignatureRepository {
 
 final signatureRepositoryProvider = Provider<SignatureRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(dioProvider);
-  return SignatureRepositoryImpl(apiClient);
+  return SignatureRepositoryImpl(ref.watch(apiClientProvider));
 });

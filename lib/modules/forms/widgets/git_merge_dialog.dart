@@ -33,53 +33,67 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
   Widget build(BuildContext context) {
     final gitState = ref.watch(gitControllerProvider(widget.controllerKey));
     final conflicts = gitState.conflicts;
+    final allResolved = conflicts.every((c) => _resolutions.containsKey(c.path));
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
       child: Dialog(
-        backgroundColor: Colors.white.withValues(alpha: 0.88),
+        backgroundColor: Colors.white.withValues(alpha: 0.94),
         elevation: 24,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.85,
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: const EdgeInsets.all(24),
+          width: MediaQuery.of(context).size.width * 0.92,
+          height: MediaQuery.of(context).size.height * 0.85,
+          padding: const EdgeInsets.all(28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
               Row(
                 children: [
-                  const FaIcon(FontAwesomeIcons.codeMerge, color: AppColors.primary, size: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Visual 3-Way Conflict Resolver',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: AppColors.textDark,
-                      fontWeight: FontWeight.bold,
+                  const FaIcon(FontAwesomeIcons.codeMerge, color: AppColors.primary, size: 28),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Visual Three-Way Conflict Resolver',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: AppColors.textDark,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Select the value to keep for each conflicting schema property.',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.of(context).pop(),
                   )
                 ],
               ),
-              const SizedBox(height: 8),
-              const Text(
-                'Concurrent changes occurred on the server while you were working. Resolve conflicts to finalize the merge.',
-                style: TextStyle(color: AppColors.textGrey, fontSize: 14),
-              ),
-              const SizedBox(height: 20),
+              const Divider(height: 32),
 
               // Conflict List
               Expanded(
                 child: conflicts.isEmpty
                     ? const Center(
-                        child: Text(
-                          'No active conflicts remaining.',
-                          style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle_outline, color: Colors.green, size: 64),
+                            SizedBox(height: 16),
+                            Text(
+                              'No active conflicts remaining.',
+                              style: TextStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(
@@ -87,16 +101,17 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                         itemBuilder: (context, index) {
                           final conflict = conflicts[index];
                           final path = conflict.path;
+                          final baseVal = conflict.base?.toString() ?? '(Empty/Unchanged)';
                           final mineVal = conflict.mine?.toString() ?? '(Deleted)';
                           final theirsVal = conflict.theirs?.toString() ?? '(Deleted)';
-                          final resolution = _resolutions[path] ?? 'mine';
+                          final resolution = _resolutions[path];
 
                           return Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            margin: const EdgeInsets.only(bottom: 24),
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             child: Padding(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(20),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -104,28 +119,84 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                   Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                         decoration: BoxDecoration(
-                                          color: Colors.grey.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(4),
+                                          color: Colors.grey.shade200,
+                                          borderRadius: BorderRadius.circular(6),
                                         ),
-                                        child: Text(
-                                          'Path: $path',
-                                          style: const TextStyle(
-                                            fontFamily: 'monospace',
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textDark,
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.folder_open_outlined, size: 16, color: Colors.grey),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              path,
+                                              style: const TextStyle(
+                                                fontFamily: 'monospace',
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.textDark,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      if (resolution != null)
+                                        Chip(
+                                          label: Text(
+                                            'Resolved using: ${resolution == 'mine' ? 'Mine' : 'Theirs'}',
+                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                                          ),
+                                          backgroundColor: resolution == 'mine' ? AppColors.primary : Colors.amber.shade700,
+                                          padding: EdgeInsets.zero,
+                                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Three columns comparison pane
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Base Column (Context)
+                                      Expanded(
+                                        child: Container(
+                                          padding: const EdgeInsets.all(14),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade50,
+                                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.history, color: Colors.grey.shade600, size: 16),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'Base Version (Ancestor)',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.grey.shade700,
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Text(
+                                                baseVal,
+                                                style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
+                                      const SizedBox(width: 16),
 
-                                  // Split comparison panes
-                                  Row(
-                                    children: [
-                                      // Mine Column
+                                      // Mine Column (Selectable)
                                       Expanded(
                                         child: InkWell(
                                           onTap: () {
@@ -133,8 +204,9 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                               _resolutions[path] = 'mine';
                                             });
                                           },
+                                          borderRadius: BorderRadius.circular(12),
                                           child: Container(
-                                            padding: const EdgeInsets.all(12),
+                                            padding: const EdgeInsets.all(14),
                                             decoration: BoxDecoration(
                                               color: resolution == 'mine'
                                                   ? AppColors.primary.withValues(alpha: 0.08)
@@ -143,24 +215,35 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                                 color: resolution == 'mine'
                                                     ? AppColors.primary
                                                     : Colors.grey.shade300,
-                                                width: 1.5,
+                                                width: resolution == 'mine' ? 2.5 : 1.5,
                                               ),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  'Your Draft changes (Workspace)',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColors.primary,
-                                                  ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      resolution == 'mine' ? Icons.check_circle : Icons.radio_button_off,
+                                                      color: AppColors.primary,
+                                                      size: 18,
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    const Text(
+                                                      'Mine (Merge Branch)',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: AppColors.primary,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                const SizedBox(height: 6),
+                                                const SizedBox(height: 10),
                                                 Text(
                                                   mineVal,
-                                                  style: const TextStyle(color: AppColors.textDark),
+                                                  style: const TextStyle(color: AppColors.textDark, fontSize: 13),
                                                 ),
                                               ],
                                             ),
@@ -169,7 +252,7 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                       ),
                                       const SizedBox(width: 16),
 
-                                      // Theirs Column
+                                      // Theirs Column (Selectable)
                                       Expanded(
                                         child: InkWell(
                                           onTap: () {
@@ -177,8 +260,9 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                               _resolutions[path] = 'theirs';
                                             });
                                           },
+                                          borderRadius: BorderRadius.circular(12),
                                           child: Container(
-                                            padding: const EdgeInsets.all(12),
+                                            padding: const EdgeInsets.all(14),
                                             decoration: BoxDecoration(
                                               color: resolution == 'theirs'
                                                   ? Colors.amber.withValues(alpha: 0.08)
@@ -187,24 +271,35 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                                                 color: resolution == 'theirs'
                                                     ? Colors.amber.shade700
                                                     : Colors.grey.shade300,
-                                                width: 1.5,
+                                                width: resolution == 'theirs' ? 2.5 : 1.5,
                                               ),
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                             ),
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  'Server main changes',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.amber.shade700,
-                                                  ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      resolution == 'theirs' ? Icons.check_circle : Icons.radio_button_off,
+                                                      color: Colors.amber.shade700,
+                                                      size: 18,
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      'Theirs (Target Branch)',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.amber.shade700,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                const SizedBox(height: 6),
+                                                const SizedBox(height: 10),
                                                 Text(
                                                   theirsVal,
-                                                  style: const TextStyle(color: AppColors.textDark),
+                                                  style: const TextStyle(color: AppColors.textDark, fontSize: 13),
                                                 ),
                                               ],
                                             ),
@@ -220,52 +315,73 @@ class _GitMergeDialogState extends ConsumerState<GitMergeDialog> {
                         },
                       ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Action buttons footer
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (!allResolved && conflicts.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Please resolve all ${conflicts.length} conflicts to complete merge.',
+                            style: TextStyle(color: Colors.red.shade700, fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      backgroundColor: allResolved ? AppColors.primary : Colors.grey.shade400,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: allResolved ? 4 : 0,
                     ),
-                    icon: const FaIcon(FontAwesomeIcons.circleCheck, size: 16),
+                    icon: const FaIcon(FontAwesomeIcons.circleCheck, size: 16, color: Colors.white),
                     label: const Text(
                       'Resolve & Complete Merge',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
                     ),
-                    onPressed: () async {
-                      // Call resolution API using resolved values
-                      final notifier = ref.read(gitControllerProvider(widget.controllerKey).notifier);
-                      
-                      final success = await notifier.mergeBranches(
-                        widget.projectId,
-                        widget.formId,
-                        widget.theirsCommitId,
-                        widget.mineCommitId,
-                      );
+                    onPressed: allResolved
+                        ? () async {
+                            final notifier = ref.read(gitControllerProvider(widget.controllerKey).notifier);
+                            
+                            final success = await notifier.mergeBranches(
+                              widget.projectId,
+                              widget.formId,
+                              widget.theirsCommitId,
+                              widget.mineCommitId,
+                              resolutions: _resolutions,
+                            );
 
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                        if (success) {
-                          ref
-                              .read(snackbarServiceProvider)
-                              .showSuccess('Workspace merged and published successfully!');
-                        } else {
-                          ref
-                              .read(snackbarServiceProvider)
-                              .showError('Failed to resolve all conflicts. Re-check options.');
-                        }
-                      }
-                    },
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              if (success) {
+                                ref
+                                    .read(snackbarServiceProvider)
+                                    .showSuccess('Workspace merged and published successfully!');
+                              } else {
+                                ref
+                                    .read(snackbarServiceProvider)
+                                    .showError('Failed to resolve all conflicts. Re-check options.');
+                              }
+                            }
+                          }
+                        : null,
                   ),
                 ],
               )

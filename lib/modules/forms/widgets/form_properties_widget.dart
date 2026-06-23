@@ -214,7 +214,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                           updated['style'] ?? form.style,
                         ),
                         accessPolicy: Map<String, dynamic>.from(
-                          updated['accessPolicy'] ?? form.accessPolicy,
+                          updated['access_policy'] ?? form.accessPolicy,
                         ),
                       ),
                     ),
@@ -267,9 +267,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                     onChanged: (updated) => controller.updateForm(
                       form.copyWith(
                         submissionSettings: Map<String, dynamic>.from(
-                          updated['submissionSettings'] ??
-                              updated['submission_settings'] ??
-                              form.submissionSettings,
+                          updated['submission_settings'] ?? form.submissionSettings,
                         ),
                       ),
                     ),
@@ -281,9 +279,8 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                     onChanged: (updated) => controller.updateForm(
                       form.copyWith(
                         quickResponses: (() {
-                          final raw = updated['quickResponses'] ??
-                              updated['quick_responses'] ??
-                              form.quickResponses;
+                          final raw =
+                              updated['quick_responses'] ?? form.quickResponses;
                           if (raw is List) {
                             return raw
                                 .whereType<Map>()
@@ -302,14 +299,11 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                     onChanged: (updated) => controller.updateForm(
                       form.copyWith(
                         dataExportSettings: Map<String, dynamic>.from(
-                          updated['dataExportSettings'] ??
-                              updated['data_export_settings'] ??
+                          updated['data_export_settings'] ??
                               form.dataExportSettings,
                         ),
                         advancedSettings: Map<String, dynamic>.from(
-                          updated['advancedSettings'] ??
-                              updated['advanced_settings'] ??
-                              form.advancedSettings,
+                          updated['advanced_settings'] ?? form.advancedSettings,
                         ),
                       ),
                     ),
@@ -322,9 +316,7 @@ class _FormPropertiesWidgetState extends ConsumerState<FormPropertiesWidget> wit
                       form.copyWith(
                         slug: updated['slug']?.toString() ?? form.slug,
                         advancedSettings: Map<String, dynamic>.from(
-                          updated['advancedSettings'] ??
-                              updated['advanced_settings'] ??
-                              form.advancedSettings,
+                          updated['advanced_settings'] ?? form.advancedSettings,
                         ),
                       ),
                     ),

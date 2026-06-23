@@ -1,37 +1,29 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/networking/dio_provider.dart';
-import '../../../core/networking/api_endpoints.dart';
+import '../../core/networking/api_client.dart';
+import '../../core/networking/api_requests.dart';
+import '../../core/networking/dio_provider.dart';
 
 class OrganizationRepository {
   OrganizationRepository(this._apiClient);
 
-  final Dio _apiClient;
+  final ApiClient _apiClient;
 
   /// Creates a new enterprise organization.
   Future<Map<String, dynamic>> createOrg(Map<String, dynamic> payload) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.createOrg,
-      data: payload,
+    return _apiClient.createOrg(
+      OrgRequest(
+        name: payload['name']?.toString() ?? '',
+        description: payload['description']?.toString(),
+      ),
     );
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
   }
 
   /// Lists all enterprise organizations.
   Future<List<Map<String, dynamic>>> listOrgs() async {
-    final response = await _apiClient.get(ApiEndpoints.listOrgs);
-    final data = response.data;
-    if (data is List) {
-      return data
-          .whereType<Map>()
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-    }
-    return const [];
+    return (await _apiClient.listOrgs())
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
   }
 
   /// Suspends or activates an organization.
@@ -39,15 +31,7 @@ class OrganizationRepository {
     String orgId,
     String status,
   ) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.updateOrgStatus(orgId),
-      data: {'status': status},
-    );
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
+    return _apiClient.updateOrgStatus(orgId, status);
   }
 
   /// Assigns a primary organization administrator.
@@ -55,28 +39,15 @@ class OrganizationRepository {
     String orgId,
     String adminEmail,
   ) async {
-    final response = await _apiClient.put(
-      ApiEndpoints.assignOrgAdmin(orgId),
-      data: {'admin_email': adminEmail},
-    );
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
+    return _apiClient.assignOrgAdmin(orgId, adminEmail);
   }
 
   /// Retrieves usage statistics for a specific organization.
   Future<Map<String, dynamic>> getOrgStats(String orgId) async {
-    final response = await _apiClient.get(ApiEndpoints.getOrgStats(orgId));
-    final data = response.data;
-    if (data is Map) {
-      return Map<String, dynamic>.from(data);
-    }
-    return const {};
+    return _apiClient.getOrgStats(orgId);
   }
 }
 
 final organizationRepositoryProvider = Provider<OrganizationRepository>((ref) {
-  return OrganizationRepository(ref.watch(dioProvider));
+  return OrganizationRepository(ref.watch(apiClientProvider));
 });

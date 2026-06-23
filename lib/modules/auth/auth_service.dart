@@ -1,78 +1,38 @@
 import 'package:dio/dio.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
+import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/api_requests.dart';
 import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/modules/auth/auth_models.dart';
 
 class AuthService {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
   final TokenService _tokenService;
 
   AuthService(this._apiClient, this._tokenService);
 
   Future<UserModel> login(String identifier, String password) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.login,
-      data: {'identifier': identifier, 'password': password},
+    final data = _authData(
+      await _apiClient.login(
+        LoginRequest(identifier: identifier, password: password),
+      ),
     );
-    final data = _authData(response.data);
-    if (data == null) {
-      throw Exception('Login response missing data');
-    }
-
-    await _handleAuthResponse(
-      _tokenFromData(data, 'access_token'),
-      _tokenFromData(data, 'refresh_token'),
-      _userFromData(data['user'] ?? data['user_data'] ?? data['profile']),
-    );
-    final user = _userFromData(data['user'] ?? data['user_data'] ?? data['profile']);
-    if (user != null) return user;
-
-    final currentUser = await _fetchCurrentUserOrNull();
-    if (currentUser != null) {
-      await _tokenService.setOrganizationId(currentUser.organizationId.toString());
-      return currentUser;
-    }
-
-    throw Exception('Failed to retrieve user info after login');
+    return _completeLogin(data, fallbackUserKey: 'user');
   }
 
   Future<UserModel> loginWithOtp(String mobile, String otp) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.loginWithOtp,
-      data: {'mobile': mobile, 'otp': otp},
+    final data = _authData(
+      await _apiClient.loginWithOtp(OtpLoginRequest(mobile: mobile, otp: otp)),
     );
-    final data = _authData(response.data);
-    if (data == null) {
-      throw Exception('Login response missing data');
-    }
-
-    await _handleAuthResponse(
-      _tokenFromData(data, 'access_token'),
-      _tokenFromData(data, 'refresh_token'),
-      _userFromData(data['user'] ?? data['user_data'] ?? data['profile']),
-    );
-    final user = _userFromData(data['user'] ?? data['user_data'] ?? data['profile']);
-    if (user != null) return user;
-
-    final currentUser = await _fetchCurrentUserOrNull();
-    if (currentUser != null) {
-      await _tokenService.setOrganizationId(currentUser.organizationId.toString());
-      return currentUser;
-    }
-
-    throw Exception('Failed to retrieve user info after login');
+    return _completeLogin(data, fallbackUserKey: 'user');
   }
 
   Future<void> requestOtp(String mobile) async {
-    await _apiClient.post(
-      ApiEndpoints.requestOtp,
-      data: {'mobile': mobile},
-    );
+    await _apiClient.requestOtp(OtpRequest(mobile: mobile));
   }
 
   Future<void> logout() async {
     try {
-      await _apiClient.post(ApiEndpoints.logout);
+      await _apiClient.logout();
     } finally {
       await _tokenService.clearTokens();
     }
@@ -91,8 +51,7 @@ class AuthService {
 
   Future<UserModel?> _fetchCurrentUserOrNull() async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.userProfile);
-      final data = _authData(response.data);
+      final data = _authData(await _apiClient.currentUser());
       return _userFromData(data?['user'] ?? data);
     } on DioException {
       return null;
@@ -106,32 +65,23 @@ class AuthService {
     String? employeeId,
     String? mobile,
   }) async {
-    await _apiClient.post(
-      ApiEndpoints.register,
-      data: {
-        'username': username,
-        'email': email,
-        'password': password,
-        'user_type': 'general',
-        if (employeeId != null) 'employee_id': employeeId,
-        if (mobile != null) 'mobile': mobile,
-      },
+    await _apiClient.register(
+      RegisterRequest(
+        username: username,
+        email: email,
+        password: password,
+        employeeId: employeeId,
+        mobile: mobile,
+      ),
     );
   }
 
   Future<void> requestPasswordReset(String email) async {
-    await _apiClient.post(
-      ApiEndpoints.requestPasswordReset,
-      data: {'email': email},
-    );
+    await _apiClient.requestPasswordReset(PasswordResetRequest(email: email));
   }
 
   Future<String> refreshToken(String refreshToken) async {
-    final response = await _apiClient.post(
-      ApiEndpoints.refreshToken,
-      options: Options(headers: {'Authorization': 'Bearer $refreshToken'}),
-    );
-    final data = _authData(response.data);
+    final data = _authData(await _apiClient.refreshToken(refreshToken));
     final accessToken = _tokenFromData(data, 'access_token');
     if (accessToken == null) {
       throw Exception('Refresh response missing access token');
@@ -150,22 +100,20 @@ class AuthService {
   }
 
   Future<void> revokeAll() async {
-    await _apiClient.post(ApiEndpoints.revokeAll);
+    await _apiClient.revokeAll();
   }
 
   Future<void> changePassword(String currentPassword, String newPassword) async {
-    await _apiClient.post(
-      ApiEndpoints.changePassword,
-      data: {'current_password': currentPassword, 'new_password': newPassword},
+    await _apiClient.changePassword(
+      ChangePasswordRequest(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      ),
     );
   }
 
   Future<UserModel> verifyOidcCallback(String code, String state) async {
-    final response = await _apiClient.post(
-      '/auth/oidc/callback',
-      data: {'code': code, 'state': state},
-    );
-    final data = _authData(response.data);
+    final data = _authData(await _apiClient.oidcCallback(code, state));
     if (data == null) {
       throw Exception('OIDC Callback response missing data');
     }
@@ -185,6 +133,34 @@ class AuthService {
     }
 
     throw Exception('Failed to retrieve user info after OIDC login');
+  }
+
+  Future<UserModel> _completeLogin(
+    Map<String, dynamic>? data, {
+    required String fallbackUserKey,
+  }) async {
+    if (data == null) {
+      throw Exception('Login response missing data');
+    }
+
+    await _handleAuthResponse(
+      _tokenFromData(data, 'access_token'),
+      _tokenFromData(data, 'refresh_token'),
+      _userFromData(data['user'] ?? data['user_data'] ?? data['profile']),
+    );
+    final user =
+        _userFromData(data['user'] ?? data['user_data'] ?? data['profile']);
+    if (user != null) return user;
+
+    final currentUser = await _fetchCurrentUserOrNull();
+    if (currentUser != null) {
+      await _tokenService.setOrganizationId(
+        currentUser.organizationId.toString(),
+      );
+      return currentUser;
+    }
+
+    throw Exception('Failed to retrieve user info after login');
   }
 
   Future<void> _handleAuthResponse(

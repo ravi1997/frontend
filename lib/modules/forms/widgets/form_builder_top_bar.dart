@@ -154,11 +154,19 @@ class FormBuilderTopBar extends ConsumerWidget {
             label: 'Merge & Sync',
             onTap: () async {
               final gitNotifier = ref.read(gitControllerProvider(controllerKey).notifier);
+              final gitState = ref.read(gitControllerProvider(controllerKey));
+              
+              final mineBranch = gitState.activeBranch;
+              final targetBranchToMerge = mineBranch == 'main' ? 'draft/patient-OPD' : mineBranch;
+              
+              final mineCommit = gitState.commits.isNotEmpty ? gitState.commits.first.id : targetBranchToMerge;
+              final theirsCommit = 'main';
+
               final success = await gitNotifier.mergeBranches(
                 projectId,
                 formId,
-                'a8a8a8a8-b9b9-c0c0-d1d1-e2e2e2e2e2e2',
-                'f3f3f3f3-a4a4-b5b5-c6c6-d7d7d7d7d7d7',
+                theirsCommit,
+                mineCommit,
               );
 
               if (!success && context.mounted) {
@@ -169,8 +177,8 @@ class FormBuilderTopBar extends ConsumerWidget {
                     controllerKey: controllerKey,
                     projectId: projectId,
                     formId: formId,
-                    theirsCommitId: 'a8a8a8a8-b9b9-c0c0-d1d1-e2e2e2e2e2e2',
-                    mineCommitId: 'f3f3f3f3-a4a4-b5b5-c6c6-d7d7d7d7d7d7',
+                    theirsCommitId: theirsCommit,
+                    mineCommitId: mineCommit,
                   ),
                 );
               }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard_repository.dart';
 
 class _MockDio extends Mock implements Dio {}
@@ -9,7 +10,7 @@ class _MockDio extends Mock implements Dio {}
 void main() {
   test('executeBoard calls the analysis execute route', () async {
     final dio = _MockDio();
-    final repo = AnalysisDashboardRepository(dio);
+    final repo = AnalysisDashboardRepository(ApiClient(dio));
 
     when(() => dio.get(any())).thenAnswer(
       (_) async => Response(

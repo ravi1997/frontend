@@ -7,9 +7,8 @@ import 'analytics_timeline.dart';
 import 'analytics_distribution.dart';
 
 final analysisDashboardRepositoryProvider =
-    Provider<AnalysisDashboardRepository>((ref) {
-      final dioClient = ref.watch(dioProvider);
-      return AnalysisDashboardRepository(dioClient);
+  Provider<AnalysisDashboardRepository>((ref) {
+      return AnalysisDashboardRepository(ref.watch(apiClientProvider));
     });
 
 final analyticsStateProvider = Provider.family<AnalyticsState, String>((

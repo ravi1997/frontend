@@ -101,7 +101,7 @@ class TranslationController extends ChangeNotifier {
     String formId, {
     String? language,
   }) async {
-    final repository = ref.read(formBuilderRepositoryProvider);
+  final repository = ref.read(formBuilderRepositoryProvider);
     return repository.getTranslations(formId, language: language);
   }
 
@@ -116,8 +116,7 @@ class TranslationController extends ChangeNotifier {
 }
 
 final translationRepositoryProvider = Provider<TranslationRepository>((ref) {
-  final apiClient = ref.watch(dioProvider);
-  return TranslationRepositoryImpl(apiClient);
+  return TranslationRepositoryImpl(ref.watch(apiClientProvider));
 });
 
 final translationControllerProvider = Provider<TranslationController>((ref) {

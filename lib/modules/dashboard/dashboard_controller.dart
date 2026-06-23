@@ -3,8 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:frontend/core/networking/dio_provider.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
 import 'package:frontend/modules/dashboard/dashboard_service.dart';
 
@@ -72,11 +70,8 @@ class DashboardController extends AsyncNotifier<DashboardData> {
   }
 
   Future<void> duplicateForm(String id, String title) async {
-    final api = ref.read(dioProvider);
-    await api.post(
-      ApiEndpoints.cloneForm(id),
-      data: {'title': '$title (Copy)'},
-    );
+    final api = ref.read(dashboardServiceProvider);
+    await api.duplicateForm(id, title);
     await refresh();
   }
 }

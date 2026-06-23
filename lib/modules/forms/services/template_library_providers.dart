@@ -6,6 +6,5 @@ import 'package:frontend/modules/forms/services/template_library_repository.dart
 final templateLibraryRepositoryProvider = Provider<TemplateLibraryRepository>((
   ref,
 ) {
-  final dio = ref.watch(dioProvider);
-  return TemplateLibraryRepositoryImpl(dio);
+  return TemplateLibraryRepositoryImpl(ref.watch(apiClientProvider));
 });

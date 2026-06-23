@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/platform/screens/webhook_management_screen.dart';
 import 'package:frontend/modules/platform/webhook_management_repository.dart';
 
 class _FakeRepo extends WebhookManagementRepository {
-  _FakeRepo() : super(Dio());
+  _FakeRepo() : super(ApiClient(Dio()));
 
   @override
   Future<List<Map<String, dynamic>>> listWebhooks({

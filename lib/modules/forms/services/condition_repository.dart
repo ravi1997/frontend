@@ -37,6 +37,5 @@ abstract class ConditionRepository {
 
 final conditionRepositoryProvider = Provider<ConditionRepository>((ref) {
   // Use real implementation
-  final apiClient = ref.watch(dioProvider);
-  return ConditionRepositoryImpl(apiClient);
+  return ConditionRepositoryImpl(ref.watch(apiClientProvider));
 });

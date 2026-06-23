@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/api_service.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/services/snackbar_service.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/error_widget.dart';
@@ -32,18 +32,10 @@ class _ComplianceManagementScreenState extends ConsumerState<ComplianceManagemen
     });
 
     try {
-      final apiService = ref.read(apiServiceProvider);
-      // Load organizations
-      final orgsResponse = await apiService.get('/admin/organizations');
-      if (orgsResponse.success) {
-        _organizations = List<Map<String, dynamic>>.from(orgsResponse.data['organizations']);
-      }
-
-      // Load compliance standards
-      final complianceResponse = await apiService.get('/admin/compliance-standards');
-      if (complianceResponse.success) {
-        _complianceStandards = List<Map<String, dynamic>>.from(complianceResponse.data['standards']);
-      }
+      final api = ref.read(apiClientProvider);
+      _organizations = List<Map<String, dynamic>>.from(await api.listOrganizations());
+      _complianceStandards =
+          List<Map<String, dynamic>>.from(await api.listComplianceStandards());
 
       if (_organizations.isNotEmpty) {
         _selectedOrg = _organizations.first;
@@ -63,17 +55,9 @@ class _ComplianceManagementScreenState extends ConsumerState<ComplianceManagemen
 
   Future<void> _updateOrgCompliance(String orgId, List<String> complianceIds) async {
     try {
-      final response = await ref.read(apiServiceProvider).put(
-        '/admin/organizations/$orgId/compliance',
-        data: {'compliance_ids': complianceIds},
-      );
-
-      if (response.success) {
-        ref.read(snackbarServiceProvider).showSuccess('Compliance settings updated successfully');
-        await _loadData(); // Refresh data
-      } else {
-        throw Exception(response.message);
-      }
+      await ref.read(apiClientProvider).updateOrganizationCompliance(orgId, complianceIds);
+      ref.read(snackbarServiceProvider).showSuccess('Compliance settings updated successfully');
+      await _loadData();
     } catch (e) {
       ref.read(snackbarServiceProvider).showError('Error updating compliance: $e');
     }

@@ -5,10 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:frontend/core/widgets/error_state_widget.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/app/theme/tokens.dart';
-import 'package:frontend/modules/auth/auth_controller.dart';
+import 'package:frontend/core/networking/api_requests.dart';
 import 'package:frontend/modules/dashboard/dashboard_models.dart';
 import 'package:frontend/modules/dashboard/widgets/analysis_boards_entry_card.dart';
 import 'package:frontend/modules/dashboard_builder/pages/project_dashboards_section.dart';
@@ -48,17 +47,8 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
     });
 
     try {
-      final api = ref.read(dioProvider);
-      final response = await api.get(ApiEndpoints.getProject(widget.projectId));
-      final data = response.data;
-      Map<String, dynamic> projectData;
-      if (data is Map<String, dynamic>) {
-        projectData = data;
-      } else if (data is Map) {
-        projectData = Map<String, dynamic>.from(data);
-      } else {
-        projectData = {};
-      }
+      final api = ref.read(apiClientProvider);
+      final projectData = await api.getProject(widget.projectId);
 
       _project = projectData;
 
@@ -83,22 +73,10 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
     });
 
     try {
-      final api = ref.read(dioProvider);
-      final response = await api.get(
-        ApiEndpoints.listProjectForms(widget.projectId),
-      );
-      final data = response.data;
-      final payload = data is Map ? data['data'] : data;
+      final api = ref.read(apiClientProvider);
+      final payload = await api.listProjectForms(widget.projectId);
 
-      if (payload is List) {
-        _forms = payload;
-      } else if (payload is Map && payload['items'] is List) {
-        _forms = List<dynamic>.from(payload['items'] as List);
-      } else if (data is Map && data['items'] is List) {
-        _forms = List<dynamic>.from(data['items'] as List);
-      } else {
-        _forms = const [];
-      }
+      _forms = payload;
     } catch (e) {
       _formsError = e.toString();
     } finally {
@@ -222,14 +200,16 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
 
     if (shouldSave != true) return;
 
-    final api = ref.read(dioProvider);
-    await api.put(
-      ApiEndpoints.updateProject(widget.projectId),
-      data: {
-        'title': titleController.text.trim(),
-        'description': descriptionController.text.trim(),
-        'help_text': helpController.text.trim(),
-      },
+    final api = ref.read(apiClientProvider);
+    await api.updateProject(
+      widget.projectId,
+      ProjectRequest(
+        name: titleController.text.trim(),
+        description: descriptionController.text.trim(),
+        helpText: helpController.text.trim().isEmpty
+            ? null
+            : helpController.text.trim(),
+      ),
     );
 
     titleController.dispose();
@@ -240,8 +220,8 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
   }
 
   Future<void> _archiveProject() async {
-    final api = ref.read(dioProvider);
-    await api.delete(ApiEndpoints.deleteProject(widget.projectId));
+    final api = ref.read(apiClientProvider);
+    await api.deleteProject(widget.projectId);
     if (mounted) {
       context.pop();
     }
@@ -268,14 +248,9 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
     final formTitleController = TextEditingController();
     final slugController = TextEditingController();
     final descriptionController = TextEditingController();
-    final helpTextController = TextEditingController();
     final tagInputController = TextEditingController();
-    final languageInputController = TextEditingController();
-    final defaultLanguageController = TextEditingController(text: 'en');
     final tags = <String>['intake'];
-    final languages = <String>['en', 'hi'];
     bool isPublic = false;
-    bool isTemplate = false;
     String uiType = 'flex';
 
     final payload = await showDialog<Map<String, dynamic>>(
@@ -308,15 +283,6 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                   TextField(
                     controller: formTitleController,
                     decoration: const InputDecoration(labelText: 'Title'),
-                    onChanged: (value) {
-                      if (slugController.text.isEmpty) {
-                        slugController.text = value
-                            .trim()
-                            .toLowerCase()
-                            .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-                            .replaceAll(RegExp(r'^-|-$'), '');
-                      }
-                    },
                   ),
                   const SizedBox(height: DesignTokens.spaceM),
                   TextField(
@@ -330,36 +296,6 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                     maxLines: 2,
                   ),
                   const SizedBox(height: DesignTokens.spaceM),
-                  TextField(
-                    controller: helpTextController,
-                    decoration: const InputDecoration(labelText: 'Help text'),
-                    maxLines: 2,
-                  ),
-                  const SizedBox(height: DesignTokens.spaceM),
-                  _ChipInputField(
-                    label: 'Supported languages',
-                    chips: languages,
-                    controller: languageInputController,
-                    hintText: 'en',
-                    onAdd: (value) {
-                      final language = value.trim();
-                      if (language.isEmpty || languages.contains(language)) {
-                        return;
-                      }
-                      setModalState(() => languages.add(language));
-                    },
-                    onDelete: (value) {
-                      setModalState(() => languages.remove(value));
-                    },
-                  ),
-                  const SizedBox(height: DesignTokens.spaceM),
-                  TextField(
-                    controller: defaultLanguageController,
-                    decoration: const InputDecoration(
-                      labelText: 'Default language',
-                      hintText: 'en',
-                    ),
-                  ),
                   const SizedBox(height: DesignTokens.spaceM),
                   DropdownButtonFormField<String>(
                     initialValue: uiType,
@@ -429,13 +365,6 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
                     title: const Text('Public form'),
                     onChanged: (value) => setModalState(() => isPublic = value),
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: isTemplate,
-                    title: const Text('Save as template'),
-                    onChanged: (value) =>
-                        setModalState(() => isTemplate = value),
-                  ),
                 ],
                 ),
               ),
@@ -450,26 +379,15 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
               onPressed: () {
                 final title = formTitleController.text.trim();
                 if (title.isEmpty) return;
-                final slug = slugController.text.trim().isEmpty
-                    ? title
-                          .toLowerCase()
-                          .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-                          .replaceAll(RegExp(r'^-|-$'), '')
-                    : slugController.text.trim();
+                final slug = slugController.text.trim();
                 Navigator.of(dialogContext).pop({
                   'title': title,
-                  'slug': slug,
+                  if (slug.isNotEmpty) 'slug': slug,
                   'description': descriptionController.text.trim(),
-                  'help_text': helpTextController.text.trim(),
                   'status': 'draft',
                   'ui_type': uiType,
-                  'supported_languages': languages,
-                  'default_language': defaultLanguageController.text.trim(),
                   'tags': tags,
                   'is_public': isPublic,
-                  'is_template': isTemplate,
-                  'sections': const [],
-                  'created_by': ref.read(authControllerProvider).value?.id,
                 });
               },
               child: const Text('Create'),
@@ -481,29 +399,18 @@ class _ProjectDashboardPageState extends ConsumerState<ProjectDashboardPage> {
 
     if (payload == null) return;
 
-    final api = ref.read(dioProvider);
-    final response = await api.post(
-      ApiEndpoints.createProjectForm(widget.projectId),
-      data: payload,
+    final api = ref.read(apiClientProvider);
+    payload['project'] = widget.projectId;
+    final response = Map<String, dynamic>.from(
+      await api.createProjectFormRaw(widget.projectId, payload),
     );
     await _loadForms();
 
-    final data = response.data;
-    String? formId;
-    if (data is Map<String, dynamic>) {
-      formId = data['id']?.toString() ?? data['_id']?.toString();
-      final nestedData = data['data'];
-      if (formId == null && nestedData is Map) {
-        formId = nestedData['id']?.toString() ?? nestedData['_id']?.toString();
-      }
-    } else if (data is Map) {
-      final map = Map<String, dynamic>.from(data);
-      formId = map['id']?.toString() ?? map['_id']?.toString();
-      final nestedData = map['data'];
-      if (formId == null && nestedData is Map) {
-        final nestedMap = Map<String, dynamic>.from(nestedData);
-        formId = nestedMap['id']?.toString() ?? nestedMap['_id']?.toString();
-      }
+    String? formId = response['id']?.toString() ?? response['_id']?.toString();
+    final nestedData = response['data'];
+    if (formId == null && nestedData is Map) {
+      final nestedMap = Map<String, dynamic>.from(nestedData);
+      formId = nestedMap['id']?.toString() ?? nestedMap['_id']?.toString();
     }
 
     if (formId != null && formId.isNotEmpty && mounted) {

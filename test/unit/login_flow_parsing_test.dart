@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/core/networking/token_service.dart';
 import 'package:frontend/modules/auth/auth_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -15,7 +16,7 @@ void main() {
   setUp(() {
     mockApiClient = MockDio();
     mockTokenService = MockTokenService();
-    authService = AuthService(mockApiClient, mockTokenService);
+    authService = AuthService(ApiClient(mockApiClient), mockTokenService);
     
     registerFallbackValue(Uri());
   });

@@ -32,6 +32,6 @@ abstract class AnalyticsRepository {
 }
 
 final analyticsRepositoryProvider = Provider<AnalyticsRepository>((ref) {
-  final apiClient = ref.watch(dioProvider);
+  final apiClient = ref.watch(apiClientProvider);
   return AnalyticsRepositoryImpl(apiClient);
 });

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/api_service.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/services/snackbar_service.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/error_widget.dart';
@@ -30,16 +30,7 @@ class _WebhookManagementScreenState extends ConsumerState<WebhookManagementScree
     });
 
     try {
-      final response = await ref.read(apiServiceProvider).get('/webhooks');
-      if (response.success) {
-        setState(() {
-          _webhooks = List<Map<String, dynamic>>.from(response.data['webhooks']);
-        });
-      } else {
-        setState(() {
-          _error = response.message;
-        });
-      }
+      _webhooks = List<Map<String, dynamic>>.from(await ref.read(apiClientProvider).listWebhooksRaw());
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -55,13 +46,9 @@ class _WebhookManagementScreenState extends ConsumerState<WebhookManagementScree
 
   Future<void> _createWebhook(Map<String, dynamic> webhookData) async {
     try {
-      final response = await ref.read(apiServiceProvider).post('/webhooks', data: webhookData);
-      if (response.success) {
-        ref.read(snackbarServiceProvider).showSuccess('Webhook created successfully');
-        await _loadWebhooks(); // Refresh list
-      } else {
-        throw Exception(response.message);
-      }
+      await ref.read(apiClientProvider).createWebhookRaw(webhookData);
+      ref.read(snackbarServiceProvider).showSuccess('Webhook created successfully');
+      await _loadWebhooks();
     } catch (e) {
       ref.read(snackbarServiceProvider).showError('Error creating webhook: $e');
     }
@@ -69,13 +56,9 @@ class _WebhookManagementScreenState extends ConsumerState<WebhookManagementScree
 
   Future<void> _updateWebhook(String webhookId, Map<String, dynamic> webhookData) async {
     try {
-      final response = await ref.read(apiServiceProvider).put('/webhooks/$webhookId', data: webhookData);
-      if (response.success) {
-        ref.read(snackbarServiceProvider).showSuccess('Webhook updated successfully');
-        await _loadWebhooks(); // Refresh list
-      } else {
-        throw Exception(response.message);
-      }
+      await ref.read(apiClientProvider).updateWebhookRaw(webhookId, webhookData);
+      ref.read(snackbarServiceProvider).showSuccess('Webhook updated successfully');
+      await _loadWebhooks();
     } catch (e) {
       ref.read(snackbarServiceProvider).showError('Error updating webhook: $e');
     }
@@ -83,13 +66,9 @@ class _WebhookManagementScreenState extends ConsumerState<WebhookManagementScree
 
   Future<void> _deleteWebhook(String webhookId) async {
     try {
-      final response = await ref.read(apiServiceProvider).delete('/webhooks/$webhookId');
-      if (response.success) {
-        ref.read(snackbarServiceProvider).showSuccess('Webhook deleted successfully');
-        await _loadWebhooks(); // Refresh list
-      } else {
-        throw Exception(response.message);
-      }
+      await ref.read(apiClientProvider).deleteWebhookRaw(webhookId);
+      ref.read(snackbarServiceProvider).showSuccess('Webhook deleted successfully');
+      await _loadWebhooks();
     } catch (e) {
       ref.read(snackbarServiceProvider).showError('Error deleting webhook: $e');
     }
@@ -211,12 +190,8 @@ class _WebhookManagementScreenState extends ConsumerState<WebhookManagementScree
             onPressed: () async {
               Navigator.of(context).pop();
               try {
-                final response = await ref.read(apiServiceProvider).post('/webhooks/${webhook['id']}/test');
-                if (response.success) {
-                  ref.read(snackbarServiceProvider).showSuccess('Test webhook sent successfully');
-                } else {
-                  throw Exception(response.message);
-                }
+                await ref.read(apiClientProvider).testWebhookRaw(webhook['id'].toString());
+                ref.read(snackbarServiceProvider).showSuccess('Test webhook sent successfully');
               } catch (e) {
                 ref.read(snackbarServiceProvider).showError('Error testing webhook: $e');
               }

@@ -32,7 +32,7 @@ class _FormAccessSettingsState extends State<FormAccessSettings> {
 
   AccessPolicy get _policy => AccessPolicy.fromJson(
     Map<String, dynamic>.from(
-      widget.form['accessPolicy'] ?? widget.form['access_policy'] ?? const {},
+      widget.form['access_policy'] ?? const {},
     ),
   );
 

@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/core/networking/dio_provider.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
 
 class GitBranchCommit {
   final String id;
@@ -38,6 +37,7 @@ class GitConflict {
   final String path;
   final dynamic mine;
   final dynamic theirs;
+  final dynamic base;
   final String mineOp;
   final String theirsOp;
 
@@ -45,6 +45,7 @@ class GitConflict {
     required this.path,
     required this.mine,
     required this.theirs,
+    required this.base,
     required this.mineOp,
     required this.theirsOp,
   });
@@ -54,6 +55,7 @@ class GitConflict {
       path: json['path'] ?? '',
       mine: json['mine'],
       theirs: json['theirs'],
+      base: json['base'],
       mineOp: json['mine_op'] ?? '',
       theirsOp: json['theirs_op'] ?? '',
     );
@@ -97,7 +99,7 @@ class GitState {
 }
 
 class GitController extends StateNotifier<GitState> {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
 
   GitController(this._apiClient) : super(GitState());
 
@@ -110,10 +112,8 @@ class GitController extends StateNotifier<GitState> {
   Future<void> loadCommits(String projectId, String formId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final response = await _apiClient.get(
-        ApiEndpoints.formCommits(projectId, formId),
-      );
-      final list = (response.data['data'] as List?) ?? [];
+      final response = await _apiClient.getMap('/projects/$projectId/forms/$formId/commits');
+      final list = (response['data'] as List?) ?? [];
       final commits = list
           .map((json) => GitBranchCommit.fromJson(json))
           .toList();
@@ -132,12 +132,12 @@ class GitController extends StateNotifier<GitState> {
   ) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final response = await _apiClient.post(
-        ApiEndpoints.formCommits(projectId, formId),
+      final response = await _apiClient.postMap(
+        '/projects/$projectId/forms/$formId/commits',
         data: {'message': message, 'form_data': formData},
       );
       state = state.copyWith(isLoading: false);
-      final commitId = response.data['data']['commit_id'] as String?;
+      final commitId = response['data']['commit_id'] as String?;
       if (commitId != null) {
         await loadCommits(projectId, formId);
       }
@@ -153,20 +153,22 @@ class GitController extends StateNotifier<GitState> {
     String projectId,
     String formId,
     String theirsCommitId,
-    String mineCommitId,
-  ) async {
+    String mineCommitId, {
+    Map<String, String>? resolutions,
+  }) async {
     state = state.copyWith(isLoading: true, error: null, conflicts: []);
     try {
-      final response = await _apiClient.post(
-        ApiEndpoints.formMerge(projectId, formId),
+      final response = await _apiClient.postMap(
+        '/projects/$projectId/forms/$formId/merge',
         data: {
           'theirs_commit_id': theirsCommitId,
           'mine_commit_id': mineCommitId,
+          if (resolutions != null) 'resolutions': resolutions,
         },
       );
 
       state = state.copyWith(isLoading: false);
-      final resData = response.data['data'] as Map<String, dynamic>;
+      final resData = response['data'] as Map<String, dynamic>;
 
       if (resData['status'] == 'conflict') {
         final conflictList = (resData['conflicts'] as List?) ?? [];
@@ -191,6 +193,6 @@ final gitControllerProvider =
       ref,
       formKey,
     ) {
-      final apiClient = ref.watch(dioProvider);
+      final apiClient = ref.watch(apiClientProvider);
       return GitController(apiClient);
     });

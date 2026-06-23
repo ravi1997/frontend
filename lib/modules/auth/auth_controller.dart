@@ -11,7 +11,7 @@ import 'package:frontend/modules/auth/auth_service.dart';
 
 // Auth Service Provider
 final authServiceProvider = Provider<AuthService>((ref) {
-  final apiClient = ref.watch(dioProvider);
+  final apiClient = ref.watch(apiClientProvider);
   final tokenStore = ref.watch(tokenServiceProvider.notifier);
   return AuthService(apiClient, tokenStore);
 });

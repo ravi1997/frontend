@@ -1,17 +1,16 @@
-import 'package:dio/dio.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
+import 'package:frontend/core/networking/api_client.dart';
+import 'package:frontend/core/networking/api_requests.dart';
 import '../../form_response.dart';
 import '../../response_repository.dart';
 
 class ResponseRepositoryImpl implements ResponseRepository {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
 
   ResponseRepositoryImpl(this._apiClient);
 
   @override
   Future<List<FormResponse>> getResponsesForForm(String formId) async {
-    final response = await _apiClient.get('/responses/form/$formId');
-    final items = _items(response.data);
+    final items = await _apiClient.listResponses('', formId);
     return items.map((e) => FormResponse.fromJson(_map(e))).toList();
   }
 
@@ -20,12 +19,9 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String projectId,
     String formId,
   ) async {
-    final response = await _apiClient.get(
-      '/projects/$projectId/forms/$formId/responses',
-    );
-    return _items(
-      response.data,
-    ).map((e) => FormResponse.fromJson(_map(e))).toList();
+    return (await _apiClient.listResponses(projectId, formId))
+        .map((e) => FormResponse.fromJson(_map(e)))
+        .toList();
   }
 
   @override
@@ -33,8 +29,9 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String formId,
     String responseId,
   ) async {
-    final response = await _apiClient.get('/responses/$responseId');
-    return FormResponse.fromJson(_map(response.data));
+    return FormResponse.fromJson(
+      _map(await _apiClient.getResponse('', formId, responseId)),
+    );
   }
 
   @override
@@ -43,15 +40,14 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String formId,
     String responseId,
   ) async {
-    final response = await _apiClient.get(
-      '/projects/$projectId/forms/$formId/responses/$responseId',
+    return FormResponse.fromJson(
+      _map(await _apiClient.getResponse(projectId, formId, responseId)),
     );
-    return FormResponse.fromJson(_map(response.data));
   }
 
   @override
   Future<void> submitResponse(FormResponse response) async {
-    await _apiClient.post('/responses', data: response.toJson());
+    await _apiClient.postMap('/responses', data: response.toJson());
   }
 
   @override
@@ -59,7 +55,7 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String projectId,
     FormResponse response,
   ) async {
-    await _apiClient.post(
+    await _apiClient.postMap(
       '/projects/$projectId/responses',
       data: response.toJson(),
     );
@@ -67,13 +63,11 @@ class ResponseRepositoryImpl implements ResponseRepository {
 
   @override
   Future<List<FormResponse>> aiSearch(String formId, String query) async {
-    final response = await _apiClient.post(
+    final response = await _apiClient.postList(
       '/responses/search',
       data: {'form_id': formId, 'query': query},
     );
-    return _items(
-      response.data,
-    ).map((e) => FormResponse.fromJson(_map(e))).toList();
+    return response.map((e) => FormResponse.fromJson(_map(e))).toList();
   }
 
   @override
@@ -82,10 +76,9 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String questionId,
     String value,
   ) async {
-    final response = await _apiClient.get(
-      ApiEndpoints.sameFormLookup(formId, questionId, value),
-    );
-    return _items(response.data).map((e) => _map(e)).toList();
+    return (await _apiClient.sameFormLookup(formId, questionId, value))
+        .map(_map)
+        .toList();
   }
 
   @override
@@ -93,10 +86,9 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String formId,
     String responseId,
   ) async {
-    final response = await _apiClient.get('/responses/$responseId/history');
-    return _items(
-      response.data,
-    ).map((e) => ResponseHistory.fromJson(_map(e))).toList();
+    return (await _apiClient.responseHistory('', formId, responseId))
+        .map((e) => ResponseHistory.fromJson(_map(e)))
+        .toList();
   }
 
   @override
@@ -105,12 +97,9 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String formId,
     String responseId,
   ) async {
-    final response = await _apiClient.get(
-      '/projects/$projectId/forms/$formId/responses/$responseId/history',
-    );
-    return _items(
-      response.data,
-    ).map((e) => ResponseHistory.fromJson(_map(e))).toList();
+    return (await _apiClient.responseHistory(projectId, formId, responseId))
+        .map((e) => ResponseHistory.fromJson(_map(e)))
+        .toList();
   }
 
   @override
@@ -119,28 +108,18 @@ class ResponseRepositoryImpl implements ResponseRepository {
     String formId,
     List<Map<String, dynamic>> filters,
   ) async {
-    final response = await _apiClient.post(
-      '/projects/$projectId/forms/$formId/responses/filter',
-      data: {'filters': filters},
-    );
-    return _items(
-      response.data,
-    ).map((e) => FormResponse.fromJson(_map(e))).toList();
+    return (await _apiClient.filteredResponses(
+      projectId,
+      formId,
+      ResponseFilterRequest(filters: filters),
+    ))
+        .map((e) => FormResponse.fromJson(_map(e)))
+        .toList();
   }
 
   Map<String, dynamic> _map(dynamic data) {
     if (data is Map<String, dynamic>) return data;
     if (data is Map) return Map<String, dynamic>.from(data);
     return const {};
-  }
-
-  List<dynamic> _items(dynamic data) {
-    if (data is List) return data;
-    if (data is Map<String, dynamic>) {
-      final items =
-          data['items'] ?? data['responses'] ?? data['results'] ?? data['data'];
-      if (items is List) return items;
-    }
-    return const [];
   }
 }

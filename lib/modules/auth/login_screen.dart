@@ -195,9 +195,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   Future<void> _handleSsoLogin() async {
     try {
-      final apiClient = ref.read(dioProvider);
-      final response = await apiClient.get('/auth/oidc/login?organization_id=default');
-      final authUrl = response.data['data']['auth_url'] as String;
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.oidcLogin('default');
+      final authUrl = response['data']['auth_url'] as String;
       if (kIsWeb) {
         web.window.location.href = authUrl;
       }

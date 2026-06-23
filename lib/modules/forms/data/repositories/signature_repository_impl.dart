@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/forms/models/signature_request.dart';
 import 'package:frontend/modules/forms/services/signature_repository.dart';
 
@@ -7,7 +7,7 @@ import 'package:frontend/modules/forms/services/signature_repository.dart';
 ///
 /// Handles signature requests, verification, and audit trails via the backend API.
 class SignatureRepositoryImpl implements SignatureRepository {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
   final Logger _logger = Logger();
 
   SignatureRepositoryImpl(this._apiClient);
@@ -15,13 +15,9 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<SignatureRequest> createRequest(SignatureRequest request) async {
     try {
-      final response = await _apiClient.post(
-        '/forms/${request.formId}/signature-requests',
-        data: request.toJson(),
-      );
-
+      final response = await _apiClient.createSignatureRequest(request);
       _logger.i('Created signature request for: ${request.signerEmail}');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e(
         'Failed to create signature request',
@@ -35,10 +31,9 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<SignatureRequest> getRequest(String requestId) async {
     try {
-      final response = await _apiClient.get('/signature-requests/$requestId');
-
+      final response = await _apiClient.getSignatureRequest(requestId);
       _logger.i('Loaded signature request: $requestId');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e(
         'Failed to load signature request',
@@ -52,10 +47,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<List<SignatureRequest>> getRequestsForForm(String formId) async {
     try {
-      final response = await _apiClient.get(
-        '/forms/$formId/signature-requests',
-      );
-      final data = response.data as List<dynamic>;
+      final data = await _apiClient.getSignatureRequestsForForm(formId);
 
       final requests = data.map((item) {
         return SignatureRequest.fromJson(item as Map<String, dynamic>);
@@ -72,8 +64,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<List<SignatureRequest>> getRequestsForSigner(String email) async {
     try {
-      final response = await _apiClient.get('/signature-requests?email=$email');
-      final data = response.data as List<dynamic>;
+      final data = await _apiClient.getSignatureRequestsForSigner(email);
 
       final requests = data.map((item) {
         return SignatureRequest.fromJson(item as Map<String, dynamic>);
@@ -94,12 +85,9 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<SignatureRequest> sendRequest(String requestId) async {
     try {
-      final response = await _apiClient.post(
-        '/signature-requests/$requestId/send',
-      );
-
+      final response = await _apiClient.sendSignatureRequest(requestId);
       _logger.i('Sent signature request: $requestId');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to send request', error: e, stackTrace: stack);
       throw _createException('Failed to send signature request', e, stack);
@@ -113,13 +101,13 @@ class SignatureRepositoryImpl implements SignatureRepository {
     required String userAgent,
   }) async {
     try {
-      final response = await _apiClient.post(
-        '/signature-requests/$requestId/view',
-        data: {'ipAddress': ipAddress, 'userAgent': userAgent},
+      final response = await _apiClient.markSignatureViewed(
+        requestId,
+        ipAddress: ipAddress,
+        userAgent: userAgent,
       );
-
       _logger.i('Marked request as viewed: $requestId');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to mark as viewed', error: e, stackTrace: stack);
       throw _createException('Failed to mark request as viewed', e, stack);
@@ -133,13 +121,13 @@ class SignatureRepositoryImpl implements SignatureRepository {
     required String ipAddress,
   }) async {
     try {
-      final response = await _apiClient.post(
-        '/signature-requests/$requestId/sign',
-        data: {'signatureData': signatureData, 'ipAddress': ipAddress},
+      final response = await _apiClient.recordSignature(
+        requestId,
+        signatureData: signatureData,
+        ipAddress: ipAddress,
       );
-
       _logger.i('Recorded signature for request: $requestId');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to record signature', error: e, stackTrace: stack);
       throw _createException('Failed to record signature', e, stack);
@@ -153,13 +141,13 @@ class SignatureRepositoryImpl implements SignatureRepository {
     String? reason,
   }) async {
     try {
-      final response = await _apiClient.post(
-        '/signature-requests/$requestId/decline',
-        data: {'ipAddress': ipAddress, 'reason': reason},
+      final response = await _apiClient.declineSignatureRequest(
+        requestId,
+        ipAddress: ipAddress,
+        reason: reason,
       );
-
       _logger.i('Declined request: $requestId');
-      return SignatureRequest.fromJson(response.data as Map<String, dynamic>);
+      return SignatureRequest.fromJson(response);
     } catch (e, stack) {
       _logger.e('Failed to decline request', error: e, stackTrace: stack);
       throw _createException('Failed to decline request', e, stack);
@@ -169,7 +157,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<void> cancelRequest(String requestId) async {
     try {
-      await _apiClient.delete('/signature-requests/$requestId');
+      await _apiClient.cancelSignatureRequest(requestId);
       _logger.i('Cancelled request: $requestId');
     } catch (e, stack) {
       _logger.e('Failed to cancel request', error: e, stackTrace: stack);
@@ -180,10 +168,7 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<List<SignatureAuditEntry>> getAuditTrail(String requestId) async {
     try {
-      final response = await _apiClient.get(
-        '/signature-requests/$requestId/audit',
-      );
-      final data = response.data as List<dynamic>;
+      final data = await _apiClient.getSignatureAuditTrail(requestId);
 
       final entries = data.map((item) {
         return SignatureAuditEntry.fromJson(item as Map<String, dynamic>);
@@ -200,10 +185,8 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<bool> verifySignature(String requestId) async {
     try {
-      final response = await _apiClient.get(
-        '/signature-requests/$requestId/verify',
-      );
-      return response.data['valid'] as bool;
+      final response = await _apiClient.verifySignature(requestId);
+      return response['valid'] as bool;
     } catch (e, stack) {
       _logger.e('Failed to verify signature', error: e, stackTrace: stack);
       throw _createException('Failed to verify signature', e, stack);
@@ -213,10 +196,8 @@ class SignatureRepositoryImpl implements SignatureRepository {
   @override
   Future<String> generateSigningDocument(String requestId) async {
     try {
-      final response = await _apiClient.get(
-        '/signature-requests/$requestId/document',
-      );
-      return response.data['documentBase64'] as String;
+      final response = await _apiClient.generateSigningDocument(requestId);
+      return response['documentBase64'] as String;
     } catch (e, stack) {
       _logger.e('Failed to generate document', error: e, stackTrace: stack);
       throw _createException('Failed to generate signing document', e, stack);

@@ -1,21 +1,19 @@
-import 'package:dio/dio.dart';
+import 'package:frontend/core/networking/api_client.dart';
 import 'analysis_dashboard.dart';
 
 class AnalysisDashboardRepository {
-  final Dio _dio;
+  final ApiClient _dio;
 
   AnalysisDashboardRepository(this._dio);
 
   Future<List<AnalysisDashboard>> listDashboards() async {
-    final response = await _dio.get('/dashboard/');
-    return (response.data as List)
+    return (await _dio.getList('/dashboard/'))
         .map((json) => AnalysisDashboard.fromJson(json))
         .toList();
   }
 
   Future<AnalysisDashboard> getDashboard(String slug) async {
-    final response = await _dio.get('/dashboard/$slug');
-    return AnalysisDashboard.fromJson(response.data);
+    return AnalysisDashboard.fromJson(await _dio.getMap('/dashboard/$slug'));
   }
 
   Future<AnalysisDashboard> createDashboard(
@@ -23,15 +21,14 @@ class AnalysisDashboardRepository {
   ) async {
     final payload = Map<String, dynamic>.from(dashboard.toJson())
       ..removeWhere((_, value) => value == null);
-    final response = await _dio.post('/dashboard/', data: payload);
-    final data = Map<String, dynamic>.from(response.data['data'] as Map);
+    final data = await _dio.postMap('/dashboard/', data: payload);
     return AnalysisDashboard.fromJson(
       Map<String, dynamic>.from(data['dashboard'] as Map),
     );
   }
 
   Future<void> updateDashboard(String id, AnalysisDashboard dashboard) async {
-    await _dio.put('/dashboard/$id', data: dashboard.toJson());
+    await _dio.putMap('/dashboard/$id', data: dashboard.toJson());
   }
 
   Future<void> deleteDashboard(String id) async {
@@ -42,9 +39,8 @@ class AnalysisDashboardRepository {
     String projectId,
     String boardId,
   ) async {
-    final response = await _dio.get(
+    return _dio.getMap(
       '/api/v1/projects/$projectId/analysis-boards/$boardId/execute',
     );
-    return Map<String, dynamic>.from(response.data as Map);
   }
 }

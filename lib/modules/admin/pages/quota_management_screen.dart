@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/api_service.dart';
+import '../../../core/networking/dio_provider.dart';
 import '../../../core/services/snackbar_service.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/error_widget.dart';
@@ -32,12 +32,8 @@ class _QuotaManagementScreenState extends ConsumerState<QuotaManagementScreen> {
     });
 
     try {
-      final apiService = ref.read(apiServiceProvider);
-      // Load organizations
-      final orgsResponse = await apiService.get('/admin/organizations');
-      if (orgsResponse.success) {
-        _organizations = List<Map<String, dynamic>>.from(orgsResponse.data['organizations']);
-      }
+      final api = ref.read(apiClientProvider);
+      _organizations = List<Map<String, dynamic>>.from(await api.listOrganizations());
 
       if (_organizations.isNotEmpty) {
         _selectedOrg = _organizations.first;
@@ -58,12 +54,11 @@ class _QuotaManagementScreenState extends ConsumerState<QuotaManagementScreen> {
 
   Future<void> _loadQuotaInfo(String orgId) async {
     try {
-      final response = await ref.read(apiServiceProvider).get('/admin/organizations/$orgId/quota');
-      if (response.success) {
-        setState(() {
-          _quotaInfo = Map<String, dynamic>.from(response.data);
-        });
-      }
+      setState(() {
+        _quotaInfo = {}; // replaced below
+      });
+      _quotaInfo = await ref.read(apiClientProvider).getOrganizationQuota(orgId);
+      if (mounted) setState(() {});
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -73,17 +68,9 @@ class _QuotaManagementScreenState extends ConsumerState<QuotaManagementScreen> {
 
   Future<void> _updateQuota(String orgId, int quotaBytes) async {
     try {
-      final response = await ref.read(apiServiceProvider).put(
-        '/admin/organizations/$orgId/quota',
-        data: {'quota_bytes': quotaBytes},
-      );
-
-      if (response.success) {
-        ref.read(snackbarServiceProvider).showSuccess('Quota updated successfully');
-        await _loadQuotaInfo(orgId); // Refresh quota info
-      } else {
-        throw Exception(response.message);
-      }
+      await ref.read(apiClientProvider).updateOrganizationQuota(orgId, quotaBytes);
+      ref.read(snackbarServiceProvider).showSuccess('Quota updated successfully');
+      await _loadQuotaInfo(orgId);
     } catch (e) {
       ref.read(snackbarServiceProvider).showError('Error updating quota: $e');
     }

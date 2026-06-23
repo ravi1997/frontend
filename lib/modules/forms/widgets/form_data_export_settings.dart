@@ -41,17 +41,13 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
   TextEditingController get _retentionControllerValue => _retentionController!;
 
   Map<String, dynamic> get _dataExportSettings => Map<String, dynamic>.from(
-    widget.form['dataExportSettings'] ??
-        widget.form['data_export_settings'] ??
-        _legacyAdvancedSettings['dataExport'] ??
+    widget.form['data_export_settings'] ??
         _legacyAdvancedSettings['data_export'] ??
         const {},
   );
 
   Map<String, dynamic> get _legacyAdvancedSettings => Map<String, dynamic>.from(
-    widget.form['advancedSettings'] ??
-        widget.form['advanced_settings'] ??
-        const {},
+    widget.form['advanced_settings'] ?? const {},
   );
 
   Map<String, dynamic> get _csvSettings => Map<String, dynamic>.from(
@@ -93,18 +89,13 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
 
   void _seedFromSettings() {
     final csvSettings = _csvSettings;
-    _headerMode =
-        csvSettings['header_mode']?.toString() ??
-        csvSettings['headerMode']?.toString() ??
-        'labels';
+    _headerMode = csvSettings['header_mode']?.toString() ?? 'labels';
     _anonymizationMode =
         _anonymization['mode']?.toString() ??
         _anonymization['type']?.toString() ??
         'none';
     _includeAttachments =
-        csvSettings['include_attachments'] as bool? ??
-        csvSettings['includeAttachments'] as bool? ??
-        false;
+        csvSettings['include_attachments'] as bool? ?? false;
 
     _delimiterController = _seedController(
       _delimiterController,
@@ -112,15 +103,11 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
     );
     _emptyFieldController = _seedController(
       _emptyFieldController,
-      csvSettings['empty_field_value']?.toString() ??
-          csvSettings['emptyFieldValue']?.toString() ??
-          '',
+      csvSettings['empty_field_value']?.toString() ?? '',
     );
     _dateFormatController = _seedController(
       _dateFormatController,
-      csvSettings['date_format']?.toString() ??
-          csvSettings['dateFormat']?.toString() ??
-          'iso8601',
+      csvSettings['date_format']?.toString() ?? 'iso8601',
     );
     _timezoneController = _seedController(
       _timezoneController,
@@ -132,10 +119,7 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
     );
     _retentionController = _seedController(
       _retentionController,
-      (_dataExportSettings['retention_days'] ??
-              _dataExportSettings['retentionDays'] ??
-              '')
-          .toString(),
+      (_dataExportSettings['retention_days'] ?? '').toString(),
     );
 
     _syncMappingControllers(_fields);
@@ -382,16 +366,9 @@ class _FormDataExportSettingsState extends State<FormDataExportSettings> {
     final exportSettings = _normalizedExportSettings();
     widget.onChanged({
       ...widget.form,
-      'dataExportSettings': exportSettings,
       'data_export_settings': exportSettings,
-      'advancedSettings': {
-        ..._legacyAdvancedSettings,
-        'dataExport': exportSettings,
-        'data_export': exportSettings,
-      },
       'advanced_settings': {
         ..._legacyAdvancedSettings,
-        'dataExport': exportSettings,
         'data_export': exportSettings,
       },
     });

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:frontend/core/networking/api_client.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard.dart';
 import 'package:frontend/modules/analytics/analysis_dashboard_repository.dart';
 import 'package:frontend/modules/analytics/analytics_providers.dart';
@@ -11,7 +12,7 @@ import 'package:frontend/modules/analytics/pages/analysis_boards_list_page.dart'
 class _FakeAnalysisDashboardRepository extends AnalysisDashboardRepository {
   AnalysisDashboard? createdDashboard;
 
-  _FakeAnalysisDashboardRepository() : super(Dio());
+  _FakeAnalysisDashboardRepository() : super(ApiClient(Dio()));
 
   @override
   Future<List<AnalysisDashboard>> listDashboards() async => <AnalysisDashboard>[];

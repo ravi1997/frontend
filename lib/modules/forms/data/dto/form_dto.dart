@@ -114,21 +114,14 @@ class FormDto {
           ? AppDateUtils.parse(normalizedJson['updated_at'])
           : null,
       workflows: Map<String, dynamic>.from(normalizedJson['workflows'] ?? {}),
-      accessPolicy: normalizedJson['accessPolicy'] != null
-          ? Map<String, dynamic>.from(normalizedJson['accessPolicy'])
-          : normalizedJson['access_policy'] != null
+      accessPolicy: normalizedJson['access_policy'] != null
           ? Map<String, dynamic>.from(normalizedJson['access_policy'])
           : null,
       submissionSettings: Map<String, dynamic>.from(
-        normalizedJson['submissionSettings'] ??
-            normalizedJson['submission_settings'] ??
-            const {},
+        normalizedJson['submission_settings'] ?? const {},
       ),
       quickResponses: () {
-        final raw =
-            normalizedJson['quickResponses'] ??
-            normalizedJson['quick_responses'] ??
-            const [];
+        final raw = normalizedJson['quick_responses'] ?? const [];
         if (raw is! List) {
           return <Map<String, dynamic>>[];
         }
@@ -138,14 +131,10 @@ class FormDto {
             .toList();
       }(),
       advancedSettings: Map<String, dynamic>.from(
-        normalizedJson['advancedSettings'] ??
-            normalizedJson['advanced_settings'] ??
-            const {},
+        normalizedJson['advanced_settings'] ?? const {},
       ),
       dataExportSettings: Map<String, dynamic>.from(
-        normalizedJson['dataExportSettings'] ??
-            normalizedJson['data_export_settings'] ??
-            const {},
+        normalizedJson['data_export_settings'] ?? const {},
       ),
       style: Map<String, dynamic>.from(normalizedJson['style'] ?? const {}),
     );
@@ -168,13 +157,12 @@ class FormDto {
           ? AppDateUtils.toIso8601(updatedAt!)
           : null,
       'workflows': workflows,
-      'accessPolicy': accessPolicy,
-      'submissionSettings': submissionSettings,
-      'quickResponses': quickResponses,
-      'advancedSettings': advancedSettings,
-      'dataExportSettings': dataExportSettings,
-      'style': style,
+      'access_policy': accessPolicy,
+      'submission_settings': submissionSettings,
       'quick_responses': quickResponses,
+      'advanced_settings': advancedSettings,
+      'data_export_settings': dataExportSettings,
+      'style': style,
     };
   }
 

@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:frontend/core/networking/dio_provider.dart';
-import 'package:frontend/core/networking/api_endpoints.dart';
+import 'package:frontend/core/networking/api_requests.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/app/startup/responsive.dart';
 import 'package:frontend/modules/auth/auth_controller.dart';
@@ -99,31 +99,21 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     if (created == null) return;
 
-    final api = ref.read(dioProvider);
-    await api.post(
-      ApiEndpoints.createProject,
-      data: {
-        'title': created.title,
-        'description': created.description,
-        'help_text': created.helpText ?? '',
-        'status': created.status,
-        'organization_id': ref
-            .read(authControllerProvider)
-            .value
-            ?.organizationId,
-        'sub_projects': const [],
-        'forms': const [],
-        'tags': created.tags,
-        'triggers': const [],
-      },
+    final api = ref.read(apiClientProvider);
+    await api.createProject(
+      ProjectRequest(
+        name: created.title,
+        description: created.description,
+        helpText: created.helpText,
+      ),
     );
     if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
   }
 
   Future<void> _archiveProject(ProjectSummary project) async {
-    final api = ref.read(dioProvider);
-    await api.delete(ApiEndpoints.deleteProject(project.id));
+    final api = ref.read(apiClientProvider);
+    await api.deleteProject(project.id);
     if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();
   }
@@ -160,23 +150,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
     if (title == null || title.isEmpty) return;
 
-    final api = ref.read(dioProvider);
-    await api.post(
-      ApiEndpoints.createProjectForm(project.id),
-      data: {
-        'title': title,
-        'slug': title.toLowerCase().replaceAll(' ', '-'),
-        'description': 'Form created from dashboard',
-        'help_text': 'Created inside ${project.title}',
-        'status': 'draft',
-        'ui_type': 'flex',
-        'supported_languages': const ['en'],
-        'default_language': 'en',
-        'tags': const [],
-        'is_public': false,
-        'is_template': false,
-        'sections': const [],
-      },
+    final api = ref.read(apiClientProvider);
+    await api.createForm(
+      project.id,
+      CreateFormRequest(
+        title: title,
+        slug: title.toLowerCase().replaceAll(' ', '-'),
+      ),
     );
     if (!mounted) return;
     await ref.read(dashboardControllerProvider.notifier).refresh();

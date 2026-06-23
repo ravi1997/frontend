@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:frontend/core/networking/api_client.dart';
 
 import 'analytics_distribution.dart';
 import 'analytics_repository.dart';
@@ -8,7 +8,7 @@ import 'analytics_timeline.dart';
 import 'form_analytics.dart';
 
 class AnalyticsRepositoryImpl implements AnalyticsRepository {
-  final Dio _apiClient;
+  final ApiClient _apiClient;
   final Logger _logger = Logger();
 
   AnalyticsRepositoryImpl(this._apiClient);
@@ -43,8 +43,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   @override
   Future<AnalyticsSummary> getAnalyticsSummary(String formId) async {
     try {
-      final response = await _apiClient.get('/forms/$formId/analytics/summary');
-      final data = _asMap(response.data);
+      final data = _asMap(await _apiClient.getAnalyticsSummary(formId));
       final total = _readInt(data, [
         'total_submissions',
         'total_responses',
@@ -86,10 +85,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     int days = 30,
   }) async {
     try {
-      final response = await _apiClient.get(
-        '/forms/$formId/analytics/timeline',
-        queryParameters: {'days': days},
-      );
+      final response = await _apiClient.getAnalyticsTimeline(formId, days: days);
       if (response.data is List) {
         return AnalyticsTimeline(
           formId: formId,
@@ -113,9 +109,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   @override
   Future<AnalyticsDistribution> getAnalyticsDistribution(String formId) async {
     try {
-      final response = await _apiClient.get(
-        '/forms/$formId/analytics/distribution',
-      );
+      final response = await _apiClient.getAnalyticsDistribution(formId);
       if (response.data is List) {
         return AnalyticsDistribution(
           formId: formId,
