@@ -50,25 +50,38 @@ class _AnalysisCoderScreenState extends ConsumerState<AnalysisCoderScreen> {
   // List of forms in project for configuration dropdowns
   List<dynamic> _projectForms = [];
   bool _isLoadingForms = false;
+  bool _isBootstrapping = true;
 
   @override
   void initState() {
     super.initState();
     _currentAnalysisId = widget.analysisId;
-    _loadProjectForms();
-    _loadAnalysis();
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    await Future.wait([
+      _loadProjectForms(),
+      _loadAnalysis(),
+    ]);
+    if (!mounted) return;
+    setState(() => _isBootstrapping = false);
   }
 
   Future<void> _loadProjectForms() async {
-    setState(() => _isLoadingForms = true);
+    if (mounted) {
+      setState(() => _isLoadingForms = true);
+    }
     try {
       final client = ref.read(apiClientProvider);
       final forms = await client.listProjectForms(widget.projectId);
+      if (!mounted) return;
       setState(() {
         _projectForms = forms;
         _isLoadingForms = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _isLoadingForms = false);
     }
   }
@@ -109,6 +122,9 @@ class _AnalysisCoderScreenState extends ConsumerState<AnalysisCoderScreen> {
           )
         ];
       });
+      if (mounted) {
+        setState(() => _errorMessage = null);
+      }
       return;
     }
 
@@ -122,8 +138,16 @@ class _AnalysisCoderScreenState extends ConsumerState<AnalysisCoderScreen> {
           _nodes = analysis.graph.nodes;
           _edges = analysis.graph.edges;
         });
+      } else if (!mounted) {
+        return;
+      } else {
+        setState(() {
+          _errorMessage =
+              'Failed to load analysis graph. The backend returned no analysis for this route.';
+        });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Failed to load analysis graph: $e';
       });
@@ -326,6 +350,92 @@ class _AnalysisCoderScreenState extends ConsumerState<AnalysisCoderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (_isBootstrapping) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF1E1E2C),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF161622),
+          title: const Text('Analysis builder'),
+        ),
+        body: Center(
+          child: Semantics(
+            label: 'Loading analysis builder',
+            liveRegion: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Loading analysis builder...',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_errorMessage != null && _nodes.isEmpty) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF1E1E2C),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF161622),
+          title: const Text('Analysis builder'),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Card(
+                color: const Color(0xFF161622),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Analysis builder unavailable',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _errorMessage ??
+                            'The analysis canvas could not be mounted.',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 20),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _loadAnalysis,
+                            child: const Text('Retry'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            child: const Text('Go back'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E2C),

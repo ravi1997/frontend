@@ -6,6 +6,7 @@ import 'package:frontend/modules/auth/auth_controller.dart';
 import 'package:frontend/modules/analytics/pages/analytics_page.dart';
 import 'package:frontend/modules/analytics/pages/analysis_boards_list_page.dart';
 import 'package:frontend/modules/auth/auth_screens.dart';
+import 'package:frontend/app/startup/app_shell.dart';
 import 'package:frontend/modules/dashboard/dashboard_page.dart';
 import 'package:frontend/modules/dashboard/form_dashboard_page.dart';
 import 'package:frontend/modules/dashboard/project_dashboard_page.dart';
@@ -69,22 +70,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const DashboardPage()),
-      GoRoute(
-        path: '/projects/:projectId',
-        builder: (context, state) {
-          final projectId = state.pathParameters['projectId']!;
-          return ProjectDashboardPage(projectId: projectId);
-        },
-      ),
-      GoRoute(
-        path: '/projects/:projectId/forms/:formId',
-        builder: (context, state) {
-          final projectId = state.pathParameters['projectId']!;
-          final formId = state.pathParameters['formId']!;
-          return FormDashboardPage(projectId: projectId, formId: formId);
-        },
-      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/oidc/callback',
@@ -109,6 +94,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return OtpVerificationScreen(mobile: mobile);
         },
       ),
+      ShellRoute(
+        builder: (context, state, child) => AppShell(child: child),
+        routes: [
+          GoRoute(path: '/', builder: (context, state) => const DashboardPage()),
+          GoRoute(
+            path: '/projects/:projectId/forms/:formId',
+            builder: (context, state) {
+              final projectId = state.pathParameters['projectId']!;
+              final formId = state.pathParameters['formId']!;
+              debugPrint('ROUTE form-dashboard project=$projectId form=$formId path=${state.uri.path}');
+              return FormDashboardPage(projectId: projectId, formId: formId);
+            },
+          ),
       GoRoute(
         path: '/builder/:formId',
         builder: (context, state) {
@@ -168,7 +166,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/form-preview',
         builder: (context, state) {
-          final form = state.extra as BuilderForm;
+          final form = state.extra;
+          if (form is! BuilderForm) {
+            return Scaffold(
+              body: ErrorStateWidget(
+                title: 'Preview unavailable',
+                message:
+                    'Open preview from the form builder so the current form can be passed into the page.',
+                error: 'Missing BuilderForm route state',
+                onBack: () => context.go('/'),
+              ),
+            );
+          }
           return FormPreviewPage(
             form: form,
             projectId: state.uri.queryParameters['projectId'] ?? '',
@@ -226,6 +235,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      GoRoute(
+        path: '/projects/:projectId',
+        builder: (context, state) {
+          final projectId = state.pathParameters['projectId']!;
+          debugPrint('ROUTE project-dashboard project=$projectId path=${state.uri.path}');
+          return ProjectDashboardPage(projectId: projectId);
+        },
+      ),
       // ── Dashboard Builder ──────────────────────────────────────────
       GoRoute(
         path: '/projects/:projectId/dashboards/:dashboardId',
@@ -265,6 +282,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/ai-ops',
         builder: (context, state) => const AIOpsScreen(),
+      ),
+        ],
       ),
     ],
   );

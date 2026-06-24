@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:frontend/app/app.dart';
 import 'package:frontend/app/theme/design_system.dart';
+import 'package:frontend/app/url_strategy.dart';
 
 SemanticsHandle? _semanticsHandle;
 
@@ -25,6 +26,7 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
+  configureUrlStrategy();
 
   try {
     // 3. Deliberate initialization
