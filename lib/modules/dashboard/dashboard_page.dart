@@ -212,7 +212,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           activeCount: data.stats.activeForms,
                           responseCount: data.stats.totalResponses,
                         ),
-                        loading: () => const _StatsSkeleton(),
+                        loading: () => const _LoadingBanner(
+                          title: 'Loading dashboard data',
+                          subtitle:
+                              'Fetching projects, forms, and response counts...',
+                        ),
                         error: (error, _) => Padding(
                           padding: const EdgeInsets.only(bottom: 24),
                           child: _ErrorBanner(
@@ -285,7 +289,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _AuthLoadingState(),
         error: (error, _) => ErrorStateWidget(
           message: 'Failed to load user profile.',
           error: error.toString(),
@@ -792,41 +796,69 @@ class _ErrorBanner extends StatelessWidget {
   }
 }
 
-class _StatsSkeleton extends StatelessWidget {
-  const _StatsSkeleton();
+class _AuthLoadingState extends StatelessWidget {
+  const _AuthLoadingState();
 
   @override
   Widget build(BuildContext context) {
-    final cols = Responsive.statColumns(context);
+    return Center(
+      child: Semantics(
+        label: 'Loading dashboard',
+        liveRegion: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Loading dashboard...',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    if (cols == 2) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final width = (constraints.maxWidth - 12) / 2;
-          return Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: const [
-              _SkeletonBox(height: 92),
-              _SkeletonBox(height: 92),
-              _SkeletonBox(height: 92),
-              _SkeletonBox(height: 92),
-            ].map((box) => SizedBox(width: width, child: box)).toList(),
-          );
-        },
-      );
-    }
+class _LoadingBanner extends StatelessWidget {
+  final String title;
+  final String subtitle;
 
-    return const Row(
-      children: [
-        Expanded(child: _SkeletonBox(height: 92)),
-        SizedBox(width: 16),
-        Expanded(child: _SkeletonBox(height: 92)),
-        SizedBox(width: 16),
-        Expanded(child: _SkeletonBox(height: 92)),
-        SizedBox(width: 16),
-        Expanded(child: _SkeletonBox(height: 92)),
-      ],
+  const _LoadingBanner({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
     );
   }
 }
