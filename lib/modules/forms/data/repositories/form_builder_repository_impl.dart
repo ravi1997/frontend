@@ -25,9 +25,7 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
   @override
   Future<BuilderForm> getForm(String projectId, String id) async {
     try {
-      final data = Map<String, dynamic>.from(
-        await _apiClient.getForm(projectId, id),
-      );
+      final data = await _loadFormData(projectId, id);
       data['id'] ??= id;
       data['form_id'] ??= id;
       final resolvedSections = _resolvedTopLevelSections(data);
@@ -47,6 +45,24 @@ class FormBuilderRepositoryImpl implements FormBuilderRepository {
       _logger.e('Failed to load form', error: e, stackTrace: s);
       throw FormLoadException(id, originalError: e);
     }
+  }
+
+  Future<Map<String, dynamic>> _loadFormData(String projectId, String formId) {
+    return _apiClient.getForm(projectId, formId).catchError((error) async {
+      final fallback = error.toString();
+      if (fallback.contains('422') ||
+          fallback.contains('404') ||
+          fallback.contains('Not enough segments')) {
+        _logger.w(
+          'Project-scoped form load failed for $formId, retrying global form endpoint',
+          error: error,
+        );
+        return Map<String, dynamic>.from(
+          await _apiClient.getGlobalForm(formId),
+        );
+      }
+      throw error;
+    }).then((value) => Map<String, dynamic>.from(value));
   }
 
   List<dynamic>? _resolvedTopLevelSections(Map<String, dynamic> formData) {

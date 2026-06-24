@@ -283,6 +283,9 @@ class ApiClient {
       postMap(ApiEndpoints.cloneProjectForm(projectId, formId), data: request.toJson());
   Future<Map<String, dynamic>> getForm(String projectId, String formId) =>
       getMap(ApiEndpoints.getProjectForm(projectId, formId));
+
+  Future<Map<String, dynamic>> getGlobalForm(String formId) =>
+      getMap(ApiEndpoints.getForm(formId));
   Future<List<dynamic>> listProjectForms(String projectId) =>
       getList(ApiEndpoints.listProjectForms(projectId));
   Future<List<dynamic>> listSections(String projectId, String formId) =>
