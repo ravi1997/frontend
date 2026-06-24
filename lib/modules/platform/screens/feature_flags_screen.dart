@@ -317,8 +317,15 @@ class _FeatureFlagsScreenState extends ConsumerState<FeatureFlagsScreen> {
                                             ),
                                             const SizedBox(width: 8),
                                             IconButton(
-                                              icon: Icon(Icons.delete_outline, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
-                                              onPressed: () => _updateOverride(key, orgId, false), // Or delete handler if API supports it, updating to false acts as standard disable/override toggle
+                                              tooltip: orgVal ? 'Disable override' : 'Enable override',
+                                              icon: Icon(
+                                                orgVal ? Icons.toggle_on : Icons.toggle_off,
+                                                size: 24,
+                                                color: orgVal
+                                                    ? DesignTokens.success
+                                                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                              ),
+                                              onPressed: () => _updateOverride(key, orgId, !orgVal),
                                             ),
                                           ],
                                         ),

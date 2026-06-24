@@ -186,6 +186,53 @@ class GitController extends StateNotifier<GitState> {
       return false;
     }
   }
+
+  /// Loads branches from the backend.
+  Future<void> loadBranches(String projectId, String formId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final response = await _apiClient.getMap('/projects/$projectId/forms/$formId/branches');
+      final list = (response['data'] as List?) ?? [];
+      final branches = list.map((e) => e.toString()).toList();
+      state = state.copyWith(branches: branches, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  /// Creates a new branch.
+  Future<bool> createBranch(String projectId, String formId, String branchName, {String? fromCommitId}) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _apiClient.postMap(
+        '/projects/$projectId/forms/$formId/branches',
+        data: {
+          'branch_name': branchName,
+          if (fromCommitId != null) 'from_commit_id': fromCommitId,
+        },
+      );
+      state = state.copyWith(isLoading: false);
+      await loadBranches(projectId, formId);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  /// Deletes an existing branch.
+  Future<bool> deleteBranch(String projectId, String formId, String branchName) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _apiClient.delete('/projects/$projectId/forms/$formId/branches/$branchName');
+      state = state.copyWith(isLoading: false);
+      await loadBranches(projectId, formId);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
 }
 
 final gitControllerProvider =

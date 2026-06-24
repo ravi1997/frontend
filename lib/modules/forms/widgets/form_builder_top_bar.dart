@@ -8,11 +8,14 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/localization/locale_controller.dart';
 import 'package:frontend/shared/models/form_models.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
+import 'package:frontend/core/services/collaboration_service.dart';
 import 'llm_copilot_drawer.dart';
 import 'form_builder_assistant_widget.dart';
 import 'package:frontend/modules/forms/services/git_controller.dart';
 import 'git_commit_dialog.dart';
 import 'git_merge_dialog.dart';
+import 'git_history_dialog.dart';
+import 'git_branch_manager_dialog.dart';
 import 'package:frontend/app/theme/tokens.dart';
 import 'package:frontend/core/widgets/responsive.dart';
 
@@ -135,6 +138,33 @@ class FormBuilderTopBar extends ConsumerWidget {
                   const SizedBox(width: DesignTokens.spaceS),
                   const _EditingBadge(),
                   const SizedBox(width: DesignTokens.spaceS),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final collabState = ref.watch(collaborationProvider(formId));
+                      if (collabState.collaborators.isEmpty) return const SizedBox.shrink();
+                      
+                      return Row(
+                        children: [
+                          ...collabState.collaborators.map((c) => Container(
+                            margin: const EdgeInsets.only(right: 4),
+                            child: CircleAvatar(
+                              radius: 12,
+                              backgroundColor: AppColors.primary,
+                              child: Text(
+                                c.displayName[0].toUpperCase(),
+                                style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )),
+                          Text(
+                            ' (${collabState.collaborators.length} present)',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textGrey),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(width: DesignTokens.spaceS),
                   _EditingLocaleSwitcher(
                     controllerKey: controllerKey,
                     formId: formId,
@@ -205,8 +235,13 @@ class FormBuilderTopBar extends ConsumerWidget {
             icon: FontAwesomeIcons.clockRotateLeft,
             label: 'History',
             onTap: () {
-              context.push(
-                '/projects/$projectId/forms/$formId/versions?title=${Uri.encodeComponent(formTitle.translate(editingLocale))}',
+              showDialog(
+                context: context,
+                builder: (context) => GitHistoryDialog(
+                  controllerKey: controllerKey,
+                  projectId: projectId,
+                  formId: formId,
+                ),
               );
             },
           ),
@@ -781,7 +816,7 @@ class _PublishButton extends ConsumerWidget {
   }
 }
 
-class _GitBranchSelector extends ConsumerWidget {
+class _GitBranchSelector extends ConsumerStatefulWidget {
   final String controllerKey;
   final String projectId;
   final String formId;
@@ -793,53 +828,93 @@ class _GitBranchSelector extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final gitState = ref.watch(gitControllerProvider(controllerKey));
-    final gitNotifier = ref.read(gitControllerProvider(controllerKey).notifier);
+  ConsumerState<_GitBranchSelector> createState() => _GitBranchSelectorState();
+}
 
-    return Container(
-      margin: const EdgeInsets.only(left: DesignTokens.spaceS + 4),
-      padding: const EdgeInsets.symmetric(
-        horizontal: DesignTokens.spaceS,
-        vertical: DesignTokens.spaceXS,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusS),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: gitState.activeBranch,
-          icon: const FaIcon(
-            FontAwesomeIcons.codeBranch,
-            size: 14,
-            color: AppColors.primary,
+class _GitBranchSelectorState extends ConsumerState<_GitBranchSelector> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gitControllerProvider(widget.controllerKey).notifier).loadBranches(
+            widget.projectId,
+            widget.formId,
+          );
+      ref.read(gitControllerProvider(widget.controllerKey).notifier).loadCommits(
+            widget.projectId,
+            widget.formId,
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final gitState = ref.watch(gitControllerProvider(widget.controllerKey));
+    final gitNotifier = ref.read(gitControllerProvider(widget.controllerKey).notifier);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(left: DesignTokens.spaceS + 4),
+          padding: const EdgeInsets.symmetric(
+            horizontal: DesignTokens.spaceS,
+            vertical: DesignTokens.spaceXS,
           ),
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-            fontSize: DesignTokens.fontS,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusS),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
           ),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              gitNotifier.switchBranch(newValue);
-              ref.read(snackbarServiceProvider).showInfo(
-                'Switched to branch: $newValue',
-              );
-            }
-          },
-          items: gitState.branches.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Text(value),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: gitState.branches.contains(gitState.activeBranch) ? gitState.activeBranch : 'main',
+              icon: const FaIcon(
+                FontAwesomeIcons.codeBranch,
+                size: 14,
+                color: AppColors.primary,
+              ),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: DesignTokens.fontS,
+              ),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  gitNotifier.switchBranch(newValue);
+                  ref.read(snackbarServiceProvider).showInfo(
+                    'Switched to branch: $newValue',
+                  );
+                }
+              },
+              items: gitState.branches.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Text(value),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.settings, size: 20, color: AppColors.primary),
+          tooltip: 'Manage Branches',
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => GitBranchManagerDialog(
+                controllerKey: widget.controllerKey,
+                projectId: widget.projectId,
+                formId: widget.formId,
               ),
             );
-          }).toList(),
+          },
         ),
-      ),
+      ],
     );
   }
 }

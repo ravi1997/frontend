@@ -9,8 +9,9 @@ import 'package:frontend/modules/forms/models/form_layout_type.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'section_widget.dart';
 import 'package:frontend/shared/models/form_models.dart';
+import 'package:frontend/core/services/collaboration_service.dart';
 
-class FormCanvasWidget extends ConsumerWidget {
+class FormCanvasWidget extends ConsumerStatefulWidget {
   final String controllerKey;
   final String projectId;
   final String formId;
@@ -25,10 +26,61 @@ class FormCanvasWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FormCanvasWidget> createState() => _FormCanvasWidgetState();
+}
+
+class _FormCanvasWidgetState extends ConsumerState<FormCanvasWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize room subscription
+    Future.microtask(() {
+      ref.read(collaborationProvider(widget.formId).notifier);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final builderState = ref.watch(
-      formBuilderControllerProvider(controllerKey),
+      formBuilderControllerProvider(widget.controllerKey),
     );
+
+    // Watch for selected question changes to acquire/release leases
+    ref.listen<String?>(
+      formBuilderControllerProvider(widget.controllerKey).select((state) => state.value?.selectedQuestionId),
+      (previous, next) {
+        final collabNotifier = ref.read(collaborationProvider(widget.formId).notifier);
+        if (previous != null) {
+          collabNotifier.releaseLease(previous);
+        }
+        if (next != null) {
+          collabNotifier.acquireLease(next);
+          collabNotifier.updateCursor(next);
+        }
+      },
+    );
+
+    // Watch for collaboration collisions
+    ref.listen(collaborationProvider(widget.formId), (previous, next) {
+      if (next.collisionTarget != null) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Edit Collision Warning'),
+            content: Text('This field is currently locked by ${next.collisionHeldBy}. Please wait or edit a different section.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ref.read(collaborationProvider(widget.formId).notifier).clearCollision();
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    });
 
     return builderState.when(
       data: (state) {
@@ -54,13 +106,13 @@ class FormCanvasWidget extends ConsumerWidget {
           onAcceptWithDetails: (details) {
             final template = details.data as CustomFieldTemplate;
             ref
-                .read(formBuilderControllerProvider(controllerKey).notifier)
+                .read(formBuilderControllerProvider(widget.controllerKey).notifier)
                 .addFromTemplate(null, template);
           },
           builder: (context, candidateData, rejectedData) => GestureDetector(
             onTap: () {
               ref
-                  .read(formBuilderControllerProvider(controllerKey).notifier)
+                  .read(formBuilderControllerProvider(widget.controllerKey).notifier)
                   .selectQuestion(null, null);
             },
             behavior: HitTestBehavior.opaque,
@@ -79,7 +131,7 @@ class FormCanvasWidget extends ConsumerWidget {
                             ref
                                 .read(
                                   formBuilderControllerProvider(
-                                    controllerKey,
+                                    widget.controllerKey,
                                   ).notifier,
                                 )
                                 .selectQuestion(null, null);
@@ -107,14 +159,14 @@ class FormCanvasWidget extends ConsumerWidget {
                                 String titleText = state.form.title.translate(
                                   state.editingLocale,
                                 );
-                                if (mode != null && mode != 'form') {
-                                  if (mode == 'question') {
+                                if (widget.mode != null && widget.mode != 'form') {
+                                  if (widget.mode == 'question') {
                                     titleText = 'Question Designer';
                                   }
-                                  if (mode == 'section') {
+                                  if (widget.mode == 'section') {
                                     titleText = 'Section Designer';
                                   }
-                                  if (mode == 'workflow') {
+                                  if (widget.mode == 'workflow') {
                                     titleText = 'Workflow Designer';
                                   }
                                 }
@@ -223,9 +275,9 @@ class FormCanvasWidget extends ConsumerWidget {
                                   final sectionWidget = SizedBox(
                                     width: itemWidth,
                                     child: SectionWidget(
-                                      controllerKey: controllerKey,
-                                      projectId: projectId,
-                                      formId: formId,
+                                      controllerKey: widget.controllerKey,
+                                      projectId: widget.projectId,
+                                      formId: widget.formId,
                                       section: section,
                                       sectionIndex: index,
                                       selectedQuestionId:
@@ -235,7 +287,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                       selectedSectionId:
                                           state.selectedSectionId,
                                       locale: state.editingLocale,
-                                      mode: mode,
+                                      mode: widget.mode,
                                     ),
                                   );
 
@@ -246,7 +298,7 @@ class FormCanvasWidget extends ConsumerWidget {
                                       ref
                                           .read(
                                             formBuilderControllerProvider(
-                                              controllerKey,
+                                              widget.controllerKey,
                                             ).notifier,
                                           )
                                           .reorderSections(
@@ -308,17 +360,17 @@ class FormCanvasWidget extends ConsumerWidget {
                         const SizedBox(height: DesignTokens.spaceL),
 
                         // Add Section Button (only if not in question/section/workflow mode)
-                        if (mode == null || mode == 'form')
+                        if (widget.mode == null || widget.mode == 'form')
                           Center(
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 debugPrint(
-                                  'ADD_SECTION_CLICKED: controllerKey=$controllerKey, projectId=$projectId, formId=$formId',
+                                  'ADD_SECTION_CLICKED: controllerKey=${widget.controllerKey}, projectId=${widget.projectId}, formId=${widget.formId}',
                                 );
                                 ref
                                     .read(
                                       formBuilderControllerProvider(
-                                        controllerKey,
+                                        widget.controllerKey,
                                       ).notifier,
                                     )
                                     .addSection();

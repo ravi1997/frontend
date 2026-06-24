@@ -11,6 +11,7 @@ import 'package:frontend/modules/forms/models/form_style.dart';
 import 'package:frontend/modules/forms/services/form_builder_controller.dart';
 import 'package:frontend/modules/forms/utility/layout_engine.dart';
 import 'builder_field_widget.dart';
+import 'package:frontend/core/services/collaboration_service.dart';
 
 // Drag and drop data classes
 class SectionDragData {
@@ -111,6 +112,7 @@ class SectionWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final collabState = ref.watch(collaborationProvider(formId));
     final isSectionSelected =
         selectedSectionId == section.id && selectedQuestionId == null;
     final sectionStyle = _sectionStyle(section);
@@ -514,10 +516,21 @@ class SectionWidget extends ConsumerWidget {
                               }
 
                               final questionWidget = BuilderFieldWidget(
+                                formId: formId,
                                 question: q,
                                 isSelected: isSelected,
                                 locale: locale,
                                 onTap: () {
+                                  final lease = collabState.leases[q.id];
+                                  if (lease != null && lease['user_id'] != collabState.myUserId) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Field is locked by ${lease['display_name']}'),
+                                        backgroundColor: Colors.amber.shade800,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
@@ -527,6 +540,10 @@ class SectionWidget extends ConsumerWidget {
                                       .selectQuestion(section.id, q.id);
                                 },
                                 onLongPress: () {
+                                  final lease = collabState.leases[q.id];
+                                  if (lease != null && lease['user_id'] != collabState.myUserId) {
+                                    return;
+                                  }
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
@@ -539,6 +556,16 @@ class SectionWidget extends ConsumerWidget {
                                       );
                                 },
                                 onDelete: () {
+                                  final lease = collabState.leases[q.id];
+                                  if (lease != null && lease['user_id'] != collabState.myUserId) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Cannot delete: field is locked by ${lease['display_name']}'),
+                                        backgroundColor: Colors.amber.shade800,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   ref
                                       .read(
                                         formBuilderControllerProvider(
@@ -548,6 +575,16 @@ class SectionWidget extends ConsumerWidget {
                                       .removeQuestion(section.id, q.id);
                                 },
                                 onDuplicate: () {
+                                  final lease = collabState.leases[q.id];
+                                  if (lease != null && lease['user_id'] != collabState.myUserId) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Cannot duplicate: field is locked by ${lease['display_name']}'),
+                                        backgroundColor: Colors.amber.shade800,
+                                      ),
+                                    );
+                                    return;
+                                  }
                                   ref
                                       .read(
                                         formBuilderControllerProvider(

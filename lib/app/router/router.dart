@@ -61,8 +61,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isAuth) {
         final user = authState.value!;
         final isAdminOnly = state.matchedLocation == '/user-management';
-        final isSuperAdminOnly = state.matchedLocation == '/backend-settings' ||
-            state.matchedLocation.startsWith('/admin');
+        final isSuperAdminOnly = state.matchedLocation.startsWith('/admin');
         if (isAdminOnly && !user.hasAtLeastRole('admin')) return '/';
         if (isSuperAdminOnly && !user.hasAtLeastRole('superadmin')) return '/';
       }

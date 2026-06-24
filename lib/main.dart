@@ -1,9 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:frontend/app/app.dart';
 import 'package:frontend/app/theme/design_system.dart';
+
+SemanticsHandle? _semanticsHandle;
 
 Future<void> main() async {
   // 1. Capture early Flutter errors
@@ -19,6 +24,7 @@ Future<void> main() async {
   };
 
   WidgetsFlutterBinding.ensureInitialized();
+  _semanticsHandle ??= SemanticsBinding.instance.ensureSemantics();
 
   try {
     // 3. Deliberate initialization

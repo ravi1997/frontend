@@ -5,6 +5,7 @@ import 'package:frontend/modules/dashboard_builder/providers/canvas_state_provid
 import 'package:frontend/modules/dashboard_builder/providers/widget_data_provider.dart';
 import 'package:frontend/modules/dashboard_builder/repositories/dashboard_builder_repository.dart';
 import 'package:frontend/modules/dashboard_builder/widgets/sharing_dialog.dart';
+import 'package:frontend/core/services/collaboration_service.dart';
 
 class DashboardBuilderPage extends ConsumerStatefulWidget {
   final String dashboardId;
@@ -17,37 +18,108 @@ class DashboardBuilderPage extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<DashboardBuilderPage> createState() => _DashboardBuilderPageState();
+  ConsumerState<DashboardBuilderPage> createState() =>
+      _DashboardBuilderPageState();
 }
 
 class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
   late Future<DashboardModel> _loadDashboardFuture;
   late WidgetDataNotifier _widgetDataNotifier;
+  ProviderSubscription<dynamic>? _collisionSubscription;
+  ProviderSubscription<String?>? _selectionSubscription;
 
   @override
   void initState() {
     super.initState();
+    // Initialize room subscription
+    Future.microtask(() {
+      ref.read(
+        collaborationProvider('dashboard:${widget.dashboardId}').notifier,
+      );
+    });
     _widgetDataNotifier = ref.read(widgetDataProvider.notifier);
     final repo = ref.read(dashboardBuilderRepositoryProvider);
-    _loadDashboardFuture = repo.getCanvas(widget.dashboardId, includeData: true).then((model) {
-      // Start auto-refresh if configured
-      if (model.settings.autoRefresh) {
-        _widgetDataNotifier.startAutoRefresh(
+    _loadDashboardFuture = repo
+        .getCanvas(widget.dashboardId, includeData: true)
+        .then((model) {
+          // Start auto-refresh if configured
+          if (model.settings.autoRefresh) {
+            _widgetDataNotifier.startAutoRefresh(
               widget.dashboardId,
               model.settings.refreshIntervalSeconds,
             );
-      }
-      // Populate widget data cache initially
-      _widgetDataNotifier.fetchDashboardData(widget.dashboardId);
-      return model;
-    });
+          }
+          // Populate widget data cache initially
+          _widgetDataNotifier.fetchDashboardData(widget.dashboardId);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _attachListeners(model);
+            }
+          });
+          return model;
+        });
   }
 
   @override
   void dispose() {
+    _collisionSubscription?.close();
+    _selectionSubscription?.close();
     // Stop refresh timer
     _widgetDataNotifier.stopAutoRefresh();
     super.dispose();
+  }
+
+  void _attachListeners(DashboardModel model) {
+    final collaborationKey = 'dashboard:${widget.dashboardId}';
+    _collisionSubscription?.close();
+    _selectionSubscription?.close();
+
+    _collisionSubscription = ref.listenManual(
+      collaborationProvider(collaborationKey),
+      (previous, next) {
+        if (next.collisionTarget != null) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Edit Collision Warning'),
+              content: Text(
+                'This widget is currently locked by ${next.collisionHeldBy}. Please wait or edit a different widget.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    ref
+                        .read(collaborationProvider(collaborationKey).notifier)
+                        .clearCollision();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      },
+    );
+
+    final initialCanvas = model.canvas;
+    _selectionSubscription = ref.listenManual<String?>(
+      canvasStateProvider(
+        initialCanvas,
+      ).select((state) => state.selectedWidgetId),
+      (previous, next) {
+        final collabNotifier = ref.read(
+          collaborationProvider(collaborationKey).notifier,
+        );
+        if (previous != null) {
+          collabNotifier.releaseLease(previous);
+        }
+        if (next != null) {
+          collabNotifier.acquireLease(next);
+          collabNotifier.updateCursor(next);
+        }
+      },
+    );
   }
 
   Future<bool> _onWillPop(CanvasState state) async {
@@ -56,7 +128,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Unsaved Changes'),
-          content: const Text('You have unsaved changes. Do you want to discard them and leave?'),
+          content: const Text(
+            'You have unsaved changes. Do you want to discard them and leave?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -86,9 +160,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save canvas: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save canvas: $e')));
       }
     }
   }
@@ -107,14 +181,18 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
         }
         if (snapshot.hasError) {
           return Scaffold(
-            body: Center(child: Text('Error loading dashboard: ${snapshot.error}')),
+            body: Center(
+              child: Text('Error loading dashboard: ${snapshot.error}'),
+            ),
           );
         }
 
         final model = snapshot.data!;
         final initialCanvas = model.canvas;
         final canvasState = ref.watch(canvasStateProvider(initialCanvas));
-        final canvasNotifier = ref.read(canvasStateProvider(initialCanvas).notifier);
+        final canvasNotifier = ref.read(
+          canvasStateProvider(initialCanvas).notifier,
+        );
         final widgetData = ref.watch(widgetDataProvider);
 
         return PopScope(
@@ -134,17 +212,21 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                 IconButton(
                   icon: const Icon(Icons.zoom_out),
                   tooltip: 'Zoom Out',
-                  onPressed: () => canvasNotifier.setScale(canvasState.scale - 0.1),
+                  onPressed: () =>
+                      canvasNotifier.setScale(canvasState.scale - 0.1),
                 ),
                 Text(
                   '${(canvasState.scale * 100).toInt()}%',
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 // Zoom in
                 IconButton(
                   icon: const Icon(Icons.zoom_in),
                   tooltip: 'Zoom In',
-                  onPressed: () => canvasNotifier.setScale(canvasState.scale + 0.1),
+                  onPressed: () =>
+                      canvasNotifier.setScale(canvasState.scale + 0.1),
                 ),
                 const VerticalDivider(width: 20),
                 // Preview / Edit mode toggle
@@ -198,7 +280,7 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                 // Left widget library (only in edit mode)
                 if (canvasState.mode == CanvasMode.edit)
                   _buildWidgetLibrary(canvasState, canvasNotifier),
-                
+
                 // Main canvas workspace
                 Expanded(
                   child: Container(
@@ -239,8 +321,12 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                                 ],
                               ),
                               child: Stack(
-                                children: canvasState.canvas.widgets.map((widget) {
-                                  final data = widgetData.data[widget.id] ?? widget.resolvedData;
+                                children: canvasState.canvas.widgets.map((
+                                  widget,
+                                ) {
+                                  final data =
+                                      widgetData.data[widget.id] ??
+                                      widget.resolvedData;
                                   return Positioned(
                                     left: widget.x,
                                     top: widget.y,
@@ -280,7 +366,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
       width: 260,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(right: BorderSide(color: theme.colorScheme.outlineVariant)),
+        border: Border(
+          right: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +377,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
             padding: const EdgeInsets.all(16),
             child: Text(
               'Widgets',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const Divider(height: 1),
@@ -338,11 +428,28 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
     CanvasStateNotifier notifier,
   ) {
     final theme = Theme.of(context);
+    final collabState = ref.watch(
+      collaborationProvider('dashboard:${this.widget.dashboardId}'),
+    );
+    final lease = collabState.leases[widget.id];
+    final isLocked = lease != null && lease['user_id'] != collabState.myUserId;
+    final lockedByName = lease != null
+        ? (lease['display_name'] ?? 'Someone')
+        : null;
     final isSelected = state.selectedWidgetId == widget.id;
 
     return GestureDetector(
       onTap: () {
         if (state.mode == CanvasMode.edit) {
+          if (isLocked) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Widget is locked by $lockedByName'),
+                backgroundColor: Colors.amber.shade800,
+              ),
+            );
+            return;
+          }
           notifier.selectWidget(widget.id);
         }
       },
@@ -352,9 +459,11 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? theme.colorScheme.primary
-                : theme.colorScheme.outlineVariant,
-            width: isSelected ? 2 : 1,
+                ? (isLocked ? Colors.amber.shade700 : theme.colorScheme.primary)
+                : (isLocked
+                      ? Colors.amber.shade700
+                      : theme.colorScheme.outlineVariant),
+            width: isSelected ? 2 : (isLocked ? 1.5 : 1),
           ),
         ),
         child: Column(
@@ -363,10 +472,21 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(8),
+                ),
               ),
               child: Row(
                 children: [
+                  if (isLocked)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6.0),
+                      child: Icon(
+                        Icons.lock,
+                        size: 14,
+                        color: Colors.amber.shade800,
+                      ),
+                    ),
                   Icon(_getWidgetIcon(widget.type), size: 16),
                   const SizedBox(width: 8),
                   Expanded(
@@ -378,7 +498,28 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (state.mode == CanvasMode.edit)
+                  if (isLocked && lockedByName != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1.5,
+                      ),
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber.shade300),
+                      ),
+                      child: Text(
+                        lockedByName,
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: Colors.amber.shade900,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  if (state.mode == CanvasMode.edit && !isLocked)
                     IconButton(
                       icon: const Icon(Icons.delete, size: 16),
                       onPressed: () {
@@ -408,14 +549,16 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       )
-                    : ((data == null && widget.type != DashboardWidgetType.llmPrompt && widget.type != DashboardWidgetType.textLabel)
-                        ? Text(
-                            'No Data',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          )
-                        : _renderWidgetData(widget, data)),
+                    : ((data == null &&
+                              widget.type != DashboardWidgetType.llmPrompt &&
+                              widget.type != DashboardWidgetType.textLabel)
+                          ? Text(
+                              'No Data',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            )
+                          : _renderWidgetData(widget, data)),
               ),
             ),
           ],
@@ -424,7 +567,10 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
     );
   }
 
-  Widget _buildPropertiesPanel(CanvasState state, CanvasStateNotifier notifier) {
+  Widget _buildPropertiesPanel(
+    CanvasState state,
+    CanvasStateNotifier notifier,
+  ) {
     final theme = Theme.of(context);
     final selectedWidget = state.selectedWidgetId != null
         ? state.canvas.widgets.firstWhere((w) => w.id == state.selectedWidgetId)
@@ -434,7 +580,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
       width: 320,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(left: BorderSide(color: theme.colorScheme.outlineVariant)),
+        border: Border(
+          left: BorderSide(color: theme.colorScheme.outlineVariant),
+        ),
       ),
       child: selectedWidget == null
           ? const Center(child: Text('Select a widget to edit properties'))
@@ -445,7 +593,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Properties',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const Divider(height: 1),
@@ -453,10 +603,15 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      Text('Widget ID: ${selectedWidget.id}', style: theme.textTheme.bodySmall),
+                      Text(
+                        'Widget ID: ${selectedWidget.id}',
+                        style: theme.textTheme.bodySmall,
+                      ),
                       const SizedBox(height: 16),
                       TextField(
-                        controller: TextEditingController(text: selectedWidget.properties['title'] ?? ''),
+                        controller: TextEditingController(
+                          text: selectedWidget.properties['title'] ?? '',
+                        ),
                         decoration: const InputDecoration(
                           labelText: 'Title',
                           border: OutlineInputBorder(),
@@ -472,11 +627,14 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: selectedWidget.x.toString()),
+                              controller: TextEditingController(
+                                text: selectedWidget.x.toString(),
+                              ),
                               decoration: const InputDecoration(labelText: 'X'),
                               keyboardType: TextInputType.number,
                               onSubmitted: (val) {
-                                selectedWidget.x = double.tryParse(val) ?? selectedWidget.x;
+                                selectedWidget.x =
+                                    double.tryParse(val) ?? selectedWidget.x;
                                 notifier.updateCanvas(state.canvas);
                               },
                             ),
@@ -484,11 +642,14 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: selectedWidget.y.toString()),
+                              controller: TextEditingController(
+                                text: selectedWidget.y.toString(),
+                              ),
                               decoration: const InputDecoration(labelText: 'Y'),
                               keyboardType: TextInputType.number,
                               onSubmitted: (val) {
-                                selectedWidget.y = double.tryParse(val) ?? selectedWidget.y;
+                                selectedWidget.y =
+                                    double.tryParse(val) ?? selectedWidget.y;
                                 notifier.updateCanvas(state.canvas);
                               },
                             ),
@@ -500,11 +661,17 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: selectedWidget.width.toString()),
-                              decoration: const InputDecoration(labelText: 'Width'),
+                              controller: TextEditingController(
+                                text: selectedWidget.width.toString(),
+                              ),
+                              decoration: const InputDecoration(
+                                labelText: 'Width',
+                              ),
                               keyboardType: TextInputType.number,
                               onSubmitted: (val) {
-                                selectedWidget.width = double.tryParse(val) ?? selectedWidget.width;
+                                selectedWidget.width =
+                                    double.tryParse(val) ??
+                                    selectedWidget.width;
                                 notifier.updateCanvas(state.canvas);
                               },
                             ),
@@ -512,11 +679,17 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: selectedWidget.height.toString()),
-                              decoration: const InputDecoration(labelText: 'Height'),
+                              controller: TextEditingController(
+                                text: selectedWidget.height.toString(),
+                              ),
+                              decoration: const InputDecoration(
+                                labelText: 'Height',
+                              ),
                               keyboardType: TextInputType.number,
                               onSubmitted: (val) {
-                                selectedWidget.height = double.tryParse(val) ?? selectedWidget.height;
+                                selectedWidget.height =
+                                    double.tryParse(val) ??
+                                    selectedWidget.height;
                                 notifier.updateCanvas(state.canvas);
                               },
                             ),
@@ -548,7 +721,9 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
   Widget _renderWidgetData(DashboardWidget widget, dynamic data) {
     final theme = Theme.of(context);
     if (widget.type == DashboardWidgetType.kpiCard) {
-      final displayVal = (data is Map && data.containsKey('value')) ? data['value'] : data;
+      final displayVal = (data is Map && data.containsKey('value'))
+          ? data['value']
+          : data;
       return Text(
         displayVal.toString(),
         style: theme.textTheme.displayMedium?.copyWith(
@@ -564,9 +739,15 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
       return Text(text, maxLines: 5, overflow: TextOverflow.ellipsis);
     }
     if (widget.type == DashboardWidgetType.textLabel) {
-      return Text(widget.properties['text'] ?? '', maxLines: 5, overflow: TextOverflow.ellipsis);
+      return Text(
+        widget.properties['text'] ?? '',
+        maxLines: 5,
+        overflow: TextOverflow.ellipsis,
+      );
     }
-    if (data is Map && data.containsKey('labels') && data.containsKey('values')) {
+    if (data is Map &&
+        data.containsKey('labels') &&
+        data.containsKey('values')) {
       final labels = List<String>.from(data['labels'] as List);
       final values = List<num>.from(data['values'] as List);
       return Padding(
@@ -580,7 +761,10 @@ class _DashboardBuilderPageState extends ConsumerState<DashboardBuilderPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(labels[idx], overflow: TextOverflow.ellipsis),
-                  Text(values[idx].toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    values[idx].toString(),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             );

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/tokens.dart';
 import 'package:frontend/shared/models/form_models.dart';
+import 'package:frontend/core/services/collaboration_service.dart';
 
 import 'package:frontend/modules/forms/models/form_style.dart';
 import 'package:frontend/modules/forms/models/question_type.dart';
 
-class BuilderFieldWidget extends StatelessWidget {
+class BuilderFieldWidget extends ConsumerWidget {
+  final String formId;
   final FormQuestion question;
   final bool isSelected;
   final VoidCallback onTap;
@@ -18,6 +21,7 @@ class BuilderFieldWidget extends StatelessWidget {
 
   const BuilderFieldWidget({
     super.key,
+    required this.formId,
     required this.question,
     required this.isSelected,
     required this.onTap,
@@ -28,16 +32,23 @@ class BuilderFieldWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final collabState = ref.watch(collaborationProvider(formId));
+    final lease = collabState.leases[question.id];
+    final isLocked = lease != null && lease['user_id'] != collabState.myUserId;
+    final lockedByName = lease != null ? (lease['display_name'] ?? 'Someone') : null;
+
     final style = _questionStyle(question);
     final bgColor = _parseHexColor(
       style.backgroundColor,
       Theme.of(context).colorScheme.surface,
     );
-    final borderColor = _parseHexColor(
-      style.borderColor,
-      AppColors.borderLight,
-    );
+    final borderColor = isLocked
+        ? Colors.amber.shade700
+        : _parseHexColor(
+            style.borderColor,
+            AppColors.borderLight,
+          );
 
     final labelPosition = style.labelPosition;
     final isLeftAligned = labelPosition == 'left';
@@ -49,11 +60,13 @@ class BuilderFieldWidget extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: style.verticalMargin),
         decoration: BoxDecoration(
-      color: bgColor,
-      borderRadius: BorderRadius.circular(style.borderRadius),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(style.borderRadius),
           border: Border.all(
-            color: isSelected ? AppColors.brandBlue : borderColor,
-            width: isSelected ? 2 : style.borderWidth,
+            color: isSelected
+                ? (isLocked ? Colors.amber.shade700 : AppColors.brandBlue)
+                : borderColor,
+            width: isSelected ? 2 : (isLocked ? 1.5 : style.borderWidth),
           ),
           boxShadow: [
             BoxShadow(
@@ -68,7 +81,7 @@ class BuilderFieldWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Row (Drag handle + Actions + Optional Label)
-            _buildHeader(context, isLeftAligned, isHidden),
+            _buildHeader(context, isLeftAligned, isHidden, isLocked: isLocked, lockedByName: lockedByName),
 
             if (isLeftAligned) ...[
             const SizedBox(height: DesignTokens.spaceM),
@@ -109,9 +122,18 @@ class BuilderFieldWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isLeftAligned, bool isHidden) {
+  Widget _buildHeader(BuildContext context, bool isLeftAligned, bool isHidden, {bool isLocked = false, String? lockedByName}) {
     return Row(
       children: [
+        if (isLocked)
+          Padding(
+            padding: const EdgeInsets.only(right: 6.0),
+            child: Icon(
+              Icons.lock,
+              size: 14,
+              color: Colors.amber.shade800,
+            ),
+          ),
         isSelected
             ? const Icon(
                 Icons.check_circle,
@@ -138,6 +160,38 @@ class BuilderFieldWidget extends StatelessWidget {
           )
         else
           const Spacer(),
+        if (isLocked && lockedByName != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.amber.shade300),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Colors.amber,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  lockedByName,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.amber.shade900,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
         IconButton(
           icon: const Icon(Icons.copy, size: 18, color: AppColors.textGrey),
           onPressed: onDuplicate,

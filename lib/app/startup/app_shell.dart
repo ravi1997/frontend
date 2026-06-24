@@ -435,7 +435,8 @@ class AppSidebar extends ConsumerWidget {
             ),
             active: false,
             collapsed: collapsed,
-            onTap: () {},
+            onTap: null,
+            tooltip: 'Settings are not available yet',
           ),
           const SizedBox(height: 8),
         ],
@@ -452,13 +453,15 @@ class _SidebarItem extends StatelessWidget {
   final _NavItem item;
   final bool active;
   final bool collapsed;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final String? tooltip;
 
   const _SidebarItem({
     required this.item,
     required this.active,
     required this.collapsed,
     required this.onTap,
+    this.tooltip,
   });
 
   @override
@@ -468,7 +471,7 @@ class _SidebarItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: Tooltip(
-        message: collapsed ? item.label : '',
+        message: tooltip ?? (collapsed ? item.label : ''),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(DesignTokens.radiusS),
